@@ -17,7 +17,7 @@ import {
 function BenefitAdminEmailComponent({ name, email, message, phone_number, consultant_name, benefitType = "Benefit Program", applicationDate }) {
   const formatDate = (date) => {
     if (!date) return new Date().toLocaleDateString('cs-CZ')
-    return new Date(date).toLocaleDateString('cs-CZ')
+    return new Date(date).toLocaleDateString('cs-CZ') 
   }
 
   return (
