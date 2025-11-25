@@ -1,0 +1,182 @@
+//navbar
+@use '../components/common/navbar/styles.scss' as navbar;
+@use '../components/common/navbar/body/styles.scss' as navbarBody;
+@use '../components/common/navbar/cursor/styles.scss' as navbarCursor;
+@use '../components/common/navbar/menu/styles.scss' as navbarMenu;
+@use '../components/pages/index/MainSection/Offer/GridTransitionOut/styles.scss' as gridTransitionOut;
+//QNA
+@use '../components/common/qna/style.scss' as qna;
+//cookies
+@use '../components/modems/Cookies/styles.scss' as cookiesBar;
+//cookies page
+@use '../components/pages/cookies/CookiesPage/styles.scss' as cookiesPage;
+// Terms and services page
+@use '../components/pages/gdpr/TermsPage/styles.scss' as termsPage;
+//Footer
+@use '../components/common/footer/styles.scss' as footer;
+//BlogPost
+// @use '../components/common/blog/styles.scss' as blog;
+
+
+//Main page components
+// @use '../components/common/statbar/styles.scss' as statbar;
+@use '../components/pages/index/introStatbar/styles.scss' as introStatbar;
+@use '../components/common/grid/styles.scss' as grid;
+@use '../components/pages/index/MainSection/Offer/GridTransition/styles.scss' as gridTransition;
+@use '../components/pages/index/MainSection/Offer/WhatWeDo/styles.scss' as whatWeDo;
+
+@use '../components/pages/benefit/Reviews/styles.scss' as reviewsBenefit;
+
+
+//buttons
+@use '../components/ui/stickyButtons/buttons/RoundButton/styles.scss' as roundButton;
+@use '../components/ui/stickyButtons/buttons/SmallButton/styles.scss' as smallButton;
+@use '../components/ui/stickyButtons/buttons/MyButton/styles.scss' as myButton;
+@use '../components/ui/stickyButtons/buttons/RotatingButton/styles.scss' as rotatingButton;
+@use '../components/ui/stickyButtons/buttons/SvgButton/styles.scss' as svgButton;
+
+// images
+@use '../components/ui/stickyImage/style.scss' as stickyImage;
+
+// text animations
+// @use '../components/anim/TextAnims/MainText/styles.scss' as mainText;
+// @use '../components/anim/TextAnims/PageHeading/styles.scss'as pageHeading;
+// @use '../components/anim/TextAnims/RollingText/styles.scss' as rollingText;
+@use '../components/anim/RollingIcons/styles.scss' as rollingIcons;
+@use '../components/common/chooseBar/styles.scss' as chooseBar;
+// @use '../components/anim/TextAnims/RollingTextColor/styles.scss' as rollingTextColor;
+// @use '../components/anim/TextAnims/StatNumber/styles.scss' as statNumber;
+// @use '../components/anim/TextAnims/LoadingNumber/styles.scss' as loadingNumber;
+
+// //SVG animations 
+// @use '../components/anim/SvgAnims/ButtonSVGPath/styles.scss' as buttonSVGPath;
+// @use '../components/anim/SvgAnims/TextSVGPath/styles.scss' as textSVGPath;
+// @use '../components/anim/SvgAnims/TextSVGPath/svgPath/styles.scss' as svgPath;
+// @use '../components/anim/SvgAnims/SVGFill/styles.scss' as svgFill;
+
+// // Loop animations
+// @use '../components/anim/LoopAnims/GraphAnim/Button/styles.scss' as graphButton;
+// @use '../components/anim/LoopAnims/GraphAnim/styles.scss' as graphAnim;
+// @use '../components/anim/LoopAnims/SmoothGraphAnim/styles.scss' as smoothGraphAnim;
+// @use '../components/anim/LoopAnims/SmoothGraphAnim/Button/styles.scss' as smoothGraphButton;
+
+//Preloader
+@use '../components/common/PreLoader/styles.scss' as preloader;
+
+//Transition
+@use '../components/common/Transition/styles.scss' as transition;
+
+// main anims
+@use '../components/pages/aboutUs/aboutTeam/styles.scss' as aboutTeam;
+// @use '../components/sections/TestiCarousel/styles.scss' as testiCarousel;
+// @use '../components/sections/BlogProgress/styles.scss' as blogProgress;
+// parallax expand
+@use '../components/pages/aboutUs/parallaxExpand/styles.scss' as parallaxExpand;
+
+//About Colage
+@use '../components/pages/aboutUs/eventCollage/styles.scss' as eventCollage;
+@use '../components/pages/aboutUs/eventCollage/collage/styles.scss' as collage;
+@use '../components/pages/aboutUs/eventCollage/intro//styles.scss' as eventCollageIntro;
+
+// //logo
+// @use '../components/anim/LogoAnims/HoverAnim/styles.scss' as logoHover;
+// @use '../components/anim/LogoAnims/onView/styles.scss' as logoOnView;
+
+//ClipPath pages
+@use '../components/pages/offers/ClipPathPage/styles.scss' as clipPathPage;
+
+//main page keyframes
+@use '../components/pages/index//MainSection/Offer/styles.scss' as offer;
+//benefit program Keyframes
+@use '../components/pages/benefit/BenefitProgram/styles.scss' as benefitProgram;
+//sub benefit program Keyframes
+@use '../components/pages/benefit/BenefitProgram/IntroPage/styles.scss' as introPage;
+@use '../components/pages/benefit/BenefitProgram/InfoSection/styles.scss' as infoSection;
+//Benefit Program Details
+@use '../components/pages/benefit/BenefitDetails/styles.scss' as benefitDetails;
+// @use '../components/pages/benefit/BenefitDetails/graph/styles.scss' as graph;
+@use '../components/pages/benefit/BenefitDetails/Intro/styles.scss' as intro;
+@use '../components/pages/benefit/BenefitDetails/Rewards/styles.scss' as rewards;
+
+// benefit program showcase
+// @use '../components/pages/benefit/BenefitShowcase/style.scss' as benefitShowcase;
+// @use '../components/pages/benefit/BenefitShowcase/content/style.scss' as benefitContent;
+// @use '../components/pages/benefit/BenefitShowcase/dataBar/style.scss' as dataBar;
+// @use '../components/pages/benefit/BenefitShowcase/logobar/style.scss' as logoBar;
+
+//Main section
+@use '../components/pages/index/MainSection/IntroS/styles.scss' as mainSIntro;
+
+@use '../components/pages/index/MainSection/styles.scss' as mainSection;
+// @use '../components/pages/index/MainSection/About/styles.scss' as about;
+// @use '../components/pages/index/MainSection/Benefit/styles.scss' as benefit;
+@use '../components/pages/index/MainSection/Offer/BenefitCard/styles.scss' as benefitCard;
+// @use '../components/pages/index/MainSection/Blog/styles.scss' as MainBlog;
+@use '../components/pages/index/MainSection/Contact/styles.scss' as MainContact;
+@use '../components/pages/index/MainSection/Offer/styles.scss' as MainOffer;
+// @use '../components/pages/index/MainSection/Offer/BecomeClient/styles.scss' as becomeClient;
+@use '../components/pages/index/MainSection/Offer/Benefits/styles.scss' as benefits;
+@use '../components/pages/index/MainSection/Offer/Intro/styles.scss' as offerIntro;
+// @use '../components/pages/index/MainSection/Offer/OurDeal/styles.scss' as ourDeal;
+// @use '../components/pages/index/MainSection/Offer/OurDeal/intro/styles.scss' as ourDealIntro;
+@use '../components/pages/index/MainSection/Offer/Reality/styles.scss' as reality;
+@use '../components/pages/index/MainSection/Offer/RealityIntro/styles.scss' as realityIntro;
+@use '../components/pages/index/MainSection/Offer/Requirements/styles.scss' as requirements;
+@use '../components/pages/index/MainSection/Offer/Testimonials/styles.scss' as testimonials;
+@use '../components/pages/index/MainSection/Offer/TheWay/styles.scss' as theWay;
+// @use '../components/pages/index/MainSection/Sales/styles.scss' as sales;
+
+
+// Intros 
+@use '../components/pages/index/main/styles.scss' as IntroMain;
+@use '../components/pages/aboutUs/about/styles.scss' as IntroAbout;
+@use '../components/pages/reviews/reviews/styles.scss' as IntroReviews;
+@use '../components/pages/contact/feedBack/styles.scss' as IntroFeedBack;
+@use '../components/pages/personReviews/contact/styles.scss' as IntroContact;
+// @use '../components/intros/blogPost/styles.scss' as IntroBlogPost;
+//404 page
+@use '../components/pages/notFound/404/styles.scss' as error404;
+
+
+
+//Modem Components
+// @use '../components/modems/ContactBenefit/styles.scss' as contactBenefit;
+@use '../components/modems/Cookies/styles.scss' as cookies;
+@use '../components/modems/Review/styles.scss' as review;
+
+//Modems 
+@use '../components/modems/ContactModem/styles.scss' as contactModem;
+@use '../components/modems/CookiesModem/styles.scss' as cookiesModem;
+@use '../components/modems/ReviewModem/styles.scss' as reviewModem;
+
+
+// Forms 
+@use '../components/forms/feedback/styles.scss' as FormsFeedback;
+@use '../components/forms/contact/styles.scss' as FormsContact;
+//benefit reminder
+@use '../components/forms/BenefitReminder/styles.scss' as benefitReminder;
+
+
+.page{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    width: 100vw;
+    position: relative;
+    color: var(--wText);
+    padding: 10rem 0rem;
+
+    .header__text{
+        gap: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+    }
+    .devider{
+        height: 200vh
+    }
+}

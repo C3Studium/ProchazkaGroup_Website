@@ -1,0 +1,110 @@
+.Offer {
+    width: 100vw;
+    height: fit-content;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+
+    .sticky__wrapper {
+        width: 100%;
+        height: 400vh;
+        position: relative;
+
+        .sticky {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            height: 100vh;
+            overflow: hidden;
+            will-change: transform;
+            backface-visibility: hidden;
+            transform-style: preserve-3d;
+            
+            // Add this new container to hold both content elements
+            .content__container {
+                position: relative;
+                width: 100%;
+                height: 100%;
+                
+                // The first content that slides left
+                .mainPageSection__content1 {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    will-change: transform;
+                    backface-visibility: hidden;
+                    z-index: 2; // Keep slightly higher z-index
+                }
+                
+                // The second content that slides right
+                .mainPageSection__content2 {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    will-change: transform;
+                    backface-visibility: hidden;
+                    z-index: 1; // Keep slightly lower z-index
+                }
+            }
+        }
+    }
+
+
+    .section__wrapper{
+        width: 100vw;
+        height: 600vh;
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background-color: var(--bgColor);
+
+
+        .section__container{
+            z-index: 0;
+            position: absolute;
+            top: 0vh;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+
+
+            .gridT__container{
+                width: 100%;
+                height: 100vh;
+                position: absolute;
+                top: 0;
+                left: 0;
+                display: flex;
+                justify-content: center;
+                align-items: flex-start;
+                z-index: 1;
+                overflow: hidden;
+            }
+
+            .sticky__wrapper{
+                z-index: 0;
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+
+            }
+        }
+    }
+}

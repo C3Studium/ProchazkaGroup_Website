@@ -1,0 +1,15 @@
+# *
+User-agent: *
+Allow: /
+
+# *
+User-agent: *
+Disallow: /private-page
+Disallow: /admin
+Disallow: /api
+
+# Host
+Host: https://prochazkagroup.cz
+
+# Sitemaps
+Sitemap: https://prochazkagroup.cz/sitemap.xml

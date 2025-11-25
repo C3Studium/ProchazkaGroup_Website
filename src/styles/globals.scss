@@ -1,0 +1,47 @@
+@use './styles.scss' as styles;
+@import url("../../public/css/satoshi.css");
+@import url("../../public/css/switzer.css");
+@import url("../../public/css/zodiak.css");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+
+
+body{
+  width: 100vw;
+  margin: 0 !important;
+  padding: 0 !important;
+  font-family: "zodiak-light", sans-serif; 
+  background-color: #063F66;
+  * {
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+  }
+  &::-webkit-scrollbar {
+    width: 0px;
+  }
+  &::-webkit-scrollbar-thumb {
+    width: 0px;
+  }
+  // scrollbar-width: none; //only for Firefox
+
+}
+
+
+// Styly pro stránku 
+:root {
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --bgColor: #063F66;
+  --bgColor2: #050A10;
+  --hColor: #4bdadc;
+  --hColor2: #9151e0;
+  --wText: #fff;
+  --bText: #050A10;
+  --blur: rgba(117, 171, 192, 0.2);
+  --divider: #5E758D;
+}

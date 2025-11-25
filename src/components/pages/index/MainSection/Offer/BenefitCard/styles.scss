@@ -1,0 +1,1031 @@
+@media (min-aspect-ratio: 1/1) {
+    @media only screen and ( min-width: 1730px ) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.3rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 50%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 2.5rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 1598px) and (max-width: 1729px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.3rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 50%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 2.5rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 1420px) and (max-width: 1596px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.1rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 50%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 2rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 1260px) and (max-width: 1420px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.1rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 50%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 2rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 960px) and (max-width: 1240px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.1rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 70%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 2rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 500px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 70%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 1.5rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 0.9rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 70%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 1.3rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+}
+
+@media (max-aspect-ratio: 1/1) {
+    @media only screen and (min-width: 1000px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.1rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 50%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 2rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 10vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 35%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 1.1rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 70%;
+                height: 100%;
+                position: relative;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 1.8rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 5vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 60%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 0.9rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 90%;
+                height: 100%;
+                position: absolute;
+                bottom: 15%;
+                right: 0;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 1.5rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 0vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 60%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: flex-start;
+                    justify-content: center;
+
+                    p{
+                        font-size: 0.9rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 90%;
+                height: 100%;
+                position: absolute;
+                bottom: 15%;
+                right: 0;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 1.5rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+    @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
+        .BenefitCard{
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-direction: row;
+            padding: 0vh 5vw;
+            .BenefitCard__container__icons{
+                width: 25%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-start;
+                justify-content: flex-start;
+                flex-direction: column;
+            }
+
+            .BenefitCard__container__subtext{
+                width: 60%;
+                height: 100%;
+                position: relative;
+                display: flex;
+                align-items: flex-end;
+                justify-content: center;
+                .subtext__container{
+                    width: 100%;
+                    height: 30%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-size: 0.9rem;
+                        font-family: "zodiak-light";
+                        margin: 0;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            .BenefitCard__container__text{
+                width: 90%;
+                height: 100%;
+                position: absolute;
+                bottom: 0%;
+                right: 0;
+                justify-content: flex-end;
+                display: flex;
+                align-items: center;
+
+                .mainText__container{
+                    width: 100%;
+                    height: 80%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+
+                    p{
+                        font-family: "Switzer-light";
+                        font-size: 1.5rem;
+                        margin: 0;
+                        text-align: right;
+                        span{
+                            color: var(--wText);
+                        }
+                    }
+                }
+            }
+
+            svg{
+                width: 100%;
+                height: 100%;
+                position: absolute;
+                top: 0;
+                left: 0;
+                z-index: 0;
+                will-change: transform;
+                backface-visibility: hidden;
+                transform: translateZ(0);
+            }
+        }
+    }
+}

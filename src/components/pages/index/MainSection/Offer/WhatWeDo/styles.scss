@@ -1,0 +1,2541 @@
+@media (min-aspect-ratio: 1/1) {
+    @media only screen and ( min-width: 1730px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 20%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.5rem;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 1598px) and (max-width: 1729px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 30%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.5rem;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 1420px) and (max-width: 1596px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 15%;
+                    width: 30%;
+                    height: 70%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 40%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 25%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.5rem;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 1260px) and (max-width: 1420px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 30%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.3rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.8rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 960px) and (max-width: 1240px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 30%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.3rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.8rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 30%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.1rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.5rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 30%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.1rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.5rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+}
+
+
+@media (max-aspect-ratio: 1/1) {
+    @media only screen and (min-width: 1000px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 40%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.5rem;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 50%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.5rem;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+
+                        img{
+                            width: 150px !important;
+                            height: 150px !important;
+                        }
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 70%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.1rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+
+                        img{
+                            width: 100px !important;
+                            height: 100px !important;
+                        }
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 70%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.1rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+    @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
+        .WhatWeDo{
+            position: relative;
+            width: 100vw;
+            height: 600vh;
+        
+            .WhatWeDo__ref {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        
+            .WhatWeDo__sticky {
+                position: sticky;
+                top: 0;
+                width: 100vw;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 10;
+                will-change: transform;
+                transform: translateZ(0);
+                backface-visibility: hidden;
+                perspective: 1000px;
+                contain: layout size style; // Helps browser optimize the rendering
+        
+                .WhatWeDo__sticky___wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    z-index: 2;
+                    will-change: transform, opacity;
+                    transform-style: preserve-3d; // Enable 3D transformations
+                }
+        
+                .WhatWeDo__grid {
+                    z-index: 12;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+        
+                .icon-progression-container{
+                    position: absolute;
+                    top: 20%;
+                    left: 10%;
+                    width: 30%;
+                    height: 100%;
+                    
+                    .floating-icon{
+                        position: absolute;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        top: 30%;
+                        left: 10%;
+
+                        img{
+                            width: 100px !important;
+                            height: 100px !important;
+                        }
+                    }
+                }
+        
+                .navigator {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: flex-start;
+                    align-items: flex-start;
+                    z-index: 2;
+                    will-change: contents;
+                    padding: 0 5vw;
+                    .navigator__container{
+                        width: 70%;
+                        height: 20%;
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+        
+                        .navigator__item{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                color: none;
+                                
+                                p{
+                                    font-size: 1.1rem !important;
+                                    font-weight: 300;
+                                    margin: 0;
+                                }
+                            }
+                        }
+            
+                        .active{
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+                            font-size: 2rem;
+                            font-weight: 300;
+                            color: var(--wText);
+                            text-transform: uppercase;
+                            transition: all 0.3s ease;
+            
+                            .number{
+                                width: 2rem;
+                                height: 2rem;
+                                display: flex;
+                                justify-content: center;
+                                align-items: center;
+                                
+                                p{
+                                    font-family: "zodiak-light";
+                                    font-size: 1.3rem !important;
+                                    font-weight: 300;
+                                    color: var(--wText);
+                                    transition: all 0.3s ease;
+                                    margin: 0;
+                                }
+                            }
+                        }
+                    }
+        
+        
+                }
+        
+                .sections-wrapper{
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 2;
+        
+        
+                }
+            
+                .svg__morph {
+                    z-index: 0;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    z-index: 0;
+                    pointer-events: none;
+                    will-change: contents;
+                    transform: translateZ(0);
+                    > div {
+                        z-index: 5;
+                        will-change: transform, opacity;
+                        pointer-events: none;
+                        // Add a subtle blur for a glow effect
+                        filter: blur(40px);
+                        mix-blend-mode: screen;
+                    }
+                    
+                    svg {
+                        will-change: transform;
+                        transform: translateZ(0);
+                        backface-visibility: hidden;
+                        contain: strict; // Isolate this element for better performance
+                        path{
+                            transform: translateZ(0);
+                            will-change: d, transform;
+                            contain: style layout paint;
+                        }
+                    }
+                }
+                
+                svg {
+                    width: 100%;
+                    height: 100%;
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    will-change: contents;
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,55 @@
+# ProchazkaGroup - Financial Advisory Services (LLMO Profile)
+
+title: Procházka Group
+description: Nezávislé finanční poradenství v České republice. Poskytujeme komplexní služby v oblasti financí, pojištění, investic a hypotečního poradenství s důrazem na transparentnost, vzdělávání a dlouhodobé vztahy.
+language: cs
+author: Procházka Group
+
+# Website Resources
+website: https://prochazkagroup.cz
+sitemap: https://prochazkagroup.cz/sitemap.xml
+robots: https://prochazkagroup.cz/robots.txt
+
+# Company Overview
+overview: Procházka Group je česká poradenská společnost s více než 10 lety zkušeností. Poskytujeme nezávislé finanční poradenství jednotlivcům, rodinám i firmám.
+
+# Core Services
+services:
+  - Finanční plánování a poradenství
+  - Pojišťovací poradenství
+  - Investiční strategie a řešení
+  - Financování nemovitostí a hypotéky
+  - Výběr produktů napříč trhem
+  - Firemní benefity a vzdělávání týmů
+
+# Team Info
+team_size: 10
+leadership: Zkušení finanční poradci s individuálním přístupem
+values:
+  - Nezávislost na bankách a pojišťovnách
+  - Transparentnost a poctivost
+  - Dlouhodobé vztahy
+  - Klient na prvním místě
+  - Vzdělávací přístup
+
+# Content Strategy
+content_focus:
+  - Finanční vzdělávání a osvěta
+  - Recenze a zpětná vazba klientů
+  - Odbornost týmu
+  - Reporty a analýzy v pojištění
+  - Kariérní příležitosti
+
+# Business Model
+model: Nezávislá poradenská firma pracující výhradně pro klienty, bez závazků vůči konkrétním institucím.
+
+# Contact
+location: Česká republika
+email: asistentka.prochazka@ovbone.cz
+phone: +420705500200
+
+# AI Discoverability Signals
+structured_data: true
+open_graph: true
+schema_org: true
+llmo_compliant: true

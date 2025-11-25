@@ -1,0 +1,38 @@
+export const projects = [
+    {
+        number: '01',
+        title: 'Pojistné Hlášení',
+        description: '50% sleva na roční předplatné pro všechny klienty Procházka Group.',
+        href: 'https://www.pojistnehlaseni.cz/',
+        src: '/assets/backgrounds/partners/pojistnehlaseni.webp',
+        alt: 'Project 01',
+        text: '', 
+    },
+    {
+        number: '02',
+        title: 'ElevenCosmetic',
+        description: '10% slevu pro naše klienty - na jakýkoliv produkt, který si vyberete.',
+        href: 'https://www.elevencosmetic.cz/',
+        src: '/assets/backgrounds/partners/elevencosmetic.webp',
+        alt: 'Project 02',
+        text: '', 
+    },
+    {
+        number: '03',
+        title: 'ReKvítka',
+        description: 'Sleva pro naše klienty ve stavu vyjednávání, brzy bude aktualizováno.',
+        href: 'https://re-kvitka.cz/',
+        src: '/assets/backgrounds/partners/rekvitko.webp',
+        alt: 'Project 03',
+        text: '', 
+    },
+    {
+        number: '04',
+        title: 'Project 04',
+        description: 'Stále v přípravě, brzy bude aktualizováno.',
+        href: 'https://www.google.com',
+        src: '/assets/prebuild/house.webp',
+        alt: 'Project 04',
+        text: '', 
+    },
+]

@@ -1,0 +1,127 @@
+-- -- Email interactions tracking table
+-- CREATE TABLE IF NOT EXISTS email_interactions (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   email VARCHAR(255) NOT NULL,
+--   template VARCHAR(50) NOT NULL,
+--   segment VARCHAR(20) DEFAULT 'unknown',
+--   subject TEXT NOT NULL,
+--   sent_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+--   opened_at TIMESTAMPTZ,
+--   clicked_at TIMESTAMPTZ,
+--   message_id VARCHAR(255),
+--   user_agent TEXT,
+--   ip_address INET,
+--   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+--   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- );
+
+-- -- Indexes for performance
+-- CREATE INDEX IF NOT EXISTS idx_email_interactions_email ON email_interactions(email);
+-- CREATE INDEX IF NOT EXISTS idx_email_interactions_template ON email_interactions(template);
+-- CREATE INDEX IF NOT EXISTS idx_email_interactions_segment ON email_interactions(segment);
+-- CREATE INDEX IF NOT EXISTS idx_email_interactions_sent_at ON email_interactions(sent_at);
+-- CREATE INDEX IF NOT EXISTS idx_email_interactions_opened_at ON email_interactions(opened_at);
+
+-- -- Customer segments table for advanced segmentation
+-- CREATE TABLE IF NOT EXISTS customer_segments (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   email VARCHAR(255) UNIQUE NOT NULL,
+--   segment VARCHAR(20) NOT NULL DEFAULT 'new',
+--   engagement_score INTEGER DEFAULT 0,
+--   total_emails_sent INTEGER DEFAULT 0,
+--   total_opens INTEGER DEFAULT 0,
+--   total_clicks INTEGER DEFAULT 0,
+--   last_activity TIMESTAMPTZ,
+--   preferences JSONB DEFAULT '{}',
+--   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+--   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+-- );
+
+-- -- Email templates performance tracking
+-- CREATE TABLE IF NOT EXISTS email_performance (
+--   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+--   template VARCHAR(50) NOT NULL,
+--   sent_count INTEGER DEFAULT 0,
+--   open_count INTEGER DEFAULT 0,
+--   click_count INTEGER DEFAULT 0,
+--   bounce_count INTEGER DEFAULT 0,
+--   unsubscribe_count INTEGER DEFAULT 0,
+--   date DATE NOT NULL DEFAULT CURRENT_DATE,
+--   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+--   UNIQUE(template, date)
+-- );
+
+-- -- Function to update customer segment automatically
+-- CREATE OR REPLACE FUNCTION update_customer_segment()
+-- RETURNS TRIGGER AS $$
+-- DECLARE
+--   total_emails INTEGER;
+--   total_opens INTEGER;
+--   total_clicks INTEGER;
+--   recent_activity INTEGER;
+--   engagement_score INTEGER;
+-- BEGIN
+--   -- Calculate metrics
+--   SELECT
+--     COUNT(*),
+--     COUNT(CASE WHEN opened_at IS NOT NULL THEN 1 END),
+--     COUNT(CASE WHEN clicked_at IS NOT NULL THEN 1 END)
+--   INTO total_emails, total_opens, total_clicks
+--   FROM email_interactions
+--   WHERE email = NEW.email;
+
+--   -- Recent activity (last 30 days)
+--   SELECT COUNT(*)
+--   INTO recent_activity
+--   FROM email_interactions
+--   WHERE email = NEW.email
+--     AND sent_at > NOW() - INTERVAL '30 days';
+
+--   -- Calculate engagement score
+--   engagement_score := (total_opens * 1) + (total_clicks * 3) + (recent_activity * 2);
+
+--   -- Determine segment
+--   UPDATE customer_segments
+--   SET
+--     engagement_score = engagement_score,
+--     total_emails_sent = total_emails,
+--     total_opens = total_opens,
+--     total_clicks = total_clicks,
+--     last_activity = NEW.sent_at,
+--     segment = CASE
+--       WHEN total_clicks >= 3 AND recent_activity >= 3 THEN 'highly_engaged'
+--       WHEN total_opens >= 2 AND recent_activity >= 2 THEN 'engaged'
+--       WHEN total_opens >= 1 THEN 'occasional'
+--       WHEN total_emails >= 1 THEN 'inactive'
+--       ELSE 'new'
+--     END,
+--     updated_at = NOW()
+--   WHERE email = NEW.email;
+
+--   -- Insert if not exists
+--   IF NOT FOUND THEN
+--     INSERT INTO customer_segments (
+--       email, segment, engagement_score, total_emails_sent,
+--       total_opens, total_clicks, last_activity
+--     ) VALUES (
+--       NEW.email,
+--       CASE
+--         WHEN total_clicks >= 3 AND recent_activity >= 3 THEN 'highly_engaged'
+--         WHEN total_opens >= 2 AND recent_activity >= 2 THEN 'engaged'
+--         WHEN total_opens >= 1 THEN 'occasional'
+--         WHEN total_emails >= 1 THEN 'inactive'
+--         ELSE 'new'
+--       END,
+--       engagement_score, total_emails, total_opens, total_clicks, NEW.sent_at
+--     );
+--   END IF;
+
+--   RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+-- -- Trigger to automatically update segments
+-- CREATE TRIGGER trigger_update_customer_segment
+--   AFTER INSERT ON email_interactions
+--   FOR EACH ROW
+--   EXECUTE FUNCTION update_customer_segment();
