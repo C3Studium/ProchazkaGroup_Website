@@ -1,11 +1,12 @@
-@media (min-aspect-ratio: 1/1) { 
+@use "../../../../styles/system/_shortcuts.scss" as *;
+@media (min-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1730px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 200vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -16,16 +17,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -34,7 +35,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -50,15 +51,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -74,20 +75,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 30vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -95,14 +97,16 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 8rem;
                             line-height: 1;
                             margin-bottom: 1rem;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.5rem;
                             width: 60%;
@@ -112,13 +116,14 @@
             }
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 200vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -129,16 +134,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -147,7 +152,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -163,15 +168,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -187,20 +192,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 30vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -208,14 +214,16 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 8rem;
                             line-height: 1;
                             margin-bottom: 1rem;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.3rem;
                             width: 60%;
@@ -223,15 +231,16 @@
                     }
                 }
             }
-        }   
+        }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 200vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -242,16 +251,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -260,7 +269,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -276,15 +285,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -300,20 +309,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 30vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -321,13 +331,15 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 1;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.3rem;
                             width: 70%;
@@ -337,13 +349,14 @@
             }
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 200vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -354,16 +367,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -372,7 +385,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -388,15 +401,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -412,20 +425,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 30vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -433,14 +447,16 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 1;
                             margin-bottom: 1rem;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.3rem;
                             width: 70%;
@@ -450,13 +466,14 @@
             }
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 200vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -467,16 +484,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -485,7 +502,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -501,15 +518,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -525,20 +542,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 30vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -546,13 +564,15 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 1;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.1rem;
                             width: 80%;
@@ -562,13 +582,14 @@
             }
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .FeedbackIntro{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .FeedbackIntro {
             width: 100vw;
             height: 400vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -579,16 +600,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -597,7 +618,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -613,15 +634,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -637,20 +658,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 35vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -658,14 +680,16 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 1;
                             margin-bottom: 2.5rem;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1rem;
                             width: 100%;
@@ -675,13 +699,14 @@
             }
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .FeedbackIntro{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .FeedbackIntro {
             width: 100vw;
             height: 500vh;
             position: relative;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -692,16 +717,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -710,7 +735,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -726,15 +751,15 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 55vw;
                     height: 37.5vh;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     position: relative;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -750,20 +775,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 35vw;
                     height: 90%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -771,14 +797,16 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 4rem;
                             line-height: 1;
                             margin-bottom: 2.5rem;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 0.9rem;
                             width: 100%;
@@ -792,13 +820,13 @@
 
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 200vh;
             position: relative;
             overflow: hidden;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -809,16 +837,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -827,7 +855,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -843,7 +871,7 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 85vw;
                     height: 57.5vh;
                     display: flex;
@@ -852,8 +880,8 @@
                     position: absolute;
                     top: 0;
                     left: 5vw;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -869,20 +897,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 50vw;
                     height: 90%;
                     display: flex;
                     justify-content: flex-end;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -890,14 +919,16 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 8rem;
                             line-height: 1;
                             margin-bottom: 1rem;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.3rem;
                             width: 60%;
@@ -907,14 +938,15 @@
             }
         }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 250vh;
             position: relative;
             overflow: hidden;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -925,16 +957,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -943,7 +975,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -959,7 +991,7 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 85vw;
                     height: 57.5vh;
                     display: flex;
@@ -968,8 +1000,8 @@
                     position: absolute;
                     top: 0;
                     left: 5vw;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -985,20 +1017,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 50vw;
                     height: 90%;
                     display: flex;
                     justify-content: flex-end;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -1006,13 +1039,15 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 0.75;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1.1rem;
                             width: 60%;
@@ -1023,14 +1058,15 @@
             }
         }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 300vh;
             position: relative;
             overflow: hidden;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1041,16 +1077,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1059,7 +1095,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -1075,7 +1111,7 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 90vw;
                     height: 57.5vh;
                     display: flex;
@@ -1084,8 +1120,8 @@
                     position: absolute;
                     top: 0;
                     left: 5vw;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -1101,20 +1137,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 90vw;
                     height: 90%;
                     display: flex;
                     justify-content: flex-end;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -1122,13 +1159,15 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 0.75;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1rem;
                             width: 60%;
@@ -1139,14 +1178,15 @@
             }
         }
     }
+
     @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 350vh;
             position: relative;
             overflow: hidden;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1157,16 +1197,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1175,7 +1215,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -1191,7 +1231,7 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 90vw;
                     height: 57.5vh;
                     display: flex;
@@ -1200,8 +1240,8 @@
                     position: absolute;
                     top: 10vh;
                     left: 5vw;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -1217,20 +1257,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 90vw;
                     height: 90%;
                     display: flex;
                     justify-content: flex-end;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -1238,13 +1279,15 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 5rem;
                             line-height: 0.75;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 1rem;
                             width: 60%;
@@ -1255,14 +1298,15 @@
             }
         }
     }
+
     @media only screen and (min-width: 330px) and (max-width: 379px) and (min-height: 450px) {
-        .FeedbackIntro{
+        .FeedbackIntro {
             width: 100vw;
             height: 400vh;
             position: relative;
             overflow: hidden;
 
-            .pageIndex{
+            .pageIndex {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1273,16 +1317,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1291,7 +1335,7 @@
                 }
             }
 
-            .Cover{
+            .Cover {
                 position: absolute;
                 top: 0;
                 left: 0;
@@ -1307,7 +1351,7 @@
                 padding: 0 5vw;
                 font-family: "Switzer-Light";
 
-                .MainText{
+                .MainText {
                     width: 90vw;
                     height: 57.5vh;
                     display: flex;
@@ -1316,8 +1360,8 @@
                     position: absolute;
                     top: 5vh;
                     left: 5vw;
-    
-                    h1{
+
+                    h1 {
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
@@ -1333,20 +1377,21 @@
                         color: var(--wText);
                         z-index: 3;
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .Header{
+                .Header {
                     width: 90vw;
                     height: 90%;
                     display: flex;
                     justify-content: flex-end;
                     align-items: flex-end;
                     position: relative;
-                    .Header__text{
+
+                    .Header__text {
                         width: 100%;
                         height: 20%;
                         display: flex;
@@ -1354,13 +1399,15 @@
                         align-items: center;
                         position: relative;
                         gap: 1.5rem;
-                        font-family: "Zodiak-Light";
-                        h3{
+                        font-family: "Switzer";
+
+                        h3 {
                             height: 100%;
                             font-size: 3rem;
                             line-height: 0.75;
                         }
-                        p{
+
+                        p {
                             margin: 0;
                             font-size: 0.9rem;
                             width: 60%;

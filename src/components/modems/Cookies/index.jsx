@@ -1,118 +1,102 @@
-import SmallButton from "@/components/ui/stickyButtons/buttons/SmallButton";
-import CookiesModem from "../CookiesModem";
+import { motion } from "framer-motion";
+import SVGButton from "@/components/common/ui/stickyButtons/buttons/SvgButton";
 import { useCookies } from "@/context/CookiesProvider";
 import { useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton";
+import Grid from "@/components/common/grid";
 
-export default function CookiesBar() {
-    const [ settings, setSettings ] = useState(false);
-    const { 
-        acceptAllCookies, 
-        rejectAllCookies, 
-        savePreferences, 
-        COOKIE_CATEGORIES,
-        showBanner,
-        hasConsented 
-    } = useCookies();
+const modemAnim = {
+    open: {
+        x: "0",
+        opacity: 1,
+        transition: {
+            duration: 0.6,
+            ease: [0.76, 0, 0.24, 1]
+        },
+    },
+    closed: {
+        x: "100%",
+        opacity: 0,
+        transition: {
+            duration: 0.6,
+            ease: [0.76, 0, 0.24, 1]
+        },
+    }
+}
 
-    // Helper function to handle Clarity consent
-    const handleClarityConsent = (analyticsConsent) => {
-        try {
-            if (typeof window !== 'undefined' && window.clarity) {
-                if (analyticsConsent) {
-                    window.clarity('consent', true);
-                    
-                    // Set up user identification
-                    window.clarity('identify', 
-                        `user-${Date.now()}`, 
-                        `session-${Date.now()}`, 
-                        window.location.pathname, 
-                        "Anonymous User"
-                    );
-                    
-                    console.log('✅ Clarity enabled via cookie consent');
-                } else {
-                    window.clarity('consent', false);
-                    console.log('⚠️ Clarity disabled via cookie consent');
-                }
-            }
-        } catch (error) {
-            console.warn('❌ Clarity consent update failed:', error);
-        }
+export default function CookiesModem({ setSettings, settings, open }) {
+    const { COOKIE_CATEGORIES, preferences, savePreferences } = useCookies();
+    const [localPreferences, setLocalPreferences] = useState(preferences);
+    const setOpen = typeof setSettings === "function" ? setSettings : open;
+    const isOpen = typeof settings === "boolean" ? settings : false;
+
+    const handleToggle = (categoryId) => {
+        if (COOKIE_CATEGORIES[categoryId].required) return;
+
+        setLocalPreferences(prev => ({
+            ...prev,
+            [categoryId]: !prev[categoryId]
+        }));
     };
 
-    const handleAcceptAll = () => {
-        acceptAllCookies();
-        handleClarityConsent(true);
-    };
-
-    const handleAcceptNecessary = () => {
-        const necessaryOnly = Object.keys(COOKIE_CATEGORIES).reduce((acc, key) => ({
-            ...acc,
-            [key]: COOKIE_CATEGORIES[key].required
-        }), {});
-        
-        savePreferences(necessaryOnly);
-        handleClarityConsent(false);
-    };
-
-    const handleRejectAll = () => {
-        rejectAllCookies();
-        handleClarityConsent(false);
-    };
-
-    const handleCustomPreferences = (preferences) => {
-        savePreferences(preferences);
-        handleClarityConsent(preferences.analytics || false);
+    const handleSave = () => {
+        savePreferences(localPreferences);
     };
 
     return (
-        <AnimatePresence mode="wait">
-            {showBanner && (
-                <motion.div 
-                    className="cookies__bar"
-                    initial={{ y: 100, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: 100, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                >
-                    <div className="cookies__bar__text">
-                        <p>
-                            Používáme cookies pro základní funkce webu a analýzu návštěvnosti. 
-                            <a href="/cookies">Více informací</a>
-                        </p>
-                        <p className="cookies__bar__text__secondary">
-                            Kliknutím na tlačítko můžete spravovat své preference nebo přijmout všechna cookies.
-                        </p>
-                    </div>
-                    <div className="cookies__bar__buttons">
-                        <div className="cookies__bar__buttons__button">
-                            <div onClick={handleAcceptAll}>
-                                <SmallButton text="Souhlasím" />
+        <motion.section
+            className="CookiesModem"
+            initial={{ x: "100%", opacity: 0 }}
+            animate="open"
+            exit="closed"
+            variants={modemAnim}
+        >
+            <Grid size="20vh" />
+            <div className="exit__button" onClick={() => setOpen && setOpen(!isOpen)}>
+                <SVGButton src='/assets/svg/exit.svg' altText='close_icon' />
+                <p>Zavřít</p>
+            </div>
+
+            <div className="cookies__content">
+                <div className="cookies__header">
+                    <h3>Nastavení cookies</h3>
+                    <p>
+                        Zde můžete upravit své preference ohledně cookies.
+                        Nezbytné cookies jsou vždy povoleny pro správné fungování webu.
+                    </p>
+                </div>
+
+                <div className="cookies__options">
+                    {Object.entries(COOKIE_CATEGORIES).map(([id, category]) => (
+                        <div key={id} className="cookie__option">
+                            <div className="cookie__option__header">
+                                <div className="checkbox__container">
+                                    <input
+                                        type="checkbox"
+                                        checked={localPreferences[id]}
+                                        onChange={() => handleToggle(id)}
+                                        disabled={category.required}
+                                    />
+                                    <h4>{category.name}</h4>
+                                </div>
+                                <p>{category.description}</p>
                             </div>
-                            <div onClick={handleAcceptNecessary}>
-                                <SmallButton text="Nezbytné" />
+                            <div className="cookie__option__details">
+                                <p>Poskytovatelé: {category.providers.join(', ')}</p>
+                                <p>Cookies: {category.cookies.join(', ')}</p>
                             </div>
-                            <div onClick={handleRejectAll}>
-                                <SmallButton text="Nesouhlasím" />
-                            </div>
+                            <div className="devider" />
                         </div>
-                        <div className="cookies__bar__buttons__settings">
-                            <div onClick={() => setSettings(!settings)}>
-                                <SmallButton text="Nastavení" />
-                            </div>
-                        </div>
+                    ))}
+                </div>
+
+                <div className="cookies__save">
+                    <div onClick={handleSave}>
+                        <RoundButton text="Uložit" href='' disableLink={true} />
                     </div>
-                </motion.div>
-            )}
-            <AnimatePresence mode="wait">
-                {settings && (
-                    <CookiesModem 
-                        open={setSettings} 
-                        onSavePreferences={handleCustomPreferences}
-                    />
-                )}
-            </AnimatePresence>
-        </AnimatePresence>
+                    <div className="devider" />
+                </div>
+            </div>
+        </motion.section>
     );
 }

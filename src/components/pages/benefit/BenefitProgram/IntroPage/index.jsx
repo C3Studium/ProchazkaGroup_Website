@@ -1,4 +1,4 @@
-import Magnetic from "@/components/anim/Magnetic";
+import Magnetic from "@/components/common/Magnetic";
 import Grid from "@/components/common/grid";
 import PixelateText from "@/components/pages/index/main/neonText";
 import { useGlobalContext } from "@/context/LoadProvider";
@@ -26,14 +26,14 @@ export default function IntroPageBenefit() {
                 height: window.innerHeight
             });
         };
-        
+
         // Initial dimensions
         handleResize();
-        
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    
+
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -42,10 +42,10 @@ export default function IntroPageBenefit() {
 
     const height = useTransform(
         scrollYProgress,
-        [0,1],
+        [0, 1],
         windowDimensions.width >= 1000 && windowDimensions.height > windowDimensions.width
-            ? ['120vh','90vh']
-            : ['140vh','100vh']
+            ? ['120vh', '90vh']
+            : ['140vh', '100vh']
     );
 
     const borderRadiusValue = useTransform(
@@ -65,24 +65,24 @@ export default function IntroPageBenefit() {
             scale: 1,
             opacity: 1,
             transition: {
-                delay: firstLoad  ?  4.25 : 0.25,
+                delay: firstLoad ? 4.25 : 0.25,
                 duration: 1,
-                ease: [ 0.76, 0, 0.24, 1],
+                ease: [0.76, 0, 0.24, 1],
             }
         }
     }
 
-    return(
-        <motion.section 
-            className="IntroPageBenefit" 
+    return (
+        <motion.section
+            className="IntroPageBenefit"
             ref={sectionRef}
             style={{
                 height,
                 borderBottomLeftRadius: borderRadiusValue,
                 borderBottomRightRadius: borderRadiusValue,
             }}
-        > 
-            <Grid size="20vh" key={"IntroPageBenefit"}/> 
+        >
+            <Grid size="20vh" key={"IntroPageBenefit"} />
             <div className="header" ref={headingRef}>
                 <Magnetic sensitivity={0.05}>
                     <Link href="/">
@@ -90,8 +90,8 @@ export default function IntroPageBenefit() {
                     </Link>
                 </Magnetic>
             </div>
-            <motion.div 
-            
+            <motion.div
+
                 style={{
                     position: 'absolute',
                     top: '0',
@@ -102,12 +102,12 @@ export default function IntroPageBenefit() {
 
                 }}
                 initial="initial"
-                animate="enter" 
+                animate="enter"
                 variants={introAnim}
             >
-                <Image 
-                    src="/assets/backgrounds/trophies.webp" 
-                    alt="Benefit Program Intro Page" 
+                <Image
+                    src="/assets/backgrounds/trophies.webp"
+                    alt="Benefit Program Intro Page"
                     fill={true}
                     priority={true}
                     quality={100}
@@ -117,17 +117,17 @@ export default function IntroPageBenefit() {
                     className="background-image"
                 />
             </motion.div>
-            <div className="cover"/>
+            <div className="cover" />
             <div className="text">
                 <h1>
-                    <PixelateText 
-                        text="BENEFIT" 
+                    <PixelateText
+                        text="BENEFIT"
                         isInView={isInView}
-                        firstLoad={firstLoad} 
+                        firstLoad={firstLoad}
                     />
                     <span className="highlighted">
-                        <PixelateText 
-                            text="PROGRAM" 
+                        <PixelateText
+                            text="PROGRAM"
                             isInView={isInView}
                             firstLoad={firstLoad}
                         />

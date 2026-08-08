@@ -1,13 +1,13 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react"
 import { motion, useScroll, useMotionValue, animate } from "framer-motion"
-import MainText from "@/components/anim/MainText"
-import SubText from "@/components/anim/SubText"
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton"
+import SubText from "@/components/common/TextAnim/SubText"
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton"
 import NextImage from "next/image"
-import RollingIcons from "@/components/anim/RollingIcons"
+import RollingIcons from "@/components/common/RollingIcons"
 import Grid from "@/components/common/grid"
 import { throttle } from "lodash"
 import { usePerformance } from "@/context/PerformanceProvider"
+import MainText from "@/components/common/TextAnim/MainText"
 
 /**
  * IntroSMobile - Ultra-Optimized Mobile Animation System
@@ -66,11 +66,11 @@ export default function IntroSMobile() {
     }), [shouldReduceAnimations]);
 
     // Optimized scroll progress with minimal processing
-    const {scrollYProgress} = useScroll({
+    const { scrollYProgress } = useScroll({
         target: section,
         offset: ['start end', 'end start']
     });
-    
+
     // Ultra-optimized scroll handler with performance locks
     const handleScroll = useCallback(
         throttle((value) => {
@@ -121,13 +121,13 @@ export default function IntroSMobile() {
     // Setup scroll handler
     useEffect(() => {
         const unsubscribeScroll = scrollYProgress.on("change", handleScroll);
-        
+
         return () => {
             unsubscribeScroll();
             handleScroll.cancel();
         };
     }, [scrollYProgress, handleScroll]);
-    
+
     // Optimized initialization with performance checks
     useEffect(() => {
         // Set initial state - optimized for immediate rendering
@@ -155,7 +155,7 @@ export default function IntroSMobile() {
     const updateSectionVisibility = useCallback((targetIdx, duration) => {
         const staggerDelay = transitionConfigs.staggerDelay;
 
-        switch(targetIdx) {
+        switch (targetIdx) {
             case 0:
                 // Parallel fade-out for performance
                 animate(aboutSectionOpacity, 0, {
@@ -224,84 +224,36 @@ export default function IntroSMobile() {
                 break;
         }
     }, [transitionConfigs]);
-    
+
     return (
         <section className="IntroSMain" ref={section}>
-            <div className="IntroSMain__section"/>
-            <div className="IntroSMain__section"/>
-            <div className="IntroSMain__section"/>
+            <div className="IntroSMain__section" />
+            <div className="IntroSMain__section" />
+            <div className="IntroSMain__section" />
 
-            <div className="IntroSMain__sticky"> 
-                <div className="IntroSMain__sticky__container"> 
-                    <Grid size="20vh"/>
-                    
+            <div className="IntroSMain__sticky">
+                <div className="IntroSMain__sticky__container">
+                    <Grid size="20vh" />
+
                     {/* Content sections with only opacity animations to avoid SCSS issues */}
-                    <motion.div 
+                    <motion.div
                         className="IntroSMain__Benefit"
                         style={{ opacity: benefitSectionOpacity }}
                     >
                         <div className="IntroSMain__Benefit__over">
-                            <MainText 
-                                text="BENEFIT PROGRAM.<br />STAČÍ, ABY SE Z VAŠEHO DOPORUČENÍ STAL NOVÝ KLIENT, A PENÍZE JSOU VAŠE. VYHRÁVÁTE JAK VY TAK I DRUHÝ." 
+                            <MainText
+                                text="BENEFIT PROGRAM.<br />STAČÍ, ABY SE Z VAŠEHO DOPORUČENÍ STAL NOVÝ KLIENT, A PENÍZE JSOU VAŠE. VYHRÁVÁTE JAK VY TAK I DRUHÝ."
                                 className="mainText__container"
                             />
-                            <SubText 
-                                text="Ať už chcete splatit hypotéku, zajistit lepší budoucnost pro děti, nebo si dopřát něco navíc. Benefit program vám k tomu pomůže. Prostě doporučte, a sledujte, jak roste nejen váš úspěch, ale i jejich díky Vám." 
-                                className="subText__container" 
+                            <SubText
+                                text="Ať už chcete splatit hypotéku, zajistit lepší budoucnost pro děti, nebo si dopřát něco navíc. Benefit program vám k tomu pomůže. Prostě doporučte, a sledujte, jak roste nejen váš úspěch, ale i jejich díky Vám."
+                                className="subText__container"
                             />
                         </div>
                         <div className="IntroSMain__Benefit__under">
-                            <NextImage 
+                            <NextImage
                                 src="/assets/prebuild/svg/graphMain.svg"
-                                alt="benefit-icon"  
-                                width={200}
-                                height={200}
-                                priority={false}
-                                quality={90}
-                            />
-                        </div>
-                    </motion.div>
-                    
-                    <motion.div 
-                        className="IntroSMain__About"
-                        style={{ opacity: aboutSectionOpacity }}
-                    >
-                        <div className="IntroSMain__About__over">
-                            <SubText 
-                                text="Náš tým roste a zraje s jediným cílem: přinášet vám výsledky, a splnit naši misi." 
-                                className="subText__container" 
-                            />
-                            <MainText 
-                                text="UMOŽŇUJEME VYVÍJET NOVÉ ÚSPĚŠNÉ PŘÍBĚHY, A TO NEJEN TY VAŠE. SPOLEČNĚ BUDUJEME TÝM EXPERTŮ, NA KTERÉ SE MŮŽETE SPOLEHNOUT." 
-                                className="mainText__container"
-                            />
-                        </div>
-                        <div className="IntroSMain__About__under">
-                            <NextImage 
-                                src="/assets/prebuild/svg/teamMain.svg"
-                                alt="about-icon"  
-                                width={200}
-                                height={200}
-                                priority={false}
-                                quality={90}
-                            />
-                        </div>
-                    </motion.div>
-                    
-                    <motion.div 
-                        className="IntroSMain__Offers"
-                        style={{ opacity: offersSectionOpacity }}
-                    >
-                        <div className="IntroSMain__Offers__over">
-                            <MainText 
-                                text="VYJEDNALI JSME PRO NAŠE KLIENTY SLEVY A SKVĚLÉ NABÍDKY TAKY MIMO NAŠÍ OBLAST, ABYSTE UŠETŘILI I U KAŽDODENNÍCH POTŘEB. " 
-                                className="mainText__container"
-                            />
-                        </div>
-                        <div className="IntroSMain__Offers__under">
-                            <NextImage 
-                                src="/assets/prebuild/svg/offerMain.svg"
-                                alt="offers-icon"  
+                                alt="benefit-icon"
                                 width={200}
                                 height={200}
                                 priority={false}
@@ -310,7 +262,55 @@ export default function IntroSMobile() {
                         </div>
                     </motion.div>
 
-                    <motion.div 
+                    <motion.div
+                        className="IntroSMain__About"
+                        style={{ opacity: aboutSectionOpacity }}
+                    >
+                        <div className="IntroSMain__About__over">
+                            <SubText
+                                text="Náš tým roste a zraje s jediným cílem: přinášet vám výsledky, a splnit naši misi."
+                                className="subText__container"
+                            />
+                            <MainText
+                                text="UMOŽŇUJEME VYVÍJET NOVÉ ÚSPĚŠNÉ PŘÍBĚHY, A TO NEJEN TY VAŠE. SPOLEČNĚ BUDUJEME TÝM EXPERTŮ, NA KTERÉ SE MŮŽETE SPOLEHNOUT."
+                                className="mainText__container"
+                            />
+                        </div>
+                        <div className="IntroSMain__About__under">
+                            <NextImage
+                                src="/assets/prebuild/svg/teamMain.svg"
+                                alt="about-icon"
+                                width={200}
+                                height={200}
+                                priority={false}
+                                quality={90}
+                            />
+                        </div>
+                    </motion.div>
+
+                    <motion.div
+                        className="IntroSMain__Offers"
+                        style={{ opacity: offersSectionOpacity }}
+                    >
+                        <div className="IntroSMain__Offers__over">
+                            <MainText
+                                text="VYJEDNALI JSME PRO NAŠE KLIENTY SLEVY A SKVĚLÉ NABÍDKY TAKY MIMO NAŠÍ OBLAST, ABYSTE UŠETŘILI I U KAŽDODENNÍCH POTŘEB. "
+                                className="mainText__container"
+                            />
+                        </div>
+                        <div className="IntroSMain__Offers__under">
+                            <NextImage
+                                src="/assets/prebuild/svg/offerMain.svg"
+                                alt="offers-icon"
+                                width={200}
+                                height={200}
+                                priority={false}
+                                quality={90}
+                            />
+                        </div>
+                    </motion.div>
+
+                    <motion.div
                         className="IntroSMain__Offers__under__icons"
                         style={{ opacity: iconsOpacity }}
                     >
@@ -319,26 +319,26 @@ export default function IntroSMobile() {
                                 <div className="header">
                                     <p>NAŠI PARTNEŘI:</p>
                                 </div>
-                                <div className="devider__wrapper"/>
-                                <RollingIcons baseVelocity={2.5}/>
-                                <div className="devider__wrapper"/>
+                                <div className="devider__wrapper" />
+                                <RollingIcons baseVelocity={2.5} />
+                                <div className="devider__wrapper" />
                             </div>
                         </div>
-                        
+
                         <div className="logos__container">
                             <div className="logos__wrapper">
                                 <div className="header">
                                     <p>LOKALNI PARTNEŘI:</p>
                                 </div>
-                                <div className="devider__wrapper"/>
-                                <RollingIcons baseVelocity={2.5}/>
-                                <div className="devider__wrapper"/>
+                                <div className="devider__wrapper" />
+                                <RollingIcons baseVelocity={2.5} />
+                                <div className="devider__wrapper" />
                             </div>
                         </div>
                     </motion.div>
-                    
-                    <div className="divider"/>
-                    
+
+                    <div className="divider" />
+
                     {/* Ultra-optimized button container */}
                     <div className="IntroSMain__button__container">
                         <div className="IntroSMain__button" style={{ translateX: "0%" }}>

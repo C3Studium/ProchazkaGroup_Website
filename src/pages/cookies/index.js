@@ -1,6 +1,5 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import Footer from "@/components/common/footer"
 import CookiesContent from "@/components/pages/cookies/CookiesPage"
 
@@ -77,8 +76,6 @@ export default function CookiesPage() {
                 </script>
             </Head>
             <main lang="cs">
-                <Navbar />
-                <Cursor />
                 <CookiesContent />
                 <Footer />
             </main>

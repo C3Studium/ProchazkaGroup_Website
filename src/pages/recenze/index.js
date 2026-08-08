@@ -1,12 +1,12 @@
 import Footer from "@/components/common/footer";
 import Navbar from "@/components/common/navbar";
 import Cursor from "@/components/common/navbar/cursor";
-import ReviewsList from "@/components/modems/Review";
+import ReviewsList from "@/components/modems/Rezence";
 import ReviewsIntro from "@/components/pages/reviews/reviews";
 import Head from "next/head";
 
-export default function ReviewsPage () {
-    return(
+export default function ReviewsPage() {
+    return (
         <>
             <Head>
                 <title>Recenze a Hodnocení | Procházka Group</title>
@@ -17,7 +17,7 @@ export default function ReviewsPage () {
                 <meta name="author" content="Procházka Group" />
                 <meta name="robots" content="index, follow" />
                 <link rel="canonical" href="https://prochazkagroup.cz/recenze" />
-                
+
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://prochazkagroup.cz/recenze" />
@@ -81,9 +81,7 @@ export default function ReviewsPage () {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Cursor />
-                <Navbar />
+            <main lang="cs" key="reviews-page">
                 <ReviewsIntro />
                 <ReviewsList />
                 <Footer />

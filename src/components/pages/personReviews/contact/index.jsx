@@ -1,6 +1,6 @@
 //NOTE:FeedBack and contact are switched
 
-import Magnetic from "@/components/anim/Magnetic";
+import Magnetic from "@/components/common/Magnetic";
 import Grid from "@/components/common/grid";
 import ContactForm from "@/components/forms/contact";
 import { TestPeople } from "@/constants/people";
@@ -11,28 +11,28 @@ import { useRef } from "react";
 import { useGlobalContext } from "@/context/LoadProvider";
 import { useInView, useSpring, useTransform, motion } from "framer-motion";
 
-export default function ContactIntro({name, number, moto, databaseName, icons, srcbg, srcp}) {
+export default function ContactIntro({ name, number, moto, databaseName, icons, srcbg, srcp }) {
     const { firstLoad } = useGlobalContext();
     const sectionRef = useRef(null);
-    
+
     const { scrollYProgress: parallaxScrollYProgress } = useScroll({
         target: sectionRef,
-        offset: [ 'start start', 'end end']
+        offset: ['start start', 'end end']
     });
-    
+
     const smoothYScroll = useSpring(parallaxScrollYProgress, {
         stiffness: 100,
         damping: 20,
         restDelta: 0.001
     });
-    
+
     // Add parallax effect
     const yPos = useTransform(smoothYScroll, [0, 1], ["0%", "10%"]);
     const scale = useTransform(smoothYScroll, [0, 1], [1.05, 1]);
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
-        offset: [ 'start start', 'end end']
+        offset: ['start start', 'end end']
     })
 
 
@@ -65,7 +65,7 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
             }
         }
     };
-    
+
     // Animation for elements that slide from bottom
     const slideUpAnim = {
         initial: {
@@ -83,7 +83,7 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
         }
     };
 
-    
+
     const points = TestPeople.length
     return (
         <section className="ContactIntro" ref={sectionRef}>
@@ -95,9 +95,9 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                 </Magnetic>
             </div>
             <div className="grid__container">
-                <Grid size="20vh"/>
+                <Grid size="20vh" />
             </div>
-            <motion.div 
+            <motion.div
                 className="background__img"
                 initial="initial"
                 animate="enter"
@@ -110,11 +110,11 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                         scale: scale,
                     }}
                 >
-                    <Image 
-                        src={srcbg} 
-                        alt='background_image' 
+                    <Image
+                        src={srcbg}
+                        alt='background_image'
                         fill={true}
-                        style={{ objectFit: 'cover'}}
+                        style={{ objectFit: 'cover' }}
                         sizes="100vw"
                         quality={100}
                         priority={true}
@@ -123,8 +123,8 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                     />
                 </motion.div>
             </motion.div>
-            <div className="cover"/>
-            <motion.div 
+            <div className="cover" />
+            <motion.div
                 className="ContactIntro__wrapper"
                 initial="initial"
                 animate="enter"
@@ -136,7 +136,7 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
             >
                 {/* Main Info Section */}
                 <div className="ContactIntro__MainInfo">
-                    <motion.div 
+                    <motion.div
                         className="ContactIntro__MainInfo__header"
                         variants={slideUpAnim}
                     >
@@ -144,7 +144,7 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                             <h2>{name}</h2>
                         </div>
                     </motion.div>
-                    <motion.div 
+                    <motion.div
                         className="ContactIntro__MainInfo__text__container"
                         variants={slideUpAnim}
                     >
@@ -162,7 +162,7 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                                 return (
                                     <Magnetic key={`magnetic-${icon.name}`} sensitivity={0.1}>
                                         <Link href={icon.href}>
-                                            <IconComponent 
+                                            <IconComponent
                                                 size={40}
                                                 aria-label={icon.name}
                                                 className="social__icon"
@@ -174,15 +174,15 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                         </div>
                     </div>
                 </div>
-    
-    
+
+
                 {/* Collage Section with Snapping Transform */}
-                <div className="ContactIntro__Collage"> 
+                <div className="ContactIntro__Collage">
                     <div className="ContactIntro__Collage__pics">
                         <div className="ContactIntro__Collage__pic">
-                            <Image 
+                            <Image
                                 src={srcp}
-                                alt="profile_pic1" 
+                                alt="profile_pic1"
                                 fill={true}
                                 quality={100}
                                 priority={true}
@@ -211,7 +211,7 @@ export default function ContactIntro({name, number, moto, databaseName, icons, s
                     </div>
                 </div>
             </motion.div>
-            <ContactForm scroll={scrollYProgress} name={databaseName}/>
+            <ContactForm scroll={scrollYProgress} name={databaseName} />
         </section>
     )
 }

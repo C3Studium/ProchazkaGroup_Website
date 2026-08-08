@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView, useScroll, useSpring, useTransform } from 'framer-motion';
 import { PrivacySections } from "@/constants/cookiesTerms";
-import Magnetic from "@/components/anim/Magnetic";
+import Magnetic from "@/components/common/Magnetic";
 import Link from "next/link";
 import { useGlobalContext } from "@/context/LoadProvider";
 import PixelateText from "../../index/main/neonText";
@@ -14,7 +14,7 @@ export default function TermsContent() {
     const isInView = useInView(headingRef, { once: true });
     const [activeSection, setActiveSection] = useState(null);
     const sectionRefs = useRef([]);
-    
+
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -59,17 +59,17 @@ export default function TermsContent() {
         section.scrollIntoView({ behavior: 'smooth' });
     };
 
-        useEffect(() => {
+    useEffect(() => {
         const handleScroll = () => {
             const scrollPosition = window.scrollY + window.innerHeight / 2;
-    
+
             for (let i = 0; i < sectionRefs.current.length; i++) {
                 const section = sectionRefs.current[i];
                 if (section) {
                     const rect = section.getBoundingClientRect();
                     const sectionTop = rect.top + window.scrollY;
                     const sectionBottom = sectionTop + rect.height;
-    
+
                     if (sectionTop <= scrollPosition && sectionBottom > scrollPosition) {
                         // Use PrivacySections instead of CookiesSections
                         setActiveSection(PrivacySections[i].id);
@@ -78,7 +78,7 @@ export default function TermsContent() {
                 }
             }
         };
-    
+
         window.addEventListener('scroll', handleScroll);
         // Call once on initial load to set the initial active section
         handleScroll();
@@ -87,7 +87,7 @@ export default function TermsContent() {
 
     return (
         <section className="TermsContent">
-            <Grid size="20vh" key={"TermsContent"}/>
+            <Grid size="20vh" key={"TermsContent"} />
             <div className="header">
                 <Magnetic sensitivity={0.05}>
                     <Link href="/">
@@ -96,7 +96,7 @@ export default function TermsContent() {
                 </Magnetic>
             </div>
             <div className="devider"></div>
-            <motion.div 
+            <motion.div
                 className="cover"
                 initial="initial"
                 animate="enter"
@@ -107,27 +107,27 @@ export default function TermsContent() {
                     willChange: "transform, opacity"
                 }}
             >
-                <Grid size="20vh" key={"Cover__TermsContent"}/>
+                <Grid size="20vh" key={"Cover__TermsContent"} />
                 <div className="cover__header" ref={headingRef}>
                     <motion.p style={{ y: headerY }}>
                         <span>
-                            <PixelateText 
-                                text="VŠE O OCHRANĚ," 
+                            <PixelateText
+                                text="VŠE O OCHRANĚ,"
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
                         </span>
 
                         <span className="highlighted">
-                            <PixelateText 
-                                text="POUŽITÍ VAŠICH ÚDAJŮ" 
+                            <PixelateText
+                                text="POUŽITÍ VAŠICH ÚDAJŮ"
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
                         </span>
                         <span>
-                            <PixelateText 
-                                text="A INFORMACÍ." 
+                            <PixelateText
+                                text="A INFORMACÍ."
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
@@ -140,7 +140,7 @@ export default function TermsContent() {
                     </h3>
                     <p>
                         <PixelateText
-                            text="Detaily a všechny podrobné informace" 
+                            text="Detaily a všechny podrobné informace"
                             isInView={isInView}
                             firstLoad={firstLoad}
                         />
@@ -167,7 +167,7 @@ export default function TermsContent() {
                                             e.preventDefault();
                                             handleLinkClick(section.id);
                                         }}
-                                        animate={{ 
+                                        animate={{
                                             opacity: activeSection === section.id ? 1 : 0.6,
                                             fontWeight: activeSection === section.id ? "500" : "300",
                                             color: activeSection === section.id ? "#4bdadc" : "#050A10"

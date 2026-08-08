@@ -5,14 +5,7 @@ const LoadContext = createContext();
 
 export function LoadProvider({ children }) {
     const [firstLoad, setFirstLoad] = useState(true);
-    const minRunTime = 4;
-    const maxRunTime = 4;
 
-    // Calculate runTime once and memoize it
-    const runTime = useMemo(() => {
-        const generatedTime = Math.random() * (maxRunTime - minRunTime) + minRunTime;
-        return Math.max(generatedTime, 0.1);
-    }, [])
 
 
 
@@ -20,7 +13,7 @@ export function LoadProvider({ children }) {
         const timer = setTimeout(() => {
             setFirstLoad(false);
             document.body.style.overflow = '';
-        }, runTime * 1000);
+        }, 3000);
 
         document.body.style.overflow = 'hidden';
         return () => clearTimeout(timer);
@@ -28,7 +21,7 @@ export function LoadProvider({ children }) {
 
     // Memoize context value to prevent unnecessary re-renders
     // change this when the preloader will be ready to run normally
-    const value = useMemo(() => ({ firstLoad, setFirstLoad, runTime }), [firstLoad, runTime]);
+    const value = useMemo(() => ({ firstLoad, setFirstLoad }), [firstLoad]);
 
     return (
         <LoadContext.Provider value={value}>

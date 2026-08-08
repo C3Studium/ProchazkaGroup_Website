@@ -5,8 +5,8 @@ import { useRef, useState, useEffect } from "react";
 import { useScroll, motion, useTransform, AnimatePresence } from "framer-motion";
 import Grid from "@/components/common/grid";
 import { useGlobalContext } from "@/context/LoadProvider";
-import SVGButton from "@/components/ui/stickyButtons/buttons/SvgButton";
-import Magnetic from "@/components/anim/Magnetic";
+import SVGButton from "@/components/common/ui/stickyButtons/buttons/SvgButton";
+import Magnetic from "@/components/common/Magnetic";
 
 const VideoModem = ({ setOpen }) => {
     const videoRef = useRef(null);
@@ -57,7 +57,7 @@ const VideoModem = ({ setOpen }) => {
     }, []);
 
     return (
-        <motion.div 
+        <motion.div
             className="video__container"
             initial='initial'
             animate='enter'
@@ -90,11 +90,11 @@ const VideoModem = ({ setOpen }) => {
                     justifyContent: "center",
                 }}
             >
-                <video 
-                    src="/assets/video/benefit_program.mp4" 
+                <video
+                    src="/assets/video/benefit_program.mp4"
                     ref={videoRef}
-                    autoPlay 
-                    loop  
+                    autoPlay
+                    loop
                     playsInline
                     style={{
                         width: "100%",
@@ -116,7 +116,7 @@ const VideoModem = ({ setOpen }) => {
                                 width: "25vw",
                                 height: "25vw",
                             }}
-                            
+
                             onClick={handlePausePlay}
 
                             initial={{ opacity: 0 }}
@@ -127,7 +127,7 @@ const VideoModem = ({ setOpen }) => {
                                 ease: [0.76, 0, 0.24, 1],
                             }}
                         >
-                            <Image 
+                            <Image
                                 src="/assets/svg/playbutton.svg"
                                 alt="play_button"
                                 width={100}
@@ -146,8 +146,8 @@ const VideoModem = ({ setOpen }) => {
                         zIndex: 1001,
                     }}
                 >
-                    <SVGButton 
-                        src="/assets/svg/exit.svg" 
+                    <SVGButton
+                        src="/assets/svg/exit.svg"
                         altText="exit_button"
                         onClick={() => setOpen(false)}
                     />
@@ -182,24 +182,24 @@ export default function BenefitProgramKeyframes() {
             scale: 1,
             opacity: 1,
             transition: {
-                delay: firstLoad  ?  4 : 0.25,
+                delay: firstLoad ? 4 : 0.25,
                 duration: 1,
-                ease: [ 0.76, 0, 0.24, 1],
+                ease: [0.76, 0, 0.24, 1],
             }
         }
     };
 
-    return(
+    return (
         <section className="BenefitProgramKeyFrames"
             style={{
                 zIndex: open ? 1000 : 50,
             }}
         >
             <div style={{ position: 'relative', width: '100vw', height: '100vh' }}>
-                <Grid size="20vh" key={"BenefitProgramKeyFrames"}/>
+                <Grid size="20vh" key={"BenefitProgramKeyFrames"} />
             </div>
             <IntroPageBenefit />
-            <motion.div 
+            <motion.div
                 className="BenefitProgramKeyFramesImage"
                 style={{
                     x: headerMove,
@@ -208,9 +208,9 @@ export default function BenefitProgramKeyframes() {
                 initial="initial"
                 animate="enter"
             >
-                <Image  
-                    src='/assets/prebuild/small-tree.webp' 
-                    alt="small-tree" 
+                <Image
+                    src='/assets/prebuild/small-tree.webp'
+                    alt="small-tree"
                     fill={true}
                     sizes="50vw"
                     quality={100}
@@ -218,7 +218,7 @@ export default function BenefitProgramKeyframes() {
                     placeholder="blur"
                     blurDataURL="data:image/webp"
                 />
-                <div 
+                <div
                     style={{
                         position: "absolute",
                         top: "50%",
@@ -245,15 +245,15 @@ export default function BenefitProgramKeyframes() {
                                 alignItems: "center",
                                 cursor: "pointer"
                             }}
-                    >
-                            <Image 
+                        >
+                            <Image
                                 src="/assets/svg/playbutton.svg"
                                 alt="play_button"
                                 width={100}
                                 height={100}
                                 priority={true}
                             />
-                    </div>
+                        </div>
                     </Magnetic>
                 </div>
             </motion.div>
@@ -262,7 +262,7 @@ export default function BenefitProgramKeyframes() {
                     <VideoModem setOpen={setOpen} />
                 )}
             </AnimatePresence>
-            <InfoBenefitS ref={sectionRef} scroll={scrollYProgress}/>
+            <InfoBenefitS ref={sectionRef} scroll={scrollYProgress} />
         </section>
     )
 }

@@ -1,15 +1,15 @@
 import MainText from "@/components/anim/MainText";
 import SubText from "@/components/anim/SubText";
 import Grid from "@/components/common/grid";
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton";
-import CustomImage from "@/components/ui/stickyImage";
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton";
+import CustomImage from "@/components/common/ui/stickyImage";
 import { projects } from "@/constants/nabidkypage";
 import { usePerformance } from "@/context/PerformanceProvider";
 import { useGlobalContext } from "@/context/LoadProvider"; // Added import
 import { useScroll, useTransform, motion, useInView, useSpring } from "framer-motion"; // Added useInView
 import { useRef } from "react";
 import PixelateText from "../../index/main/neonText";
-import Magnetic from "@/components/anim/Magnetic";
+import Magnetic from "@/components/common/Magnetic";
 import Link from "next/link";
 import { trackEvent } from "@/hooks/trackEvent";
 
@@ -18,7 +18,7 @@ export default function ClipPathPage() {
     const { firstLoad } = useGlobalContext(); // Access firstLoad state
     const headingRef = useRef(null);
     const isInView = useInView(headingRef, { once: true });
-    
+
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -58,10 +58,10 @@ export default function ClipPathPage() {
         }
     };
 
-    
+
     return (
         <section className="ClipPathPage">
-            <Grid size="20vh" key={"ClipPathPage"}/>
+            <Grid size="20vh" key={"ClipPathPage"} />
             <div className="header">
                 <Magnetic sensitivity={0.05}>
                     <Link href="/">
@@ -70,9 +70,9 @@ export default function ClipPathPage() {
                 </Magnetic>
             </div>
             <div className="devider"></div>
-            
+
             {/* Apply animation to cover */}
-            <motion.div 
+            <motion.div
                 className="cover"
                 initial="initial"
                 animate="enter"
@@ -83,27 +83,27 @@ export default function ClipPathPage() {
                     willChange: "transform, opacity"
                 }}
             >
-                <Grid size="20vh" key={"Cover__ClipPathPage"}/>
+                <Grid size="20vh" key={"Cover__ClipPathPage"} />
                 <div className="cover__header" ref={headingRef}>
                     <motion.p style={{ y: headerY }}>
                         <span>
-                            <PixelateText 
-                                text="SLEVY A VÝHODNÉ NABÍDKY" 
+                            <PixelateText
+                                text="SLEVY A VÝHODNÉ NABÍDKY"
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
                         </span>
 
                         <span className="highlighted">
-                            <PixelateText 
-                                text="EXCLUSIF ET SEULEMENT" 
+                            <PixelateText
+                                text="EXCLUSIF ET SEULEMENT"
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
                         </span>
                         <span>
-                            <PixelateText 
-                                text="PRO NAŠE KLIENTY." 
+                            <PixelateText
+                                text="PRO NAŠE KLIENTY."
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
@@ -116,21 +116,21 @@ export default function ClipPathPage() {
                     </h3>
                     <p>
                         <PixelateText
-                            text="Domlouváme exklusivní nabídky pro lepší podmínky" 
+                            text="Domlouváme exklusivní nabídky pro lepší podmínky"
                             isInView={isInView}
                             firstLoad={firstLoad}
                         />
                     </p>
                 </motion.div>
-            </motion.div> 
-            
+            </motion.div>
+
             {projects.map((project, index) => {
                 const { number, title, description, href, src, alt, text } = project;
                 return (
-                    <Galery 
-                        number={number} 
-                        title={title} 
-                        description={description} 
+                    <Galery
+                        number={number}
+                        title={title}
+                        description={description}
                         href={href}
                         src={src}
                         alt={alt}
@@ -157,8 +157,8 @@ const Galery = ({ number, title, description, href, src, alt, text }) => {
 
     const x = useTransform(
         scrollYProgress,
-        [ 0, 0.5, 1 ], 
-        [ 400, -100, -200 ]
+        [0, 0.5, 1],
+        [400, -100, -200]
     );
 
     // Handle partner link click with specific tracking
@@ -166,13 +166,13 @@ const Galery = ({ number, title, description, href, src, alt, text }) => {
         // Create specific event names for each partner
         const eventMap = {
             'Pojistné Hlášení': 'partner_pojistne_hlaseni_clicked',
-            'ElevenCosmetic': 'partner_eleven_cosmetic_clicked', 
+            'ElevenCosmetic': 'partner_eleven_cosmetic_clicked',
             'ReKvítka': 'partner_rekvitka_clicked',
             'Project 04': 'partner_project_04_clicked'
         };
 
         const eventName = eventMap[title] || `partner_${title.toLowerCase().replace(/\s+/g, '_')}_clicked`;
-        
+
         trackEvent(eventName, {
             partner_name: title,
             partner_number: number,
@@ -200,7 +200,7 @@ const Galery = ({ number, title, description, href, src, alt, text }) => {
                         [0, 0.3, 0.7, 1],
                         [
                             'inset(100% 0 0 0)',
-                            'inset(0 0 0 0)',   
+                            'inset(0 0 0 0)',
                             'inset(0 0 0 0)',
                             'inset(0 0 100% 0)'
                         ]
@@ -224,17 +224,17 @@ const Galery = ({ number, title, description, href, src, alt, text }) => {
                         {title}
                     </p>
                 </div>
-                <div className="ClipPathPage__Galery__Content__devider"/>
+                <div className="ClipPathPage__Galery__Content__devider" />
                 <MainText text={description} initialColor={'#050A10'} />
                 <SubText initialColor="#050A10" className={'ClipPathPage__Galery__Content__p'} text={text} />
                 <div className="ClipPathPage__Galery__Content__Button">
                     <motion.div
-                    style={shouldReduceAnimations ? { x: -50 } : { x }}
+                        style={shouldReduceAnimations ? { x: -50 } : { x }}
                         onClick={handlePartnerClick}  // Track click event
-                    >   
+                    >
                         <RoundButton href={href} text="Více informací" />
                     </motion.div>
-                    <div className="ClipPathPage__Galery__Content__Button__devider"/>
+                    <div className="ClipPathPage__Galery__Content__Button__devider" />
                 </div>
             </div>
         </div>

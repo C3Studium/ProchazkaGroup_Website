@@ -16,17 +16,17 @@ import Image from "next/image"
 import Grid from "@/components/common/grid"
 import Collage from "../eventCollage/collage"
 import AboutTeam from "../aboutTeam"
-import SubText from "@/components/anim/SubText"
+import SubText from "@/components/common/TextAnim/SubText"
 
 export default function ParallaxExpanf() {
     // Performance
     const { shouldReduceAnimations } = usePerformance();
-    
+
     const container = useRef(null)
 
     const { scrollYProgress } = useScroll({
         target: container,
-        offset: [ 'start start', 'end end']
+        offset: ['start start', 'end end']
     })
 
     const smoothScrollY = useSpring(scrollYProgress, {
@@ -48,16 +48,16 @@ export default function ParallaxExpanf() {
         [0, 15, 15, 15, 0]
     );
 
-    const scale4 = useTransform(scrollYProgress, [ 0, 0.3], [ 1, 4])
-    const scale5 = useTransform(scrollYProgress, [ 0, 0.3], [ 1, 5])
-    const scale6 = useTransform(scrollYProgress, [ 0, 0.3], [ 1, 6])
-    const scale8 = useTransform(scrollYProgress, [ 0, 0.3], [ 1, 8])
-    const scale9 = useTransform(scrollYProgress, [ 0, 0.3], [ 1, 9])
+    const scale4 = useTransform(scrollYProgress, [0, 0.3], [1, 4])
+    const scale5 = useTransform(scrollYProgress, [0, 0.3], [1, 5])
+    const scale6 = useTransform(scrollYProgress, [0, 0.3], [1, 6])
+    const scale8 = useTransform(scrollYProgress, [0, 0.3], [1, 8])
+    const scale9 = useTransform(scrollYProgress, [0, 0.3], [1, 9])
 
     // For text animation
     const x = useTransform(
         scrollYProgress,
-        [0, 0.3], 
+        [0, 0.3],
         shouldReduceAnimations ? [3000, -6000] : [3000, -6000]
     );
 
@@ -65,7 +65,7 @@ export default function ParallaxExpanf() {
     const rows = 7;
     const columns = 11;
 
-    
+
     // Generate grid tiles for the pixelated image
     const gridTiles = useMemo(() => {
         const tiles = [];
@@ -75,21 +75,21 @@ export default function ParallaxExpanf() {
                 const tileIndex = row * columns + col;
                 const xOffset = -(col * (100 / columns));
                 const yOffset = -(row * (100 / rows));
-                
+
                 // Calculate distance from center for delay
                 const centerRow = Math.floor(rows / 2);
                 const centerCol = Math.floor(columns / 2);
                 const rowDistance = Math.abs(row - centerRow);
                 const colDistance = Math.abs(col - centerCol);
-                
+
                 // Use distance from center for delay calculation
                 // This creates a radial wave effect from the center
                 const distanceFromCenter = Math.sqrt(Math.pow(rowDistance, 2) + Math.pow(colDistance, 2));
                 const maxDistance = Math.sqrt(Math.pow(centerRow, 2) + Math.pow(centerCol, 2));
-                
+
                 // Create a delay factor between 0 and 0.2
                 const delayFactor = (distanceFromCenter / maxDistance) * 0.05;
-                
+
                 tiles.push({
                     id: `tile-${tileIndex}`,
                     row,
@@ -146,30 +146,30 @@ export default function ParallaxExpanf() {
     return (
         <motion.section className="ParallaxExpand">
             <div className="ParallaxExpand__whiteSpace">
-                <Grid size="20vh" key={"ParallaxExpand__whiteSpace"}/>
+                <Grid size="20vh" key={"ParallaxExpand__whiteSpace"} />
             </div>
-            <motion.div className="ParallaxExpand__sticky__container" ref={container}  style={{ opacity: sectionOpacity}} >
+            <motion.div className="ParallaxExpand__sticky__container" ref={container} style={{ opacity: sectionOpacity }} >
                 <div className="ParallaxExpand__sticky">
-                    <Grid size="20vh" key={"ParallaxExpand__sticky"}/>
+                    <Grid size="20vh" key={"ParallaxExpand__sticky"} />
                     {
                         pictures.map((pic, index) => {
                             const { src, scale, isPixelated } = pic
-                            
+
                             if (isPixelated) {
 
                                 // Pixelated grid for the last image
                                 return (
-                                    <motion.div 
-                                    key={index} 
-                                        style={{ 
+                                    <motion.div
+                                        key={index}
+                                        style={{
                                             scale,
                                             filter: useTransform(containerBlurTransform, blur => `blur(${blur}px`)
-                                        }} 
+                                        }}
                                         className="image__wrapper"
                                     >
-                                        <div 
+                                        <div
                                             className="pixelated__grid__container"
-                                            style={{ 
+                                            style={{
                                                 display: 'grid',
                                                 gridTemplateColumns: `repeat(${columns}, 2fr)`,
                                                 gridTemplateRows: `repeat(${rows}, 2fr)`,
@@ -179,7 +179,7 @@ export default function ParallaxExpanf() {
                                                 columnGap: '0px',
                                             }}
                                         >
-                                            <Grid size="20vh" key={"pixelated__grid__container_"}/>
+                                            <Grid size="20vh" key={"pixelated__grid__container_"} />
                                             {gridTiles.map((tile) => {
                                                 // Create a custom blur transform for each tile with its own delay
                                                 const tileBlur = useTransform(
@@ -198,7 +198,7 @@ export default function ParallaxExpanf() {
                                                     if (latest > 0.95) return true;
                                                     return false;
                                                 });
-                                                
+
                                                 return (
                                                     <motion.div
                                                         key={tile.id}
@@ -210,14 +210,14 @@ export default function ParallaxExpanf() {
                                                             transform: 'translateZ(0)',
                                                         }}
                                                     >
-                                                        <div 
+                                                        <div
                                                             className="pixelated__image__wrapper"
                                                             style={{
                                                                 width: '100%',
                                                                 height: '100%',
                                                             }}
                                                         >
-                                                            <div 
+                                                            <div
                                                                 className="pixelated__image__container"
                                                                 style={{
                                                                     width: `${columns * 100}%`,
@@ -260,16 +260,16 @@ export default function ParallaxExpanf() {
                                 return (
                                     <motion.div key={index} style={{ scale }} className="image__wrapper">
                                         <div className="image__container">
-                                            <Image 
-                                                src={src} 
-                                                alt="image" 
-                                                fill={true} 
+                                            <Image
+                                                src={src}
+                                                alt="image"
+                                                fill={true}
                                                 sizes="50vw"
                                                 quality={100}
                                                 priority={false}
-                                                placeholder="blur" 
+                                                placeholder="blur"
                                                 blurDataURL="data:image/webp"
-                                                style={{ zIndex: `${index}`}}
+                                                style={{ zIndex: `${index}` }}
                                             />
                                             <div
                                                 style={{
@@ -288,13 +288,13 @@ export default function ParallaxExpanf() {
                             }
                         })
                     }
-                    
+
                     {/* Integrated IntroCollage */}
                     <div className="IntroCollage">
-                        <div className="sticky">                        
+                        <div className="sticky">
                             <div className="text__wrapper">
                                 <motion.div className="text__container">
-                                    <motion.p 
+                                    <motion.p
                                         className="filled-text"
                                         style={{
                                             x,
@@ -310,7 +310,7 @@ export default function ParallaxExpanf() {
                     </div>
                 </div>
                 <Collage />
-                <div 
+                <div
                     className="ParallaxExpand__section__text"
                     style={
                         {

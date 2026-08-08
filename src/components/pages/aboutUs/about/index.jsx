@@ -1,16 +1,16 @@
 import Image from "next/image";
 import { AnimatePresence, motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
 import { useEffect, useMemo, useRef, useState } from "react";
-import RotatingButton from "@/components/ui/stickyButtons/buttons/RotatingButton";
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton";
-import MainText from "@/components/anim/MainText";
-import SubText from "@/components/anim/SubText";
+import RotatingButton from "@/components/common/ui/stickyButtons/buttons/RotatingButton";
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton";
+import MainText from "@/components/common/TextAnim/MainText";
+import SubText from "@/components/common/TextAnim/SubText";
 import Grid from "@/components/common/grid";
 import PixelateText from "../../index/main/neonText";
 import { useGlobalContext } from "@/context/LoadProvider";
-import Magnetic from "@/components/anim/Magnetic";
+import Magnetic from "@/components/common/Magnetic";
 import Link from "next/link";
-import SVGButton from "@/components/ui/stickyButtons/buttons/SvgButton";
+import SVGButton from "@/components/common/ui/stickyButtons/buttons/SvgButton";
 import { trackEvent } from "@/hooks/trackEvent";
 
 
@@ -22,9 +22,9 @@ const draw = {
             pathLength: 1.1,
             opacity: 1,
             transition: {
-                ease: [ 0.76, 0, 0.24, 1 ],
-                pathLength: {delay, duration: 1.5, type: 'spring', bounce: 0},
-                opacity: {delay, duration: i * 0.5},
+                ease: [0.76, 0, 0.24, 1],
+                pathLength: { delay, duration: 1.5, type: 'spring', bounce: 0 },
+                opacity: { delay, duration: i * 0.5 },
             }
         }
     },
@@ -38,9 +38,9 @@ const textDrawAnim = {
             opacity: 1,
             y: 0,
             transition: {
-                ease: [ 0.76, 0, 0.24, 1 ],
-                opacity: {delay, duration: i * 0.75},
-                y: {delay, duration: i * 0.5},
+                ease: [0.76, 0, 0.24, 1],
+                opacity: { delay, duration: i * 0.75 },
+                y: { delay, duration: i * 0.5 },
             }
         }
     },
@@ -70,7 +70,7 @@ const values = [
     }
 ]
 
-export default function AboutInto( ){
+export default function AboutInto() {
     const { firstLoad } = useGlobalContext();
     const introRef = useRef(null);
     const headingRef = useRef(null);
@@ -78,17 +78,17 @@ export default function AboutInto( ){
     const mainContentRef = useRef(null);
     const parallaxRef = useRef(null);
 
-    const [ open, setOpen ] = useState(false);
-    
+    const [open, setOpen] = useState(false);
+
     const [dimensions, setDimensions] = useState({
         width: 0,
         height: 0
     });
 
-      // Add parallax effect
+    // Add parallax effect
     const { scrollYProgress: parallaxMainScroll } = useScroll({
         target: parallaxRef,
-        offset: ["start start", "end start"]  
+        offset: ["start start", "end start"]
     });
 
     const smoothYScroll = useSpring(parallaxMainScroll, {
@@ -96,14 +96,14 @@ export default function AboutInto( ){
         damping: 20,
         restDelta: 0.001
     })
-    
+
     // Transform values for parallax effect (subtle movement)
     const yPos = useTransform(smoothYScroll, [0, 1], ["0%", "10%"]);
     const scale = useTransform(smoothYScroll, [0, 1], [1.05, 1]);
 
     const { scrollYProgress } = useScroll({
         target: mainContentRef,
-        offset: [ 'start end', 'end end']
+        offset: ['start end', 'end end']
     })
     const rotation = useMemo(() => [0, 120, 240], []);
     useEffect(() => {
@@ -113,7 +113,7 @@ export default function AboutInto( ){
                 height: window.innerHeight
             });
         };
-        
+
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -123,49 +123,49 @@ export default function AboutInto( ){
 
     const imageAnimX = useTransform(
         scrollYProgress,
-        [0, 0.35, 0.45 , 0.55, 0.65, 1],
-        isPortrait ? ["-50%", "-50%", "-50%", "-50%", "-350%", "-350%"] : 
-        ["-50%", "-50%", "-100%", "-100%", "-350%", "-350%"]
+        [0, 0.35, 0.45, 0.55, 0.65, 1],
+        isPortrait ? ["-50%", "-50%", "-50%", "-50%", "-350%", "-350%"] :
+            ["-50%", "-50%", "-100%", "-100%", "-350%", "-350%"]
     )
     const imageAnimScale = useTransform(
         scrollYProgress,
-        [0, 0.35, 0.45 , 0.55, 0.65, 1],
+        [0, 0.35, 0.45, 0.55, 0.65, 1],
         isPortrait ? [1, 1, 1.15, 1.15, 1.15, 1.15] : [1, 1, 1.25, 1.25, 1.25, 1.25]
     )
     const imageAnimY = useTransform(
         scrollYProgress,
-        [0, 0.35, 0.45 , 0.55, 0.65, 1],
-        isPortrait ? ["35%", "35%", "75%", "75%", "75%", "75%"] : 
-        ["35%", "35%", "35%", "35%", "35%", "35%"]
+        [0, 0.35, 0.45, 0.55, 0.65, 1],
+        isPortrait ? ["35%", "35%", "75%", "75%", "75%", "75%"] :
+            ["35%", "35%", "35%", "35%", "35%", "35%"]
     )
 
     const sectionX = useTransform(
         scrollYProgress,
-        [ 0.55, 1],
-        isPortrait ? ["5%", "0%"] : ["50%", "0%"] 
+        [0.55, 1],
+        isPortrait ? ["5%", "0%"] : ["50%", "0%"]
     )
     const sectionOpacity1 = useTransform(
         scrollYProgress,
-        [ 0, 0.55, 1],
-        [ 1, 1, 0] 
+        [0, 0.55, 1],
+        [1, 1, 0]
     )
 
     const sectionOpacity2 = useTransform(
         scrollYProgress,
-        [ 0.65, 1],
-        [ 0, 1] 
+        [0.65, 1],
+        [0, 1]
     )
 
     const buttonOpacity2 = useTransform(
         scrollYProgress,
-        dimensions.width <= 740 
+        dimensions.width <= 740
             ? [0.1, 0.45]  // Mobile breakpoints
             : [0.65, 1],    // Desktop breakpoints
         [1, 0]             // Opacity values
     )
     const buttonscale2 = useTransform(
         scrollYProgress,
-        dimensions.width <= 740 
+        dimensions.width <= 740
             ? [0.1, 0.45]  // Mobile breakpoints
             : [0.65, 1],    // Desktop breakpoints
         [1, 0]             // Opacity values
@@ -183,7 +183,7 @@ export default function AboutInto( ){
             transition: {
                 delay: firstLoad ? 4.5 : 0.5,
                 duration: 1,
-                ease: [ 0.76, 0, 0.24, 1],
+                ease: [0.76, 0, 0.24, 1],
             }
         }
     }
@@ -197,7 +197,7 @@ export default function AboutInto( ){
             transition: {
                 delay: 0.5,
                 duration: 1,
-                ease: [ 0.76, 0, 0.24, 1],
+                ease: [0.76, 0, 0.24, 1],
             }
         }
     }
@@ -224,8 +224,8 @@ export default function AboutInto( ){
             page_section: "about_intro"
         });
     };
-    
-    return(
+
+    return (
         <section className="About" ref={introRef}>
             <AnimatePresence mode="wait">
                 {open && (
@@ -239,7 +239,7 @@ export default function AboutInto( ){
                 onClick={handleCareerInterestClick}
             >
                 {/* add here teh same reposnive design as in main intro */}
-                <RoundButton href='/kontakt' text='Zájem o pozici?' disableLink={false}/>
+                <RoundButton href='/kontakt' text='Zájem o pozici?' disableLink={false} />
             </motion.div>
             <div className="header">
                 <Magnetic sensitivity={0.05}>
@@ -248,7 +248,7 @@ export default function AboutInto( ){
                     </Link>
                 </Magnetic>
             </div>
-            <motion.div 
+            <motion.div
                 className="button__container"
                 initial='initial'
                 animate='enter'
@@ -262,7 +262,7 @@ export default function AboutInto( ){
                 onClick={handleInsuranceReportingClick}
             >
                 <Link href="https://www.pojistnehlaseni.cz/">
-                    <RotatingButton text=" - Nahlášení Pojistného - Nahlášení Pojistného"/>
+                    <RotatingButton text=" - Nahlášení Pojistného - Nahlášení Pojistného" />
                 </Link>
             </motion.div>
             <motion.section className="AboutInto"
@@ -276,8 +276,8 @@ export default function AboutInto( ){
                 }}
             >
                 <div className="AboutInto__wrapper">
-                    <Grid size="20vh" key={"AboutInto__wrapper"}/>
-                    <div className="cover"/>
+                    <Grid size="20vh" key={"AboutInto__wrapper"} />
+                    <div className="cover" />
                     <motion.div className="background"
                         style={{
                             y: yPos,
@@ -285,9 +285,9 @@ export default function AboutInto( ){
                         }}
                     >
                         {/* Background image with blur effect */}
-                        <Image 
-                            src='/assets/backgrounds/logoBannerBG.webp' 
-                            alt="background-photo" 
+                        <Image
+                            src='/assets/backgrounds/logoBannerBG.webp'
+                            alt="background-photo"
                             fill={true}
                             sizes="100vw"
                             priority={true}
@@ -298,14 +298,14 @@ export default function AboutInto( ){
                     </motion.div>
                     <div className="mainHeader" ref={headingRef}>
                         <h1>
-                            <PixelateText 
-                                text="JSME TU PRO VÁS UŽ PŘES" 
+                            <PixelateText
+                                text="JSME TU PRO VÁS UŽ PŘES"
                                 isInView={isInView}
-                                firstLoad={firstLoad} 
+                                firstLoad={firstLoad}
                             />
                             <span className="highlighted">
-                                <PixelateText 
-                                    text="JEDNU DEKÁDU" 
+                                <PixelateText
+                                    text="JEDNU DEKÁDU"
                                     isInView={isInView}
                                     firstLoad={firstLoad}
                                 />
@@ -319,9 +319,9 @@ export default function AboutInto( ){
                             y: imageAnimY
                         }}
                     >
-                        <Image  
-                            src='/assets/backgrounds/about.webp' 
-                            alt="team_photo" 
+                        <Image
+                            src='/assets/backgrounds/about.webp'
+                            alt="team_photo"
                             fill={true}
                             sizes="50vw"
                             priority={true}
@@ -329,7 +329,7 @@ export default function AboutInto( ){
                             placeholder="blur"
                             blurDataURL="data:image/webp"
                         />
-                        <div 
+                        <div
                             style={{
                                 position: "absolute",
                                 top: "50%",
@@ -345,7 +345,7 @@ export default function AboutInto( ){
                                 cursor: "pointer"
                             }}
                         >
-                           <Magnetic sensitivity={0.05}>
+                            <Magnetic sensitivity={0.05}>
                                 <div
                                     onClick={() => setOpen(true)}
                                     style={{
@@ -356,23 +356,23 @@ export default function AboutInto( ){
                                         alignItems: "center",
                                         cursor: "pointer"
                                     }}
-                            >
-                                    <Image 
+                                >
+                                    <Image
                                         src="/assets/svg/playbutton.svg"
                                         alt="play_button"
                                         width={100}
                                         height={100}
                                         priority={true}
                                     />
-                            </div>
-                           </Magnetic>
+                                </div>
+                            </Magnetic>
                         </div>
                     </motion.div>
                 </div>
             </motion.section>
             <div className="AboutUs" ref={mainContentRef}>
                 <div className="AboutUs__Sticky">
-                    <Grid size="20vh" key={"AboutUs__Sticky"}/>
+                    <Grid size="20vh" key={"AboutUs__Sticky"} />
                     <motion.div className="AboutUs__Sticky__content"
                         style={{
                             x: sectionX
@@ -388,20 +388,20 @@ export default function AboutInto( ){
                                     <div className="Header">
                                         <div className="Header__container">
                                             <h2>ξ</h2>
-                                            <p>13 let praxe, individuální přístup a výsledky</p>    
+                                            <p>13 let praxe, individuální přístup a výsledky</p>
                                         </div>
-                                        <div className="devider"/>
+                                        <div className="devider" />
                                     </div>
                                     <div className="MainText">
-                                        <MainText initialColor={'#fff'} text="Založil jsem tým, který dnes tvoří 10 schopných lidí - a všichni sdílíme stejnou vizi."/>
-                                        <div className="devider"/>
+                                        <MainText initialColor={'#fff'} text="Založil jsem tým, který dnes tvoří 10 schopných lidí - a všichni sdílíme stejnou vizi." />
+                                        <div className="devider" />
                                     </div>
                                     <div className="subText">
                                         <div className="subText__text">
-                                            <SubText text={'Našim klientům šetříme čas, starosti a hlavně peníze. <br/> Ať už jde o řešení bydlení, pojištění <br/> nebo vytváření rezerv – vše stavíme na zkušenostech, <br/> které jsme roky sbírali v praxi.'}/>
+                                            <SubText text={'Našim klientům šetříme čas, starosti a hlavně peníze. <br/> Ať už jde o řešení bydlení, pojištění <br/> nebo vytváření rezerv – vše stavíme na zkušenostech, <br/> které jsme roky sbírali v praxi.'} />
                                         </div>
-                                        
-                                        <div className="devider"/>
+
+                                        <div className="devider" />
                                     </div>
                                 </motion.div>
                                 <motion.div className="AboutUs__Sticky__content__2"
@@ -412,9 +412,9 @@ export default function AboutInto( ){
                                     <div className="Header">
                                         <div className="Header__container">
                                             <h2>ξ</h2>
-                                            <p>Tým, který roste s klienty i spolupracovníky</p>    
+                                            <p>Tým, který roste s klienty i spolupracovníky</p>
                                         </div>
-                                        <div className="devider"/>
+                                        <div className="devider" />
                                     </div>
                                     <div className="subText1">
                                         <div className="subText__text">
@@ -424,26 +424,26 @@ export default function AboutInto( ){
                                         </div>
                                     </div>
                                     <div className="MainText">
-                                        <div  className="devider"/>
+                                        <div className="devider" />
                                         <p>Těší mě, když vidím jak si mí spolupracovníci plní své cíle a jdou směrem k finanční nezávislosti.
                                         </p>
-                                        <div className="devider"/>
+                                        <div className="devider" />
                                     </div>
                                     <div className="subText2">
                                         <div className="subText__text">
                                             <p>
-                                                Nezávislost nám umožňuje vybírat produkty podle potřeb klienta. Nejsme vázáni na banky či pojišťovny — pracujeme výhradně pro lidi. 
+                                                Nezávislost nám umožňuje vybírat produkty podle potřeb klienta. Nejsme vázáni na banky či pojišťovny — pracujeme výhradně pro lidi.
                                             </p>
                                         </div>
                                     </div>
                                 </motion.div>
                             </div>
                         </div>
-                        <motion.div className="AboutUs__Sticky__content__values" style={{ opacity: isPortrait ? sectionOpacity2 : 1}}>
+                        <motion.div className="AboutUs__Sticky__content__values" style={{ opacity: isPortrait ? sectionOpacity2 : 1 }}>
                             <div className="Header">
                                 <div className="Header__container">
                                     <h2>01</h2>
-                                    <p>Máme nediskutabilní hodnoty <br /> a pevné zásady</p>    
+                                    <p>Máme nediskutabilní hodnoty <br /> a pevné zásady</p>
                                 </div>
                             </div>
                             <div className="Values__container">
@@ -499,10 +499,10 @@ export default function AboutInto( ){
                                 </div>
                                 <div className="svg__fillc__Ccontainer">
                                     {[0, 1, 2].map((index) => (
-                                        <motion.svg 
+                                        <motion.svg
                                             key={`circle-${index}`}
-                                            viewBox="0 0 100 100" 
-                                            initial='initial' 
+                                            viewBox="0 0 100 100"
+                                            initial='initial'
                                             whileInView='animate'
                                             style={{
                                                 transform: `rotate(${rotation[index]}deg)`,
@@ -510,7 +510,7 @@ export default function AboutInto( ){
                                             }}
                                         >
                                             <motion.path
-                                                variants={draw} 
+                                                variants={draw}
                                                 custom={index + 1}
                                                 d={circlePath}
                                                 fill="none"
@@ -521,12 +521,12 @@ export default function AboutInto( ){
                                 </div>
                             </div>
                         </motion.div>
-                        
+
                     </motion.div>
                 </div>
             </div>
         </section>
-        
+
     )
 }
 
@@ -580,7 +580,7 @@ const VideoModem = ({ setOpen }) => {
     }, []);
 
     return (
-        <motion.div 
+        <motion.div
             className="video__container"
             initial='initial'
             animate='enter'
@@ -613,11 +613,11 @@ const VideoModem = ({ setOpen }) => {
                     justifyContent: "center",
                 }}
             >
-                <video 
-                    src="/assets/video/kancl.mp4" 
+                <video
+                    src="/assets/video/kancl.mp4"
                     ref={videoRef}
-                    autoPlay 
-                    loop  
+                    autoPlay
+                    loop
                     playsInline
                     style={{
                         width: "100%",
@@ -639,7 +639,7 @@ const VideoModem = ({ setOpen }) => {
                                 width: "25vw",
                                 height: "25vw",
                             }}
-                            
+
                             onClick={handlePausePlay}
 
                             initial={{ opacity: 0 }}
@@ -650,7 +650,7 @@ const VideoModem = ({ setOpen }) => {
                                 ease: [0.76, 0, 0.24, 1],
                             }}
                         >
-                            <Image 
+                            <Image
                                 src="/assets/svg/playbutton.svg"
                                 alt="play_button"
                                 width={100}
@@ -669,8 +669,8 @@ const VideoModem = ({ setOpen }) => {
                         zIndex: 1001,
                     }}
                 >
-                    <SVGButton 
-                        src="/assets/svg/exit.svg" 
+                    <SVGButton
+                        src="/assets/svg/exit.svg"
                         altText="exit_button"
                         onClick={() => setOpen(false)}
                     />

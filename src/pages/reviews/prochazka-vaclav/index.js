@@ -1,18 +1,17 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import { useFetchDatabase } from "@/hooks/useFetchDatabase"
 import { useEffect, useState } from "react"
-import { 
-    FaFacebookF, 
-    FaInstagram, 
+import {
+    FaFacebookF,
+    FaInstagram,
     FaEnvelope
 } from 'react-icons/fa';
 import ContactIntro from "@/components/pages/personReviews/contact"
 
 export default function PersonFeebackPage1() {
 
-    const {fetchClovek} = useFetchDatabase()
+    const { fetchClovek } = useFetchDatabase()
 
     const [personData, setPersonData] = useState({
         name: 'Václav Procházka',
@@ -22,10 +21,10 @@ export default function PersonFeebackPage1() {
     })
 
     const icons = [
-        { name: "mail", src: FaEnvelope, href: "mailto:vaclav.prochazka2@ovbmail.cz"},
+        { name: "mail", src: FaEnvelope, href: "mailto:vaclav.prochazka2@ovbmail.cz" },
         { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/vaclav.prochazka.5?locale=cs_CZ" },
         { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/prochazka_vaclav?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
-    //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
+        //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
     ]
 
 
@@ -53,8 +52,8 @@ export default function PersonFeebackPage1() {
     }, [fetchClovek])
 
 
-    
-    return(
+
+    return (
         <>
             <Head>
                 <title>{`${personData.name} | Vedoucí kanceláře | Procházka Group`}</title>
@@ -120,10 +119,8 @@ export default function PersonFeebackPage1() {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Cursor />
-                <Navbar />
-                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp}/>
+            <main lang="cs" key="person-page">
+                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp} />
             </main>
         </>
     )

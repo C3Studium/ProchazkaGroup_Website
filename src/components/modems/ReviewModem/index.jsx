@@ -1,7 +1,7 @@
 
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton"
-import SVGButton from "@/components/ui/stickyButtons/buttons/SvgButton"
-import { people as staticPeople} from "@/constants/people"
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton"
+import SVGButton from "@/components/common/ui/stickyButtons/buttons/SvgButton"
+import { people as staticPeople } from "@/constants/people"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
 import { useEffect, useState } from "react"
@@ -34,9 +34,9 @@ const modemAnim = {
 
 
 
-export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
+export default function ReviewModem({ isOpen, setIsOpen, onSubmitted }) {
     const [menuOpen, setMenuOpen] = useState(false)
-    const [ currentIndex, setCurrentIndex ] = useState(0)
+    const [currentIndex, setCurrentIndex] = useState(0)
     const [previewIndex, setPreviewIndex] = useState(null)
     const [peopleData, setPeopleData] = useState(staticPeople) // Přidáno
 
@@ -52,11 +52,11 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
         handleSubmit: handleReviewSubmit
     } = useReviewForm()
 
-    
-    const {fetchPeople} = useFetchDatabase()
+
+    const { fetchPeople } = useFetchDatabase()
 
     // Set default person on mount
-        useEffect(() => {
+    useEffect(() => {
         const loadPeopleData = async () => {
             try {
                 // Try to fetch from the database first
@@ -114,9 +114,9 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
 
     const handleSubmit = async (e) => {
         e?.preventDefault()
-        
+
         const result = await handleReviewSubmit()
-        
+
         if (result.success) {
             // Track successful review submission with enhanced data
             trackEvent("review_submitted_successfully", {
@@ -161,7 +161,7 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                 timestamp: new Date().toISOString()
             });
         }
-        
+
         toast({
             title: result.success ? "Úspěch!" : "Chyba!",
             description: result.message,
@@ -191,17 +191,17 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
         }
     }
 
-    return(
-        <motion.section 
+    return (
+        <motion.section
             className="ReviewModem"
-            initial={{ x: "100%", opacity: 0}}
+            initial={{ x: "100%", opacity: 0 }}
             animate="open"
             exit="closed"
             variants={modemAnim}
         >
-            <Grid size="20vh" key={"ReviewsModem"}/>
+            <Grid size="20vh" key={"ReviewsModem"} />
             <div className="button" onClick={() => setIsOpen(!isOpen)}>
-                <SVGButton src='/assets/svg/exit.svg' altText='close_icon'/>
+                <SVGButton src='/assets/svg/exit.svg' altText='close_icon' />
                 <p>Zrušit</p>
             </div>
 
@@ -210,7 +210,7 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                     <div className="Personal__container">
                         <div className="ImageConatiner">
                             <AnimatePresence mode="wait">
-                                <motion.div 
+                                <motion.div
                                     key={activeIndex}
                                     className="image"
                                     initial={{ opacity: 0, x: -100 }}
@@ -218,9 +218,9 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                     exit={{ opacity: 0, x: -100 }}
                                     transition={{ duration: 0.2 }}
                                 >
-                                    <Image 
-                                        src={peopleData[activeIndex].src} 
-                                        alt={peopleData[activeIndex].alt} 
+                                    <Image
+                                        src={peopleData[activeIndex].src}
+                                        alt={peopleData[activeIndex].alt}
                                         fill={true}
                                         sizes="50vw"
                                         quality={100}
@@ -235,7 +235,7 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
 
                         <div className="Info__container">
                             <div className="moto">
-                                
+
                                 <div className="moto__text">
                                     <AnimatePresence mode="wait">
                                         <motion.p
@@ -250,7 +250,7 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                 </div>
 
                                 <div className="moto__name">
-                                    <div className="devider"/>
+                                    <div className="devider" />
                                     <AnimatePresence mode="wait">
                                         <motion.p
                                             key={activeIndex}
@@ -264,58 +264,58 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                 </div>
                                 <div className="stats">
                                     <AnimatePresence mode="wait">
-                                        <motion.div 
+                                        <motion.div
                                             key={activeIndex}
                                             className="ThumsUp"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            transition={{ 
+                                            transition={{
                                                 duration: 0.2,
                                                 delay: 0.1
                                             }}
                                         >
                                             <p>{peopleData[activeIndex].likes}</p>
-                                            <Image  
-                                                src='/assets/svg/thumbsup_w.svg' 
-                                                alt="thumbsUp_icon" 
-                                                width={35} 
-                                                height={35} 
-                                                style={{ paddingBottom: 5}}
+                                            <Image
+                                                src='/assets/svg/thumbsup_w.svg'
+                                                alt="thumbsUp_icon"
+                                                width={35}
+                                                height={35}
+                                                style={{ paddingBottom: 5 }}
                                                 priority={false}
                                                 loading="lazy"
                                                 quality={60}
                                                 placeholder="blur"
                                                 blurDataURL="data:image/svg"
-                                            /> 
+                                            />
                                         </motion.div>
                                     </AnimatePresence>
 
                                     <AnimatePresence mode="wait">
-                                        <motion.div 
+                                        <motion.div
                                             key={activeIndex}
                                             className="Comments"
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
                                             exit={{ opacity: 0 }}
-                                            transition={{ 
+                                            transition={{
                                                 duration: 0.2,
                                                 delay: 0.15
                                             }}
                                         >
                                             <p>{peopleData[activeIndex].reviews}</p>
-                                            <Image  
-                                                src='/assets/svg/comment_w.svg' 
-                                                alt="reviews__icon" 
-                                                width={35} 
-                                                height={35} 
-                                                style={{ paddingBottom: 5}}
+                                            <Image
+                                                src='/assets/svg/comment_w.svg'
+                                                alt="reviews__icon"
+                                                width={35}
+                                                height={35}
+                                                style={{ paddingBottom: 5 }}
                                                 priority={false}
                                                 loading="lazy"
                                                 quality={60}
                                                 placeholder="blur"
                                                 blurDataURL="data:image/svg"
-                                            /> 
+                                            />
                                         </motion.div>
                                     </AnimatePresence>
                                 </div>
@@ -329,12 +329,12 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                 <div className="form">
                     <div className="form__inputs">
                         <div className="input__container">
-                            <div className="form__devider"/>
+                            <div className="form__devider" />
                             <div className="input__container">
                                 <h3>Δ</h3>
                                 <label>Jméno:</label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={formData.customerName}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
@@ -344,14 +344,14 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="input__container">
-                            <div className="form__devider"/>
+                            <div className="form__devider" />
                             <div className="input__container">
                                 <h3>ε</h3>
                                 <label>Email:</label>
-                                <input 
-                                    type="email" 
+                                <input
+                                    type="email"
                                     value={formData.email}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
@@ -361,9 +361,9 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                 />
                             </div>
                         </div>
-                        
+
                         <div className="person__selection">
-                            <div className="form__devider"/>
+                            <div className="form__devider" />
                             <div className="input__container__wrapper">
                                 <div className="header__input">
                                     <div className="index">
@@ -373,13 +373,13 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                 </div>
                                 <div className="person__container">
                                     <AnimatePresence mode="wait">
-                                        <motion.div 
-                                            key={activeIndex} 
+                                        <motion.div
+                                            key={activeIndex}
                                             className="name"
                                             initial={{ opacity: 0, y: -20 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: -20 }}
-                                            transition={{ 
+                                            transition={{
                                                 duration: 0.2,
                                                 ease: "easeInOut"
                                             }}
@@ -388,7 +388,7 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                         </motion.div>
                                     </AnimatePresence>
                                 </div>
-                                
+
                                 <div className="buttons">
                                     <motion.button
                                         whileTap={{ scale: 0.97 }}
@@ -405,18 +405,18 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                             transition={{ duration: 0.2 }}
                                             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                         >
-                                            <Image 
-                                                src='/assets/svg/arrowup_w.svg' 
-                                                alt="arrow" 
-                                                width={30} 
-                                                height={30} 
+                                            <Image
+                                                src='/assets/svg/arrowup_w.svg'
+                                                alt="arrow"
+                                                width={30}
+                                                height={30}
                                                 priority={false}
                                                 loading="lazy"
                                                 quality={60}
                                             />
                                         </motion.div>
                                     </motion.button>
-                    
+
                                     <ChooseBar
                                         people={peopleData}
                                         isOpen={menuOpen}
@@ -437,13 +437,13 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                                 </div>
                             </div>
                         </div>
-                
+
                         <div className="input__container">
-                            <div className="form__devider"/>
+                            <div className="form__devider" />
                             <div className="input__container">
                                 <h3>λ</h3>
                                 <label>Váš Názor:</label>
-                                <textarea 
+                                <textarea
                                     value={formData.message}
                                     onChange={(e) => setFormData(prev => ({
                                         ...prev,
@@ -454,7 +454,7 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                             </div>
                         </div>
                         <div className="input__container">
-                            <div className="form__devider"/>
+                            <div className="form__devider" />
                             <div className="text__container">
                                 <p>Klinutím na “poslat žádost” souhlasíte se zpracováním vašich osobních údajů</p>
                             </div>
@@ -463,14 +463,14 @@ export default function ReviewModem ({ isOpen, setIsOpen, onSubmitted}) {
                 </div>
                 <div className="cta">
                     <div className="button">
-                        <RoundButton 
-                            href='' 
-                            text={loading ? 'Odesílám...' : 'Poslat Recenzi'} 
+                        <RoundButton
+                            href=''
+                            text={loading ? 'Odesílám...' : 'Poslat Recenzi'}
                             disableLink={true}
                             onClick={handleSubmit}
                         />
                     </div>
-                    <div className="devider"/>
+                    <div className="devider" />
                 </div>
             </div>
         </motion.section>

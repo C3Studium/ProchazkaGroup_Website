@@ -1,5 +1,5 @@
-import MainText from "@/components/anim/MainText";
-import SubText from "@/components/anim/SubText";
+import MainText from "@/components/common/TextAnim/MainText";
+import SubText from "@/components/common/TextAnim/SubText";
 import Grid from "@/components/common/grid";
 import { Benefitreviews, ReviewsCards } from "@/constants/benefitpage";
 import { AnimatePresence, motion } from "framer-motion";
@@ -11,27 +11,27 @@ export default function Reviews() {
     const [batchSize, setBatchSize] = useState(3); // Default to 3
     const [reviews, setReviews] = useState([]); // Store database reviews
     const [loading, setLoading] = useState(true);
-    
+
     const { fetchReviews } = useFetchDatabase();
     const container = useRef(null);
-    
+
     // Fetch reviews from database
     useEffect(() => {
         const loadBenefitReviews = async () => {
             if (typeof window === 'undefined') return; // SSR safety
-            
+
             try {
                 const data = await fetchReviews();
                 if (data) {
                     // Filter only Benefit Program reviews
-                    const benefitReviews = data.filter(review => 
-                        review.hashtag === 'benefitprogram' || 
+                    const benefitReviews = data.filter(review =>
+                        review.hashtag === 'benefitprogram' ||
                         review.consultant_name === 'Benefit Program'
                     );
-                    
+
                     // Sort by number
                     benefitReviews.sort((a, b) => a.number - b.number);
-                    
+
                     setReviews(benefitReviews);
                 }
             } catch (error) {
@@ -42,29 +42,29 @@ export default function Reviews() {
                 setLoading(false);
             }
         };
-        
+
         loadBenefitReviews();
     }, [fetchReviews]);
-    
+
     // Use database reviews if available, otherwise fallback to static
     const reviewsToShow = reviews.length > 0 ? reviews : Benefitreviews;
     const totalBatches = Math.ceil(reviewsToShow.length / batchSize);
-    
+
     useEffect(() => {
         const handleResize = () => {
             const width = window.innerWidth;
             const height = window.innerHeight;
-    
+
             // Update batchSize based on dimensions
             setBatchSize(
                 width <= 600
                     ? 1  // Show 1 review for mobile
-                    : width >= 700 && width <= 990 && height >= 950 
+                    : width >= 700 && width <= 990 && height >= 950
                         ? 2  // Show 2 reviews for tablet portrait
                         : 3  // Default 3 reviews
             );
         };
-        
+
         handleResize();
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
@@ -129,18 +129,18 @@ export default function Reviews() {
         const start = currentBatch * batchSize;
         return reviewsToShow.slice(start, start + batchSize);
     };
-    
+
     // Show loading state
     if (loading) {
         return (
             <div className="Reviews">
-                <Grid size="20vh"/> 
+                <Grid size="20vh" />
                 <div className="Reviews__wrapper">
                     <div className="reviews__wrapper">
                         <div className="reviews__Header">
-                            <MainText 
-                                text={"NAČÍTÁNÍ RECENZÍ..."} 
-                                className="mainText__container" 
+                            <MainText
+                                text={"NAČÍTÁNÍ RECENZÍ..."}
+                                className="mainText__container"
                                 initialColor="#050A10"
                             />
                         </div>
@@ -149,27 +149,27 @@ export default function Reviews() {
             </div>
         );
     }
-    
-    return(
+
+    return (
         <div className="Reviews" ref={container}>
-            <Grid size="20vh"/> 
+            <Grid size="20vh" />
             <div className="Reviews__wrapper">
                 <div className="reviews__wrapper">
                     <div className="reviews__Header">
-                        <MainText 
-                            text={"PŘEČTETE SI CO NA PROGRAM ŘÍKAJÍ NAŠI DALŠÍ KLIENTI JAKO VY."} 
-                            className="mainText__container" 
+                        <MainText
+                            text={"PŘEČTETE SI CO NA PROGRAM ŘÍKAJÍ NAŠI DALŠÍ KLIENTI JAKO VY."}
+                            className="mainText__container"
                             initialColor="#050A10"
                         />
-                        <SubText 
-                            text={"NEBO JEŠTĚ NEJSTE KLIENTEM? TO CHCE NAPRAVIT!"} 
-                            className="subText__container" 
+                        <SubText
+                            text={"NEBO JEŠTĚ NEJSTE KLIENTEM? TO CHCE NAPRAVIT!"}
+                            className="subText__container"
                             initialColor="#050A10"
                         />
                     </div>
-                    
+
                     <AnimatePresence mode="wait">
-                        <motion.div 
+                        <motion.div
                             key={currentBatch}
                             className="reviews__container"
                             variants={containerVariants}
@@ -178,7 +178,7 @@ export default function Reviews() {
                             exit="exit"
                         >
                             {getCurrentBatch().map((review, index) => (
-                                <motion.div 
+                                <motion.div
                                     className="review"
                                     key={`${currentBatch}-${review.number || review.id || index}`}
                                     variants={reviewVariants}

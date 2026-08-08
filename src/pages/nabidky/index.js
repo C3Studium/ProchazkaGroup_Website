@@ -1,6 +1,4 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
 import Footer from "@/components/common/footer"
 import ClipPathPage from "@/components/pages/offers/ClipPathPage"
 
@@ -74,9 +72,7 @@ export default function PrilezitostiPage() {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Navbar />
-                <Cursor />
+            <main lang="cs" key="offers-page">
                 <ClipPathPage />
                 <Footer />
             </main>

@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion, useInView, useScroll, useSpring, useTransform } from 'framer-motion';
 import { CookiesSections } from "@/constants/cookiesTerms";
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton";
-import CookiesModem from "@/components/modems/CookiesModem";
-import Magnetic from "@/components/anim/Magnetic";
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton";
+import CookiesModem from "@/components/modems/Cookies";
+import Magnetic from "@/components/common/Magnetic";
 import Link from "next/link";
 import PixelateText from "../../index/main/neonText";
 import { useGlobalContext } from "@/context/LoadProvider";
@@ -16,9 +16,9 @@ export default function CookiesContent() {
     const isInView = useInView(headingRef, { once: true });
     const [activeSection, setActiveSection] = useState(null);
     const sectionRefs = useRef([]);
-    const [ isOpen, setIsOpen ] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
 
-    
+
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -88,7 +88,7 @@ export default function CookiesContent() {
 
     return (
         <section className="CookiesContent">
-            <Grid size="20vh"/>
+            <Grid size="20vh" />
             <div className="header">
                 <Magnetic sensitivity={0.05}>
                     <Link href="/">
@@ -97,7 +97,7 @@ export default function CookiesContent() {
                 </Magnetic>
             </div>
             <div className="devider"></div>
-            <motion.div 
+            <motion.div
                 className="cover"
                 initial="initial"
                 animate="enter"
@@ -108,19 +108,19 @@ export default function CookiesContent() {
                     willChange: "transform, opacity"
                 }}
             >
-                <Grid size="20vh"/>
+                <Grid size="20vh" />
                 <div className="cover__header" ref={headingRef}>
                     <motion.p style={{ y: headerY }}>
                         <span>
-                            <PixelateText 
-                                text="CO JSOU COOKIES" 
+                            <PixelateText
+                                text="CO JSOU COOKIES"
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
                         </span>
                         <span>
-                            <PixelateText 
-                                text="A JAK JE POUŽÍVÁME." 
+                            <PixelateText
+                                text="A JAK JE POUŽÍVÁME."
                                 isInView={isInView}
                                 firstLoad={firstLoad}
                             />
@@ -133,7 +133,7 @@ export default function CookiesContent() {
                     </h3>
                     <p>
                         <PixelateText
-                            text="Zde si můžete nastavit, ke kterým budeme mít přístup." 
+                            text="Zde si můžete nastavit, ke kterým budeme mít přístup."
                             isInView={isInView}
                             firstLoad={firstLoad}
                         />
@@ -160,7 +160,7 @@ export default function CookiesContent() {
                                             e.preventDefault();
                                             handleLinkClick(section.id);
                                         }}
-                                        animate={{ 
+                                        animate={{
                                             opacity: activeSection === section.id ? 1 : 0.6,
                                             fontWeight: activeSection === section.id ? "500" : "300",
                                             color: activeSection === section.id ? "#4bdadc" : "#050A10"
@@ -187,12 +187,12 @@ export default function CookiesContent() {
             <div className="Cookies__Button">
                 <p>Chcete si přenastavit vaše cookies?</p>
                 <div onClick={() => setIsOpen(!isOpen)}>
-                    <RoundButton href='/' text='Nastavit' disableLink={true}/>
+                    <RoundButton href='/' text='Nastavit' disableLink={true} />
                 </div>
             </div>
             <AnimatePresence mode="wait">
                 {isOpen && (
-                    <CookiesModem open={setIsOpen} />
+                    <CookiesModem setSettings={setIsOpen} settings={isOpen} />
                 )}
             </AnimatePresence>
         </section>

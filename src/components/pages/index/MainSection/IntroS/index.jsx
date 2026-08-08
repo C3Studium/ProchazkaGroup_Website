@@ -16,17 +16,17 @@
 
 // NOTE: this is proper engine for high level morphing animations. leave it as future references for other projects. like intro preloader etc.
 
-import MainText from "@/components/anim/MainText";
-import SubText from "@/components/anim/SubText";
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton";
+import SubText from "@/components/common/TextAnim/SubText";
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton";
 import { motion, useScroll, useMotionValue, animate, useTransform, AnimatePresence } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { interpolate } from "flubber";
 import NextImage from "next/image";
-import RollingIcons from "@/components/anim/RollingIcons";
+import RollingIcons from "@/components/common/RollingIcons";
 import Grid from "@/components/common/grid";
 import { usePerformance } from "@/context/PerformanceProvider";
 import IntroSMobile from "../IntroSMobile";
+import MainText from "@/components/common/TextAnim/MainText";
 
 export default function IntroSMain() {
     const [isMobile, setIsMobile] = useState(false);
@@ -101,63 +101,100 @@ function IntroSDesktop() {
         { text: "Získat Nabídky", href: "/nabidky", opacity: opacity3 }
     ];
 
+    const animateSectionVisuals = useCallback((sectionIndex) => {
+        const transition = { duration: 0.5, ease: "easeInOut" };
+
+        imageOpacities.forEach((opacity, i) => {
+            animate(opacity, i === sectionIndex ? 1 : 0, transition);
+        });
+
+        animate(benefitSectionOpacity, sectionIndex === 0 ? 1 : 0, transition);
+        animate(aboutSectionOpacity, sectionIndex === 1 ? 1 : 0, transition);
+        animate(offersSectionOpacity, sectionIndex === 2 ? 1 : 0, transition);
+        animate(iconsOpacity, sectionIndex === 2 ? 1 : 0, transition);
+        animate(buttonProgress, sectionIndex, { duration: 0.45, ease: "easeInOut" });
+    }, [aboutSectionOpacity, benefitSectionOpacity, buttonProgress, iconsOpacity, imageOpacities, offersSectionOpacity]);
+
     // Ultra-minimal 120fps morphing engine with mobile optimization
     const [morphStepsReady, setMorphStepsReady] = useState(false);
-    const preCalculatedMorphs = useRef([]);
+    const preCalculatedMorphs = useRef({});
+    const [morphsLoaded, setMorphsLoaded] = useState(false);
 
     // Skip heavy morphing calculations on low-end devices
     const shouldUseMorphing = !shouldReduceAnimations;
 
     // Start with basic paths, calculate morphing in background (only on capable devices)
+    const computeMorphSteps = useCallback((transitionIndex, stepsPerTransition) => {
+        if (transitionIndex < 0 || transitionIndex >= pathValues.length - 1) return;
+        if (preCalculatedMorphs.current[transitionIndex]) return;
+
+        const interpolator = interpolate(pathValues[transitionIndex], pathValues[transitionIndex + 1], {
+            maxSegmentLength: 10, // Lower quality for fewer points, faster compute
+            single: true
+        });
+
+        const steps = [];
+        for (let step = 0; step <= stepsPerTransition; step++) {
+            const t = step / stepsPerTransition;
+            steps.push(interpolator(t));
+        }
+        preCalculatedMorphs.current[transitionIndex] = steps;
+    }, []);
+
     useEffect(() => {
-        // Skip morphing calculations entirely on low-end devices
+        if (!section.current) return;
+        let isMounted = true;
+        const observer = new IntersectionObserver(
+            entries => {
+                entries.forEach(entry => {
+                    if (!entry.isIntersecting || morphsLoaded) return;
+                    import("@/data/morphs/introS.json").then((module) => {
+                        if (!isMounted) return;
+                        const data = module.default;
+                        if (data && Array.isArray(data.transitions)) {
+                            preCalculatedMorphs.current = data.transitions;
+                            setMorphStepsReady(true);
+                        }
+                        setMorphsLoaded(true);
+                    });
+                });
+            },
+            { threshold: 0.1 }
+        );
+
+        observer.observe(section.current);
+        return () => {
+            isMounted = false;
+            observer.disconnect();
+        };
+    }, [morphsLoaded]);
+
+    useEffect(() => {
         if (!shouldUseMorphing) {
-            setMorphStepsReady(true); // Mark as ready to use fallback
+            setMorphStepsReady(true);
             return;
         }
 
-        const calculateMorphSteps = () => {
-            const morphs = [];
-            const stepsPerTransition = 30; // Reduced from 60 for faster calculation
+        const stepsPerTransition = 24; // Tuned for smooth 60fps without heavy compute
+        const requestIdle = window.requestIdleCallback || ((cb) => setTimeout(() => cb({ timeRemaining: () => 0 }), 0));
 
-            // Process one transition at a time to avoid blocking
-            let currentTransition = 0;
-            const totalTransitions = pathValues.length - 1;
-
-            const processNextTransition = () => {
-                if (currentTransition >= totalTransitions) {
-                    preCalculatedMorphs.current = morphs;
-                    setMorphStepsReady(true);
-                    return;
-                }
-
-                const i = currentTransition;
-                const interpolator = interpolate(pathValues[i], pathValues[i + 1], {
-                    maxSegmentLength: 8, // Increased for better quality with fewer steps
-                    single: true
-                });
-
-                const steps = [];
-                for (let step = 0; step <= stepsPerTransition; step++) {
-                    const t = step / stepsPerTransition;
-                    steps.push(interpolator(t));
-                }
-                morphs.push(steps);
-
-                currentTransition++;
-
-                // Process next transition in next animation frame
-                requestAnimationFrame(processNextTransition);
-            };
-
-            // Start processing in next animation frame
-            requestAnimationFrame(processNextTransition);
+        const schedule = (index) => {
+            requestIdle(() => {
+                computeMorphSteps(index, stepsPerTransition);
+                setMorphStepsReady(true);
+            });
         };
 
-        // Delay calculation by 1.5 seconds for even faster initial load
-        const timer = setTimeout(calculateMorphSteps, 1500);
-        return () => clearTimeout(timer);
-    }, [shouldUseMorphing]);
+        // Precompute the first transition immediately to avoid initial lag
+        if (!preCalculatedMorphs.current[0]) {
+            computeMorphSteps(0, stepsPerTransition);
+            setMorphStepsReady(true);
+        }
+
+        // Only compute current + next transition to reduce work
+        schedule(currentSection);
+        schedule(currentSection + 1);
+    }, [computeMorphSteps, currentSection, shouldUseMorphing]);
 
     // Device-optimized morphing: full morphing on capable devices, opacity fallback on low-end
     const morphPath = useTransform(sectionMotionValue, (section) => {
@@ -242,11 +279,16 @@ function IntroSDesktop() {
                     duration: 0.4, // Optimized for 120fps smoothness
                     ease: "easeInOut"
                 });
+                animateSectionVisuals(newSection);
             }
         });
 
         return () => unsubscribe();
     }, [scrollYProgress, currentSection, sectionMotionValue]);
+
+    useEffect(() => {
+        animateSectionVisuals(currentSection);
+    }, [animateSectionVisuals, currentSection]);
 
     // Add subtle opacity transition for low-end devices
     const svgOpacity = useMotionValue(1);
@@ -276,7 +318,6 @@ function IntroSDesktop() {
         <section className="IntroSMain" ref={section}>
             <div className="IntroSMain__sticky">
                 <div className="IntroSMain__sticky__container">
-                    <Grid size="20vh" />
                     <motion.div className="IntroSMain__Benefit" style={{ opacity: benefitSectionOpacity }}>
                         <div className="IntroSMain__Benefit__over">
                             <MainText

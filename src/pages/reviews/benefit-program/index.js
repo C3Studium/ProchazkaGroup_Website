@@ -1,63 +1,62 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import { useFetchDatabase } from "@/hooks/useFetchDatabase"
 import { useEffect, useState } from "react"
-import { 
+import {
     FaEnvelope,
-    FaFacebookF, 
-    FaInstagram, 
-    FaLinkedinIn, 
-    FaTwitter, 
+    FaFacebookF,
+    FaInstagram,
+    FaLinkedinIn,
+    FaTwitter,
 } from 'react-icons/fa';
 import ContactIntro from "@/components/pages/personReviews/contact"
 
 
 export default function PersonFeebackPage2() {
-    const {fetchClovek} = useFetchDatabase()
-    
-        const [personData, setPersonData] = useState({
-            name: 'Benefit Program',
-            moto: 'Přidejte sem své hodnocení jak se vám líbí program a přizvěte další lidi do Benefit program.',
-            number: '12',
-            databaseName: 'Benefit Program'
-        })
-        const srcbg = "/assets/backgrounds/mainOffice.webp"
-        const srcp = "/assets/benefit-cards/DOP12.webp"
+    const { fetchClovek } = useFetchDatabase()
 
-        const icons = [
-            // { name: "mail", 
-            //     src: FaEnvelope, href: "mailto:vituj@ovbmail.cz"
-            // },
-            // { name: "facebook", 
-            //     src: FaFacebookF, href: "https://www.facebook.com/profile.php?id=100008797333828&locale=cs_CZ"
-            // },
-            // { name: "instagram",
-            //     src: FaInstagram, href: "https://www.instagram.com/lukasvituj7?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
-            // },
+    const [personData, setPersonData] = useState({
+        name: 'Benefit Program',
+        moto: 'Přidejte sem své hodnocení jak se vám líbí program a přizvěte další lidi do Benefit program.',
+        number: '12',
+        databaseName: 'Benefit Program'
+    })
+    const srcbg = "/assets/backgrounds/mainOffice.webp"
+    const srcp = "/assets/benefit-cards/DOP12.webp"
+
+    const icons = [
+        // { name: "mail", 
+        //     src: FaEnvelope, href: "mailto:vituj@ovbmail.cz"
+        // },
+        // { name: "facebook", 
+        //     src: FaFacebookF, href: "https://www.facebook.com/profile.php?id=100008797333828&locale=cs_CZ"
+        // },
+        // { name: "instagram",
+        //     src: FaInstagram, href: "https://www.instagram.com/lukasvituj7?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="
+        // },
         //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
-        ]
-    
-        useEffect(() => {
-            const loadData = async () => {
-                try {
-                    const data = await fetchClovek("Benefit Program")
-                    if (data && data.length > 0) {
-                        setPersonData(prev => ({
-                            ...prev,
-                            name: data[0].name,
-                            moto: data[0].moto
-                        }))
-                    }
-                }
-                catch (err) {
-                    console.log(err)
+    ]
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await fetchClovek("Benefit Program")
+                if (data && data.length > 0) {
+                    setPersonData(prev => ({
+                        ...prev,
+                        name: data[0].name,
+                        moto: data[0].moto
+                    }))
                 }
             }
-            loadData();
-        }, [fetchClovek])
-    
-    return(
+            catch (err) {
+                console.log(err)
+            }
+        }
+        loadData();
+    }, [fetchClovek])
+
+    return (
         <>
             <Head>
                 <title>{`Benefit Program stránka pro recenze`}</title>
@@ -131,10 +130,8 @@ export default function PersonFeebackPage2() {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Cursor />
-                <Navbar />
-                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp}/>
+            <main lang="cs" key="person-page">
+                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp} />
             </main>
         </>
     )

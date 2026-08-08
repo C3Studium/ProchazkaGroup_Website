@@ -1,0 +1,41 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+.scrollToText {
+    position: relative;
+    text-transform: uppercase;
+    padding: 0;
+    margin: 0.25rem;
+    mix-blend-mode: difference;
+    width: fit-content;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    pointer-events: none;
+
+    .scrollToText__char__track {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        align-items: center;
+        width: 1ch;
+        height: 100%;
+        margin: 0 0.15rem;
+        padding: 0;
+
+        .scrollToText__char__letter {
+            margin: 0 0.1rem;
+            padding: 0;
+            color: var(--wText);
+            @include font(SCTA);
+            font-family: "Switzer-Light";
+            font-weight: 400;
+            width: 1ch;
+            height: 1em;
+            line-height: 1.1em;
+            text-align: center;
+        }
+    }
+}

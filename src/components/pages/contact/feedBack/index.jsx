@@ -4,7 +4,7 @@ import { useScroll, motion, useInView, useSpring, useTransform } from "framer-mo
 import { useRef } from "react";
 import { useGlobalContext } from "@/context/LoadProvider";
 import PixelateText from "../../index/main/neonText";
-import Magnetic from "@/components/anim/Magnetic";
+import Magnetic from "@/components/common/Magnetic";
 import Link from "next/link";
 
 //NOTE: FeedBack and contact are switched
@@ -14,12 +14,12 @@ export default function FeedbackIntro() {
     const { firstLoad } = useGlobalContext();
     const headingRef = useRef(null);
     const isInView = useInView(headingRef, { once: true });
-    
+
     const { scrollYProgress } = useScroll({
         target: sectionRef,
         offset: ['start start', 'end start']
     });
-    
+
     const smoothYProgress = useSpring(scrollYProgress, {
         stiffness: 100,
         damping: 30,
@@ -31,13 +31,13 @@ export default function FeedbackIntro() {
         [0, 0.15, 0.75, 1],
         [0, 0, -50, -80]
     );
-    
+
     const textY = useTransform(
         smoothYProgress,
         [0, 0.5, 1],
         [0, 0, -50]
     );
-    
+
     // Animation for cover container
     const coverAnim = {
         initial: {
@@ -54,7 +54,7 @@ export default function FeedbackIntro() {
             }
         }
     };
-    
+
     return (
         <section className="FeedbackIntro" ref={sectionRef}>
             <div className="pageIndex">
@@ -64,8 +64,8 @@ export default function FeedbackIntro() {
                     </Link>
                 </Magnetic>
             </div>
-            
-            <motion.div 
+
+            <motion.div
                 className="Cover"
                 initial="initial"
                 animate="enter"
@@ -75,7 +75,7 @@ export default function FeedbackIntro() {
                     willChange: "transform, opacity"
                 }}
             >
-                <Grid size="20vh" key={"Cover_feedbackintro"}/>
+                <Grid size="20vh" key={"Cover_feedbackintro"} />
                 <div className="MainText" ref={headingRef}>
                     <motion.div style={{ y: headerY }}>
                         <h1>
@@ -117,7 +117,7 @@ export default function FeedbackIntro() {
                         </h1>
                     </motion.div>
                 </div>
-                
+
                 <motion.div className="Header" style={{ y: textY }}>
                     <div className="Header__text">
                         <h3>σ</h3>
@@ -131,8 +131,8 @@ export default function FeedbackIntro() {
                     </div>
                 </motion.div>
             </motion.div>
-            
-            <FeedbackForm scroll={scrollYProgress}/>
+
+            <FeedbackForm scroll={scrollYProgress} />
         </section>
     );
 }

@@ -1,6 +1,7 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
 @media (min-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1730px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -13,7 +14,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -23,28 +25,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 55%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 3.5rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -52,8 +56,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -61,32 +65,33 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: -20%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.5rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                             padding-top: 1rem;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -30%;
@@ -96,8 +101,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -108,8 +113,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -118,24 +123,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 2rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -143,18 +148,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -166,8 +173,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -180,7 +188,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -190,28 +199,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 55%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 3.5rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -219,8 +230,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -228,32 +239,33 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: -20%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.5rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                             padding-top: 1rem;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -30%;
@@ -263,8 +275,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -275,8 +287,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -285,24 +297,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 2rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -310,18 +322,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -333,8 +347,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -347,7 +362,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -357,28 +373,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 55%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 3rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -386,8 +404,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -395,32 +413,33 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: -20%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.5rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                             padding-top: 1rem;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -30%;
@@ -430,8 +449,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -442,8 +461,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -452,24 +471,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 1.8rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -477,18 +496,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -500,8 +521,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -514,7 +536,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -524,28 +547,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 55%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 2.5rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -553,8 +578,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -562,31 +587,32 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: -20%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 3rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.3rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -30%;
@@ -596,8 +622,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -608,8 +634,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -618,24 +644,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 1.5rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -643,18 +669,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -666,8 +694,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -680,7 +709,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -690,28 +720,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 55%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 2.5rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -719,8 +751,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -728,31 +760,32 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 0%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 3rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.3rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -10%;
@@ -762,8 +795,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -774,8 +807,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -784,24 +817,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 1.5rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -809,18 +842,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -832,8 +867,9 @@
             }
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .QNA{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -846,7 +882,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 35vh;
                 position: absolute;
@@ -856,28 +893,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 65%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 2rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -885,8 +924,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -894,31 +933,32 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 0%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 2.5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.1rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -10%;
@@ -928,8 +968,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -940,8 +980,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -950,24 +990,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 1.3rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -975,18 +1015,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -998,8 +1040,9 @@
             }
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .QNA{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -1012,7 +1055,8 @@
             gap: 15%;
             overflow: hidden;
             z-index: 0;
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 35vh;
                 position: absolute;
@@ -1022,28 +1066,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 65%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 2rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -1051,8 +1097,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -1060,31 +1106,32 @@
                     width: 40%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 0%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 2.5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.1rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -10%;
@@ -1094,8 +1141,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -1106,8 +1153,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -1116,24 +1163,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
+
+                        h3 {
                             font-size: 1.3rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -1141,18 +1188,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             width: 90%;
                             margin: 0;
                             padding: 1rem 0 0 0;
@@ -1164,11 +1213,12 @@
             }
         }
     }
-        
+
 }
+
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -1182,7 +1232,8 @@
             gap: 15%;
             overflow: hidden;
             color: var(--bText);
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -1192,28 +1243,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 65%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 3rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -1221,8 +1274,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -1230,32 +1283,33 @@
                     width: 50%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 0%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.5rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                             padding-top: 1rem;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: -10%;
@@ -1265,8 +1319,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -1277,8 +1331,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -1287,24 +1341,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
-                            font-family: "Zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.5rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -1312,18 +1366,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
 
                             width: 90%;
@@ -1331,15 +1387,16 @@
                             padding: 1rem 0 0 0;
                             font-size: 1.3rem;
                             font-weight: 300;
-        
+
                         }
                     }
                 }
             }
-        } 
+        }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -1353,7 +1410,8 @@
             gap: 15%;
             overflow: hidden;
             color: var(--bText);
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -1363,28 +1421,30 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 65%;
                     height: 100%;
                     display: flex;
                     align-items: flex-start;
                     justify-content: flex-start;
                     position: relative;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 2.5rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -1392,8 +1452,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
@@ -1401,31 +1461,32 @@
                     width: 50%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 10%;
                         left: 0;
                         display: flex;
                         gap: 1.5rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 3rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.3rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: 0%;
@@ -1435,8 +1496,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -1447,8 +1508,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -1457,24 +1518,24 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
                         align-items: center;
                         cursor: pointer;
                         padding: 0.25rem 0;
-        
-                        h3{
-                            font-family: "Zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.3rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -1482,18 +1543,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
 
                             width: 90%;
@@ -1501,15 +1564,16 @@
                             padding: 1rem 0 0 0;
                             font-size: 1.1rem;
                             font-weight: 300;
-        
+
                         }
                     }
                 }
             }
-        } 
+        }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -1523,7 +1587,8 @@
             gap: 15%;
             overflow: hidden;
             color: var(--bText);
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -1533,8 +1598,8 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 100%;
                     height: 100%;
                     display: flex;
@@ -1543,20 +1608,22 @@
                     position: absolute;
                     left: 0;
                     top: 5%;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 2rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -1564,8 +1631,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-end;
@@ -1573,31 +1640,32 @@
                     width: 100%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 10%;
                         right: 0;
                         display: flex;
                         gap: 1rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 3rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.1rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: 0%;
@@ -1607,8 +1675,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -1619,8 +1687,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -1629,8 +1697,8 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
@@ -1638,16 +1706,16 @@
                         cursor: pointer;
                         padding: 0.25rem 0;
                         gap: 1rem;
-        
-                        h3{
-                            font-family: "Zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.1rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -1655,18 +1723,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
 
                             width: 90%;
@@ -1674,15 +1744,16 @@
                             padding: 1rem 0 0 0;
                             font-size: 1rem;
                             font-weight: 300;
-        
+
                         }
                     }
                 }
             }
-        } 
+        }
     }
+
     @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -1696,7 +1767,8 @@
             gap: 15%;
             overflow: hidden;
             color: var(--bText);
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -1706,8 +1778,8 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 100%;
                     height: 100%;
                     display: flex;
@@ -1716,20 +1788,22 @@
                     position: absolute;
                     left: 0;
                     top: 5%;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 1.8rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -1737,8 +1811,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-end;
@@ -1746,31 +1820,32 @@
                     width: 100%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 10%;
                         right: 0;
                         display: flex;
                         gap: 1rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 3rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1.1rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: 0%;
@@ -1780,8 +1855,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -1792,8 +1867,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -1802,8 +1877,8 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
@@ -1811,16 +1886,16 @@
                         cursor: pointer;
                         padding: 0.25rem 0;
                         gap: 1rem;
-        
-                        h3{
-                            font-family: "Zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.1rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -1828,18 +1903,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
 
                             width: 90%;
@@ -1847,15 +1924,16 @@
                             padding: 1rem 0 0 0;
                             font-size: 1rem;
                             font-weight: 300;
-        
+
                         }
                     }
                 }
             }
-        } 
+        }
     }
+
     @media only screen and (min-width: 330px) and (max-width: 379px) and (min-height: 450px) {
-        .QNA{
+        .QNA {
             width: 100vw;
             min-height: 90vh;
             background-color: var(--wText);
@@ -1869,7 +1947,8 @@
             gap: 15%;
             overflow: hidden;
             color: var(--bText);
-            .QNA__Intro{
+
+            .QNA__Intro {
                 width: 90%;
                 height: 30vh;
                 position: absolute;
@@ -1879,8 +1958,8 @@
                 display: flex;
                 color: var(--bText);
                 z-index: 2;
-        
-                .QNA__MainText{
+
+                .QNA__MainText {
                     width: 100%;
                     height: 100%;
                     display: flex;
@@ -1889,20 +1968,22 @@
                     position: absolute;
                     left: 0;
                     top: 5%;
-        
-                    .MainTextV3__Main{
+
+                    .MainTextV3__Main {
                         width: 100%;
                         height: 100%;
-                        
-                        .MainText__Container{
-                            p{
+
+                        .MainText__Container {
+                            p {
                                 margin: 0;
                                 text-transform: uppercase;
                                 font-family: "Switzer-light";
                                 line-height: 1.2;
-                                span{
+
+                                span {
                                     font-size: 1.5rem;
                                 }
+
                                 .highlighted {
                                     color: var(--hText);
                                 }
@@ -1910,8 +1991,8 @@
                         }
                     }
                 }
-        
-                .QNA__Header{
+
+                .QNA__Header {
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-end;
@@ -1919,31 +2000,32 @@
                     width: 100%;
                     height: 100%;
                     position: relative;
-                    
-        
-                    .QNA__Header__container{
+
+
+                    .QNA__Header__container {
                         position: absolute;
                         bottom: 10%;
                         right: 0;
                         display: flex;
                         gap: 1rem;
-        
-                        h2{
+
+                        h2 {
                             font-size: 2.5rem;
                             margin: 0;
                             line-height: 1;
-                            font-family: "zodiak-light";
+                            font-family: "Switzer";
                         }
-        
-                        p{
+
+                        p {
                             font-size: 1rem;
                             margin: 0;
-                            font-family: "zodiak-medium";
+                            font-family: "Switzer";
                             line-height: 1.2;
                         }
-        
+
                     }
-                    .devider{
+
+                    .devider {
                         position: absolute;
                         left: 0;
                         bottom: 0%;
@@ -1953,8 +2035,8 @@
                     }
                 }
             }
-        
-            .QNA__wrapper{
+
+            .QNA__wrapper {
                 width: 90%;
                 margin: calc(35vh + 10%) auto 5% auto;
                 position: relative;
@@ -1965,8 +2047,8 @@
                 color: var(--bText);
                 gap: 0.5rem;
                 z-index: 1;
-        
-                .QNA__item{
+
+                .QNA__item {
                     width: 100%;
                     display: flex;
                     align-items: flex-start;
@@ -1975,8 +2057,8 @@
                     background-color: var(--bgColor);
                     border-radius: 25px;
                     padding: 1rem 2.5rem;
-        
-                    .QNA__item__header{
+
+                    .QNA__item__header {
                         width: 100%;
                         display: flex;
                         justify-content: space-between;
@@ -1984,16 +2066,16 @@
                         cursor: pointer;
                         padding: 0.25rem 0;
                         gap: 1rem;
-        
-                        h3{
-                            font-family: "Zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1rem;
                             font-weight: 300;
                             color: var(--wText);
                             margin: 0;
                         }
-        
-                        .QNA__item__header__icon{
+
+                        .QNA__item__header__icon {
                             display: flex;
                             align-items: center;
                             justify-content: center;
@@ -2001,18 +2083,20 @@
                             padding: 0.5rem
                         }
                     }
-        
-                    .QNA__item__content{
+
+                    .QNA__item__content {
                         overflow: hidden;
                         color: var(--wText);
                         margin: 0;
-                        .devider{
+
+                        .devider {
                             width: 90%;
                             height: 2px;
                             background-color: var(--wText);
                             opacity: 0.12;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
 
                             width: 90%;
@@ -2020,11 +2104,11 @@
                             padding: 1rem 0 0 0;
                             font-size: 0.9rem;
                             font-weight: 300;
-        
+
                         }
                     }
                 }
             }
-        } 
+        }
     }
 }

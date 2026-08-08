@@ -1,47 +1,102 @@
-@use './styles.scss' as styles;
-@import url("../../public/css/satoshi.css");
-@import url("../../public/css/switzer.css");
-@import url("../../public/css/zodiak.css");
+// AUTO-IMPORT START
+@use "../components/pages/reviews/reviews/styles.scss" as _s0;
+@use "../components/pages/personReviews/contact/styles.scss" as _s1;
+@use "../components/pages/offers/ClipPathPage/styles.scss" as _s2;
+@use "../components/pages/notFound/404/styles.scss" as _s3;
+@use "../components/pages/index/main/styles.scss" as _s4;
+@use "../components/pages/index/introStatbar/styles.scss" as _s5;
+@use "../components/pages/index/Testimonials/styles.scss" as _s6;
+@use "../components/pages/index/MainSection/styles.scss" as _s7;
+@use "../components/pages/index/MainSection/Offer/styles.scss" as _s8;
+@use "../components/pages/index/MainSection/Offer/WhatWeDo/styles.scss" as _s9;
+@use "../components/pages/index/MainSection/Offer/TheWay/styles.scss" as _s10;
+@use "../components/pages/index/MainSection/Offer/Requirements/styles.scss" as _s11;
+@use "../components/pages/index/MainSection/Offer/RealityIntro/styles.scss" as _s12;
+@use "../components/pages/index/MainSection/Offer/Reality/styles.scss" as _s13;
+@use "../components/pages/index/MainSection/Offer/Intro/styles.scss" as _s14;
+@use "../components/pages/index/MainSection/Offer/GridTransitionOut/styles.scss" as _s15;
+@use "../components/pages/index/MainSection/Offer/GridTransition/styles.scss" as _s16;
+@use "../components/pages/index/MainSection/Offer/Benefits/styles.scss" as _s17;
+@use "../components/pages/index/MainSection/Offer/BenefitCard/styles.scss" as _s18;
+@use "../components/pages/index/MainSection/IntroS/styles.scss" as _s19;
+@use "../components/pages/index/MainSection/Contact/styles.scss" as _s20;
+@use "../components/pages/gdpr/TermsPage/styles.scss" as _s21;
+@use "../components/pages/cookies/CookiesPage/styles.scss" as _s22;
+@use "../components/pages/contact/feedBack/styles.scss" as _s23;
+@use "../components/pages/benefit/Reviews/styles.scss" as _s24;
+@use "../components/pages/benefit/BenefitProgram/styles.scss" as _s25;
+@use "../components/pages/benefit/BenefitProgram/IntroPage/styles.scss" as _s26;
+@use "../components/pages/benefit/BenefitProgram/InfoSection/styles.scss" as _s27;
+@use "../components/pages/benefit/BenefitDetails/styles.scss" as _s28;
+@use "../components/pages/benefit/BenefitDetails/Rewards/styles.scss" as _s29;
+@use "../components/pages/benefit/BenefitDetails/Intro/styles.scss" as _s30;
+@use "../components/pages/aboutUs/parallaxExpand/styles.scss" as _s31;
+@use "../components/pages/aboutUs/eventCollage/styles.scss" as _s32;
+@use "../components/pages/aboutUs/eventCollage/intro/styles.scss" as _s33;
+@use "../components/pages/aboutUs/eventCollage/collage/styles.scss" as _s34;
+@use "../components/pages/aboutUs/aboutTeam/styles.scss" as _s35;
+@use "../components/pages/aboutUs/about/styles.scss" as _s36;
+@use "../components/modems/Rezence/styles.scss" as _s37;
+@use "../components/modems/ReviewModem/styles.scss" as _s38;
+@use "../components/modems/CookiesBar/styles.scss" as _s39;
+@use "../components/modems/Cookies/styles.scss" as _s40;
+@use "../components/modems/Contact/styles.scss" as _s41;
+@use "../components/forms/feedback/styles.scss" as _s42;
+@use "../components/forms/contact/styles.scss" as _s43;
+@use "../components/forms/BenefitReminder/styles.scss" as _s44;
+@use "../components/common/ui/stickyImage/style.scss" as _s45;
+@use "../components/common/ui/stickyButtons/buttons/buttonLink/styles.scss" as _s46;
+@use "../components/common/ui/stickyButtons/buttons/SvgButton/styles.scss" as _s47;
+@use "../components/common/ui/stickyButtons/buttons/SmallButton/styles.scss" as _s48;
+@use "../components/common/ui/stickyButtons/buttons/RoundButton/styles.scss" as _s49;
+@use "../components/common/ui/stickyButtons/buttons/RotatingButton/styles.scss" as _s50;
+@use "../components/common/ui/stickyButtons/buttons/MyButton/styles.scss" as _s51;
+@use "../components/common/ui/rippleImage/GridDistortion.css" as _s52;
+@use "../components/common/qna/style.scss" as _s53;
+@use "../components/common/onViewLogo/styles.scss" as _s54;
+@use "../components/common/navbar/menu/styles.scss" as _s55;
+@use "../components/common/navbar/cursor/styles.scss" as _s56;
+@use "../components/common/navbar/body/styles.scss" as _s57;
+@use "../components/common/grid/styles.scss" as _s58;
+@use "../components/common/footer/styles.scss" as _s59;
+@use "../components/common/chooseBar/styles.scss" as _s60;
+@use "../components/common/Transition/styles.scss" as _s61;
+@use "../components/common/TextAnim/scrollToText/styles.scss" as _s62;
+@use "../components/common/TextAnim/StatNumber/styles.scss" as _s63;
+@use "../components/common/TextAnim/MainText/styles.scss" as _s64;
+@use "../components/common/RollingIcons/styles.scss" as _s65;
+@use "../components/common/PreLoader/styles.scss" as _s66;
+@use "../components/common/Background/styles.scss" as _s67;
+// AUTO-IMPORT END
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url("../../public/Fonts/synonym/css/synonym.css");
+@import url("../../public/Fonts/switzer/css/switzer.css");
 
 
 
 
-body{
-  width: 100vw;
-  margin: 0 !important;
-  padding: 0 !important;
-  font-family: "zodiak-light", sans-serif; 
+
+body {
+  width: 100dvw;
+  height: auto;
+  margin: 0;
+  padding: 0;
+  font-family: "Switzer-Light", sans-serif;
   background-color: #063F66;
+
   * {
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
   }
+
   &::-webkit-scrollbar {
     width: 0px;
   }
+
   &::-webkit-scrollbar-thumb {
     width: 0px;
   }
+
   // scrollbar-width: none; //only for Firefox
 
-}
-
-
-// Styly pro stránku 
-:root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-  --bgColor: #063F66;
-  --bgColor2: #050A10;
-  --hColor: #4bdadc;
-  --hColor2: #9151e0;
-  --wText: #fff;
-  --bText: #050A10;
-  --blur: rgba(117, 171, 192, 0.2);
-  --divider: #5E758D;
 }

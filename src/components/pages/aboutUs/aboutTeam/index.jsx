@@ -1,5 +1,5 @@
-import Magnetic from "@/components/anim/Magnetic";
-import SubText from "@/components/anim/SubText";
+import Magnetic from "@/components/common/Magnetic";
+import SubText from "@/components/common/TextAnim/SubText";
 import Grid from "@/components/common/grid";
 import { useScroll, useTransform, motion, animate, useAnimation, AnimatePresence, useInView } from "framer-motion";
 import Image from "next/image";
@@ -40,12 +40,12 @@ export default function AboutTeam() {
         return Array.from({ length: points }, (_, i) => {
             // Calculate the base position for each point (evenly spaced)
             const basePosition = i / points;
-            
+
             // Add small offset to push transition points closer to the circles
             // The 1/(points*2) creates evenly spaced offsets
             // Multiplying by 0.8 shifts them closer to the circles
             const offset = (1 / (points * 2)) * 0.8;
-            
+
             return basePosition + offset;
         });
     }, [points]);
@@ -58,7 +58,7 @@ export default function AboutTeam() {
                 const currentPeak = peakPoints[i];
                 const nextPeak = peakPoints[i + 1] || 1;
                 const halfwayToNext = currentPeak + ((nextPeak - currentPeak) / 2);
-                
+
                 // If we're in this range, set this as the active index
                 if (value < halfwayToNext) {
                     setActiveIndex(i);
@@ -66,7 +66,7 @@ export default function AboutTeam() {
                 }
             }
         });
-        
+
         return () => unsubscribe();
     }, [scrollYProgress, peakPoints]);
 
@@ -82,9 +82,9 @@ export default function AboutTeam() {
     const circleProgress8 = useTransform(scrollYProgress, [peakPoints[7] + 0.02, peakPoints[8] - 0.02], [0, 1], { clamp: true });
     const circleProgress9 = useTransform(scrollYProgress, [peakPoints[8] + 0.02, peakPoints[9] - 0.02], [0, 1], { clamp: true });
     const circleProgress10 = useTransform(scrollYProgress, [peakPoints[9] + 0.02, 1], [0, 1], { clamp: true });
-    
-    
-    
+
+
+
     // Segments anims aligned with circle transitions
     const segmentProgress0 = useTransform(scrollYProgress, [peakPoints[0], peakPoints[0] + 0.02], ['100%', '0%'], { clamp: true });
     const segmentProgress1 = useTransform(scrollYProgress, [peakPoints[1], peakPoints[1] + 0.02], ['100%', '0%'], { clamp: true });
@@ -110,10 +110,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress0,
             segmentAnim: segmentProgress0,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:vaclav.prochazka2@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/vaclav.prochazka.5?locale=cs_CZ" },
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/prochazka_vaclav?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
+                { name: "mail", src: FaEnvelope, href: "mailto:vaclav.prochazka2@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/vaclav.prochazka.5?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/prochazka_vaclav?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
             ]
         },
         {
@@ -127,10 +127,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress1,
             segmentAnim: segmentProgress1,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:michaela.markova@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/misa.markova.940?locale=cs_CZ" },
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/mark_michaela?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
+                { name: "mail", src: FaEnvelope, href: "mailto:michaela.markova@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/misa.markova.940?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/mark_michaela?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
             ]
         },
         {
@@ -144,10 +144,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress2,
             segmentAnim: segmentProgress2,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:ondrej.efenberk@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/ondrej.efenberk?locale=cs_CZ" },
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/ondrej_efenberk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
+                { name: "mail", src: FaEnvelope, href: "mailto:ondrej.efenberk@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/ondrej.efenberk?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/ondrej_efenberk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
             ]
         },
         {
@@ -161,10 +161,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress3,
             segmentAnim: segmentProgress3,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:tereza.posnerova@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/tereza.posnerova?locale=cs_CZ" },
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/teruu_na?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
+                { name: "mail", src: FaEnvelope, href: "mailto:tereza.posnerova@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/tereza.posnerova?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/teruu_na?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
             ]
         },
         {
@@ -178,10 +178,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress4,
             segmentAnim: segmentProgress4,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:tereza.markova6@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/terezka.markova.73/?locale=cs_CZ" },
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/terka.markova/"},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
+                { name: "mail", src: FaEnvelope, href: "mailto:tereza.markova6@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/terezka.markova.73/?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/terka.markova/" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
             ]
         },
         {
@@ -195,10 +195,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress5,
             segmentAnim: segmentProgress5,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:lukas.matous1@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/lukas.matous.3?locale=cs_CZ"},
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/matous.lukas?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+                { name: "mail", src: FaEnvelope, href: "mailto:lukas.matous1@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/lukas.matous.3?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/matous.lukas?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
             ]
         },
         {
@@ -212,10 +212,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress6,
             segmentAnim: segmentProgress6,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:olga.kaslova@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/olga.kaslova?locale=cs_CZ"},
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/okaslova?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+                { name: "mail", src: FaEnvelope, href: "mailto:olga.kaslova@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/olga.kaslova?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/okaslova?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
             ]
         },
         {
@@ -229,10 +229,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress7,
             segmentAnim: segmentProgress7,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:vituj@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/profile.php?id=100008797333828&locale=cs_CZ"},
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/lukasvituj7?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+                { name: "mail", src: FaEnvelope, href: "mailto:vituj@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/profile.php?id=100008797333828&locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/lukasvituj7?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
             ]
         },
         {
@@ -246,10 +246,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress8,
             segmentAnim: segmentProgress8,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:servis.prochazka@ovbone.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/tynuse.furbachova?locale=cs_CZ"},
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/tynus.furbachova/"},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+                { name: "mail", src: FaEnvelope, href: "mailto:servis.prochazka@ovbone.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/tynuse.furbachova?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/tynus.furbachova/" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
             ]
         },
         {
@@ -263,10 +263,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress9,
             segmentAnim: segmentProgress9,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:anna.stofflova@ovbmail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/anicka.stofflova?locale=cs_CZ"},
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/annastofflova?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw=="},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+                { name: "mail", src: FaEnvelope, href: "mailto:anna.stofflova@ovbmail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/anicka.stofflova?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/annastofflova?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
             ]
         },
         {
@@ -280,10 +280,10 @@ export default function AboutTeam() {
             circleAnim: circleProgress10,
             segmentAnim: segmentProgress10,
             icons: [
-              { name: "mail", src: FaEnvelope, href: "mailto:jana.filipska1@ovbamail.cz"},
-              { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/jana.filip.77?locale=cs_CZ"},
-              { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/jana.filipska/?utm_source=ig_web_button_share_sheet"},
-            //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+                { name: "mail", src: FaEnvelope, href: "mailto:jana.filipska1@ovbamail.cz" },
+                { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/jana.filip.77?locale=cs_CZ" },
+                { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/jana.filipska/?utm_source=ig_web_button_share_sheet" },
+                //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
             ]
         },
     ]
@@ -292,50 +292,50 @@ export default function AboutTeam() {
     const handleScroll = useCallback(() => {
         try {
             // Safety checks
-            if (!sectionScroll?.current || 
-                !isVisible?.current || 
-                isSnapping?.current || 
-                !snapActive?.current || 
-                !peakPoints || 
-                peakPoints.length === 0 || 
+            if (!sectionScroll?.current ||
+                !isVisible?.current ||
+                isSnapping?.current ||
+                !snapActive?.current ||
+                !peakPoints ||
+                peakPoints.length === 0 ||
                 typeof window === 'undefined') return;
-            
+
             // Clear existing timeout
             if (scrollTimeout?.current) {
                 clearTimeout(scrollTimeout.current);
             }
-            
+
             // Set timeout duration based on device
             const timeoutDuration = isTouchDevice ? 1000 : 50;
-            
+
             scrollTimeout.current = setTimeout(() => {
                 const element = sectionScroll.current;
                 if (!element) return;
-    
+
                 // Calculate scroll progress
                 const rect = element.getBoundingClientRect();
                 const sectionScrollProgress = -rect.top / (rect.height - window.innerHeight);
-                
+
                 // Validate scroll progress
                 if (isNaN(sectionScrollProgress) || !isFinite(sectionScrollProgress)) return;
-                
+
                 // Check last point
                 if (sectionScrollProgress > peakPoints[peakPoints.length - 1]) {
                     setPassedLastPoint(true);
                     return;
                 }
-    
+
                 // Reset on scroll up
                 if (sectionScrollProgress < peakPoints[peakPoints.length - 1]) {
                     setPassedLastPoint(false);
                 }
-    
+
                 // Continue only if not passed last point
                 if (!passedLastPoint) {
                     let closestPeak = peakPoints[0];
                     let closestIndex = 0;
                     let minDistance = Math.abs(sectionScrollProgress - peakPoints[0]);
-    
+
                     // Find closest peak
                     peakPoints.forEach((peak, index) => {
                         const distance = Math.abs(sectionScrollProgress - peak);
@@ -345,19 +345,19 @@ export default function AboutTeam() {
                             closestIndex = index;
                         }
                     });
-    
+
                     // Adjust threshold based on device
                     const snapThreshold = isTouchDevice ? 0.1 / points : 0.03 / points;
-                    
+
                     // Animate if beyond threshold
                     if (minDistance > snapThreshold) {
                         isSnapping.current = true;
                         setActiveIndex(closestIndex);
-    
-                        const targetScroll = window.scrollY + 
-                            (closestPeak - sectionScrollProgress) * 
+
+                        const targetScroll = window.scrollY +
+                            (closestPeak - sectionScrollProgress) *
                             (rect.height - window.innerHeight);
-    
+
                         let animation = animate(window.scrollY, targetScroll, {
                             type: "spring",
                             stiffness: isTouchDevice ? 200 : 400,
@@ -375,7 +375,7 @@ export default function AboutTeam() {
                             },
                             velocity: scrollYProgress.getVelocity() * (isTouchDevice ? 0.3 : 1),
                         });
-    
+
                         // Cleanup animation on component unmount
                         return () => {
                             if (animation) animation.stop();
@@ -389,12 +389,12 @@ export default function AboutTeam() {
             snapActive.current = false;
         }
     }, [
-        peakPoints, 
-        points, 
-        scrollYProgress, 
-        isTouchDevice, 
+        peakPoints,
+        points,
+        scrollYProgress,
+        isTouchDevice,
         passedLastPoint,
-        setActiveIndex, 
+        setActiveIndex,
         setPassedLastPoint
     ]);
 
@@ -403,29 +403,29 @@ export default function AboutTeam() {
 
         const element = sectionScroll.current;
         if (!element) return;
-        
+
         let rafId;
         let observerTimeout;
-        
+
         const observer = new IntersectionObserver(
             (entries) => {
                 const [entry] = entries;
-                
+
                 const elementTop = entry.boundingClientRect.top;
                 const elementBottom = entry.boundingClientRect.bottom;
                 const windowHeight = window.innerHeight;
-                
+
                 const topThreshold = windowHeight * 0.1;
                 const bottomThreshold = windowHeight * 0.9;
-                
-                const isWithinThreshold = 
-                    elementTop <= topThreshold && 
+
+                const isWithinThreshold =
+                    elementTop <= topThreshold &&
                     elementBottom >= bottomThreshold;
 
                 isVisible.current = entry.isIntersecting;
                 snapActive.current = isWithinThreshold;
             },
-            { 
+            {
                 rootMargin: "-10% 0px -10% 0px",
                 threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1]
             }
@@ -435,7 +435,7 @@ export default function AboutTeam() {
 
         const handleScrollDebounced = () => {
             if (rafId) cancelAnimationFrame(rafId);
-            
+
             rafId = requestAnimationFrame(() => {
                 if (!isSnapping.current) handleScroll();
             });
@@ -448,9 +448,9 @@ export default function AboutTeam() {
             if (observerTimeout) clearTimeout(observerTimeout);
             if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
             if (observer) observer.disconnect();
-            
+
             window.removeEventListener("scroll", handleScrollDebounced);
-            
+
             isVisible.current = false;
             snapActive.current = false;
             isSnapping.current = false;
@@ -462,9 +462,9 @@ export default function AboutTeam() {
             <motion.div
                 className="AboutTeam__sticky"
             >
-                <motion.div className="AboutTeam__sticky__wrapper"> 
+                <motion.div className="AboutTeam__sticky__wrapper">
                     <motion.div className="AboutTeam__wrapper">
-                        <Grid size="20vh" key={"AboutTeam__wrapper"}/>
+                        <Grid size="20vh" key={"AboutTeam__wrapper"} />
                         {/* Main Info Section */}
                         <div className="AboutTeam__MainInfo">
                             {/* <div className="AboutTeam__SubInfo__Moto">
@@ -477,8 +477,8 @@ export default function AboutTeam() {
                                 <AnimatePresence mode="wait">
                                     {people.map((person, i) => (
                                         activeIndex === i && (
-                                            <motion.div 
-                                                key={`header-${i}`} 
+                                            <motion.div
+                                                key={`header-${i}`}
                                                 className="AboutTeam__MainInfo__header__container"
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
@@ -487,7 +487,7 @@ export default function AboutTeam() {
                                                 ref={(el) => (headingRef.current[i] = el)}
                                             >
                                                 <h2>
-                                                    <PixelateText 
+                                                    <PixelateText
                                                         text={person.name}
                                                         isInView={isInView}
                                                     />
@@ -502,8 +502,8 @@ export default function AboutTeam() {
                                     <AnimatePresence mode="wait">
                                         {people.map((person, i) => (
                                             activeIndex === i && (
-                                                <motion.div 
-                                                    key={`text-${i}`} 
+                                                <motion.div
+                                                    key={`text-${i}`}
                                                     className="AboutTeam__MainInfo__text__container__text"
                                                     initial={{ opacity: 0, y: 20 }}
                                                     animate={{ opacity: 1, y: 0 }}
@@ -512,7 +512,7 @@ export default function AboutTeam() {
                                                     ref={(el) => (numberRef.current[i] = el)}
                                                 >
                                                     <p className="number__text">
-                                                        <PixelateText 
+                                                        <PixelateText
                                                             text={person.number}
                                                             isInView={isInView2}
                                                         />
@@ -533,45 +533,45 @@ export default function AboutTeam() {
                                     <AnimatePresence mode="wait">
                                         {people.map((person, i) => (
                                             activeIndex === i && (
-                                            <motion.div 
-                                                key={`icons-container-${i}`} 
-                                                className="AboutTeam__MainInfo__person__icons"
-                                                initial={{ opacity: 0, y: 20 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: -20 }}
-                                                transition={{ duration: 0.5 }}
-                                            >
-                                                {/* Inner map for the specific person's icons */}
-                                                {person.icons.map((icon, iconIndex) => {
-                                                const IconComponent = icon.src;
-                                                return (
-                                                    <motion.div
-                                                        key={`icon-${i}-${iconIndex}`}
-                                                        initial={{ opacity: 0, scale: 0.8 }}
-                                                        animate={{ 
-                                                            opacity: 1, 
-                                                            scale: 1,
-                                                            transition: { 
-                                                            delay: iconIndex * 0.1,  // Staggered animation
-                                                            duration: 0.4
-                                                            } 
-                                                        }}
-                                                        exit={{ opacity: 0, scale: 0.8 }}
-                                                        className="icon__wrapper"
-                                                    >
-                                                    <Magnetic sensitivity={0.1}>
-                                                        <Link href={icon.href} target="_blank" rel="noopener noreferrer">
-                                                            <IconComponent 
-                                                                size={40}
-                                                                aria-label={icon.name}
-                                                                className="social__icon"
-                                                            />
-                                                        </Link>
-                                                    </Magnetic>
-                                                    </motion.div>
-                                                );
-                                                })}
-                                            </motion.div>
+                                                <motion.div
+                                                    key={`icons-container-${i}`}
+                                                    className="AboutTeam__MainInfo__person__icons"
+                                                    initial={{ opacity: 0, y: 20 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    exit={{ opacity: 0, y: -20 }}
+                                                    transition={{ duration: 0.5 }}
+                                                >
+                                                    {/* Inner map for the specific person's icons */}
+                                                    {person.icons.map((icon, iconIndex) => {
+                                                        const IconComponent = icon.src;
+                                                        return (
+                                                            <motion.div
+                                                                key={`icon-${i}-${iconIndex}`}
+                                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                                animate={{
+                                                                    opacity: 1,
+                                                                    scale: 1,
+                                                                    transition: {
+                                                                        delay: iconIndex * 0.1,  // Staggered animation
+                                                                        duration: 0.4
+                                                                    }
+                                                                }}
+                                                                exit={{ opacity: 0, scale: 0.8 }}
+                                                                className="icon__wrapper"
+                                                            >
+                                                                <Magnetic sensitivity={0.1}>
+                                                                    <Link href={icon.href} target="_blank" rel="noopener noreferrer">
+                                                                        <IconComponent
+                                                                            size={40}
+                                                                            aria-label={icon.name}
+                                                                            className="social__icon"
+                                                                        />
+                                                                    </Link>
+                                                                </Magnetic>
+                                                            </motion.div>
+                                                        );
+                                                    })}
+                                                </motion.div>
                                             )
                                         ))}
                                     </AnimatePresence>
@@ -585,15 +585,15 @@ export default function AboutTeam() {
                                 <AnimatePresence mode="wait">
                                     {people.map((person, i) => (
                                         activeIndex === i && (
-                                            <motion.div 
-                                                key={`pic-${i}`} 
+                                            <motion.div
+                                                key={`pic-${i}`}
                                                 className="AboutTeam__Collage__pic"
                                                 initial={{ scale: 0.95, opacity: 0 }}
                                                 animate={{ scale: 1, opacity: 1 }}
                                                 exit={{ scale: 0.95, opacity: 0 }}
                                                 transition={{ duration: 0.5 }}
                                             >
-                                                <PixelatedImage 
+                                                <PixelatedImage
                                                     src={person.src}
                                                     alt={person.alt}
                                                     src2={person.src2}
@@ -610,14 +610,14 @@ export default function AboutTeam() {
                                 <div>
                                     {people.map((person, i) => (
                                         <div key={`circle-${i}`} className="progress__circle">
-                                        <motion.div style={{ scale: person.circleAnim }}></motion.div>
+                                            <motion.div style={{ scale: person.circleAnim }}></motion.div>
                                         </div>
                                     ))}
                                 </div>
                                 <div>
                                     {people.map((person, i) => (
                                         <div key={`segment-outline-${i}`} className="progress__segment">
-                                        <motion.div style={{ x: person.segmentAnim }}></motion.div>
+                                            <motion.div style={{ x: person.segmentAnim }}></motion.div>
                                         </div>
                                     ))}
                                 </div>
@@ -641,26 +641,26 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
         rows: 8,
         columns: 8
     });
-    
+
     useEffect(() => {
-        if(isClicked || isHovered) {
+        if (isClicked || isHovered) {
             setIsRevealed(true);
         }
         else {
             setIsRevealed(false);
         }
     }, [isClicked, isHovered]);
-    
+
     // Effect to handle screen size changes
     useEffect(() => {
         const handleResize = () => {
             // Only update grid params if screen width changes across the 600px threshold
             const isSmallScreen = window.innerWidth <= 600;
-            
+
             setGridParams(prevParams => {
                 // Check if we need to update (crossing the threshold)
                 const wasSmallScreen = prevParams.rows === 6;
-                
+
                 if (isSmallScreen && !wasSmallScreen) {
                     // Switch to small screen layout
                     return {
@@ -676,22 +676,22 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
                         columns: 8        // Original columns
                     };
                 }
-                
+
                 // No change needed
                 return prevParams;
             });
         };
-        
+
         // Set initial grid params
         handleResize();
-        
+
         // Add resize listener
         window.addEventListener('resize', handleResize);
-        
+
         // Clean up
         return () => window.removeEventListener('resize', handleResize);
     }, []);
-    
+
     // Recalculate grid tiles when grid params change
     const gridTiles = useMemo(() => {
         const { rows, columns } = gridParams;
@@ -708,11 +708,11 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
                 const centerCol = Math.floor(columns / 2);
                 const rowDistance = Math.abs(row - centerRow);
                 const colDistance = Math.abs(col - centerCol);
-                
+
                 // Calculate radial distance
                 const distanceFromCenter = Math.sqrt(Math.pow(rowDistance, 2) + Math.pow(colDistance, 2));
                 const maxDistance = Math.sqrt(Math.pow(centerRow, 2) + Math.pow(centerCol, 2));
-                
+
                 // Create a delay factor between 0 and 0.5
                 const delayFactor = (distanceFromCenter / maxDistance) * 0.5;
 
@@ -755,9 +755,9 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
             setIsHovered(false);
         }
     };
-    
+
     return (
-        <motion.div 
+        <motion.div
             className="AboutTeam__Collage__pic__pixelated__image"
             onClick={handleClick}
             onHoverStart={handleHoverEnter}
@@ -765,8 +765,8 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
         >
             {/* Original image (background) */}
             <div className="AboutTeam__Collage__pic__background">
-                <Image 
-                    src={src2} 
+                <Image
+                    src={src2}
                     alt={alt2}
                     fill={true}
                     sizes="50vw"
@@ -777,14 +777,14 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
                     blurDataURL="data:image/webp"
                 />
             </div>
-            
+
             {/* Pixelated overlay */}
             <div className="AboutTeam__Collage__pic__pixelated">
-                <motion.div 
+                <motion.div
                     className="pixelated__grid__container"
                     initial="hidden"
                     animate={controls}
-                    style={{ 
+                    style={{
                         gridTemplateColumns: `repeat(${gridParams.columns}, ${gridParams.tileSize})`,
                         gridTemplateRows: `repeat(${gridParams.rows}, ${gridParams.tileSize})`,
                     }}
@@ -794,7 +794,7 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
                             key={tile.id}
                             className="pixelated__grid__tile"
                             initial={{ opacity: 1, filter: "blur(0px)" }}
-                            animate={isRevealed 
+                            animate={isRevealed
                                 ? { opacity: 0, filter: "blur(10px)", transition: { duration: 0.5, delay: tile.delayFactor, ease: "easeIn" } }
                                 : { opacity: 1, filter: "blur(0px)", transition: { duration: 0.5, delay: tile.delayFactor, ease: "easeOut" } }
                             }
@@ -805,7 +805,7 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
                                 overflow: 'hidden',
                             }}
                         >
-                            <div 
+                            <div
                                 className="pixelated__image__wrapper"
                                 style={{
                                     width: '100%',
@@ -813,7 +813,7 @@ const PixelatedImage = ({ src, alt, src2, alt2, index, isTouchDevice }) => {
                                     position: 'relative'
                                 }}
                             >
-                                <div 
+                                <div
                                     className="pixelated__image__container"
                                     style={{
                                         width: `${gridParams.columns * 100}%`,

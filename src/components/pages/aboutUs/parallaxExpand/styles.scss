@@ -1,18 +1,19 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
 // This componentn  does not need horizontal viwport units, it looks good.
 @media (min-aspect-ratio: 1/1) {
   .ParallaxExpand {
     height: 1910vh;
     position: relative;
     z-index: 10;
-    font-family: "Zodiak-Light";
+    font-family: "Switzer";
 
-    .ParallaxExpand__whiteSpace{
+    .ParallaxExpand__whiteSpace {
       height: 60vh;
       width: 100vw;
       position: relative;
     }
 
-    .ParallaxExpand__sticky__container{
+    .ParallaxExpand__sticky__container {
       height: 1000vh;
       width: 100vw;
       position: relative;
@@ -25,7 +26,7 @@
         top: 0;
         height: 100vh;
         overflow: hidden;
-    
+
         .image__wrapper {
           width: 100%;
           height: 100%;
@@ -37,49 +38,106 @@
           justify-content: center;
           // z-index: 10;
 
-          .pixelated__grid__container{
+          .pixelated__grid__container {
             width: 40vw;
             height: 22.5vh;
             transform-origin: center center;
           }
-    
+
           .image__container {
             position: absolute;
             // width: 25vw;
             // height: 30vh;
-            
+
             img {
               width: 100%;
               height: 100%;
               object-fit: cover;
             }
           }
-    
-          &:nth-of-type(1) .image__container { top: 35vh; left: 37.5vw; width: 20vw; height: 20vh; }
-          &:nth-of-type(2) .image__container { top: 5vh; left: 5vw; width: 25vw; height: 25vh;}
-          &:nth-of-type(3) .image__container { top: 35vh; left: 7.5vw; width: 15vw; height: 35vh;}
-          &:nth-of-type(4) .image__container { top: 35vh; left: 75vw; width: 20vw; height: 25vh;}
-          &:nth-of-type(5) .image__container { top: 72.5vh; left: 15vw; width: 20vw; height: 22.5vh; z-index: 1;}
-          &:nth-of-type(6) .image__container { top: 67.5vh; left: 37.5vw; width: 25vw; height: 25vh;}
-          &:nth-of-type(7) .image__container { top: 67.5vh; left: 70vw; width: 20vw; height: 22.5vh;}
-          &:nth-of-type(8) .image__container { top: 2.5vh; left: 37.5vw; width: 25vw; height: 25vh; }
-          &:nth-of-type(9) .image__container { top: 2.5vh;; left: 70vw; ; width: 20vw; height: 30vh; }
+
+          &:nth-of-type(1) .image__container {
+            top: 35vh;
+            left: 37.5vw;
+            width: 20vw;
+            height: 20vh;
+          }
+
+          &:nth-of-type(2) .image__container {
+            top: 5vh;
+            left: 5vw;
+            width: 25vw;
+            height: 25vh;
+          }
+
+          &:nth-of-type(3) .image__container {
+            top: 35vh;
+            left: 7.5vw;
+            width: 15vw;
+            height: 35vh;
+          }
+
+          &:nth-of-type(4) .image__container {
+            top: 35vh;
+            left: 75vw;
+            width: 20vw;
+            height: 25vh;
+          }
+
+          &:nth-of-type(5) .image__container {
+            top: 72.5vh;
+            left: 15vw;
+            width: 20vw;
+            height: 22.5vh;
+            z-index: 1;
+          }
+
+          &:nth-of-type(6) .image__container {
+            top: 67.5vh;
+            left: 37.5vw;
+            width: 25vw;
+            height: 25vh;
+          }
+
+          &:nth-of-type(7) .image__container {
+            top: 67.5vh;
+            left: 70vw;
+            width: 20vw;
+            height: 22.5vh;
+          }
+
+          &:nth-of-type(8) .image__container {
+            top: 2.5vh;
+            left: 37.5vw;
+            width: 25vw;
+            height: 25vh;
+          }
+
+          &:nth-of-type(9) .image__container {
+            top: 2.5vh;
+            ;
+            left: 70vw;
+            ;
+            width: 20vw;
+            height: 30vh;
+          }
 
 
           &:nth-of-type(10) {
             .image__container {
               top: 50%;
-              left: 50%; 
-              transform: translate(-50%, -50%); 
-              width: 20vw; 
-              height: 20vh; 
+              left: 50%;
+              transform: translate(-50%, -50%);
+              width: 20vw;
+              height: 20vh;
             }
+
             .pixelated__grid__container {
               position: absolute;
               top: 50%;
-              left: 50%; 
-              transform: translate(-50%, -50%) translateZ(0) ; 
-              width: 20vw; 
+              left: 50%;
+              transform: translate(-50%, -50%) translateZ(0);
+              width: 20vw;
               height: 22.5vh;
               transform-origin: center center;
               display: grid;
@@ -87,7 +145,7 @@
               grid-template-columns: repeat(10, 1fr);
               grid-auto-rows: 1fr;
               gap: 0px;
-              
+
               // Force grid tiles to be square using aspect-ratio
               .pixelated__grid__tile {
                 aspect-ratio: 1/1;
@@ -101,7 +159,7 @@
                 isolation: isolate;
 
                 z-index: 1;
-                
+
                 .pixelated__image__wrapper {
                   width: 100%;
                   height: 100%;
@@ -123,7 +181,7 @@
         }
       }
 
-      .ParallaxExpand__section__text{
+      .ParallaxExpand__section__text {
         position: absolute;
         bottom: 80vh;
         left: 50%;
@@ -143,28 +201,28 @@
       height: 1910vh;
       position: relative;
       z-index: 10;
-      font-family: "Zodiak-Light";
-  
-      .ParallaxExpand__whiteSpace{
+      font-family: "Switzer";
+
+      .ParallaxExpand__whiteSpace {
         height: 60vh;
         width: 100vw;
         position: relative;
       }
-  
-      .ParallaxExpand__sticky__container{
+
+      .ParallaxExpand__sticky__container {
         height: 1000vh;
         width: 100vw;
         position: relative;
         z-index: 1;
         background-color: var(--bgColor);
         pointer-events: none;
-  
+
         .ParallaxExpand__sticky {
           position: sticky;
           top: 0;
           height: 100vh;
           overflow: hidden;
-      
+
           .image__wrapper {
             width: 100%;
             height: 100%;
@@ -175,50 +233,107 @@
             align-items: center;
             justify-content: center;
             // z-index: 10;
-  
-            .pixelated__grid__container{
+
+            .pixelated__grid__container {
               width: 40vw;
               height: 25vh;
               transform-origin: center center;
             }
-      
+
             .image__container {
               position: absolute;
               // width: 25vw;
               // height: 30vh;
-              
+
               img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
               }
             }
-      
-            &:nth-of-type(1) .image__container { top: 35vh; left: 37.5vw; width: 30vw; height: 7.5vh; }
-            &:nth-of-type(2) .image__container { top: 15vh; left: 5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(3) .image__container { top: 35vh; left: 5vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(4) .image__container { top: 40vh; left: 70vw; width: 25vw; height: 15vh;}
-            &:nth-of-type(5) .image__container { top: 62.5vh; left: 5vw; width: 30vw; height: 15vh; z-index: 1;}
-            &:nth-of-type(6) .image__container { top: 70vh; left: 37.5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(7) .image__container { top: 62.5vh; left: 70vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(8) .image__container { top: 12.5vh; left: 37.5vw; width: 27.5vw; height: 12.5vh; }
-            &:nth-of-type(9) .image__container { top: 20vh;; left: 67.5vw; ; width: 30vw; height: 15vh; }
-  
-  
+
+            &:nth-of-type(1) .image__container {
+              top: 35vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 7.5vh;
+            }
+
+            &:nth-of-type(2) .image__container {
+              top: 15vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(3) .image__container {
+              top: 35vh;
+              left: 5vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(4) .image__container {
+              top: 40vh;
+              left: 70vw;
+              width: 25vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(5) .image__container {
+              top: 62.5vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+              z-index: 1;
+            }
+
+            &:nth-of-type(6) .image__container {
+              top: 70vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(7) .image__container {
+              top: 62.5vh;
+              left: 70vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(8) .image__container {
+              top: 12.5vh;
+              left: 37.5vw;
+              width: 27.5vw;
+              height: 12.5vh;
+            }
+
+            &:nth-of-type(9) .image__container {
+              top: 20vh;
+              ;
+              left: 67.5vw;
+              ;
+              width: 30vw;
+              height: 15vh;
+            }
+
+
             &:nth-of-type(10) {
               .image__container {
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%); 
-                width: 30vw; 
-                height: 15vh; 
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 30vw;
+                height: 15vh;
               }
+
               .pixelated__grid__container {
                 position: absolute;
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%) translateZ(0) ; 
-                width: 30vw; 
+                left: 50%;
+                transform: translate(-50%, -50%) translateZ(0);
+                width: 30vw;
                 height: 17.5vw;
                 transform-origin: center center;
                 display: grid;
@@ -226,7 +341,7 @@
                 grid-template-columns: repeat(10, 1fr);
                 grid-auto-rows: 1fr;
                 gap: 0px;
-                
+
                 // Force grid tiles to be square using aspect-ratio
                 .pixelated__grid__tile {
                   aspect-ratio: 1/1;
@@ -236,18 +351,18 @@
                   will-change: transform;
                   backface-visibility: hidden;
                   contain: layout paint style;
-  
+
                   isolation: isolate;
-  
+
                   z-index: 1;
-                  
+
                   .pixelated__image__wrapper {
                     width: 100%;
                     height: 100%;
                   }
                 }
-  
-  
+
+
                 // .pixelated__grid__canvas{
                 //   width: 100%;
                 //   height: 100%;
@@ -261,7 +376,8 @@
             }
           }
         }
-         .ParallaxExpand__section__text{
+
+        .ParallaxExpand__section__text {
           position: absolute;
           bottom: 80vh;
           left: 50%;
@@ -272,36 +388,37 @@
           width: 80%;
         }
       }
-    
+
     }
   }
+
   @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
     .ParallaxExpand {
       height: 1910vh;
       position: relative;
       z-index: 10;
-      font-family: "Zodiak-Light";
-  
-      .ParallaxExpand__whiteSpace{
+      font-family: "Switzer";
+
+      .ParallaxExpand__whiteSpace {
         height: 60vh;
         width: 100vw;
         position: relative;
       }
-  
-      .ParallaxExpand__sticky__container{
+
+      .ParallaxExpand__sticky__container {
         height: 1000vh;
         width: 100vw;
         position: relative;
         z-index: 1;
         background-color: var(--bgColor);
         pointer-events: none;
-  
+
         .ParallaxExpand__sticky {
           position: sticky;
           top: 0;
           height: 100vh;
           overflow: hidden;
-      
+
           .image__wrapper {
             width: 100%;
             height: 100%;
@@ -312,50 +429,107 @@
             align-items: center;
             justify-content: center;
             // z-index: 10;
-  
-            .pixelated__grid__container{
+
+            .pixelated__grid__container {
               width: 40vw;
               height: 25vh;
               transform-origin: center center;
             }
-      
+
             .image__container {
               position: absolute;
               // width: 25vw;
               // height: 30vh;
-              
+
               img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
               }
             }
-      
-            &:nth-of-type(1) .image__container { top: 35vh; left: 37.5vw; width: 30vw; height: 7.5vh; }
-            &:nth-of-type(2) .image__container { top: 15vh; left: 5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(3) .image__container { top: 35vh; left: 5vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(4) .image__container { top: 40vh; left: 70vw; width: 25vw; height: 15vh;}
-            &:nth-of-type(5) .image__container { top: 62.5vh; left: 5vw; width: 30vw; height: 15vh; z-index: 1;}
-            &:nth-of-type(6) .image__container { top: 70vh; left: 37.5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(7) .image__container { top: 62.5vh; left: 70vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(8) .image__container { top: 12.5vh; left: 37.5vw; width: 27.5vw; height: 12.5vh; }
-            &:nth-of-type(9) .image__container { top: 20vh;; left: 67.5vw; ; width: 30vw; height: 15vh; }
-  
-  
+
+            &:nth-of-type(1) .image__container {
+              top: 35vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 7.5vh;
+            }
+
+            &:nth-of-type(2) .image__container {
+              top: 15vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(3) .image__container {
+              top: 35vh;
+              left: 5vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(4) .image__container {
+              top: 40vh;
+              left: 70vw;
+              width: 25vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(5) .image__container {
+              top: 62.5vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+              z-index: 1;
+            }
+
+            &:nth-of-type(6) .image__container {
+              top: 70vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(7) .image__container {
+              top: 62.5vh;
+              left: 70vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(8) .image__container {
+              top: 12.5vh;
+              left: 37.5vw;
+              width: 27.5vw;
+              height: 12.5vh;
+            }
+
+            &:nth-of-type(9) .image__container {
+              top: 20vh;
+              ;
+              left: 67.5vw;
+              ;
+              width: 30vw;
+              height: 15vh;
+            }
+
+
             &:nth-of-type(10) {
               .image__container {
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%); 
-                width: 30vw; 
-                height: 15vh; 
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 30vw;
+                height: 15vh;
               }
+
               .pixelated__grid__container {
                 position: absolute;
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%) translateZ(0) ; 
-                width: 30vw; 
+                left: 50%;
+                transform: translate(-50%, -50%) translateZ(0);
+                width: 30vw;
                 height: 17.5vw;
                 transform-origin: center center;
                 display: grid;
@@ -363,7 +537,7 @@
                 grid-template-columns: repeat(10, 1fr);
                 grid-auto-rows: 1fr;
                 gap: 0px;
-                
+
                 // Force grid tiles to be square using aspect-ratio
                 .pixelated__grid__tile {
                   aspect-ratio: 1/1;
@@ -373,18 +547,18 @@
                   will-change: transform;
                   backface-visibility: hidden;
                   contain: layout paint style;
-  
+
                   isolation: isolate;
-  
+
                   z-index: 1;
-                  
+
                   .pixelated__image__wrapper {
                     width: 100%;
                     height: 100%;
                   }
                 }
-  
-  
+
+
                 // .pixelated__grid__canvas{
                 //   width: 100%;
                 //   height: 100%;
@@ -398,7 +572,8 @@
             }
           }
         }
-         .ParallaxExpand__section__text{
+
+        .ParallaxExpand__section__text {
           position: absolute;
           bottom: 80vh;
           left: 50%;
@@ -409,36 +584,37 @@
           width: 80%;
         }
       }
-    
+
     }
   }
+
   @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
     .ParallaxExpand {
       height: 1910vh;
       position: relative;
       z-index: 10;
-      font-family: "Zodiak-Light";
-  
-      .ParallaxExpand__whiteSpace{
+      font-family: "Switzer";
+
+      .ParallaxExpand__whiteSpace {
         height: 60vh;
         width: 100vw;
         position: relative;
       }
-  
-      .ParallaxExpand__sticky__container{
+
+      .ParallaxExpand__sticky__container {
         height: 1000vh;
         width: 100vw;
         position: relative;
         z-index: 1;
         background-color: var(--bgColor);
         pointer-events: none;
-  
+
         .ParallaxExpand__sticky {
           position: sticky;
           top: 0;
           height: 100vh;
           overflow: hidden;
-      
+
           .image__wrapper {
             width: 100%;
             height: 100%;
@@ -449,50 +625,107 @@
             align-items: center;
             justify-content: center;
             // z-index: 10;
-  
-            .pixelated__grid__container{
+
+            .pixelated__grid__container {
               width: 40vw;
               height: 25vh;
               transform-origin: center center;
             }
-      
+
             .image__container {
               position: absolute;
               // width: 25vw;
               // height: 30vh;
-              
+
               img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
               }
             }
-      
-           &:nth-of-type(1) .image__container { top: 35vh; left: 37.5vw; width: 30vw; height: 7.5vh; }
-            &:nth-of-type(2) .image__container { top: 15vh; left: 5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(3) .image__container { top: 35vh; left: 5vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(4) .image__container { top: 40vh; left: 70vw; width: 25vw; height: 15vh;}
-            &:nth-of-type(5) .image__container { top: 62.5vh; left: 5vw; width: 30vw; height: 15vh; z-index: 1;}
-            &:nth-of-type(6) .image__container { top: 70vh; left: 37.5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(7) .image__container { top: 62.5vh; left: 70vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(8) .image__container { top: 12.5vh; left: 37.5vw; width: 27.5vw; height: 12.5vh; }
-            &:nth-of-type(9) .image__container { top: 20vh;; left: 67.5vw; ; width: 30vw; height: 15vh; }
-  
-  
+
+            &:nth-of-type(1) .image__container {
+              top: 35vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 7.5vh;
+            }
+
+            &:nth-of-type(2) .image__container {
+              top: 15vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(3) .image__container {
+              top: 35vh;
+              left: 5vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(4) .image__container {
+              top: 40vh;
+              left: 70vw;
+              width: 25vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(5) .image__container {
+              top: 62.5vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+              z-index: 1;
+            }
+
+            &:nth-of-type(6) .image__container {
+              top: 70vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(7) .image__container {
+              top: 62.5vh;
+              left: 70vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(8) .image__container {
+              top: 12.5vh;
+              left: 37.5vw;
+              width: 27.5vw;
+              height: 12.5vh;
+            }
+
+            &:nth-of-type(9) .image__container {
+              top: 20vh;
+              ;
+              left: 67.5vw;
+              ;
+              width: 30vw;
+              height: 15vh;
+            }
+
+
             &:nth-of-type(10) {
               .image__container {
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%); 
-                width: 30vw; 
-                height: 20vw; 
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 30vw;
+                height: 20vw;
               }
+
               .pixelated__grid__container {
                 position: absolute;
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%) translateZ(0) ; 
-                width: 27.5vw; 
+                left: 50%;
+                transform: translate(-50%, -50%) translateZ(0);
+                width: 27.5vw;
                 height: 17.5vw;
                 transform-origin: center center;
                 display: grid;
@@ -500,7 +733,7 @@
                 grid-template-columns: repeat(10, 1fr);
                 grid-auto-rows: 1fr;
                 gap: 0px;
-                
+
                 // Force grid tiles to be square using aspect-ratio
                 .pixelated__grid__tile {
                   aspect-ratio: 1/1;
@@ -510,18 +743,18 @@
                   will-change: transform;
                   backface-visibility: hidden;
                   contain: layout paint style;
-  
+
                   isolation: isolate;
-  
+
                   z-index: 1;
-                  
+
                   .pixelated__image__wrapper {
                     width: 100%;
                     height: 100%;
                   }
                 }
-  
-  
+
+
                 // .pixelated__grid__canvas{
                 //   width: 100%;
                 //   height: 100%;
@@ -535,7 +768,8 @@
             }
           }
         }
-         .ParallaxExpand__section__text{
+
+        .ParallaxExpand__section__text {
           position: absolute;
           bottom: 80vh;
           left: 50%;
@@ -546,36 +780,37 @@
           width: 80%;
         }
       }
-    
+
     }
   }
+
   @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
     .ParallaxExpand {
       height: 1910vh;
       position: relative;
       z-index: 10;
-      font-family: "Zodiak-Light";
-  
-      .ParallaxExpand__whiteSpace{
+      font-family: "Switzer";
+
+      .ParallaxExpand__whiteSpace {
         height: 60vh;
         width: 100vw;
         position: relative;
       }
-  
-      .ParallaxExpand__sticky__container{
+
+      .ParallaxExpand__sticky__container {
         height: 1000vh;
         width: 100vw;
         position: relative;
         z-index: 1;
         background-color: var(--bgColor);
         pointer-events: none;
-  
+
         .ParallaxExpand__sticky {
           position: sticky;
           top: 0;
           height: 100vh;
           overflow: hidden;
-      
+
           .image__wrapper {
             width: 100%;
             height: 100%;
@@ -586,50 +821,107 @@
             align-items: center;
             justify-content: center;
             // z-index: 10;
-  
-            .pixelated__grid__container{
+
+            .pixelated__grid__container {
               width: 40vw;
               height: 25vh;
               transform-origin: center center;
             }
-      
+
             .image__container {
               position: absolute;
               // width: 25vw;
               // height: 30vh;
-              
+
               img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
               }
             }
-      
-           &:nth-of-type(1) .image__container { top: 35vh; left: 37.5vw; width: 30vw; height: 7.5vh; }
-            &:nth-of-type(2) .image__container { top: 15vh; left: 5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(3) .image__container { top: 35vh; left: 5vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(4) .image__container { top: 40vh; left: 70vw; width: 25vw; height: 15vh;}
-            &:nth-of-type(5) .image__container { top: 62.5vh; left: 5vw; width: 30vw; height: 15vh; z-index: 1;}
-            &:nth-of-type(6) .image__container { top: 70vh; left: 37.5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(7) .image__container { top: 62.5vh; left: 70vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(8) .image__container { top: 12.5vh; left: 37.5vw; width: 27.5vw; height: 12.5vh; }
-            &:nth-of-type(9) .image__container { top: 20vh;; left: 67.5vw; ; width: 30vw; height: 15vh; }
-  
-  
+
+            &:nth-of-type(1) .image__container {
+              top: 35vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 7.5vh;
+            }
+
+            &:nth-of-type(2) .image__container {
+              top: 15vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(3) .image__container {
+              top: 35vh;
+              left: 5vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(4) .image__container {
+              top: 40vh;
+              left: 70vw;
+              width: 25vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(5) .image__container {
+              top: 62.5vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+              z-index: 1;
+            }
+
+            &:nth-of-type(6) .image__container {
+              top: 70vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(7) .image__container {
+              top: 62.5vh;
+              left: 70vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(8) .image__container {
+              top: 12.5vh;
+              left: 37.5vw;
+              width: 27.5vw;
+              height: 12.5vh;
+            }
+
+            &:nth-of-type(9) .image__container {
+              top: 20vh;
+              ;
+              left: 67.5vw;
+              ;
+              width: 30vw;
+              height: 15vh;
+            }
+
+
             &:nth-of-type(10) {
               .image__container {
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%); 
-                width: 30vw; 
-                height: 15vh; 
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 30vw;
+                height: 15vh;
               }
+
               .pixelated__grid__container {
                 position: absolute;
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%) translateZ(0) ; 
-                width: 27.5vw; 
+                left: 50%;
+                transform: translate(-50%, -50%) translateZ(0);
+                width: 27.5vw;
                 height: 17.5vw;
                 transform-origin: center center;
                 display: grid;
@@ -637,7 +929,7 @@
                 grid-template-columns: repeat(10, 1fr);
                 grid-auto-rows: 1fr;
                 gap: 0px;
-                
+
                 // Force grid tiles to be square using aspect-ratio
                 .pixelated__grid__tile {
                   aspect-ratio: 1/1;
@@ -647,18 +939,18 @@
                   will-change: transform;
                   backface-visibility: hidden;
                   contain: layout paint style;
-  
+
                   isolation: isolate;
-  
+
                   z-index: 1;
-                  
+
                   .pixelated__image__wrapper {
                     width: 100%;
                     height: 100%;
                   }
                 }
-  
-  
+
+
                 // .pixelated__grid__canvas{
                 //   width: 100%;
                 //   height: 100%;
@@ -672,7 +964,8 @@
             }
           }
         }
-         .ParallaxExpand__section__text{
+
+        .ParallaxExpand__section__text {
           position: absolute;
           bottom: 80vh;
           left: 50%;
@@ -683,36 +976,37 @@
           width: 80%;
         }
       }
-    
+
     }
   }
+
   @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
     .ParallaxExpand {
       height: 1910vh;
       position: relative;
       z-index: 10;
-      font-family: "Zodiak-Light";
-  
-      .ParallaxExpand__whiteSpace{
+      font-family: "Switzer";
+
+      .ParallaxExpand__whiteSpace {
         height: 60vh;
         width: 100vw;
         position: relative;
       }
-  
-      .ParallaxExpand__sticky__container{
+
+      .ParallaxExpand__sticky__container {
         height: 1000vh;
         width: 100vw;
         position: relative;
         z-index: 1;
         background-color: var(--bgColor);
         pointer-events: none;
-  
+
         .ParallaxExpand__sticky {
           position: sticky;
           top: 0;
           height: 100vh;
           overflow: hidden;
-      
+
           .image__wrapper {
             width: 100%;
             height: 100%;
@@ -723,50 +1017,107 @@
             align-items: center;
             justify-content: center;
             // z-index: 10;
-  
-            .pixelated__grid__container{
+
+            .pixelated__grid__container {
               width: 40vw;
               height: 25vh;
               transform-origin: center center;
             }
-      
+
             .image__container {
               position: absolute;
               // width: 25vw;
               // height: 30vh;
-              
+
               img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
               }
             }
-      
-            &:nth-of-type(1) .image__container { top: 35vh; left: 37.5vw; width: 30vw; height: 7.5vh; }
-            &:nth-of-type(2) .image__container { top: 15vh; left: 5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(3) .image__container { top: 35vh; left: 5vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(4) .image__container { top: 40vh; left: 70vw; width: 25vw; height: 15vh;}
-            &:nth-of-type(5) .image__container { top: 62.5vh; left: 5vw; width: 30vw; height: 15vh; z-index: 1;}
-            &:nth-of-type(6) .image__container { top: 70vh; left: 37.5vw; width: 30vw; height: 15vh;}
-            &:nth-of-type(7) .image__container { top: 62.5vh; left: 70vw; width: 25vw; height: 20vh;}
-            &:nth-of-type(8) .image__container { top: 12.5vh; left: 37.5vw; width: 27.5vw; height: 12.5vh; }
-            &:nth-of-type(9) .image__container { top: 20vh;; left: 67.5vw; ; width: 30vw; height: 15vh; }
-  
-  
+
+            &:nth-of-type(1) .image__container {
+              top: 35vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 7.5vh;
+            }
+
+            &:nth-of-type(2) .image__container {
+              top: 15vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(3) .image__container {
+              top: 35vh;
+              left: 5vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(4) .image__container {
+              top: 40vh;
+              left: 70vw;
+              width: 25vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(5) .image__container {
+              top: 62.5vh;
+              left: 5vw;
+              width: 30vw;
+              height: 15vh;
+              z-index: 1;
+            }
+
+            &:nth-of-type(6) .image__container {
+              top: 70vh;
+              left: 37.5vw;
+              width: 30vw;
+              height: 15vh;
+            }
+
+            &:nth-of-type(7) .image__container {
+              top: 62.5vh;
+              left: 70vw;
+              width: 25vw;
+              height: 20vh;
+            }
+
+            &:nth-of-type(8) .image__container {
+              top: 12.5vh;
+              left: 37.5vw;
+              width: 27.5vw;
+              height: 12.5vh;
+            }
+
+            &:nth-of-type(9) .image__container {
+              top: 20vh;
+              ;
+              left: 67.5vw;
+              ;
+              width: 30vw;
+              height: 15vh;
+            }
+
+
             &:nth-of-type(10) {
               .image__container {
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%); 
-                width: 30vw; 
-                height: 15vh; 
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 30vw;
+                height: 15vh;
               }
+
               .pixelated__grid__container {
                 position: absolute;
                 top: 50%;
-                left: 50%; 
-                transform: translate(-50%, -50%) translateZ(0) ; 
-                width: 27.5vw; 
+                left: 50%;
+                transform: translate(-50%, -50%) translateZ(0);
+                width: 27.5vw;
                 height: 17.5vw;
                 transform-origin: center center;
                 display: grid;
@@ -774,7 +1125,7 @@
                 grid-template-columns: repeat(10, 1fr);
                 grid-auto-rows: 1fr;
                 gap: 0px;
-                
+
                 // Force grid tiles to be square using aspect-ratio
                 .pixelated__grid__tile {
                   aspect-ratio: 1/1;
@@ -784,18 +1135,18 @@
                   will-change: transform;
                   backface-visibility: hidden;
                   contain: layout paint style;
-  
+
                   isolation: isolate;
-  
+
                   z-index: 1;
-                  
+
                   .pixelated__image__wrapper {
                     width: 100%;
                     height: 100%;
                   }
                 }
-  
-  
+
+
                 // .pixelated__grid__canvas{
                 //   width: 100%;
                 //   height: 100%;
@@ -809,7 +1160,8 @@
             }
           }
         }
-         .ParallaxExpand__section__text{
+
+        .ParallaxExpand__section__text {
           position: absolute;
           bottom: 80vh;
           left: 50%;
@@ -820,7 +1172,7 @@
           width: 80%;
         }
       }
-    
+
     }
   }
 }

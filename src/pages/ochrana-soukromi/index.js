@@ -1,6 +1,5 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import Footer from "@/components/common/footer"
 import TermsContent from "@/components/pages/gdpr/TermsPage"
 
@@ -73,9 +72,7 @@ export default function PrivacyPolicyPage() {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Navbar />
-                <Cursor />
+            <main lang="cs" key="privacy-policy-page">
                 <TermsContent />
                 <Footer />
             </main>

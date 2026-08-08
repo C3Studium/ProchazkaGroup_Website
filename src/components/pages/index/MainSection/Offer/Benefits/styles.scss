@@ -1,6 +1,7 @@
+@use "../../../../../../styles/system/_shortcuts.scss" as *;
 @media (min-aspect-ratio: 1/1) {
-    @media only screen and ( min-width: 1730px ) {
-        .Benefits{
+    @media only screen and (min-width: 1730px) {
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -10,9 +11,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 40%;
@@ -20,66 +21,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 5rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 5rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 5rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 50%;
                         color: var(--wText);
                         font-size: 1.3rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 65%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -87,48 +91,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 8rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 50%;
                         font-size: 1.3rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 2.5rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -138,8 +145,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -149,9 +157,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 40%;
@@ -159,66 +167,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 5rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 5rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 5rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 50%;
                         color: var(--wText);
                         font-size: 1.3rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 65%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -226,48 +237,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 8rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 50%;
                         font-size: 1.3rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 2.5rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -277,8 +291,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -288,9 +303,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 40%;
@@ -298,66 +313,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 4rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 4rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 4rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 50%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 65%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -365,48 +383,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 5rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 50%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 2rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -416,8 +437,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -427,9 +449,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 40%;
@@ -437,66 +459,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 3rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 50%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 65%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -504,48 +529,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 5rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 50%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 2rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -555,8 +583,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -566,9 +595,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 30%;
@@ -576,66 +605,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 3rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 70%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 55%;
                 height: 90%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -643,48 +675,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 5rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 70%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 2rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -694,8 +729,9 @@
             }
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 500px) {
-        .Benefits{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 500px) {
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -705,9 +741,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 30%;
@@ -715,66 +751,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 2rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 2rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 2rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 100%;
                         color: var(--wText);
                         font-size: 0.9rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 55%;
                 height: 90%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -782,48 +821,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 70%;
                         font-size: 0.9rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 1.5rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -833,8 +875,9 @@
             }
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .Benefits{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 25vh 5vw 10vh 5vw;
@@ -844,9 +887,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 30%;
@@ -854,66 +897,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 1.8rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 1.8rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 1.8rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 100%;
                         color: var(--wText);
                         font-size: 0.8rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 55%;
                 height: 90%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -921,48 +967,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 2rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 70%;
                         font-size: 0.8rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 1.3rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -976,7 +1025,7 @@
 
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 30vh 5vw 25vh 5vw;
@@ -986,9 +1035,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 40%;
@@ -996,66 +1045,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 4rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 4rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 4rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 80%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 65%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1063,48 +1115,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 5rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 60%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 2rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -1114,8 +1169,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 30vh 5vw 20vh 5vw;
@@ -1125,9 +1181,9 @@
             justify-content: center;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 40%;
@@ -1135,66 +1191,69 @@
                 justify-content: center;
                 align-items: flex-start;
                 flex-direction: column;
-                .data__item{
+
+                .data__item {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 3rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 100%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 65%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1202,48 +1261,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 90%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 1.8rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -1253,8 +1315,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 20vh 5vw 10vh 5vw;
@@ -1265,9 +1328,9 @@
             flex-direction: column-reverse;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 100%;
@@ -1275,66 +1338,69 @@
                 justify-content: center;
                 align-items: flex-end;
                 flex-wrap: wrap;
-                .data__item{
+
+                .data__item {
                     width: 50%;
                     height: 30%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 3rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 100%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 100%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1342,48 +1408,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 90%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 1.5rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -1393,8 +1462,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 20vh 5vw 10vh 5vw;
@@ -1405,9 +1475,9 @@
             flex-direction: column-reverse;
             gap: 10vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 100%;
@@ -1415,66 +1485,69 @@
                 justify-content: center;
                 align-items: flex-end;
                 flex-wrap: wrap;
-                .data__item{
+
+                .data__item {
                     width: 50%;
                     height: 30%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 3rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 3rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 100%;
                         color: var(--wText);
                         font-size: 1.1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 100%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1482,48 +1555,51 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 90%;
                         font-size: 1.1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: center;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 1.5rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;
@@ -1533,8 +1609,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .Benefits{
+        .Benefits {
             width: 100vw;
             height: 100vh;
             padding: 20vh 5vw 10vh 5vw;
@@ -1545,9 +1622,9 @@
             flex-direction: column-reverse;
             gap: 2.5vw;
             overflow: hidden;
-            
-        
-            .data__wrapperB{
+
+
+            .data__wrapperB {
                 z-index: 3;
                 display: flex;
                 width: 100%;
@@ -1555,66 +1632,69 @@
                 justify-content: center;
                 align-items: flex-end;
                 flex-wrap: wrap;
-                .data__item{
+
+                .data__item {
                     width: 50%;
                     height: 30%;
                     display: flex;
                     justify-content: center;
                     align-items: flex-end;
                     flex-direction: column;
-            
+
                     .number__wrapper {
                         width: 40%;
                         display: flex;
                         align-items: flex-start;
                         justify-content: flex-end;
-            
-                        h1{
+
+                        h1 {
                             font-size: 2rem;
                             font-weight: 300;
                             margin: 0;
                             color: var(--hColor);
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
                         }
-                        
+
                         .currency {
                             color: var(--hColor);
                             font-size: 2rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
-                        .suffix{
+
+                        .suffix {
                             color: var(--hColor);
                             font-size: 2rem;
                             font-weight: 300;
                             margin-left: 2px;
-                            font-family: "Zodiak-light";
+                            font-family: "Switzer";
 
                         }
                     }
-            
-                    p{
+
+                    p {
                         text-align: right;
                         width: 100%;
                         color: var(--wText);
                         font-size: 1rem;
                         font-weight: 300;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
 
                     }
                 }
             }
-            .text__container{
+
+            .text__container {
                 width: 100%;
                 height: 100%;
                 display: flex;
                 align-items: flex-start;
                 justify-content: flex-start;
                 flex-direction: column-reverse;
-        
-                .header{
+
+                .header {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1622,52 +1702,55 @@
                     justify-content: flex-end;
                     gap: 1rem;
                     color: var(--wText);
-        
-                    h3{
+
+                    h3 {
                         font-size: 2.5rem;
                         margin: 0;
-                        font-family: "Zodiak-light";     
+                        font-family: "Switzer";
                     }
-                    p{
+
+                    p {
                         width: 90%;
                         font-size: 1rem;
                         margin: 0;
                         padding-top: 1rem;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                     }
                 }
-        
-                .subtext{
+
+                .subtext {
                     width: 100%;
                     height: 70%;
                     position: relative;
                     display: flex;
                     align-items: flex-end;
                     justify-content: flex-end;
-        
-                    .subtext__container{
+
+                    .subtext__container {
                         width: 100%;
                         height: 100%;
                         display: flex;
                         align-items: center;
                         justify-content: flex-end;
 
-            
-                        p{
+
+                        p {
                             text-align: right;
                             margin: 0;
-                            span{
+
+                            span {
                                 font-size: 1.1rem;
                                 font-family: "Switzer-light";
                             }
                         }
                     }
-        
+
                 }
-    
-        
+
+
             }
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: 0;

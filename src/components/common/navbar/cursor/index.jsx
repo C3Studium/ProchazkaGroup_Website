@@ -9,6 +9,7 @@ export default function Cursor() {
     const { boundsRefs } = useCursorRef();
     const [activeHoveredRef, setActiveHoveredRef] = useState(null);
     const [CursorDimensions, setCursorDimensions] = useState({ width: 20, height: 20 });
+    const [cursorRadius, setCursorRadius] = useState(10);
     const [isTouchDevice, setIsTouchDevice] = useState(false);
     // I have refractured the code to use this state with null value, so I can use it to check if the bounds are hovered and which one - using true or false woulf activate all of them at once. 
     // This is important for the cursor to stick to the center of the hovered bounds
@@ -26,24 +27,56 @@ export default function Cursor() {
                 (window.DocumentTouch && document instanceof DocumentTouch)
             );
         };
-        
+
         setIsTouchDevice(checkTouch());
     }, []);
 
+    const getElementScale = useCallback((el) => {
+        if (!el) return { scaleX: 1, scaleY: 1 };
+        const computed = window.getComputedStyle(el);
+        const transformValue = computed.transform;
+        if (!transformValue || transformValue === "none") {
+            return { scaleX: 1, scaleY: 1 };
+        }
+        const Matrix = window.DOMMatrixReadOnly || window.WebKitCSSMatrix;
+        if (!Matrix) {
+            return { scaleX: 1, scaleY: 1 };
+        }
+        const matrix = new Matrix(transformValue);
+        return { scaleX: matrix.a || 1, scaleY: matrix.d || 1 };
+    }, []);
+
+    const updateCursorFromTarget = useCallback((target) => {
+        if (!target) return;
+        const { scaleX, scaleY } = getElementScale(target);
+        const baseWidth = target.offsetWidth || 0;
+        const baseHeight = target.offsetHeight || 0;
+        const width = baseWidth * scaleX;
+        const height = baseHeight * scaleY;
+        const computed = window.getComputedStyle(target);
+        const radiusValue = computed.borderRadius || "0px";
+        let parsedRadius = parseFloat(radiusValue);
+        if (radiusValue.includes("%")) {
+            parsedRadius = (Math.min(baseWidth, baseHeight) * parsedRadius) / 100;
+        }
+        const scaledRadius = parsedRadius * Math.min(scaleX, scaleY);
+        const fallbackRadius = Math.min(width, height) / 2;
+        setCursorDimensions({ width, height });
+        setCursorRadius(Number.isFinite(scaledRadius) ? scaledRadius : fallbackRadius);
+    }, [getElementScale]);
+
     useEffect(() => {
         if (activeHoveredRef) {
-            const { width, height } = activeHoveredRef.getBoundingClientRect();
-            const newWidth = width * 0.25;
-            const newHeight = height * 0.25;
-            setCursorDimensions({ width: newWidth, height: newHeight });
+            updateCursorFromTarget(activeHoveredRef);
         } else {
             setCursorDimensions({ width: 20, height: 20 });
+            setCursorRadius(10);
         }
-    }, [activeHoveredRef]);
+    }, [activeHoveredRef, updateCursorFromTarget]);
 
     const CursorSizeWidth = CursorDimensions.width;
     const CursorSizeHeight = CursorDimensions.height;
-    
+
 
     // Mouse position + smooth
     const mouse = {
@@ -69,7 +102,7 @@ export default function Cursor() {
 
     const manageMouseMove = useCallback((e) => {
         if (!ref.current || isTouchDevice) return;
-        
+
         const { clientX, clientY } = e;
         const { width: widthRef, height: heightRef } = ref.current.getBoundingClientRect();
 
@@ -77,6 +110,7 @@ export default function Cursor() {
             const boundsRect = activeHoveredRef.getBoundingClientRect();
             const center = { x: boundsRect.left + boundsRect.width / 2, y: boundsRect.top + boundsRect.height / 2 };
 
+            updateCursorFromTarget(activeHoveredRef);
             mouse.x.set((center.x - widthRef / 2) + (clientX - center.x) * 0.1);
             mouse.y.set((center.y - heightRef / 2) + (clientY - center.y) * 0.1);
         } else {
@@ -121,10 +155,10 @@ export default function Cursor() {
     useEffect(() => {
         if (!isTouchDevice) {
             boundsRefs.forEach((boundsRef) => {
-                if(boundsRef) {
+                if (boundsRef) {
                     const onHover = () => handleBoundsHover(boundsRef);
                     const onLeave = () => handleBoundsLeave(boundsRef);
-                    
+
                     boundsRef.addEventListener('mouseenter', onHover);
                     boundsRef.addEventListener('mouseleave', onLeave);
                     boundsRef.__onHover = onHover;
@@ -134,7 +168,7 @@ export default function Cursor() {
 
             return () => {
                 boundsRefs.forEach((boundsRef) => {
-                    if(boundsRef) {
+                    if (boundsRef) {
                         boundsRef.removeEventListener('mouseenter', boundsRef.__onHover);
                         boundsRef.removeEventListener('mouseleave', boundsRef.__onLeave);
                         delete boundsRef.__onHover;
@@ -145,10 +179,19 @@ export default function Cursor() {
         }
     }, [boundsRefs, handleBoundsHover, handleBoundsLeave, isTouchDevice]);
 
+
+    const template = ({ translateX = 0, translateY = 0, rotate = 0, scaleX = 1, scaleY = 1 }) => {
+        const tx = typeof translateX === "string" ? translateX : `${translateX}px`;
+        const ty = typeof translateY === "string" ? translateY : `${translateY}px`;
+        return `translate3d(${tx}, ${ty}, 0) rotate(${rotate}deg) scaleX(${scaleX}) scaleY(${scaleY})`;
+    }
+
     return isTouchDevice ? null : (
         <motion.div
             ref={ref}
             className='cursor'
+            key={"cursor"}
+            transformTemplate={template}
             style={{
                 translateX: smoothMouse.x,
                 translateY: smoothMouse.y,
@@ -156,10 +199,11 @@ export default function Cursor() {
                 scaleY: scale.y
             }}
             animate={{
-                borderRadius: CursorSizeWidth / 2,
+                borderRadius: cursorRadius,
                 width: CursorSizeWidth,
                 height: CursorSizeHeight
             }}
-        ></motion.div>
+        >
+        </motion.div>
     );
 }

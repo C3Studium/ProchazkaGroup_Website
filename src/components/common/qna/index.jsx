@@ -1,4 +1,3 @@
-import MainText from "@/components/anim/MainText";
 import { qnas } from "@/constants/pages/qna"
 import { AnimatePresence, motion, useInView } from "framer-motion"
 import Image from "next/image"
@@ -6,6 +5,7 @@ import { useState, useRef } from "react"
 import GetChars from "../navbar/body/getChars"
 import { usePerformance } from "@/context/PerformanceProvider"
 import Grid from "../grid";
+import MainText from "../TextAnim/MainText"
 
 const contentVariants = {
     open: {

@@ -1,6 +1,7 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
 @media (min-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1730px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -9,7 +10,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -20,16 +21,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -37,8 +38,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -46,8 +47,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -59,7 +60,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 3.5rem;
                         font-weight: 300;
@@ -71,26 +72,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -102,7 +103,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -113,69 +114,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 2rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 3rem;
                                 height: 3rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 2rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -184,7 +189,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -195,16 +200,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -212,8 +217,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -221,8 +226,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -234,7 +239,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 3.5rem;
                         font-weight: 300;
@@ -246,26 +251,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -277,7 +282,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -288,69 +293,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 2rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 3rem;
                                 height: 3rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 2rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -359,7 +368,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -370,16 +379,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -387,8 +396,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -396,8 +405,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -409,7 +418,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 3rem;
                         font-weight: 300;
@@ -421,26 +430,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -452,7 +461,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -463,69 +472,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.5rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 2rem;
                                 height: 2rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.5rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 1.1rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -534,7 +547,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -545,16 +558,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -562,8 +575,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -571,8 +584,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -584,7 +597,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 2.5rem;
                         font-weight: 300;
@@ -596,26 +609,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -627,7 +640,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -638,69 +651,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -709,7 +726,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -720,16 +737,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -737,8 +754,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -746,8 +763,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -759,7 +776,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 2.5rem;
                         font-weight: 300;
@@ -771,26 +788,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -802,7 +819,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -813,69 +830,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .ReviewsIntro{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -884,7 +905,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -895,16 +916,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -912,8 +933,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -921,8 +942,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 50%;
@@ -934,7 +955,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 2rem;
                         font-weight: 300;
@@ -946,26 +967,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 90%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -977,7 +998,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -988,69 +1009,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .ReviewsIntro{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -1059,7 +1084,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1070,16 +1095,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1087,8 +1112,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -1096,8 +1121,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 50%;
@@ -1109,7 +1134,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 50%;
                         font-size: 1.5rem;
                         font-weight: 300;
@@ -1121,26 +1146,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 90%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -1152,7 +1177,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -1163,61 +1188,64 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
@@ -1228,7 +1256,7 @@
 
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -1237,7 +1265,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1248,16 +1276,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1265,8 +1293,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -1274,8 +1302,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -1287,7 +1315,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 60%;
                         font-size: 3rem;
                         font-weight: 300;
@@ -1299,26 +1327,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -1330,7 +1358,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -1341,69 +1369,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.5rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 2rem;
                                 height: 2rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.5rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 1.1rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -1412,7 +1444,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1423,16 +1455,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1440,8 +1472,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -1449,8 +1481,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 60%;
@@ -1462,7 +1494,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 60%;
                         font-size: 2.5rem;
                         font-weight: 300;
@@ -1474,26 +1506,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -1505,7 +1537,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -1516,69 +1548,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 40vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -1587,7 +1623,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1598,16 +1634,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1615,8 +1651,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -1624,8 +1660,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 50%;
@@ -1637,7 +1673,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 70%;
                         font-size: 2rem;
                         font-weight: 300;
@@ -1649,26 +1685,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -1680,7 +1716,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -1691,69 +1727,73 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 55vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 font-weight: 400;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 45vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -1762,7 +1802,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1773,16 +1813,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1790,8 +1830,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -1799,8 +1839,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 50%;
@@ -1812,7 +1852,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 90%;
                         font-size: 2rem;
                         font-weight: 300;
@@ -1824,26 +1864,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -1855,7 +1895,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -1866,68 +1906,72 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 55vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;
             }
         }
     }
+
     @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .ReviewsIntro{
+        .ReviewsIntro {
             position: relative;
             display: flex;
             width: 100vw;
@@ -1936,7 +1980,7 @@
             align-items: center;
             overflow: hidden;
 
-            .header{
+            .header {
                 position: fixed;
                 top: 2.5vh;
                 left: 2.5vw;
@@ -1947,16 +1991,16 @@
                 width: 2.5vw;
                 height: 2.5vw;
                 mix-blend-mode: difference;
-                
-                a{
+
+                a {
                     width: 100%;
                     height: 100%;
                     display: flex;
                     justify-content: center;
                     align-items: center;
                     text-decoration: none;
-                    
-                    h2{
+
+                    h2 {
                         font-size: 1.5rem;
                         margin: 0;
                         color: var(--wText);
@@ -1964,8 +2008,8 @@
                     }
                 }
             }
-        
-            .ReviewsIntro__Wrapper{
+
+            .ReviewsIntro__Wrapper {
                 position: absolute;
                 display: flex;
                 width: 100%;
@@ -1973,8 +2017,8 @@
                 justify-content: flex-end;
                 align-items: center;
                 will-change: transform, opacity;
-        
-                .Heading{
+
+                .Heading {
                     z-index: 3;
                     position: absolute;
                     top: 50%;
@@ -1986,7 +2030,7 @@
                     align-items: center;
 
 
-                    h1{
+                    h1 {
                         width: 90%;
                         font-size: 2rem;
                         font-weight: 300;
@@ -1998,26 +2042,26 @@
                         z-index: 3;
                         font-family: "Switzer-Light";
 
-                        .highlighted{
+                        .highlighted {
                             color: var(--hColor);
                         }
                     }
                 }
 
-                .background__container{
+                .background__container {
                     position: absolute;
                     top: 0;
                     left: 0;
                     width: 100vw;
                     height: 100vh;
 
-                    img{
+                    img {
                         width: 100%;
                         height: 100%;
                         object-fit: cover;
                     }
 
-                    .cover{
+                    .cover {
                         position: absolute;
                         top: 0;
                         left: 0;
@@ -2029,7 +2073,7 @@
                     }
                 }
 
-                .rect__container{
+                .rect__container {
                     position: absolute;
                     bottom: 0;
                     left: 0;
@@ -2040,60 +2084,63 @@
                     align-items: flex-end;
                     padding: 0 2.5vw;
 
-                    .stats__container{
+                    .stats__container {
                         width: 55vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
                         align-items: center;
                         gap: 2.5vw;
-                        font-family: "Zodiak-Light";
+                        font-family: "Switzer";
 
-                        .stat{
+                        .stat {
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             gap: 0.5rem;
                             flex-direction: row;
-                            p{
+
+                            p {
                                 color: var(--wText);
                                 font-size: 1.3rem;
                                 margin: 0;
                             }
-                            img{
+
+                            img {
                                 width: 1.5rem;
                                 height: 1.5rem;
                             }
                         }
                     }
 
-                    .logo__container{
+                    .logo__container {
                         width: 50vw;
                         height: 100%;
                         display: flex;
                         justify-content: flex-start;
                         align-items: center;
-                        h3{
+
+                        h3 {
                             color: var(--wText);
                             font-size: 1.3rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
-                        p{
+                        p {
                             color: var(--wText);
                             font-size: 0.9rem;
                             font-weight: 300;
                             margin: 0;
-                            font-family: "Zodiak-Medium";
+                            font-family: "Switzer";
                         }
 
                     }
                 }
             }
-            
-            .button__container{
+
+            .button__container {
                 position: absolute;
                 bottom: 10%;
                 left: 2.5%;

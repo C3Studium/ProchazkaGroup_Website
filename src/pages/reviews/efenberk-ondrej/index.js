@@ -1,56 +1,55 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import { useFetchDatabase } from "@/hooks/useFetchDatabase"
 import { useEffect, useState } from "react"
-import { 
+import {
     FaEnvelope,
-    FaFacebookF, 
-    FaInstagram, 
-    FaLinkedinIn, 
-    FaTwitter, 
+    FaFacebookF,
+    FaInstagram,
+    FaLinkedinIn,
+    FaTwitter,
 } from 'react-icons/fa';
 import ContactIntro from "@/components/pages/personReviews/contact"
 
 export default function PersonFeebackPage2() {
-    const {fetchClovek} = useFetchDatabase()
-    
-        const [personData, setPersonData] = useState({
-            name: 'Ondřej Efenberk',
-            moto: 'Důležité je být připraven než v budoucnu nemile překvapen.',
-            number: '03',
-            databaseName: 'Ondřej Efenberk'
-        })
-        const srcbg ="/assets/backgrounds/secondOffice.webp"
-        const srcp = "/assets/portraits/business/17.webp"
+    const { fetchClovek } = useFetchDatabase()
 
-        const icons = [
-            { name: "mail", src: FaEnvelope, href: "mailto:ondrej.efenberk@ovbmail.cz"},
-            { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/ondrej.efenberk?locale=cs_CZ" },
-            { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/ondrej_efenberk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
+    const [personData, setPersonData] = useState({
+        name: 'Ondřej Efenberk',
+        moto: 'Důležité je být připraven než v budoucnu nemile překvapen.',
+        number: '03',
+        databaseName: 'Ondřej Efenberk'
+    })
+    const srcbg = "/assets/backgrounds/secondOffice.webp"
+    const srcp = "/assets/portraits/business/17.webp"
+
+    const icons = [
+        { name: "mail", src: FaEnvelope, href: "mailto:ondrej.efenberk@ovbmail.cz" },
+        { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/ondrej.efenberk?locale=cs_CZ" },
+        { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/ondrej_efenberk?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==" },
         //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/" }
-        ]
-    
-        useEffect(() => {
-            const loadData = async () => {
-                try {
-                    const data = await fetchClovek("Ondřej Efenberk")
-                    if (data && data.length > 0) {
-                        setPersonData(prev => ({
-                            ...prev,
-                            name: data[0].name,
-                            moto: data[0].moto
-                        }))
-                    }
-                }
-                catch (err) {
-                    console.log(err)
+    ]
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await fetchClovek("Ondřej Efenberk")
+                if (data && data.length > 0) {
+                    setPersonData(prev => ({
+                        ...prev,
+                        name: data[0].name,
+                        moto: data[0].moto
+                    }))
                 }
             }
-            loadData();
-        }, [fetchClovek])
-    
-    return(
+            catch (err) {
+                console.log(err)
+            }
+        }
+        loadData();
+    }, [fetchClovek])
+
+    return (
         <>
             <Head>
                 <title>{`${personData.name} | Finanční Poradce | Procházka Group`}</title>
@@ -119,10 +118,8 @@ export default function PersonFeebackPage2() {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Cursor />
-                <Navbar />
-                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp}/>
+            <main lang="cs" key="person-page">
+                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp} />
             </main>
         </>
     )

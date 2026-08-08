@@ -1,4 +1,4 @@
-import SubText from "@/components/anim/SubText";
+import SubText from "@/components/common/TextAnim/SubText";
 import Grid from "@/components/common/grid";
 import { useScroll, useTransform, motion } from "framer-motion";
 import Image from "next/image";
@@ -99,10 +99,10 @@ export default function Intro() {
         },
     ]
 
-    return(
+    return (
         <motion.div className="Intro" ref={sectionRef} style={{ y: moveY }}>
             <div className="Intro__sticky__wrapper">
-                <Grid size="20vh" key={"Intro__sticky__wrapper"}/>
+                <Grid size="20vh" key={"Intro__sticky__wrapper"} />
                 <div className="Intro__container">
                     <div className="Intro__header">
                         {points.map((item, index) => {
@@ -114,16 +114,16 @@ export default function Intro() {
                                 </motion.div>
                             )
                         }
-                    )}
+                        )}
                     </div>
                     <div className="Intro__text">
-                        <SubText initialColor="#050A10" text={"Za každou novou smlouvu dostanete přímou odměnu, aniž by kdokoli musel něco platit navíc. Pomáháte, budujete, vyděláváte. To je smysl programu."}/>
+                        <SubText initialColor="#050A10" text={"Za každou novou smlouvu dostanete přímou odměnu, aniž by kdokoli musel něco platit navíc. Pomáháte, budujete, vyděláváte. To je smysl programu."} />
                     </div>
                 </div>
 
                 <div className="Image__container">
                     {/* Container with direct CSS clip-path */}
-                    <div 
+                    <div
                         style={{
                             position: 'relative',
                             width: '100%',
@@ -139,7 +139,7 @@ export default function Intro() {
                             const { src, alt } = item
                             return (
                                 <motion.div className="Intro__image__container" key={`introImage${index}`} style={{ opacity: item.imgOpacity }}>
-                                    <Image 
+                                    <Image
                                         src={src}
                                         fill={true}
                                         alt={alt}

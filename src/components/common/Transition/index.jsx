@@ -1,171 +1,29 @@
 'use client'
-import { usePathname } from "next/navigation";
+import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
 import { useGlobalContext } from "@/context/LoadProvider";
 import Preloader from "../PreLoader";
-import { useEffect } from "react";
 
 
-const childrenWrapper = {
-    initial: {
-        opacity: 1,
-        y: 0,
-    },
-    animate: {
-        opacity: 1,
-        y: 0,
-    },
-    exit: {
-        opacity: 1,
-        y: 20,
-        transition: {
-            duration: 1.5,
-            ease: [0.76, 0, 0.24, 1],
-            delay: 0.5
-        }
-    }
-}
-const background = {
-    initial: {
-        x: '0'
-    },
-    enter: {
-        x: '-100%',
-        transition: {duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.5}
-    },
-    exit: {
-        x: '0',
-        transition: {duration: 0.7, ease: [0.76, 0, 0.24, 1]}
-    }
-}
-
-const PathnameText = {
-    initial: {
-        x: '0',
-        opacity: 1,
-    },
-    enter: {
-        x: '-800%',
-        opacity: 0,
-        transition: {duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.3},
-    },
-    exit: {
-        x: '0',
-        opacity: 1,
-        transition: {duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.5}
-    }
-}
-
-const rowSlide = {
-    initial: {
-      x: '0',
-    },
-    enter: (i) => ({
-      x: '-100%',
-      transition: { 
-        duration: 0.5, 
-        ease: [0.76, 0, 0.24, 1], 
-        delay: ((rows.length - i - 1) * 0.1 ) + 0.3 },
-    }),
-    exit: (i) => ({
-      x: '0',
-      transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: (i * 0.15 ) + 0.3  },
-    }),
-};
-const textExplosionHover = (initialColor) => ({
-    initial: {
-        scale: 1,
-        opacity: 0.5,         // Start with opacity 0.5
-        color: initialColor,
-        y: 50                 // Start positioned below
-    },
-    enter: (i) => ({
-        scale: 1,             // Maintain scale during enter
-        opacity: 1,           // Fade in to full opacity
-        color: initialColor,
-        y: 0,                 // Move up to original position
-        transition: {
-            duration: 0.4,
-            ease: [0.76, 0, 0.24, 1],
-            delay: i[0],
-            opacity: { 
-                duration: 0.4, 
-                ease: 'easeOut',
-                delay: i[0] 
-            },
-            y: { 
-                duration: 0.4, 
-                ease: 'easeOut',
-                delay: i[0] 
-            }
-        }
-    }),
-    exit: (i) => ({
-        scale: 1,             // Maintain scale during exit
-        opacity: [1, 1, 0.5], // Fade out to opacity 0.5 in the last 10%
-        color: [initialColor, initialColor, '#00F0FF'],
-        y: [0, 25, 50],       // Move down from midpoint to y:50 in the last 10%
-        transition: {
-            duration: 0.4,
-            ease: [0.76, 0, 0.24, 1],
-            delay: i[1],
-            opacity: { 
-                times: [0, 0.9, 1], // Trigger opacity change in the last 10%
-                duration: 0.4, 
-                ease: 'easeIn',
-                delay: i[1] 
-            },
-            y: { 
-                times: [0, 0.9, 1], // Trigger y movement in the last 10%
-                duration: 0.4, 
-                ease: 'easeIn',
-                delay: i[1] 
-            }
-        }
+const GetChars = ({ text }) => {
+    return text.split('').map((char, i) => {
+        return (
+            <span key={i}>{char}</span>
+        )
     })
-});
+}
 
-const getChars = ({ text, initialColor }) => {
-    if (!text) {
-        console.warn('getChars: "text" is undefined or null.');
-        return null; // Or return a default value/component
-    }
 
-    let chars = [];
-
-    text.split('').forEach((char, i) => {
-        if (char === ' ') {
-            // Render a non-animated space
-            chars.push(
-                <span
-                    key={`space-${i}`}
-                    style={{
-                        display: 'inline-block',
-                        width: '0.3em', // Adjust spacing as needed
-                    }}
-                >
-                    &nbsp;
-                </span>
-            );
-        } else {
-            chars.push(
-                <motion.span
-                    key={`${char}-${i}`}
-                    variants={textExplosionHover(initialColor)}
-                    custom={[i * 0.02, (text.length - i) * 0.02]}
-                    initial="initial"
-                    animate="enter"
-                    exit="exit"
-                    className="char"
-                    style={{ display: 'inline-block', marginRight: '0.02em' }}
-                >
-                    {char}
-                </motion.span>
-            );
-        }
-    });
-
-    return chars;
+const childrenSlide = {
+    initial: {
+        opacity: 0,
+    },
+    enter: {
+        opacity: 1,
+    },
+    exit: {
+        opacity: 0,
+    },
 };
 
 const routes = {
@@ -187,96 +45,96 @@ const rows = [
     {
         number: 0,
     },
-    {
-        number: 1,
-    },
-    {
-        number: 2,
-    }
 ]
 
 
-export default function Transition ({ children }) {
-    const pathname = usePathname();
+export default function Transition({ children }) {
+    const router = useRouter();
+    const pathname = router.asPath.split('?')[0].split('#')[0];
     const routeText = routes[pathname] || '404';
-    const { preloaderRun, firstLoad } = useGlobalContext();
+    const { firstLoad } = useGlobalContext();
 
-    // Disable/enable Lenis scrolling when preloader is active
-    useEffect(() => {
-        // Access the global lenis instance
-        if (typeof window === 'undefined' || !window.lenis) return;
-        
-        if (firstLoad && pathname === '/') {
-            // Disable scrolling when preloader is active
-            window.lenis.stop();
-            document.body.style.overflow = 'hidden';
-        } else {
-            // Re-enable scrolling when preloader is done
-            window.lenis.start();
-            document.body.style.overflow = '';
+
+    const PathnameText = {
+        initial: {
+            x: !firstLoad ? '0%' : '-800%',
+            opacity: 1,
+        },
+        enter: {
+            x: '-800%',
+            opacity: 0,
+            transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.3 },
+        },
+        exit: {
+            x: !firstLoad ? '0%' : '-800%',
+            opacity: 1,
+            transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: 0.5 }
         }
-        
-        // Cleanup function to ensure scrolling is re-enabled
-        return () => {
-            if (typeof window !== 'undefined' && window.lenis) {
-                window.lenis.start();
-                document.body.style.overflow = '';
-            }
-        };
-    }, [firstLoad, pathname]);
+    }
 
-  return (
-    <AnimatePresence mode="wait">
-        <motion.div 
-            className="Transition__main"
-            key={`transition${pathname}`}
+    const rowSlide = {
+        initial: {
+            x: !firstLoad ? '0%' : '100%',
+        },
+        enter: (i) => ({
+            x: '100%',
+            transition: {
+                duration: 0.5,
+                ease: [0.76, 0, 0.24, 1],
+                delay: ((rows.length - i - 1) * 0.1) + 0.3
+            },
+        }),
+        exit: (i) => ({
+            x: !firstLoad ? '0%' : '100%',
+            transition: { duration: 0.7, ease: [0.76, 0, 0.24, 1], delay: (i * 0.15) + 0.3 },
+        }),
+    };
+
+    return (
+        <AnimatePresence
+            mode="wait"
+            onExitComplete={() => {
+                window.scrollTo(0, 0);
+                if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
+            }}
         >
-            <motion.div
-                className='Transition__body__background'
-                variants={background}
-                initial='initial'
-                animate='enter'
-                exit='exit'
-            ></motion.div>
-            <motion.div 
-                className='Transition__rows__container'
-                variants={background}
-                initial='initial'
-                animate='enter'
-                exit='exit'
-            >
-                {rows.map((row, index) => {
-                    const { number } = row;
-                    return (
+            {rows.map((row, index) => {
+                const { number } = row;
+                return (
                     <motion.div
-                        key={`rowsr${number}`}
-                        className='navbar__body__row'
+                        key={`rowsr${number}-${pathname}`}
+                        className='Transition__body__row'
                         variants={rowSlide}
                         initial='initial'
                         animate='enter'
                         exit='exit'
                         custom={index} //ensure the index is passed as a custom prop
                     ></motion.div>
-                    );
-                })}
-            </motion.div>
-            {/* Page Text */}
-            <motion.div 
+                );
+            })}
+            <motion.div
                 className="Transition__PageText"
                 variants={PathnameText}
                 initial='initial'
                 animate='enter'
                 exit='exit'
+                key={`transition${pathname}text`}
             >
                 <p>
-                    {getChars({ text: routeText, initialColor: '#fff' })}
+                    <GetChars text={routeText} />
                 </p>
             </motion.div>
-        </motion.div>
-        <AnimatePresence mode="wait">
-            {firstLoad && <Preloader number={100} staggers={8} key='preloader'/>}
+            {firstLoad && <Preloader key={`preloader-${pathname}`} />}
+            <motion.div
+                className="Transition__children__wrapper"
+                key={`transition${pathname}children`}
+                variants={childrenSlide}
+                initial='initial'
+                animate='enter'
+                exit='exit'
+            >
+                {children}
+            </motion.div>
         </AnimatePresence>
-            {children}  
-    </AnimatePresence>
-  );
+    );
 }

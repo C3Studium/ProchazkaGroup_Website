@@ -34,7 +34,7 @@ const nextConfig = {
       }
     ],
     // Add configured qualities to fix warnings
-    qualities: [60, 80, 90, 100],
+    qualities: [60,70, 80, 90, 100],
     // Improve image optimization settings
     formats: ['image/webp'],
     minimumCacheTTL: 60,

@@ -15,12 +15,12 @@ export default function Page404() {
                 <meta name="description" content="Omlouváme se, ale požadovaná stránka nebyla nalezena. Navštivte naši hlavní stránku Procházka Group, součást OVB Allfinanz, pro více informací o finančním poradenství." />
                 <meta name="robots" content="noindex, nofollow" />
                 <link rel="canonical" href="https://prochazkagroup.cz" />
-                
+
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:title" content="404: Stránka nenalezena | Procházka Group" />
                 <meta property="og:description" content="Omlouváme se, ale požadovaná stránka nebyla nalezena. Procházka Group, součást OVB Allfinanz." />
-                
+
                 {/* Error page specific */}
                 <meta name="prerender-status-code" content="404" />
 
@@ -53,9 +53,7 @@ export default function Page404() {
                     })}
                 </script>
             </Head>
-            <main>
-                <Cursor />
-                <Navbar />
+            <main key="404">
                 <Intro404 />
             </main>
         </>

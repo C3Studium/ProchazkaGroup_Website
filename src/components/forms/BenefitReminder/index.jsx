@@ -1,22 +1,22 @@
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton"
+import RoundButton from "@/components/common/ui/stickyButtons/buttons/RoundButton"
 import { people as staticPeople } from "@/constants/people"
 import { useToast } from "@/hooks/use-toast"
 import { AnimatePresence, motion, useScroll, useSpring, useTransform } from "framer-motion"
 import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { useFetchDatabase } from "@/hooks/useFetchDatabase"
-import MainText from "@/components/anim/MainText"
+import MainText from "@/components/common/TextAnim/MainText"
 import Grid from "@/components/common/grid"
 import { usePerformance } from "@/context/PerformanceProvider"
-import SubText from "@/components/anim/SubText"
+import SubText from "@/components/common/TextAnim/SubText"
 import ChooseBar from "@/components/common/chooseBar"
 import { trackEvent } from "@/hooks/trackEvent"
-import ContactModem from "@/components/modems/ContactModem"
+import ContactModem from "@/components/modems/Contact"
 
 
 export default function BenefitReminder() {
-    const [ menuOpen, setMenuOpen ] = useState(false)
-    const [ currentIndex, setCurrentIndex ] = useState(0)
+    const [menuOpen, setMenuOpen] = useState(false)
+    const [currentIndex, setCurrentIndex] = useState(0)
     const [previewIndex, setPreviewIndex] = useState(null)
     const [isMobile, setIsMobile] = useState(false)
     const [peopleData, setPeopleData] = useState(staticPeople)
@@ -28,30 +28,30 @@ export default function BenefitReminder() {
     const sectionRef = useRef(null)
     const subtextRef = useRef(null)
     const mainTextRef = useRef(null)
-    
+
     // Set up scroll tracking for parallax effects
     const { scrollYProgress } = useScroll({
         target: sectionRef,
         offset: ["start end", "end start"]
     })
-    
+
     // Create smooth scroll progress
     const smoothProgress = useSpring(scrollYProgress, {
         stiffness: 300,
         damping: 30,
         restDelta: 0.001
     })
-    
+
     // Parallax transforms for heading elements
     const subtextY = useTransform(
-        smoothProgress, 
-        [0, 0.5, 1], 
+        smoothProgress,
+        [0, 0.5, 1],
         shouldReduceAnimations ? [0, 0, 0] : [-30, 0, 30]
     )
-    
+
     const mainTextY = useTransform(
-        smoothProgress, 
-        [0, 0.5, 1], 
+        smoothProgress,
+        [0, 0.5, 1],
         shouldReduceAnimations ? [0, 0, 0] : [40, 0, -40]
     )
 
@@ -73,7 +73,7 @@ export default function BenefitReminder() {
         [0, 0.1, 0.2],
         [1, 0.8, 0]
     )
-    
+
     useEffect(() => {
         setIsMobile(/iPhone|iPad|iPod|Android/i.test(navigator.userAgent))
     }, [])
@@ -105,8 +105,8 @@ export default function BenefitReminder() {
     const activeIndex = previewIndex ?? currentIndex
 
 
-    const {fetchPeople} = useFetchDatabase()
-            
+    const { fetchPeople } = useFetchDatabase()
+
     useEffect(() => {
         const loadPeopleData = async () => {
             try {
@@ -145,7 +145,7 @@ export default function BenefitReminder() {
         loadPeopleData();
     }, []);
 
-     const handleCopyName = async () => {
+    const handleCopyName = async () => {
         // Open the contact modal instead of copying phone number
         setIsOpen(true)
 
@@ -182,9 +182,9 @@ export default function BenefitReminder() {
                 />
             </motion.div>
 
-            <Grid size="20vh" key={"BenefitReality"}/>
+            <Grid size="20vh" key={"BenefitReality"} />
             <div className="BenefitReminder__Header">
-                <motion.div 
+                <motion.div
                     className="Main__text"
                     ref={subtextRef}
                     style={{ y: subtextY }}
@@ -193,28 +193,28 @@ export default function BenefitReminder() {
                         <h3>
                             01
                         </h3>
-                        <SubText className={"subtext__Container"} text={"80 % našich členů získá svou první odměnu do dvou týdnů."} initialColor="#050A10"/>
+                        <SubText className={"subtext__Container"} text={"80 % našich členů získá svou první odměnu do dvou týdnů."} initialColor="#050A10" />
                     </div>
                 </motion.div>
-                <motion.div 
+                <motion.div
                     className="Header"
                     ref={mainTextRef}
                     style={{ y: mainTextY }}
                 >
-                    <MainText initialColor={"#050A10"} text='Přidejte se, doporučte a začněte získávat.'/>
+                    <MainText initialColor={"#050A10"} text='Přidejte se, doporučte a začněte získávat.' />
                 </motion.div>
             </div>
             <div className="BenefitReminder__Personal__wrapper">
                 <div className="BenefitReminder__Personal__choice">
                     <div className="BenefitReminder__Personal__choice__container">
-                        {peopleData.map(( person, i) => {
+                        {peopleData.map((person, i) => {
                             const { name, likes, reviews, moto, src, alt } = person
 
                             return (
                                 <div className="BenefitReminder__Personal__choice__wrapper" key={`wrappersfs${i}`}>
-                                    <div className="BenefitReminder__Personal__choice__image__container" key={`wsarappersfs${i}`} style={{ zIndex: 1 + i}}>
+                                    <div className="BenefitReminder__Personal__choice__image__container" key={`wsarappersfs${i}`} style={{ zIndex: 1 + i }}>
                                         <AnimatePresence mode="wait">
-                                            <motion.div 
+                                            <motion.div
                                                 key={activeIndex}
                                                 className="BenefitReminder__Personal__choice__image"
                                                 initial={{ opacity: 0, x: -100 }}
@@ -222,9 +222,9 @@ export default function BenefitReminder() {
                                                 exit={{ opacity: 0, x: -100 }}
                                                 transition={{ duration: 0.2 }}
                                             >
-                                                <Image 
-                                                    src={peopleData[activeIndex].src} 
-                                                    alt={peopleData[activeIndex].alt} 
+                                                <Image
+                                                    src={peopleData[activeIndex].src}
+                                                    alt={peopleData[activeIndex].alt}
                                                     fill={true}
                                                     sizes="50vw"
                                                     priority={false}
@@ -234,20 +234,20 @@ export default function BenefitReminder() {
                                                     blurDataURL="data:image/webp"
                                                 />
                                             </motion.div>
-                                            </AnimatePresence>
-                                            
+                                        </AnimatePresence>
+
                                     </div>
                                     <div className="BenefitReminder__Personal__choice__Data__container">
                                         <div className="BenefitReminder__choice__Input">
                                             <div className="person__container">
                                                 <AnimatePresence mode="wait">
-                                                    <motion.div 
-                                                        key={activeIndex} 
+                                                    <motion.div
+                                                        key={activeIndex}
                                                         className="name"
                                                         initial={{ opacity: 0, y: -20 }}
                                                         animate={{ opacity: 1, y: 0 }}
                                                         exit={{ opacity: 0, y: -20 }}
-                                                        transition={{ 
+                                                        transition={{
                                                             duration: 0.2,
                                                             ease: "easeInOut"
                                                         }}
@@ -273,11 +273,11 @@ export default function BenefitReminder() {
                                                         transition={{ duration: 0.2 }}
                                                         style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                                     >
-                                                        <Image 
-                                                            src='/assets/svg/arrowup.svg' 
-                                                            alt="arrow" 
-                                                            width={30} 
-                                                            height={30} 
+                                                        <Image
+                                                            src='/assets/svg/arrowup.svg'
+                                                            alt="arrow"
+                                                            width={30}
+                                                            height={30}
                                                             quality={60}
                                                             priority={false}
                                                             loading="lazy"
@@ -300,56 +300,56 @@ export default function BenefitReminder() {
                                         </div>
                                         <div className="Reviews_stats">
                                             <AnimatePresence mode="wait">
-                                                <motion.div 
+                                                <motion.div
                                                     key={activeIndex}
                                                     className="ThumsUp"
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
-                                                    transition={{ 
+                                                    transition={{
                                                         duration: 0.2,
                                                         delay: 0.1
                                                     }}
                                                 >
                                                     <p>{peopleData[activeIndex].likes}</p>
-                                                    <Image  
-                                                        src='/assets/svg/thumbsup.svg' 
-                                                        alt="thumbsUp_icon" 
-                                                        width={50} 
+                                                    <Image
+                                                        src='/assets/svg/thumbsup.svg'
+                                                        alt="thumbsUp_icon"
+                                                        width={50}
                                                         height={50}
                                                         priority={false}
                                                         quality={60}
                                                         loading="lazy"
                                                         placeholder="blur"
                                                         blurDataURL="data:image/svg"
-                                                    /> 
+                                                    />
                                                 </motion.div>
                                             </AnimatePresence>
 
                                             <AnimatePresence mode="wait">
-                                                <motion.div 
+                                                <motion.div
                                                     key={activeIndex}
                                                     className="Comments"
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
                                                     exit={{ opacity: 0 }}
-                                                    transition={{ 
+                                                    transition={{
                                                         duration: 0.2,
                                                         delay: 0.15
                                                     }}
                                                 >
                                                     <p>{peopleData[activeIndex].reviews}</p>
-                                                    <Image  
-                                                        src='/assets/svg/comment.svg' 
-                                                        alt="review__icon" 
-                                                        width={50} 
+                                                    <Image
+                                                        src='/assets/svg/comment.svg'
+                                                        alt="review__icon"
+                                                        width={50}
                                                         height={50}
                                                         priority={false}
                                                         quality={60}
                                                         loading="lazy"
                                                         placeholder="blur"
                                                         blurDataURL="data:image/webp"
-                                                    /> 
+                                                    />
                                                 </motion.div>
                                             </AnimatePresence>
                                         </div>
@@ -357,23 +357,23 @@ export default function BenefitReminder() {
                                 </div>
                             )
                         })}
-                    </div> 
+                    </div>
                 </div>
-            </div>  
+            </div>
 
             <div className="CTA__Wrapper">
-                <div className="devider__line"/>
-                <motion.div style={{left: buttonX}} className="button__wrapper" onClick={handleCopyName}>
-                    <RoundButton href='' text='Zapojit se hned' disableLink={true}/>
-                </motion.div> 
+                <div className="devider__line" />
+                <motion.div style={{ left: buttonX }} className="button__wrapper" onClick={handleCopyName}>
+                    <RoundButton href='' text='Zapojit se hned' disableLink={true} />
+                </motion.div>
             </div>
-                    
-        
+
+
             <div className="Footer__wrapper">
                 <h2>?</h2>
                 <p>Nejste našimi Klienty?</p>
                 <div className="svg__wrapper">
-                    <motion.div 
+                    <motion.div
                         className="svg__container"
                         animate={{
                             y: [0, 10, 0],
@@ -385,10 +385,10 @@ export default function BenefitReminder() {
                             repeatType: "loop"
                         }}
                     >
-                        <Image 
-                            src='/assets/svg/ArrowDown.svg' 
-                            alt="arrow-down" 
-                            height={60} 
+                        <Image
+                            src='/assets/svg/ArrowDown.svg'
+                            alt="arrow-down"
+                            height={60}
                             width={30}
                             priority={false}
                             quality={60}

@@ -1,11 +1,11 @@
 import { useRef } from "react";
 import { useScroll, useTransform, motion } from "framer-motion";
-import MainText from "@/components/anim/MainText";
-import SubText from "@/components/anim/SubText";
+import SubText from "@/components/common/TextAnim/SubText";
 import Image from "next/image";
 import Grid from "@/components/common/grid";
+import MainText from "@/components/common/TextAnim/MainText";
 
-export default function IntroOffer(){
+export default function IntroOffer() {
     const sectionRef = useRef(null);
 
     const { scrollYProgress } = useScroll({
@@ -32,49 +32,49 @@ export default function IntroOffer(){
     const subTextOpacity = useTransform(scrollYProgress, [0.15, 0.35, 0.65, 0.85], [0, 1, 1, 0]);
     const subTextScale = useTransform(scrollYProgress, [0.15, 0.35, 0.65, 0.85], [0.8, 1, 1, 1]);
 
-    return(
+    return (
         <section className="IntroOffer" ref={sectionRef} id="offer">
-            <Grid size="20vh"/>
+            <Grid size="20vh" />
             <div className="IntroOffer__container">
-                <motion.div 
+                <motion.div
                     className="IntroOffer__header"
-                    style={{ 
+                    style={{
                         y: headerY,
                         opacity: headerOpacity,
                         scale: headerScale,
                         rotateX: headerRotateX,
-                        transformPerspective: "1000px" 
+                        transformPerspective: "1000px"
                     }}
                 >
                     <div className="header__wrapper">
                         <h3>δ</h3>
                         <p>Náším snem je vaše<br /> finanční nezávislost: </p>
                     </div>
-                    <div className="devider"/>
+                    <div className="devider" />
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                     className="IntroOffer__MainText"
-                    style={{ 
+                    style={{
                         y: mainTextY,
                         opacity: mainTextOpacity,
                         scale: mainTextScale,
                     }}
                 >
-                    <MainText 
+                    <MainText
                         text={'NEMÁTE NA SVÉ FINANCE ČAS?<br /><br />HODINA VAŠEHO ČASU VÁS DĚLÍ OD<br />OKAMŽIKU, KDY SE<br />O VAŠE FINANCE BUDE STARAT OPRAVDOVÝ PROFESIONÁL.'}
                     />
-                    
-                    <motion.div 
+
+                    <motion.div
                         className="IntroOffer__image__container"
-                        style={{ 
+                        style={{
                             y: imageY,
                             scale: imageScale,
                             opacity: imageOpacity,
                             rotate: imageRotate
                         }}
                     >
-                        <Image 
+                        <Image
                             src="/assets/prebuild/svg/shapeMain.svg"
                             fill={true}
                             alt="shape"
@@ -84,18 +84,18 @@ export default function IntroOffer(){
                         />
                     </motion.div>
                 </motion.div>
-                
-                <motion.div 
+
+                <motion.div
                     className="IntroOffer__subText"
-                    style={{ 
+                    style={{
                         y: subTextY,
                         opacity: subTextOpacity,
                         scale: subTextScale,
                     }}
                 >
-                    <SubText 
-                        initialColor="#fff" 
-                        className={'subtext__div'} 
+                    <SubText
+                        initialColor="#fff"
+                        className={'subtext__div'}
                         text={'Každým dnem, kdy vaše finance nepracují pro Vás<br/>ztrácíte hodnotu, kterou už nikdy nezískáte zpět.'}
                     />
                 </motion.div>

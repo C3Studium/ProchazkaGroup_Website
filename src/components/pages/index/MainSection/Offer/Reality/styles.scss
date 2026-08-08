@@ -1,6 +1,7 @@
+@use "../../../../../../styles/system/_shortcuts.scss" as *;
 @media (min-aspect-ratio: 1/1) {
-    @media only screen and ( min-width: 1730px) {
-        .Reality{
+    @media only screen and (min-width: 1730px) {
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -13,8 +14,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 50vh;
                 width: 60%;
                 position: relative;
@@ -22,7 +23,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -30,25 +31,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -56,8 +56,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 60vh;
                 position: relative;
@@ -67,7 +67,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -76,58 +77,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 2.5rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.3rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 1.3rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -137,8 +145,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -151,8 +160,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 50vh;
                 width: 60%;
                 position: relative;
@@ -160,7 +169,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -168,25 +177,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -194,8 +202,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 60vh;
                 position: relative;
@@ -205,7 +213,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -214,58 +223,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 2.5rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.3rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 1.3rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -275,8 +291,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -289,8 +306,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 50vh;
                 width: 60%;
                 position: relative;
@@ -298,7 +315,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -306,25 +323,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -332,8 +348,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 60vh;
                 position: relative;
@@ -343,7 +359,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -352,58 +369,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 2rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 1.1rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -413,8 +437,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -427,8 +452,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 50vh;
                 width: 60%;
                 position: relative;
@@ -436,7 +461,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -444,25 +469,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -470,8 +494,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 60vh;
                 position: relative;
@@ -481,7 +505,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -490,58 +515,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 2rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 1.1rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -551,8 +583,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -565,8 +598,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 50vh;
                 width: 65%;
                 position: relative;
@@ -574,7 +607,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -582,25 +615,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -608,8 +640,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 60vh;
                 position: relative;
@@ -619,7 +651,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -628,69 +661,76 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.8rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
 
-                        .magnetic{
-                            .Small__button_container{
+                        .magnetic {
+                            .Small__button_container {
                                 width: 100px;
                                 height: 30px;
 
-                                p{
+                                p {
                                     font-size: 0.9rem;
                                 }
                             }
                         }
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 2.5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 0.9rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -700,8 +740,9 @@
             }
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .Reality{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -714,8 +755,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 90vh;
                 width: 65%;
                 position: relative;
@@ -723,7 +764,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -731,25 +772,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -757,8 +797,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 100vh;
                 position: relative;
@@ -768,7 +808,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -777,69 +818,76 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.8rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
 
-                        .magnetic{
-                            .Small__button_container{
+                        .magnetic {
+                            .Small__button_container {
                                 width: 100px;
                                 height: 30px;
 
-                                p{
+                                p {
                                     font-size: 0.9rem;
                                 }
                             }
                         }
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 2.5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 0.9rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -849,8 +897,9 @@
             }
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .Reality{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -863,8 +912,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 90vh;
                 width: 65%;
                 position: relative;
@@ -872,7 +921,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
@@ -880,25 +929,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -906,8 +954,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 45%;
                 height: 100vh;
                 position: relative;
@@ -917,7 +965,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -926,69 +975,76 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.5rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 0.8rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
 
-                        .magnetic{
-                            .Small__button_container{
+                        .magnetic {
+                            .Small__button_container {
                                 width: 100px;
                                 height: 30px;
 
-                                p{
+                                p {
                                     font-size: 0.8rem;
                                 }
                             }
                         }
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 2rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 0.7rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -1003,7 +1059,7 @@
 
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -1016,8 +1072,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 40vh;
                 width: 90%;
                 position: relative;
@@ -1025,7 +1081,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 100%;
                     position: relative;
@@ -1033,25 +1089,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -1059,8 +1114,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 90%;
                 height: 40vh;
                 position: relative;
@@ -1070,7 +1125,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1079,58 +1135,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 2rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 70%;
                         font-size: 1.1rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -1140,8 +1203,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -1154,8 +1218,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 40vh;
                 width: 90%;
                 position: relative;
@@ -1163,7 +1227,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 100%;
                     position: relative;
@@ -1171,25 +1235,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -1197,8 +1260,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 90%;
                 height: 40vh;
                 position: relative;
@@ -1208,7 +1271,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1217,58 +1281,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 2rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 3rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 70%;
                         font-size: 1.1rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -1278,8 +1349,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -1292,8 +1364,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 40vh;
                 width: 100%;
                 position: relative;
@@ -1301,7 +1373,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 100%;
                     position: relative;
@@ -1309,25 +1381,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -1335,8 +1406,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 100%;
                 height: 40vh;
                 position: relative;
@@ -1346,7 +1417,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 30%;
                     display: flex;
@@ -1355,58 +1427,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.8rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 2.5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 0.9rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 15%;
                 right: -5%;
@@ -1416,8 +1495,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 100vh;
             padding: 5vh 5vw;
@@ -1430,8 +1510,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 40vh;
                 width: 100%;
                 position: relative;
@@ -1439,7 +1519,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 100%;
                     position: relative;
@@ -1447,25 +1527,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -1473,8 +1552,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 100%;
                 height: 50vh;
                 position: relative;
@@ -1484,7 +1563,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -1493,58 +1573,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.8rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 2.5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 0.9rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: -5%;
@@ -1554,8 +1641,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .Reality{
+        .Reality {
             width: 100vw;
             height: 120vh;
             padding: 5vh 5vw;
@@ -1568,8 +1656,8 @@
             overflow: hidden;
             color: var(--wText);
             background-color: var(--bgColor2);
-        
-            .Graph__container{
+
+            .Graph__container {
                 height: 40vh;
                 width: 100%;
                 position: relative;
@@ -1577,7 +1665,7 @@
                 align-items: flex-start;
                 justify-content: center;
 
-                .graph__wrapper{
+                .graph__wrapper {
                     width: 100%;
                     height: 100%;
                     position: relative;
@@ -1585,25 +1673,24 @@
                     align-items: center;
                     justify-content: center;
                     padding: 1rem;
-                    font-family: "Zodiak-light";
-            
-                    .recharts-responsive-container{
-                        .recharts-wrapper{
-                            .recharts-surface{
-                                .recharts-yAxis{
-                                    text{
+                    font-family: "Switzer";
+
+                    .recharts-responsive-container {
+                        .recharts-wrapper {
+                            .recharts-surface {
+                                .recharts-yAxis {
+                                    text {
                                         transform: translate(10px, 5px);
-                                        tspan{
-                                            
-                                        }
+
+                                        tspan {}
                                     }
                                 }
-                                .recharts-layer{
-                                    .recharts-cartesian-axis-ticks{
+
+                                .recharts-layer {
+                                    .recharts-cartesian-axis-ticks {
                                         width: 90%;
-                                        .recharts-cartesian-axis-tick{
-                                            
-                                        }
+
+                                        .recharts-cartesian-axis-tick {}
                                     }
                                 }
                             }
@@ -1611,8 +1698,8 @@
                     }
                 }
             }
-            
-            .Header{
+
+            .Header {
                 width: 100%;
                 height: 50vh;
                 position: relative;
@@ -1622,7 +1709,8 @@
                 flex-direction: column-reverse;
                 z-index: 60;
                 gap: 2.5vh;
-                .addText{
+
+                .addText {
                     width: 100%;
                     height: 40%;
                     display: flex;
@@ -1631,58 +1719,65 @@
                     flex-direction: column;
                     gap: 0.5rem;
                     z-index: 60;
-                    .addText__content{
+
+                    .addText__content {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 0.5rem;
-                        h3{
-                            font-family: "zodiak-light";
+
+                        h3 {
+                            font-family: "Switzer";
                             font-size: 1.8rem;
                             font-weight: 600;
                         }
-                        p{
+
+                        p {
                             font-family: "Switzer-light";
                             font-size: 1.1rem;
                             font-weight: 300;
                         }
                     }
 
-                    .addText__buttons{
+                    .addText__buttons {
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 1rem;
                     }
                 }
-                .header__text{
+
+                .header__text {
                     width: 100%;
                     height: 40%;
                     display: flex;
                     justify-content: flex-start;
                     align-items: flex-start;
                     gap: 0.5rem;
-                    h3{
+
+                    h3 {
                         font-size: 2.5rem;
                         white-space: nowrap;
-                        font-family: "Zodiak-light";
+                        font-family: "Switzer";
                         margin: 0;
                         line-height: 1;
                     }
-                    p{
+
+                    p {
                         margin: 0;
                         padding-top: 0.25rem;
                         width: 100%;
                         font-size: 0.9rem;
-                        font-family: "Zodiak-light";
-                        span{
+                        font-family: "Switzer";
+
+                        span {
                             color: var(--hColor);
                         }
                     }
                 }
             }
-        
-            .divider{
+
+            .divider {
                 position: absolute;
                 bottom: 5%;
                 right: -5%;

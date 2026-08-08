@@ -1,6 +1,7 @@
+@use "../../../../../../styles/system/_shortcuts.scss" as *;
 @media (min-aspect-ratio: 1/1) {
-    @media only screen and ( min-width: 1730px) {
-        .GraphTheWay{
+    @media only screen and (min-width: 1730px) {
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -11,7 +12,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -21,8 +22,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -30,28 +31,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 2.5rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: flex;
@@ -59,32 +63,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1.3rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -92,7 +99,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -104,7 +111,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -113,7 +121,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -122,7 +130,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -131,7 +139,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -140,7 +148,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -154,13 +162,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -171,7 +180,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -181,8 +190,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -190,28 +199,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 2.5rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: flex;
@@ -219,32 +231,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1.3rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -252,7 +267,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -264,7 +279,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -273,7 +289,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -282,7 +298,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -291,7 +307,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -300,7 +316,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -314,13 +330,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -331,7 +348,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -341,8 +358,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -350,28 +367,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 2rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: flex;
@@ -379,32 +399,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1.1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 80%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -412,7 +435,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -424,7 +447,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -433,7 +457,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -442,7 +466,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -451,7 +475,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -460,7 +484,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -474,13 +498,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -491,7 +516,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -501,8 +526,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -510,28 +535,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.8rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: flex;
@@ -539,32 +567,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1.1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 60%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -572,7 +603,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -584,7 +615,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -593,7 +625,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -602,7 +634,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -611,7 +643,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -620,7 +652,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -629,7 +661,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 35px;
                                             height: 35px;
                                         }
@@ -639,13 +671,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -656,7 +689,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -666,8 +699,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -675,28 +708,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.8rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 50%;
                         height: 100%;
                         display: flex;
@@ -704,32 +740,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1.1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -737,7 +776,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -749,7 +788,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -758,7 +798,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -767,7 +807,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -776,7 +816,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -785,7 +825,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -794,7 +834,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 35px;
                                             height: 35px;
                                         }
@@ -804,13 +844,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .GraphTheWay{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -821,7 +862,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -831,8 +872,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -840,31 +881,34 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end; 
+                        align-items: flex-end;
                         position: absolute;
                         top: 15vh;
                         left: 0vw;
-                        p{
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.3rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 100%;
                         height: 100%;
                         display: flex;
@@ -872,32 +916,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 0.9rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -905,7 +952,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -917,7 +964,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -926,7 +974,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -935,7 +983,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -944,7 +992,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -953,7 +1001,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -962,7 +1010,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 35px;
                                             height: 35px;
                                         }
@@ -972,13 +1020,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .GraphTheWay{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -989,7 +1038,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -999,8 +1048,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -1008,31 +1057,34 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 50%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end; 
+                        align-items: flex-end;
                         position: absolute;
                         top: 15vh;
                         left: 0vw;
-                        p{
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.3rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 100%;
                         height: 100%;
                         display: flex;
@@ -1040,32 +1092,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 30%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 0.9rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -1073,7 +1128,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -1085,7 +1140,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -1094,7 +1150,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -1103,7 +1159,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -1112,7 +1168,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -1121,7 +1177,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -1130,7 +1186,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 25px;
                                             height: 25px;
                                         }
@@ -1140,7 +1196,7 @@
                         }
                     }
                 }
-            
+
             }
 
         }
@@ -1149,7 +1205,7 @@
 
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -1160,7 +1216,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -1171,8 +1227,8 @@
                 color: var(--bText);
                 gap: 10vh;
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -1180,28 +1236,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 60%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 2rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: flex;
@@ -1209,32 +1268,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 80%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1.1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 60%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 50%;
                         height: 100%;
                         position: relative;
@@ -1242,7 +1304,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -1254,7 +1316,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -1263,7 +1326,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -1272,7 +1335,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -1281,7 +1344,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -1290,7 +1353,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -1299,7 +1362,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 35px;
                                             height: 35px;
                                         }
@@ -1309,13 +1372,14 @@
                         }
                     }
                 }
-            
+
             }
 
         }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -1326,7 +1390,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -1336,8 +1400,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -1345,28 +1409,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 70%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.8rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: flex;
@@ -1374,32 +1441,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 100%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 80%;
                         height: 100%;
                         position: relative;
@@ -1407,7 +1477,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -1419,7 +1489,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -1428,7 +1499,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -1437,7 +1508,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -1446,7 +1517,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -1455,7 +1526,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -1464,7 +1535,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 35px;
                                             height: 35px;
                                         }
@@ -1474,13 +1545,14 @@
                         }
                     }
                 }
-            
+
             }
 
-        } 
+        }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -1491,7 +1563,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -1501,8 +1573,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -1510,28 +1582,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 100%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.5rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: none;
@@ -1539,32 +1614,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 100%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 100%;
                         height: 100%;
                         position: relative;
@@ -1572,7 +1650,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -1584,7 +1662,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -1593,7 +1672,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -1602,7 +1681,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -1611,7 +1690,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -1620,7 +1699,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -1629,7 +1708,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 30px;
                                             height: 30px;
                                         }
@@ -1639,13 +1718,14 @@
                         }
                     }
                 }
-            
+
             }
 
-        } 
+        }
     }
+
     @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -1656,7 +1736,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -1666,8 +1746,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -1675,28 +1755,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 100%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.5rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: none;
@@ -1704,32 +1787,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 100%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 100%;
                         height: 100%;
                         position: relative;
@@ -1737,7 +1823,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -1749,7 +1835,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -1758,7 +1845,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -1767,7 +1854,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -1776,7 +1863,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -1785,7 +1872,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -1794,7 +1881,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 30px;
                                             height: 30px;
                                         }
@@ -1804,13 +1891,14 @@
                         }
                     }
                 }
-            
+
             }
 
-        } 
+        }
     }
+
     @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .GraphTheWay{
+        .GraphTheWay {
             width: 100vw;
             height: 100vh;
             padding: 15vh 5vw 0 5vw;
@@ -1821,7 +1909,7 @@
             overflow: hidden;
             color: var(--bText);
 
-            .MainSection__wrapper{
+            .MainSection__wrapper {
                 position: relative;
                 width: 100%;
                 height: 100%;
@@ -1831,8 +1919,8 @@
                 flex-direction: column;
                 color: var(--bText);
 
-                
-                .Graph__header{
+
+                .Graph__header {
                     width: 100%;
                     height: 40%;
                     position: relative;
@@ -1840,28 +1928,31 @@
                     justify-content: flex-start;
                     align-items: center;
                     flex-direction: row;
-                    
-                    .maintext__container{
+
+                    .maintext__container {
                         width: 100%;
                         height: 100%;
                         display: flex;
                         justify-content: flex-end;
-                        align-items: flex-end;   
-                        p{
+                        align-items: flex-end;
+
+                        p {
                             margin: 0;
                             text-transform: uppercase;
                             text-align: left;
                             font-family: "Switzer-light";
-                            span{
+
+                            span {
                                 font-size: 1.3rem;
                             }
+
                             .highlighted {
                                 color: var(--hColor);
                             }
                         }
                     }
 
-                    .Graph__content__header{
+                    .Graph__content__header {
                         width: 40%;
                         height: 100%;
                         display: none;
@@ -1869,32 +1960,35 @@
                         justify-content: flex-end;
                         gap: 0.5rem;
 
-                        .Subtext__container{
+                        .Subtext__container {
                             width: 100%;
                             height: 100%;
                             display: flex;
                             justify-content: flex-end;
                             align-items: flex-end;
 
-                            p{
-                                margin: 0; 
+                            p {
+                                margin: 0;
                                 color: var(--wText);
-                                font-family: "zodiak-light";
-                                span{
+                                font-family: "Switzer";
+
+                                span {
                                     font-size: 1rem;
                                 }
                             }
                         }
                     }
                 }
-                .Graph__wrapper{
+
+                .Graph__wrapper {
                     width: 100%;
                     height: 50%;
                     position: relative;
                     display: flex;
                     justify-content: flex-start;
                     align-items: center;
-                    .Graph__wrapper__container{
+
+                    .Graph__wrapper__container {
                         width: 100%;
                         height: 100%;
                         position: relative;
@@ -1902,7 +1996,7 @@
                         justify-content: flex-start;
                         align-items: flex-end;
 
-                        .Graph__content__mainline{
+                        .Graph__content__mainline {
                             height: 4px;
                             position: absolute;
                             bottom: 40%;
@@ -1914,7 +2008,8 @@
                             z-index: 1;
                             right: "auto"
                         }
-                        .Graph__content{
+
+                        .Graph__content {
                             width: 100%;
                             height: 100%;
                             display: flex;
@@ -1923,7 +2018,7 @@
                             flex-direction: column;
                             position: relative;
 
-                            .Graph__content__anim__container{
+                            .Graph__content__anim__container {
                                 width: 100%;
                                 height: 100%;
                                 position: relative;
@@ -1932,7 +2027,7 @@
                                 justify-content: center;
                                 padding: 2.5rem 1rem;
 
-                                .Graph__content__anim{
+                                .Graph__content__anim {
                                     width: 25%;
                                     height: 15%;
                                     position: relative;
@@ -1941,7 +2036,7 @@
                                     justify-content: center;
                                     flex-direction: column;
 
-                                    .Graph__content__anim__text{
+                                    .Graph__content__anim__text {
                                         width: 100%;
                                         height: 100%;
                                         position: relative;
@@ -1950,7 +2045,7 @@
                                         justify-content: center;
                                         flex-direction: column;
 
-                                        p{
+                                        p {
                                             margin: 0;
                                             text-transform: uppercase;
                                             text-align: center;
@@ -1959,7 +2054,7 @@
                                             color: var(--wText);
                                         }
 
-                                        img{
+                                        img {
                                             width: 25px;
                                             height: 25px;
                                         }
@@ -1969,7 +2064,7 @@
                         }
                     }
                 }
-            
+
             }
 
         }

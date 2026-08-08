@@ -23,7 +23,7 @@ export default function BenefitProgramPage() {
                 <meta name="author" content="Procházka Group" />
                 <meta name="robots" content="index, follow" />
                 <link rel="canonical" href="https://prochazkagroup.cz/benefit-program" />
-                
+
                 {/* Open Graph / Facebook */}
                 <meta property="og:type" content="website" />
                 <meta property="og:url" content="https://prochazkagroup.cz/benefit-program" />
@@ -71,13 +71,11 @@ export default function BenefitProgramPage() {
                 </script>
             </Head>
             <main lang="cs">
-                <Navbar />
-                <Cursor />
                 <BenefitProgramKeyframes />
                 <BenefitDetails />
                 <Reviews />
                 <BenefitReminder />
-                <Contact text={'Vy ještě nejste našimi klienty?<br/>Viditelně jsme Vás zaujmuli, to byste teď <br/> neprocházeli náš program, že?'}/>
+                <Contact text={'Vy ještě nejste našimi klienty?<br/>Viditelně jsme Vás zaujmuli, to byste teď <br/> neprocházeli náš program, že?'} />
                 <QNA />
                 <Footer />
             </main>

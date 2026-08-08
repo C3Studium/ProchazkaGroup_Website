@@ -82,7 +82,7 @@ function BenefitUserEmailComponent({
               {personalizedGreeting || `Dobrý den, ${name},`}
             </Heading>
 
-            <Text className="text-center mb-8 text-lg font-light tablet:text-xl max-w-xl" style={{ color: '#4bdadc', fontFamily: "Satoshi-Light, sans-serif" }}>
+            <Text className="text-center mb-8 text-lg font-light tablet:text-xl max-w-xl" style={{ color: '#4bdadc', fontFamily: "Switzer, sans-serif" }}>
               {getValueProposition(segment)}
             </Text>
 
@@ -118,7 +118,7 @@ function BenefitUserEmailComponent({
 
                 <Row className="pb-3" style={{ borderBottom: '1px solid #5E758D' }}>
                   <Column className="w-full tablet:w-1/3 mb-2 tablet:mb-0">
-                    <Text className="font-semibold m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#4bdadc',}}>Datum žádosti:</Text>
+                    <Text className="font-semibold m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#4bdadc', }}>Datum žádosti:</Text>
                   </Column>
                   <Column className="w-full tablet:w-2/3">
                     <Text className="m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#fff', }}>{formatDate(applicationDate || new Date())}</Text>

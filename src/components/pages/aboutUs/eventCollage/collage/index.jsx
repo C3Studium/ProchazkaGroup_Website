@@ -1,5 +1,5 @@
 import Grid from "@/components/common/grid";
-import CustomImage from "@/components/ui/stickyImage";
+import CustomImage from "@/components/common/ui/stickyImage";
 import { motion, useScroll, useTransform } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -9,11 +9,11 @@ const containerVariants = {
     hidden: {},
     visible: {
         transition: {
-        staggerChildren: 0.2,
+            staggerChildren: 0.2,
         },
     },
 };
-  
+
 const evenItemVariants = {
     hidden: {
         x: 100,
@@ -23,12 +23,12 @@ const evenItemVariants = {
         x: 0,
         opacity: 1,
         transition: {
-        duration: 0.6,
-        ease: "easeOut",
+            duration: 0.6,
+            ease: "easeOut",
         },
     },
 };
-  
+
 const oddItemVariants = {
     hidden: {
         x: -100,
@@ -38,8 +38,8 @@ const oddItemVariants = {
         x: 0,
         opacity: 1,
         transition: {
-        duration: 0.6,
-        ease: "easeOut",
+            duration: 0.6,
+            ease: "easeOut",
         },
     },
 };
@@ -54,25 +54,25 @@ export default function Collage() {
         const handleResize = () => {
             setWindowWidth(window.innerWidth);
         };
-        
+
         window.addEventListener('resize', handleResize);
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     const { scrollYProgress } = useScroll({
-      target: sectionRef,
-      offset: ['start start', 'end end']
+        target: sectionRef,
+        offset: ['start start', 'end end']
     });
 
-     const peakPoints = useMemo(() => (
+    const peakPoints = useMemo(() => (
         Array.from({ length: points }, (_, i) => (i / points) + (1 / (points * 4)))
     ), [points]);
 
     // Create conditional transform based on viewport width
     const moveX = useTransform(
-        scrollYProgress, 
-        [0, 1], 
-        windowWidth < 450 
+        scrollYProgress,
+        [0, 1],
+        windowWidth < 450
             ? ['150vw', '-700vw'] // Double the movement for small screens
             : ['100vw', '-450vw']  // Normal movement for larger screens
     );
@@ -112,7 +112,8 @@ export default function Collage() {
             time: '2023',
             photo: '/assets/prebuild/reviewsBackground.webp',
             alt: 'Official branding',
-            text: 'Založení značky ProcházkaGroup pod hlavičkou OVB. Jasná identita, která odráží naše hodnoty – důvěru, výsledky a individuální přístup. A ustanovení společného cíle.',        },
+            text: 'Založení značky ProcházkaGroup pod hlavičkou OVB. Jasná identita, která odráží naše hodnoty – důvěru, výsledky a individuální přístup. A ustanovení společného cíle.',
+        },
         {
             name: 'Povýšení do vedení',
             time: '2023-2024',
@@ -175,8 +176,8 @@ export default function Collage() {
                 <motion.div className="Collage__content" style={{ x: moveX }}>
                     {eventPairs.map(([event1, event2], i) => {
                         return (
-                            <motion.div 
-                                className="content__container" 
+                            <motion.div
+                                className="content__container"
                                 key={i}
                                 variants={containerVariants}
                                 initial="hidden"
@@ -185,16 +186,16 @@ export default function Collage() {
                             >
                                 {/* First Event */}
                                 <motion.div className="content">
-                                    <motion.div 
+                                    <motion.div
                                         className="contains"
                                         variants={i % 2 === 0 ? oddItemVariants : evenItemVariants}
                                     >
-                                        <motion.div 
+                                        <motion.div
                                             className="contains__header"
                                             variants={{
                                                 hidden: { y: 20, opacity: 0 },
-                                                visible: { 
-                                                    y: 0, 
+                                                visible: {
+                                                    y: 0,
                                                     opacity: 1,
                                                     transition: { delay: 0.2, duration: 0.5 }
                                                 }
@@ -204,20 +205,20 @@ export default function Collage() {
                                             <p>|</p>
                                             <h3>{event1.name}</h3>
                                         </motion.div>
-                                        <motion.div 
+                                        <motion.div
                                             className="image__container"
                                             variants={{
                                                 hidden: { scale: 0.8, opacity: 0 },
-                                                visible: { 
-                                                    scale: 1, 
+                                                visible: {
+                                                    scale: 1,
                                                     opacity: 1,
                                                     transition: { delay: 0.3, duration: 0.5 }
                                                 }
                                             }}
-                                        > 
+                                        >
                                             {/* <CustomImage src={event1.photo} altText={event1.alt}/> */}
-                                            <Image 
-                                                src={event1.photo} 
+                                            <Image
+                                                src={event1.photo}
                                                 alt={event1.alt}
                                                 fill={true}
                                                 sizes="50vw"
@@ -228,12 +229,12 @@ export default function Collage() {
                                             />
                                         </motion.div>
                                     </motion.div>
-                                    <motion.div 
+                                    <motion.div
                                         className="contains__text"
                                         variants={{
                                             hidden: { y: 30, opacity: 0 },
-                                            visible: { 
-                                                y: 0, 
+                                            visible: {
+                                                y: 0,
                                                 opacity: 1,
                                                 transition: { delay: 0.4, duration: 0.5 }
                                             }
@@ -246,16 +247,16 @@ export default function Collage() {
                                 {/* Second Event (if exists) */}
                                 {event2 && (
                                     <motion.div className="content">
-                                        <motion.div 
+                                        <motion.div
                                             className="contains"
                                             variants={i % 2 === 0 ? evenItemVariants : oddItemVariants}
                                         >
-                                            <motion.div 
+                                            <motion.div
                                                 className="contains__header"
                                                 variants={{
                                                     hidden: { y: 20, opacity: 0 },
-                                                    visible: { 
-                                                        y: 0, 
+                                                    visible: {
+                                                        y: 0,
                                                         opacity: 1,
                                                         transition: { delay: 0.2, duration: 0.5 }
                                                     }
@@ -265,20 +266,20 @@ export default function Collage() {
                                                 <p>|</p>
                                                 <h3>{event2.name}</h3>
                                             </motion.div>
-                                            <motion.div 
+                                            <motion.div
                                                 className="image__container"
                                                 variants={{
                                                     hidden: { scale: 0.8, opacity: 0 },
-                                                    visible: { 
-                                                        scale: 1, 
+                                                    visible: {
+                                                        scale: 1,
                                                         opacity: 1,
                                                         transition: { delay: 0.3, duration: 0.5 }
                                                     }
                                                 }}
-                                            > 
+                                            >
                                                 {/* <CustomImage src={event2.photo} altText={event2.alt}/> */}
-                                                <Image 
-                                                    src={event1.photo} 
+                                                <Image
+                                                    src={event1.photo}
                                                     alt={event1.alt}
                                                     fill={true}
                                                     sizes="50vw"
@@ -289,12 +290,12 @@ export default function Collage() {
                                                 />
                                             </motion.div>
                                         </motion.div>
-                                        <motion.div 
+                                        <motion.div
                                             className="contains__text"
                                             variants={{
                                                 hidden: { y: 30, opacity: 0 },
-                                                visible: { 
-                                                    y: 0, 
+                                                visible: {
+                                                    y: 0,
                                                     opacity: 1,
                                                     transition: { delay: 0.4, duration: 0.5 }
                                                 }

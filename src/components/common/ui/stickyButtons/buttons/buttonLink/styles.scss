@@ -1,0 +1,91 @@
+@use "../../../../../../styles/system/_shortcuts.scss" as *;
+
+
+.magnetic {
+    z-index: 165; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
+
+    .rotateText {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 50%;
+        width: fit-content;
+        height: fit-content;
+        z-index: 160;
+        cursor: pointer;
+
+        .rotateText__bounds {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: flex;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-content: center;
+            z-index: 4;
+            border-radius: 50%;
+
+            // I need to expand the border only when I hover over it
+            &:hover {
+                scale: 2.5;
+            }
+        }
+
+        .rotateText__text {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: hidden;
+            z-index: 3;
+            width: fit-content;
+            height: 100%;
+            margin: 0.75rem;
+            background-color: transparent;
+            padding: 0;
+            border: 0;
+            box-shadow: none;
+            text-decoration: none;
+
+            .rotateText__text__content {
+                position: relative;
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                width: fit-content;
+                height: 1.3rem;
+                overflow: hidden;
+                pointer-events: none;
+
+                .rotateText__line__left {
+                    width: 1px;
+                    height: 100%;
+                    background-color: var(--hColor2);
+                }
+
+                .rotateText__line__right {
+                    width: 1px;
+                    height: 100%;
+                    background-color: var(--hColor2);
+                }
+            }
+
+            .rotateText__line__up {
+                width: 100%;
+                height: 1px;
+                background-color: var(--hColor2);
+            }
+
+            .rotateText__line__down {
+                width: 100%;
+                height: 1px;
+                background-color: var(--hColor2);
+            }
+
+        }
+    }
+}

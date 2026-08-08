@@ -1,7 +1,5 @@
 import Head from "next/head"
 import Footer from "@/components/common/footer"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
 import QNA from "@/components/common/qna"
 import FeedbackIntro from "@/components/pages/contact/feedBack"
 
@@ -17,7 +15,7 @@ export default function ContactPage() {
         <meta name="author" content="Procházka Group" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://prochazkagroup.cz/kontakt" />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://prochazkagroup.cz/kontakt" />
@@ -73,9 +71,7 @@ export default function ContactPage() {
           })}
         </script>
       </Head>
-      <main lang="cs">
-        <Cursor />
-        <Navbar />
+      <main lang="cs" key="contact-page">
         <FeedbackIntro />
         <QNA />
         <Footer />

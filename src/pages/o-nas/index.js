@@ -1,6 +1,5 @@
 import Footer from "@/components/common/footer"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import QNA from "@/components/common/qna"
 import AboutInto from "@/components/pages/aboutUs/about"
 import ParallaxExpanf from "@/components/pages/aboutUs/parallaxExpand"
@@ -18,7 +17,7 @@ export default function AboutPage() {
         <meta name="author" content="Procházka Group" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://prochazkagroup.cz/o-nas" />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://prochazkagroup.cz/o-nas" />
@@ -65,9 +64,7 @@ export default function AboutPage() {
           })}
         </script>
       </Head>
-      <main lang="cs">
-        <Navbar />
-        <Cursor />
+      <main lang="cs" key="about-page">
         <AboutInto />
         <ParallaxExpanf />
         <QNA />

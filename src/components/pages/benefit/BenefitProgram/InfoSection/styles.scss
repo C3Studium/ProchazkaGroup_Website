@@ -1,6 +1,7 @@
+@use "../../../../../styles/system/_shortcuts.scss" as *;
 @media (min-aspect-ratio: 1/1) {
-    @media only screen and ( min-width: 1730px) {
-        .InfoBenefitS{
+    @media only screen and (min-width: 1730px) {
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -11,7 +12,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -20,7 +21,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -28,19 +29,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -52,8 +53,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -61,7 +62,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -74,46 +76,50 @@
                             align-items: center;
                             gap: 1rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 70%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 5rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 1.3rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -121,7 +127,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -131,8 +138,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 2rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -140,46 +147,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 1.3rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -187,11 +196,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -203,8 +212,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 5rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -217,8 +226,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -229,7 +239,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -238,7 +248,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -246,19 +256,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -270,8 +280,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -279,7 +289,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -292,46 +303,50 @@
                             align-items: center;
                             gap: 1rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 70%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 5rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 1.3rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -339,7 +354,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -349,8 +365,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 2rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -358,46 +374,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 1.3rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -405,11 +423,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -421,8 +439,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 5rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -435,8 +453,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -447,7 +466,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -456,7 +475,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -464,19 +483,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -488,8 +507,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -497,7 +516,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -510,46 +530,50 @@
                             align-items: center;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 4rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 1.1rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -557,7 +581,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -567,8 +592,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.8rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -576,46 +601,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 1.1rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -623,11 +650,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -639,8 +666,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 4rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -653,8 +680,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -665,7 +693,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -674,7 +702,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -682,19 +710,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -706,8 +734,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -715,7 +743,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -728,46 +757,50 @@
                             align-items: center;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 4rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 1.1rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -775,7 +808,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -785,8 +819,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.8rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -794,46 +828,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 1.1rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -841,11 +877,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -857,8 +893,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 4rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -871,8 +907,9 @@
             }
         }
     }
+
     @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -883,7 +920,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -892,7 +929,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -900,19 +937,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -924,8 +961,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 100%;
                         display: flex;
@@ -933,7 +970,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -946,46 +984,50 @@
                             align-items: center;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 3rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 0.9rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -993,7 +1035,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -1003,8 +1046,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.5rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -1012,46 +1055,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 0.9rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -1059,11 +1104,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -1075,8 +1120,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 3rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -1089,8 +1134,9 @@
             }
         }
     }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .InfoBenefitS{
+
+    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -1101,7 +1147,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -1110,7 +1156,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -1118,19 +1164,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -1142,8 +1188,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 100%;
                         display: flex;
@@ -1151,7 +1197,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -1164,46 +1211,50 @@
                             align-items: center;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 2.5rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 0.8rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -1211,7 +1262,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -1221,8 +1273,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.3rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -1230,46 +1282,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 0.8rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -1277,11 +1331,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -1293,8 +1347,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 2.5rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -1307,8 +1361,9 @@
             }
         }
     }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .InfoBenefitS{
+
+    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -1319,7 +1374,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -1328,7 +1383,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -1336,19 +1391,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -1360,8 +1415,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 100%;
                         display: flex;
@@ -1369,7 +1424,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -1382,46 +1438,50 @@
                             align-items: center;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 2rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 0.7rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -1429,7 +1489,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -1439,8 +1500,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.1rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -1448,46 +1509,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 0.7rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -1495,11 +1558,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -1511,8 +1574,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 2rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -1525,12 +1588,12 @@
             }
         }
     }
-    
+
 }
 
 @media (max-aspect-ratio: 1/1) {
     @media only screen and (min-width: 1000px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -1541,7 +1604,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -1550,7 +1613,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -1558,19 +1621,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -1582,8 +1645,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -1591,7 +1654,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -1604,46 +1668,50 @@
                             align-items: center;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: center;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 4rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 1.1rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -1651,7 +1719,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -1661,8 +1730,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.8rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -1670,46 +1739,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 1.1rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 80%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -1717,11 +1788,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -1733,8 +1804,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 4rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -1745,10 +1816,11 @@
                     }
                 }
             }
-        } 
+        }
     }
+
     @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 900px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -1759,7 +1831,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -1768,7 +1840,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -1776,19 +1848,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -1800,8 +1872,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -1809,7 +1881,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -1822,46 +1895,50 @@
                             align-items: flex-end;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: flex-end;
                                 align-items: center;
                                 gap: 1.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 4rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 1.1rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: relative;
                             width: 100%;
                             height: 100%;
@@ -1869,7 +1946,8 @@
                             justify-content: flex-start;
                             align-items: flex-start;
                             gap: 2rem;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: absolute;
                                 top: 0;
                                 display: flex;
@@ -1879,8 +1957,8 @@
                                 width: 80%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.8rem;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -1888,46 +1966,48 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 80%;
                                     font-size: 1.1rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 100%;
                                     bottom: -25%;
                                     color: var(--bText);
                                     align-items: flex-end;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -1935,11 +2015,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -1951,8 +2031,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
                             font-size: 4rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -1963,10 +2043,11 @@
                     }
                 }
             }
-        } 
+        }
     }
+
     @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .InfoBenefitS{
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -1977,7 +2058,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -1986,7 +2067,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -1994,19 +2075,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -2018,8 +2099,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -2027,7 +2108,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -2040,46 +2122,50 @@
                             align-items: flex-end;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: flex-end;
                                 align-items: center;
                                 gap: 1rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
+
+                                h3 {
                                     font-size: 3rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
+
+                                p {
                                     font-size: 0.9rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: absolute;
                             top: 0;
                             left: 0;
@@ -2091,7 +2177,8 @@
                             gap: 2rem;
                             padding: 0 5vw;
                             padding-top: 20vh;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: relative;
                                 display: flex;
                                 justify-content: center;
@@ -2100,8 +2187,8 @@
                                 width: 100%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
+
+                                h2 {
                                     font-size: 1.5rem;
                                     width: 90%;
                                     margin: 0;
@@ -2110,50 +2197,53 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 90%;
                                     font-size: 0.9rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
-                                &:nth-of-type(2){
+
+                                &:nth-of-type(2) {
                                     position: absolute;
                                     bottom: 20%;
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 100%;
                                     color: var(--bText);
                                     align-items: flex-end;
                                     bottom: 10%;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -2161,11 +2251,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -2177,234 +2267,8 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
-                            font-size: 3rem;
-                            margin: 0;
-                            text-transform: uppercase;
-                            line-height: 1.5;
-                            font-family: "Switzer-Light";
-                            text-align: center;
-                        }
-                    }
-                }
-            }
-        }  
-    }
-    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .InfoBenefitS{
-            position: relative;
-            width: 100%;
-            height: 300vh;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            background-color: var(--wText);
-            z-index: 0;
-            color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 9;
-            }
-
-            .InfoBenefitS__sticky__Cover__containerOut{
-                position: absolute;
-                bottom: -100vh;
-                left: 0;
-                width: 100vw;
-                height: 100vh;
-                z-index: 9;
-            }
-        
-            .InfoBenefitS__sticky{
-                position: sticky;
-                top: 0;
-                width: 100%;
-                height: 100vh;
-                display: flex;  
-                justify-content: center;
-                align-items: center;
-                flex-direction: column;
-                overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    gap: 2rem;
-                    flex-direction: column;
-                    overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
-                        height: 15vh;
-                        width: 90%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-end;
-                        flex-direction: column;
-                        position: relative;
-                        .InfoBenefitS__sticky__Header__container{
-                            position: absolute;
-                            will-change: transform;
-                            backface-visibility: hidden;
-                            transform-style: preserve-3d;
-                            top: 30%;
-                            right: 0;
-                            width: 100%;
-                            display: flex;
-                            justify-content: center;
-                            align-items: flex-end;
-                            gap: 0.5rem;
-                            flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
-                                display: flex;
-                                justify-content: flex-end;
-                                align-items: center;
-                                gap: 0.5rem;
-                                width: 80%;
-                                color: var(--bText);
-                                h3{
-                                    font-size: 3rem;
-                                    margin: 0;
-                                    text-transform: uppercase;
-                                    line-height: 1;
-                                    font-family: "Zodiak-Light";
-                                }
-                                p{
-                                    font-size: 0.9rem;
-                                    margin: 0;
-                                    text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
-
-                                }
-                            }
-                            .devider{
-                                width: 100%;
-                                height: 1px;
-                                background-color: var(--bgColor2);
-                            }
-                        }
-        
-                    }
-                    
-                    .InfoBenefitS__sticky__Content{
-                        height: 70vh;
-                        width: 90%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
-                            position: absolute;
-                            top: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-start;
-                            gap: 2rem;
-                            padding: 0 5vw;
-                            padding-top: 20vh;
-                            .InfoBenefitS__sticky__Content__div__content{
-                                position: relative;
-                                display: flex;
-                                justify-content: center;
-                                align-items: flex-start;
-                                gap: 1rem;
-                                width: 100%;
-                                flex-direction: column;
-                                color: var(--bText);
-        
-                                h2{
-                                    font-size: 1.5rem;
-                                    width: 90%;
-                                    margin: 0;
-                                    text-transform: uppercase;
-                                    font-weight: 300;
-                                    line-height: 1.5;
-                                    font-family: "Switzer-Light";
-                                }
-                                p{
-                                    width: 90%;
-                                    font-size: 0.9rem;
-                                    margin: 0;
-                                    font-weight: 300;
-                                    line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
-                                }
-                                &:nth-of-type(2){
-                                    position: absolute;
-                                    bottom: 20%;
-                                }
-                            }
-        
-                            &:nth-of-type(2){
-                                justify-content: flex-end;
-                                align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
-                                    width: 100%;
-                                    color: var(--bText);
-                                    align-items: flex-end;
-                                    bottom: 5%;
-        
-                                    h2{
-                                        text-align: right;
-                                    }
-        
-                                    p{
-                                        text-align: right;
-                                    }
-        
-                                    &:nth-of-type(3){
-                                        bottom: 0%;
-                                        right: 15%
-                                    }
-                                }
-                            }
-                        }
-        
-                        
-                    }
-                }
-        
-                .InfoBenefitS__sticky__Cover{
-                    position: absolute;
-                    top: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
-                    background-color: var(--bgColor2);
-
-                    .grid{
-                        z-index: 5;
-                    }
-        
-                    .mainHeader{
-                        position: absolute;
-                        top: 60%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        z-index: 2;
-                        color: var(--wText);
-                        width: 70%;
-        
-                        p{
+                        p {
                             font-size: 3rem;
                             margin: 0;
                             text-transform: uppercase;
@@ -2417,8 +2281,9 @@
             }
         }
     }
-    @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .InfoBenefitS{
+
+    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
+        .InfoBenefitS {
             position: relative;
             width: 100%;
             height: 300vh;
@@ -2429,7 +2294,7 @@
             z-index: 0;
             color: var(--bText);
 
-            .InfoBenefitS__sticky__Cover__containerIn{
+            .InfoBenefitS__sticky__Cover__containerIn {
                 position: absolute;
                 bottom: 0;
                 left: 0;
@@ -2438,7 +2303,7 @@
                 z-index: 9;
             }
 
-            .InfoBenefitS__sticky__Cover__containerOut{
+            .InfoBenefitS__sticky__Cover__containerOut {
                 position: absolute;
                 bottom: -100vh;
                 left: 0;
@@ -2446,19 +2311,19 @@
                 height: 100vh;
                 z-index: 9;
             }
-        
-            .InfoBenefitS__sticky{
+
+            .InfoBenefitS__sticky {
                 position: sticky;
                 top: 0;
                 width: 100%;
                 height: 100vh;
-                display: flex;  
+                display: flex;
                 justify-content: center;
                 align-items: center;
                 flex-direction: column;
                 overflow: hidden;
-        
-                .InfoBenefitS__sticky__Wrapper{
+
+                .InfoBenefitS__sticky__Wrapper {
                     position: absolute;
                     top: 0;
                     left: 0;
@@ -2470,8 +2335,8 @@
                     gap: 2rem;
                     flex-direction: column;
                     overflow: hidden;
-        
-                    .InfoBenefitS__sticky__Header{
+
+                    .InfoBenefitS__sticky__Header {
                         height: 15vh;
                         width: 90%;
                         display: flex;
@@ -2479,7 +2344,8 @@
                         align-items: flex-end;
                         flex-direction: column;
                         position: relative;
-                        .InfoBenefitS__sticky__Header__container{
+
+                        .InfoBenefitS__sticky__Header__container {
                             position: absolute;
                             will-change: transform;
                             backface-visibility: hidden;
@@ -2492,46 +2358,50 @@
                             align-items: flex-end;
                             gap: 0.5rem;
                             flex-direction: column;
-                            .InfoBenefitS__sticky__Header__container__text{
+
+                            .InfoBenefitS__sticky__Header__container__text {
                                 display: flex;
                                 justify-content: flex-end;
                                 align-items: center;
                                 gap: 0.5rem;
                                 width: 80%;
                                 color: var(--bText);
-                                h3{
-                                    font-size: 2.5rem;
+
+                                h3 {
+                                    font-size: 3rem;
                                     margin: 0;
                                     text-transform: uppercase;
                                     line-height: 1;
-                                    font-family: "Zodiak-Light";
+                                    font-family: "Switzer";
                                 }
-                                p{
-                                    font-size: 0.7rem;
+
+                                p {
+                                    font-size: 0.9rem;
                                     margin: 0;
                                     text-transform: lowercase;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
 
                                 }
                             }
-                            .devider{
+
+                            .devider {
                                 width: 100%;
                                 height: 1px;
                                 background-color: var(--bgColor2);
                             }
                         }
-        
+
                     }
-                    
-                    .InfoBenefitS__sticky__Content{
+
+                    .InfoBenefitS__sticky__Content {
                         height: 70vh;
                         width: 90%;
                         display: flex;
                         justify-content: center;
                         align-items: center;
                         color: var(--bText);
-        
-                        .InfoBenefitS__sticky__Content__div{
+
+                        .InfoBenefitS__sticky__Content__div {
                             position: absolute;
                             top: 0;
                             left: 0;
@@ -2543,7 +2413,8 @@
                             gap: 2rem;
                             padding: 0 5vw;
                             padding-top: 20vh;
-                            .InfoBenefitS__sticky__Content__div__content{
+
+                            .InfoBenefitS__sticky__Content__div__content {
                                 position: relative;
                                 display: flex;
                                 justify-content: center;
@@ -2552,9 +2423,9 @@
                                 width: 100%;
                                 flex-direction: column;
                                 color: var(--bText);
-        
-                                h2{
-                                    font-size: 1.3rem;
+
+                                h2 {
+                                    font-size: 1.5rem;
                                     width: 90%;
                                     margin: 0;
                                     text-transform: uppercase;
@@ -2562,50 +2433,53 @@
                                     line-height: 1.5;
                                     font-family: "Switzer-Light";
                                 }
-                                p{
+
+                                p {
                                     width: 90%;
-                                    font-size: 0.7rem;
+                                    font-size: 0.9rem;
                                     margin: 0;
                                     font-weight: 300;
                                     line-height: 1.5;
-                                    font-family: "Zodiak-Medium";
+                                    font-family: "Switzer";
                                 }
-                                &:nth-of-type(2){
+
+                                &:nth-of-type(2) {
                                     position: absolute;
                                     bottom: 20%;
                                 }
                             }
-        
-                            &:nth-of-type(2){
+
+                            &:nth-of-type(2) {
                                 justify-content: flex-end;
                                 align-items: flex-end;
-                                .InfoBenefitS__sticky__Content__div__content{
+
+                                .InfoBenefitS__sticky__Content__div__content {
                                     width: 100%;
                                     color: var(--bText);
                                     align-items: flex-end;
                                     bottom: 5%;
-        
-                                    h2{
+
+                                    h2 {
                                         text-align: right;
                                     }
-        
-                                    p{
+
+                                    p {
                                         text-align: right;
                                     }
-        
-                                    &:nth-of-type(3){
+
+                                    &:nth-of-type(3) {
                                         bottom: 0%;
                                         right: 15%
                                     }
                                 }
                             }
                         }
-        
-                        
+
+
                     }
                 }
-        
-                .InfoBenefitS__sticky__Cover{
+
+                .InfoBenefitS__sticky__Cover {
                     position: absolute;
                     top: 0;
                     width: 100%;
@@ -2613,11 +2487,11 @@
                     overflow: hidden;
                     background-color: var(--bgColor2);
 
-                    .grid{
+                    .grid {
                         z-index: 5;
                     }
-        
-                    .mainHeader{
+
+                    .mainHeader {
                         position: absolute;
                         top: 60%;
                         right: 50%;
@@ -2629,8 +2503,244 @@
                         z-index: 2;
                         color: var(--wText);
                         width: 70%;
-        
-                        p{
+
+                        p {
+                            font-size: 3rem;
+                            margin: 0;
+                            text-transform: uppercase;
+                            line-height: 1.5;
+                            font-family: "Switzer-Light";
+                            text-align: center;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
+        .InfoBenefitS {
+            position: relative;
+            width: 100%;
+            height: 300vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            background-color: var(--wText);
+            z-index: 0;
+            color: var(--bText);
+
+            .InfoBenefitS__sticky__Cover__containerIn {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 9;
+            }
+
+            .InfoBenefitS__sticky__Cover__containerOut {
+                position: absolute;
+                bottom: -100vh;
+                left: 0;
+                width: 100vw;
+                height: 100vh;
+                z-index: 9;
+            }
+
+            .InfoBenefitS__sticky {
+                position: sticky;
+                top: 0;
+                width: 100%;
+                height: 100vh;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                flex-direction: column;
+                overflow: hidden;
+
+                .InfoBenefitS__sticky__Wrapper {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    gap: 2rem;
+                    flex-direction: column;
+                    overflow: hidden;
+
+                    .InfoBenefitS__sticky__Header {
+                        height: 15vh;
+                        width: 90%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: flex-end;
+                        flex-direction: column;
+                        position: relative;
+
+                        .InfoBenefitS__sticky__Header__container {
+                            position: absolute;
+                            will-change: transform;
+                            backface-visibility: hidden;
+                            transform-style: preserve-3d;
+                            top: 30%;
+                            right: 0;
+                            width: 100%;
+                            display: flex;
+                            justify-content: center;
+                            align-items: flex-end;
+                            gap: 0.5rem;
+                            flex-direction: column;
+
+                            .InfoBenefitS__sticky__Header__container__text {
+                                display: flex;
+                                justify-content: flex-end;
+                                align-items: center;
+                                gap: 0.5rem;
+                                width: 80%;
+                                color: var(--bText);
+
+                                h3 {
+                                    font-size: 2.5rem;
+                                    margin: 0;
+                                    text-transform: uppercase;
+                                    line-height: 1;
+                                    font-family: "Switzer";
+                                }
+
+                                p {
+                                    font-size: 0.7rem;
+                                    margin: 0;
+                                    text-transform: lowercase;
+                                    font-family: "Switzer";
+
+                                }
+                            }
+
+                            .devider {
+                                width: 100%;
+                                height: 1px;
+                                background-color: var(--bgColor2);
+                            }
+                        }
+
+                    }
+
+                    .InfoBenefitS__sticky__Content {
+                        height: 70vh;
+                        width: 90%;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        color: var(--bText);
+
+                        .InfoBenefitS__sticky__Content__div {
+                            position: absolute;
+                            top: 0;
+                            left: 0;
+                            width: 100%;
+                            height: 100%;
+                            display: flex;
+                            justify-content: flex-start;
+                            align-items: flex-start;
+                            gap: 2rem;
+                            padding: 0 5vw;
+                            padding-top: 20vh;
+
+                            .InfoBenefitS__sticky__Content__div__content {
+                                position: relative;
+                                display: flex;
+                                justify-content: center;
+                                align-items: flex-start;
+                                gap: 1rem;
+                                width: 100%;
+                                flex-direction: column;
+                                color: var(--bText);
+
+                                h2 {
+                                    font-size: 1.3rem;
+                                    width: 90%;
+                                    margin: 0;
+                                    text-transform: uppercase;
+                                    font-weight: 300;
+                                    line-height: 1.5;
+                                    font-family: "Switzer-Light";
+                                }
+
+                                p {
+                                    width: 90%;
+                                    font-size: 0.7rem;
+                                    margin: 0;
+                                    font-weight: 300;
+                                    line-height: 1.5;
+                                    font-family: "Switzer";
+                                }
+
+                                &:nth-of-type(2) {
+                                    position: absolute;
+                                    bottom: 20%;
+                                }
+                            }
+
+                            &:nth-of-type(2) {
+                                justify-content: flex-end;
+                                align-items: flex-end;
+
+                                .InfoBenefitS__sticky__Content__div__content {
+                                    width: 100%;
+                                    color: var(--bText);
+                                    align-items: flex-end;
+                                    bottom: 5%;
+
+                                    h2 {
+                                        text-align: right;
+                                    }
+
+                                    p {
+                                        text-align: right;
+                                    }
+
+                                    &:nth-of-type(3) {
+                                        bottom: 0%;
+                                        right: 15%
+                                    }
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+
+                .InfoBenefitS__sticky__Cover {
+                    position: absolute;
+                    top: 0;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                    background-color: var(--bgColor2);
+
+                    .grid {
+                        z-index: 5;
+                    }
+
+                    .mainHeader {
+                        position: absolute;
+                        top: 60%;
+                        right: 50%;
+                        transform: translate(50%, -50%);
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 2;
+                        color: var(--wText);
+                        width: 70%;
+
+                        p {
                             font-size: 2.5rem;
                             margin: 0;
                             text-transform: uppercase;

@@ -1,57 +1,56 @@
 import Head from "next/head"
-import Navbar from "@/components/common/navbar"
-import Cursor from "@/components/common/navbar/cursor"
+
 import { useFetchDatabase } from "@/hooks/useFetchDatabase"
 import { useEffect, useState } from "react"
-import { 
+import {
     FaEnvelope,
-    FaFacebookF, 
-    FaInstagram, 
-    FaLinkedinIn, 
-    FaTwitter, 
+    FaFacebookF,
+    FaInstagram,
+    FaLinkedinIn,
+    FaTwitter,
 } from 'react-icons/fa';
 import ContactIntro from "@/components/pages/personReviews/contact"
 
 
 export default function PersonFeebackPage2() {
-    const {fetchClovek} = useFetchDatabase()
-    
-        const [personData, setPersonData] = useState({
-            name: 'Kristýna Fürbachová',
-            moto: 'Když už nám hoří dům, alespoň se ohřejeme.',
-            number: '09',
-            databaseName: 'Kristýna Fürbachová'
-        })
-        const srcbg = "/assets/backgrounds/mainOffice.webp"
-        const srcp = "/assets/portraits/business/9.webp"
-        const icons = [
-            { name: "mail", src: FaEnvelope, href: "mailto:servis.prochazka@ovbone.cz"},
-            { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/tynuse.furbachova?locale=cs_CZ"},
-            { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/tynus.furbachova/"},
-        //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
-        ]
+    const { fetchClovek } = useFetchDatabase()
 
-    
-        useEffect(() => {
-            const loadData = async () => {
-                try {
-                    const data = await fetchClovek("Kristýna Fürbachová")
-                    if (data && data.length > 0) {
-                        setPersonData(prev => ({
-                            ...prev,
-                            name: data[0].name,
-                            moto: data[0].moto
-                        }))
-                    }
-                }
-                catch (err) {
-                    console.log(err)
+    const [personData, setPersonData] = useState({
+        name: 'Kristýna Fürbachová',
+        moto: 'Když už nám hoří dům, alespoň se ohřejeme.',
+        number: '09',
+        databaseName: 'Kristýna Fürbachová'
+    })
+    const srcbg = "/assets/backgrounds/mainOffice.webp"
+    const srcp = "/assets/portraits/business/9.webp"
+    const icons = [
+        { name: "mail", src: FaEnvelope, href: "mailto:servis.prochazka@ovbone.cz" },
+        { name: "facebook", src: FaFacebookF, href: "https://www.facebook.com/tynuse.furbachova?locale=cs_CZ" },
+        { name: "instagram", src: FaInstagram, href: "https://www.instagram.com/tynus.furbachova/" },
+        //   { name: "mainWeb", src: FaGlobe, href: "https://www.ovbone.cz/"}
+    ]
+
+
+    useEffect(() => {
+        const loadData = async () => {
+            try {
+                const data = await fetchClovek("Kristýna Fürbachová")
+                if (data && data.length > 0) {
+                    setPersonData(prev => ({
+                        ...prev,
+                        name: data[0].name,
+                        moto: data[0].moto
+                    }))
                 }
             }
-            loadData();
-        }, [fetchClovek])
-    
-    return(
+            catch (err) {
+                console.log(err)
+            }
+        }
+        loadData();
+    }, [fetchClovek])
+
+    return (
         <>
             <Head>
                 <title>{`${personData.name} | Finanční Poradce | Procházka Group`}</title>
@@ -125,10 +124,8 @@ export default function PersonFeebackPage2() {
                     })}
                 </script>
             </Head>
-            <main lang="cs">
-                <Cursor />
-                <Navbar />
-                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp}/>
+            <main lang="cs" key="person-page">
+                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp} />
             </main>
         </>
     )

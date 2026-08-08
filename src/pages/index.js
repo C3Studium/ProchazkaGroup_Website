@@ -1,11 +1,12 @@
 import Footer from "@/components/common/footer";
-import Grid from "@/components/common/grid";
-import Navbar from "@/components/common/navbar";
-import Cursor from "@/components/common/navbar/cursor";
+import Preloader from "@/components/common/PreLoader";
 import QNA from "@/components/common/qna";
 import IntroStatbar from "@/components/pages/index/introStatbar";
 import MainIntro from "@/components/pages/index/main";
 import MainPageSection from "@/components/pages/index/MainSection";
+import Contact from "@/components/pages/index/MainSection/Contact";
+import IntroSMain from "@/components/pages/index/MainSection/IntroS";
+import Testimonials from "@/components/pages/index/Testimonials";
 import { StatbarData } from "@/constants/mainpage";
 import Head from "next/head";
 
@@ -14,7 +15,7 @@ import Head from "next/head";
 export default function Home() {
   return (
     <>
-    <Head>
+      <Head>
         <title>Procházka Group | Finanční Poradenství | OVB Allfinanz</title>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,7 +24,7 @@ export default function Home() {
         <meta name="author" content="Procházka Group" />
         <meta name="robots" content="index, follow" />
         <link rel="canonical" href="https://prochazkagroup.cz" />
-        
+
         {/* Open Graph / Facebook */}
         <meta property="og:type" content="website" />
         <meta property="og:url" content="https://prochazkagroup.cz" />
@@ -104,14 +105,13 @@ export default function Home() {
           })}
         </script>
       </Head>
-      <main>
-        <Navbar />
-        <Cursor />
+      <main lang="cs" key="index">
         <MainIntro />
-        <IntroStatbar data={StatbarData}/>
-        <MainPageSection />
+        <IntroStatbar data={StatbarData} />
+        <IntroSMain />
+        <Testimonials />
+        <Contact text={'VYBERTE SI KDO VÁM JE NEJVÍCE SYMPATICKÝ A UDĚLEJTE KROK V PŘED HNED.  PROTOŽE PRVNÍ KROK ZA VÁS NIKDO NEUDĚLÁ.'} />
         <QNA />
-        <Footer />
       </main>
     </>
   )
