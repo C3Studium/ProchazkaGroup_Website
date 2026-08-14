@@ -1,8 +1,8 @@
-import Footer from "@/components/common/footer";
-import Navbar from "@/components/common/navbar";
-import Cursor from "@/components/common/navbar/cursor";
-import ReviewsList from "@/components/modems/Rezence";
-import ReviewsIntro from "@/components/pages/reviews/reviews";
+// import Footer from "@/components/common/footer";
+// import Navbar from "@/components/common/navbar";
+// import Cursor from "@/components/common/navbar/cursor";
+// import ReviewsList from "@/components/modems/Rezence";
+// import ReviewsIntro from "@/components/pages/reviews/reviews";
 import Head from "next/head";
 
 export default function ReviewsPage() {
@@ -82,9 +82,9 @@ export default function ReviewsPage() {
                 </script>
             </Head>
             <main lang="cs" key="reviews-page">
-                <ReviewsIntro />
-                <ReviewsList />
-                <Footer />
+                {/* <ReviewsIntro /> */}
+                {/* <ReviewsList /> */}
+                {/* <Footer /> */}
             </main>
         </>
     )

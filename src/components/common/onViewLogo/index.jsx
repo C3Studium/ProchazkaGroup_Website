@@ -44,7 +44,7 @@ export default function ONViewLogo() {
                     animate={isInView ? 'enter' : 'initial'}
                     custom={1}
                 >
-                    <AnimatedText text={"Procházka Group"} custom={1} isInView={isInView} />
+                    <AnimatedText text={"Procházka Group"} />
                 </motion.h3>
                 <motion.p
                     variants={textIntro}
@@ -52,7 +52,7 @@ export default function ONViewLogo() {
                     animate={isInView ? 'enter' : 'initial'}
                     custom={2}
                 >
-                    <AnimatedText text={"Finance a vzdělání"} custom={2} isInView={isInView} />
+                    <AnimatedText text={"Finance a vzdělání"} />
                 </motion.p>
             </div>
         </div>

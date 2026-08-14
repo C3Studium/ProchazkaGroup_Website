@@ -69,6 +69,8 @@
 
     .navbar__body__background {
         position: absolute;
+        top: 0;
+        left: 0;
         background-color: var(--bgColor2);
         opacity: 0.5;
         backdrop-filter: blur(10px);
@@ -89,8 +91,20 @@
         flex-direction: column;
         z-index: 2;
 
-        .grid {
+        // Grid renders .grid__wrapper; it must overlay the rows, not sit in the
+        // flex flow (it would eat height and squash the rows).
+        .grid__wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 3;
+
+            .ripple-grid-container {
+                width: 100%;
+                height: 100%;
+            }
         }
 
         .navbar__body__rows__logo {
@@ -129,6 +143,7 @@
             z-index: 1;
             width: 100%;
             height: calc(100% / 3);
+            flex-shrink: 0;
         }
     }
 

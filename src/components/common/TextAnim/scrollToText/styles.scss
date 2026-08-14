@@ -7,7 +7,14 @@
     margin: 0.25rem;
     mix-blend-mode: difference;
     width: fit-content;
-    height: 100%;
+    // Explicit em sizing on the whole chain: the track animates by
+    // -(index * 100%) of its own height, so window, track and letter must all
+    // be exactly 1em. Percentage chains break wherever an ancestor has auto
+    // height (e.g. the navbar menu pill).
+    @include font(SCTA);
+    font-family: "Switzer-Light";
+    font-weight: 400;
+    height: 1em;
     overflow: hidden;
     display: flex;
     flex-direction: row;
@@ -20,21 +27,22 @@
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
-        width: 1ch;
-        height: 100%;
+        width: auto;
+        height: 1em;
         margin: 0 0.15rem;
         padding: 0;
 
         .scrollToText__char__letter {
-            margin: 0 0.1rem;
+            flex: 0 0 1em;
+            height: 1em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
             padding: 0;
             color: var(--wText);
-            @include font(SCTA);
-            font-family: "Switzer-Light";
-            font-weight: 400;
             width: 1ch;
-            height: 1em;
-            line-height: 1.1em;
+            line-height: 1;
             text-align: center;
         }
     }

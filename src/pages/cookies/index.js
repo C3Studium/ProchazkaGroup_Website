@@ -1,7 +1,7 @@
 import Head from "next/head"
 
-import Footer from "@/components/common/footer"
-import CookiesContent from "@/components/pages/cookies/CookiesPage"
+// import Footer from "@/components/common/footer"
+// import CookiesContent from "@/components/pages/cookies/CookiesPage"
 
 export default function CookiesPage() {
     return (
@@ -76,8 +76,8 @@ export default function CookiesPage() {
                 </script>
             </Head>
             <main lang="cs">
-                <CookiesContent />
-                <Footer />
+                {/* <CookiesContent /> */}
+                {/* <Footer /> */}
             </main>
         </>
     )

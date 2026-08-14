@@ -4,20 +4,10 @@ import React, { createContext, useContext, useMemo, useState, useEffect } from '
 const LoadContext = createContext();
 
 export function LoadProvider({ children }) {
-    const [firstLoad, setFirstLoad] = useState(true);
-
-
-
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setFirstLoad(false);
-            document.body.style.overflow = '';
-        }, 3000);
-
-        document.body.style.overflow = 'hidden';
-        return () => clearTimeout(timer);
-    }, [firstLoad]);
+    // Preloader and page transitions are removed; firstLoad stays false so
+    // consumers (neonText, page intros) run their short-delay variants and
+    // scroll is never locked.
+    const [firstLoad, setFirstLoad] = useState(false);
 
     // Memoize context value to prevent unnecessary re-renders
     // change this when the preloader will be ready to run normally

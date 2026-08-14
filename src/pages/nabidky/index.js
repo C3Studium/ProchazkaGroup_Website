@@ -1,6 +1,6 @@
 import Head from "next/head"
-import Footer from "@/components/common/footer"
-import ClipPathPage from "@/components/pages/offers/ClipPathPage"
+// import Footer from "@/components/common/footer"
+// import ClipPathPage from "@/components/pages/offers/ClipPathPage"
 
 export default function PrilezitostiPage() {
     return (
@@ -73,8 +73,8 @@ export default function PrilezitostiPage() {
                 </script>
             </Head>
             <main lang="cs" key="offers-page">
-                <ClipPathPage />
-                <Footer />
+                {/* <ClipPathPage /> */}
+                {/* <Footer /> */}
             </main>
         </>
     )

@@ -1,12 +1,12 @@
-import Footer from "@/components/common/footer";
-import Navbar from "@/components/common/navbar";
-import Cursor from "@/components/common/navbar/cursor";
-import QNA from "@/components/common/qna";
-import BenefitReminder from "@/components/forms/BenefitReminder";
-import BenefitDetails from "@/components/pages/benefit/BenefitDetails";
-import BenefitProgramKeyframes from "@/components/pages/benefit/BenefitProgram";
-import Reviews from "@/components/pages/benefit/Reviews";
-import Contact from "@/components/pages/index/MainSection/Contact";
+// import Footer from "@/components/common/footer";
+// import Navbar from "@/components/common/navbar";
+// import Cursor from "@/components/common/navbar/cursor";
+// import QNA from "@/components/common/qna";
+// import BenefitReminder from "@/components/forms/BenefitReminder";
+// import BenefitDetails from "@/components/pages/benefit/BenefitDetails";
+// import BenefitProgramKeyframes from "@/components/pages/benefit/BenefitProgram";
+// import Reviews from "@/components/pages/benefit/Reviews";
+// import Contact from "@/components/pages/index/MainSection/Contact";
 import Head from "next/head";
 
 export default function BenefitProgramPage() {
@@ -71,13 +71,13 @@ export default function BenefitProgramPage() {
                 </script>
             </Head>
             <main lang="cs">
-                <BenefitProgramKeyframes />
-                <BenefitDetails />
-                <Reviews />
-                <BenefitReminder />
-                <Contact text={'Vy ještě nejste našimi klienty?<br/>Viditelně jsme Vás zaujmuli, to byste teď <br/> neprocházeli náš program, že?'} />
-                <QNA />
-                <Footer />
+                {/* <BenefitProgramKeyframes /> */}
+                {/* <BenefitDetails /> */}
+                {/* <Reviews /> */}
+                {/* <BenefitReminder /> */}
+                {/* <Contact text={'Vy ještě nejste našimi klienty?<br/>Viditelně jsme Vás zaujmuli, to byste teď <br/> neprocházeli náš program, že?'} /> */}
+                {/* <QNA /> */}
+                {/* <Footer /> */}
             </main>
         </>
     )

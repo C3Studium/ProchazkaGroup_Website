@@ -9,7 +9,7 @@ import {
     FaLinkedinIn,
     FaTwitter,
 } from 'react-icons/fa';
-import ContactIntro from "@/components/pages/personReviews/contact"
+// import ContactIntro from "@/components/pages/personReviews/contact"
 
 export default function PersonFeebackPage2() {
     const { fetchClovek } = useFetchDatabase()
@@ -124,7 +124,7 @@ export default function PersonFeebackPage2() {
                 </script>
             </Head>
             <main lang="cs" key="person-page">
-                <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp} />
+                {/* <ContactIntro name={personData.name} moto={personData.moto} number={personData.number} databaseName={personData.databaseName} icons={icons} srcbg={srcbg} srcp={srcp} /> */}
             </main>
         </>
     )

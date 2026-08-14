@@ -1,8 +1,8 @@
-import Footer from "@/components/common/footer"
+// import Footer from "@/components/common/footer"
 
-import QNA from "@/components/common/qna"
-import AboutInto from "@/components/pages/aboutUs/about"
-import ParallaxExpanf from "@/components/pages/aboutUs/parallaxExpand"
+// import QNA from "@/components/common/qna"
+// import AboutInto from "@/components/pages/aboutUs/about"
+// import ParallaxExpanf from "@/components/pages/aboutUs/parallaxExpand"
 import Head from "next/head"
 
 export default function AboutPage() {
@@ -65,10 +65,10 @@ export default function AboutPage() {
         </script>
       </Head>
       <main lang="cs" key="about-page">
-        <AboutInto />
-        <ParallaxExpanf />
-        <QNA />
-        <Footer />
+        {/* <AboutInto /> */}
+        {/* <ParallaxExpanf /> */}
+        {/* <QNA /> */}
+        {/* <Footer /> */}
       </main>
     </>
   )

@@ -2,7 +2,7 @@ import Image from "next/image";
 import { motion, useInView, useScroll, useSpring, useTransform } from "framer-motion";
 import { useGlobalContext } from "@/context/LoadProvider";
 import { usePerformance } from "@/context/PerformanceProvider"; // Add performance context
-import RotatingButton from "@/components/common/ui/stickyButtons/buttons/RotatingButton";
+// import RotatingButton from "@/components/common/ui/stickyButtons/buttons/RotatingButton";
 import SmallButton from "@/components/common/ui/stickyButtons/buttons/SmallButton";
 import Grid from "@/components/common/grid";
 import Link from "next/link";
@@ -137,13 +137,13 @@ export default function MainIntro() {
                                 <span className="text__container__arrow">→</span>
                             </p>
                         </div>
-                        <div className="button__container">
+                        {/* <div className="button__container">
                             <Link href="https://www.pojistnehlaseni.cz/">
                                 <RotatingButton
                                     text=" - Nahlášení Pojistného - Nahlášení Pojistného"
                                 />
                             </Link>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </section>

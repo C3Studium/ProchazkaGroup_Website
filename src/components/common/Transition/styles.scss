@@ -6,7 +6,9 @@
     right: 0;
     isolation: isolate;
     background-color: #ffff;
-    backdrop-filter: blur(10px);
+    // No backdrop-filter here: it is invisible behind the opaque background,
+    // but keeps the parked (offscreen) row in the compositor and flickers
+    // strips at viewport edges while anything animates.
     z-index: 1000;
     width: 100%;
     height: 100%;

@@ -16,7 +16,10 @@
         cursor: pointer;
         will-change: transform;
         font-family: "Switzer";
-        backdrop-filter: blur(5px);
+        // backdrop-filter on a continuously rotating element forces backdrop
+        // re-sampling every frame and flickers strips at compositing-layer
+        // edges in Chromium; a translucent fill gives the same look on dark bg.
+        background-color: rgba(5, 10, 16, 0.35);
 
         .Rotating__button_Bounds {
             position: absolute;

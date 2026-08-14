@@ -1,13 +1,13 @@
-import Footer from "@/components/common/footer";
-import Preloader from "@/components/common/PreLoader";
-import QNA from "@/components/common/qna";
-import IntroStatbar from "@/components/pages/index/introStatbar";
+// import Footer from "@/components/common/footer";
+// import Preloader from "@/components/common/PreLoader";
+// import QNA from "@/components/common/qna";
+// import IntroStatbar from "@/components/pages/index/introStatbar";
 import MainIntro from "@/components/pages/index/main";
-import MainPageSection from "@/components/pages/index/MainSection";
-import Contact from "@/components/pages/index/MainSection/Contact";
-import IntroSMain from "@/components/pages/index/MainSection/IntroS";
-import Testimonials from "@/components/pages/index/Testimonials";
-import { StatbarData } from "@/constants/mainpage";
+// import MainPageSection from "@/components/pages/index/MainSection";
+// import Contact from "@/components/pages/index/MainSection/Contact";
+// import IntroSMain from "@/components/pages/index/MainSection/IntroS";
+// import Testimonials from "@/components/pages/index/Testimonials";
+// import { StatbarData } from "@/constants/mainpage";
 import Head from "next/head";
 
 //WIP: Every index has to be a logo, not a greek letters
@@ -107,11 +107,11 @@ export default function Home() {
       </Head>
       <main lang="cs" key="index">
         <MainIntro />
-        <IntroStatbar data={StatbarData} />
-        <IntroSMain />
-        <Testimonials />
-        <Contact text={'VYBERTE SI KDO VÁM JE NEJVÍCE SYMPATICKÝ A UDĚLEJTE KROK V PŘED HNED.  PROTOŽE PRVNÍ KROK ZA VÁS NIKDO NEUDĚLÁ.'} />
-        <QNA />
+        {/* <IntroStatbar data={StatbarData} /> */}
+        {/* <IntroSMain /> */}
+        {/* <Testimonials /> */}
+        {/* <Contact text={'VYBERTE SI KDO VÁM JE NEJVÍCE SYMPATICKÝ A UDĚLEJTE KROK V PŘED HNED.  PROTOŽE PRVNÍ KROK ZA VÁS NIKDO NEUDĚLÁ.'} /> */}
+        {/* <QNA /> */}
       </main>
     </>
   )

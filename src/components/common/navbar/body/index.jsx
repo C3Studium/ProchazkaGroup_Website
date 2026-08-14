@@ -1,6 +1,12 @@
 import { motion } from 'framer-motion'
-
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { useState } from 'react'
+import GetChars from './getChars'
+import Magnetic from '@/components/common/Magnetic'
 import { NavLinks, NavAddLinks, NavIcons } from '@/constants/common'
+import ONViewLogo from '@/components/common/onViewLogo'
+import Grid from '../../grid'
 
 
 const rows = [
@@ -90,94 +96,171 @@ const rowSlide = {
 };
 
 
-const titles = [
-    {
-        title: "Link",
-        index: 0
-    },
-    {
-        title: "popis",
-        index: 1
-    },
-    {
-        title: "foto",
-        index: 2
-    }
-]
-
-// const NavLinks = [
-//     {
-//         title: "HLAVNÍ STRÁNKA",
-//         decs: "",
-//         href: "/",
-//         index: 0
-//     },
-//     {
-//         title: "BENEFIT PROGRAM",
-//         decs: "",
-//         href: "/benefit-program",
-//         index: 1
-//     },
-//     {
-//         title: "O NÁS",
-//         decs: "",
-//         href: "/o-nas",
-//         index: 2
-//     },
-//     {
-//         title: "PORACI",
-//         decs: "",
-//         href: "/o-nas#poraci",
-//         index: 0
-//     },
-//     {
-//         title: "PARTNEŘI",
-//         decs: "",
-//         href: "/nabidky",
-//         index: 1
-//     },
-//     {
-//         title: "RECENZE",
-//         decs: "",
-//         href: "/recenze",
-//         index: 0
-//     },
-//     {
-//         title: "KONTAKT",
-//         decs: "",
-//         href: "/kontakt",
-//         index: 1
-//     },
-// ]
-
-
 export default function NavbarBody({ setMenu }) {
+    const [selectedLink, setSelectedLink] = useState({ isActive: false, index: 0 });
+    const pathname = usePathname();
 
+    const handleLinkClick = () => {
+        // Close the menu
+        setMenu(false);
+    };
 
-    // return (
-    //     <section>
-    //         <div className="divider" />
-    //         <div className="divider" />
-    //         <div className="navbar__body__container">
-    //             {
-    //                 titles.map((title, index) => (
-    //                     <div key={index} className="navbar__body__link">
-    //                         <p>{title.title}</p>
-    //                     </div>
-    //                 ))
-    //             }
-    //         </div>
-    //         <div>
-    //             <div>
+    return (
+        <div className='navbar__body'>
+            <motion.div
+                className='navbar__body__background'
+                variants={background}
+                initial='initial'
+                animate='enter'
+                exit='exit'
+                onClick={() => setMenu(false)}
+            >
 
-    //             </div>
-    //             <div>
-
-    //             </div>
-    //             <div>
-
-    //             </div>
-    //         </div>
-    //     </section>
-    // );
+            </motion.div>
+            <div className='navbar__body__rows__container'>
+                <Grid size='20vh' key={"navbar_body"} />
+                <motion.div
+                    className='navbar__body__rows__logo'
+                    initial='initial'
+                    animate='enter'
+                    exit='exit'
+                    variants={logoShow}
+                >
+                    <ONViewLogo />
+                </motion.div>
+                {rows.map((row, index) => {
+                    const { number } = row;
+                    return (
+                        <motion.div
+                            key={number}
+                            className='navbar__body__row'
+                            variants={rowSlide}
+                            initial='initial'
+                            animate='enter'
+                            exit='exit'
+                            custom={index}
+                        ></motion.div>
+                    );
+                })}
+            </div>
+            <div className='navbar__body__container'>
+                {NavLinks.map((link, index) => {
+                    const { href, text } = link;
+                    const initialColor = pathname === href ? '#964BF2' : '#fff';
+                    return (
+                        <Magnetic key={`magns${index}`} sensitivity='0.1'>
+                            <motion.div
+                                key={`bds${index}`}
+                                className={`navbar__body__link ${pathname === href ? 'active' : ''}`}
+                                onMouseEnter={() => setSelectedLink({ isActive: true, index })}
+                                onMouseLeave={() => setSelectedLink({ isActive: false, index })}
+                                variants={textShow}
+                                initial='initial'
+                                animate='enter'
+                                exit='exit'
+                                custom={index}
+                            >
+                                <Link href={href} onClick={handleLinkClick}>
+                                    <motion.p>
+                                        <GetChars
+                                            text={text}
+                                            selectedLink={selectedLink}
+                                            index={index}
+                                            initialColor={initialColor}
+                                            pathname={pathname}
+                                            href={href}
+                                        />
+                                    </motion.p>
+                                </Link>
+                            </motion.div>
+                        </Magnetic>
+                    );
+                })}
+            </div>
+            <div className='navbar__body__add__container'>
+                <div className='navbar__body__add__devider'>
+                    {NavAddLinks.map((link, index) => {
+                        const { href, text } = link;
+                        const newIndex = index + NavLinks.length;
+                        const initialColor = pathname === href ? '#964BF2' : '#fff';
+                        return (
+                            <Magnetic key={`magnts${newIndex}`} sensitivity='0.1'>
+                                <motion.div
+                                    key={`adddiv${newIndex}`}
+                                    className='navbar__body__add-link'
+                                    onMouseEnter={() => setSelectedLink({
+                                        isActive: true,
+                                        index: newIndex
+                                    })}
+                                    onMouseLeave={() => setSelectedLink({
+                                        isActive: false,
+                                        index: newIndex
+                                    })}
+                                    variants={textShow}
+                                    initial='initial'
+                                    animate='enter'
+                                    exit='exit'
+                                    custom={newIndex}
+                                >
+                                    <Link href={href} onClick={handleLinkClick}>
+                                        <motion.p>
+                                            <GetChars
+                                                text={text}
+                                                selectedLink={selectedLink}
+                                                index={newIndex}
+                                                initialColor={initialColor}
+                                                pathname={pathname}
+                                                href={href}
+                                            />
+                                        </motion.p>
+                                    </Link>
+                                </motion.div>
+                            </Magnetic>
+                        );
+                    })}
+                </div>
+                <div className='navbar__body__add__devider'>
+                    {NavIcons.map((icon, index) => {
+                        const { href, text } = icon;
+                        const iconIndex = index + NavLinks.length + NavAddLinks.length;
+                        const initialColor = pathname === href ? '#964BF2' : '#fff';
+                        return (
+                            <Magnetic key={`iconsmag${iconIndex}`} sensitivity='0.1'>
+                                <motion.div
+                                    key={`iconsdiv${iconIndex}`}
+                                    onMouseEnter={() => setSelectedLink({
+                                        isActive: true,
+                                        index: index + NavLinks.length + NavAddLinks.length
+                                    })}
+                                    onMouseLeave={() => setSelectedLink({
+                                        isActive: false,
+                                        index: index + NavLinks.length + NavAddLinks.length
+                                    })}
+                                    className='navbar__body__icon'
+                                    variants={textShow}
+                                    initial='initial'
+                                    animate='enter'
+                                    exit='exit'
+                                    custom={iconIndex}
+                                >
+                                    <Link href={href} onClick={handleLinkClick}>
+                                        <motion.p>
+                                            <GetChars
+                                                text={text}
+                                                selectedLink={selectedLink}
+                                                index={iconIndex}
+                                                initialColor={initialColor}
+                                                pathname={pathname}
+                                                href={href}
+                                            />
+                                        </motion.p>
+                                    </Link>
+                                </motion.div>
+                            </Magnetic>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
 }

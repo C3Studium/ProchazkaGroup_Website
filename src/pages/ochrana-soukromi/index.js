@@ -1,7 +1,7 @@
 import Head from "next/head"
 
-import Footer from "@/components/common/footer"
-import TermsContent from "@/components/pages/gdpr/TermsPage"
+// import Footer from "@/components/common/footer"
+// import TermsContent from "@/components/pages/gdpr/TermsPage"
 
 export default function PrivacyPolicyPage() {
     return (
@@ -73,8 +73,8 @@ export default function PrivacyPolicyPage() {
                 </script>
             </Head>
             <main lang="cs" key="privacy-policy-page">
-                <TermsContent />
-                <Footer />
+                {/* <TermsContent /> */}
+                {/* <Footer /> */}
             </main>
         </>
     )

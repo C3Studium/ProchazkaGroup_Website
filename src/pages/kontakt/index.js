@@ -1,7 +1,7 @@
 import Head from "next/head"
-import Footer from "@/components/common/footer"
-import QNA from "@/components/common/qna"
-import FeedbackIntro from "@/components/pages/contact/feedBack"
+// import Footer from "@/components/common/footer"
+// import QNA from "@/components/common/qna"
+// import FeedbackIntro from "@/components/pages/contact/feedBack"
 
 export default function ContactPage() {
   return (
@@ -72,9 +72,9 @@ export default function ContactPage() {
         </script>
       </Head>
       <main lang="cs" key="contact-page">
-        <FeedbackIntro />
-        <QNA />
-        <Footer />
+        {/* <FeedbackIntro /> */}
+        {/* <QNA /> */}
+        {/* <Footer /> */}
       </main>
     </>
   )
