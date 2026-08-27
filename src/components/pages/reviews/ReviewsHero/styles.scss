@@ -1,0 +1,114 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// The reviews page opens on its own name, set the way the patička sets the
+// company's. No ground of its own — the shader in _app is what is behind it.
+.RevHero {
+    position: relative;
+    padding: 26vh 6vw 8vh;
+    color: var(--wText);
+
+    .RevHero__eyebrow {
+        display: block;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.68rem, 0.8vw, 0.92rem);
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    // Its own box, so the letters answer a hand that is actually near them.
+    .RevHero__word {
+        margin-top: 2.4vh;
+        width: 100%;
+    }
+
+    .RevHero__foot {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        align-items: end;
+        gap: 2vw;
+        margin-top: 6vh;
+    }
+
+    .RevHero__rule {
+        grid-column: 1 / -1;
+        position: relative;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.22);
+        transform-origin: left center;
+        margin-bottom: 3.4vh;
+
+        @include lineSweep(x, -1.2s);
+    }
+
+    // The light travelling down the rule is ornament and nothing else; a reader
+    // who asked for less movement loses it and keeps the rule.
+    @include reduced-motion {
+        .RevHero__rule::after {
+            animation: none;
+            opacity: 0;
+        }
+    }
+
+    .RevHero__line {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.86rem, 1.05vw, 1.2rem);
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.68);
+    }
+
+    .RevHero__count {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(1.1rem, 1.8vw, 2rem);
+        color: var(--wText);
+        font-variant-numeric: tabular-nums;
+
+        em {
+            font-style: normal;
+            font-size: 0.44em;
+            letter-spacing: 0.24em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.45);
+        }
+    }
+}
+
+@media only screen and (max-width: 900px) {
+    .RevHero {
+        padding: 22vh 8vw 6vh;
+
+        // Nothing to the right of the sentence at this width, so the tally goes
+        // under it rather than being squeezed beside it.
+        .RevHero__foot {
+            grid-template-columns: 1fr;
+            gap: 2.6vh;
+        }
+    }
+}
+
+// A phone in landscape is 390px tall and this is a full-height opener: every
+// vh the head spends is one the wall does not get. The tally goes back beside
+// the sentence — there is width here even though there is no height — and the
+// rhythm above it tightens.
+//
+// `phs` is the device-qualified stop: min-width 480 and max-height 520, so a
+// tablet in landscape never picks this up.
+@include phs-h {
+    .RevHero {
+        padding: 25vh 6vw 4vh;
+
+        .RevHero__word { margin-top: 1.6vh; }
+
+        .RevHero__foot {
+            grid-template-columns: 1fr auto;
+            align-items: end;
+            gap: 3vw;
+            margin-top: 4vh;
+        }
+
+        .RevHero__rule { margin-bottom: 2.6vh; }
+
+        .RevHero__line { line-height: 1.4; }
+    }
+}

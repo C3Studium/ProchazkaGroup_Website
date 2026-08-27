@@ -5,7 +5,10 @@
     position: fixed;
     top: 0;
     right: 0;
-    padding: 5px;
+    // Was 5px, which put the logo hard against the window edge. The side value
+    // is the same 3vw the sections below start their content at, so the bar
+    // lines up with the page rather than floating over it.
+    padding: 1.5rem 3vw;
     width: 100%;
     height: fit-content;
     z-index: 160;
@@ -13,95 +16,165 @@
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
 
-    .magnetic {
-        z-index: 165; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
+    // A ground for the bar where the page has none to give it. On the wide
+    // compositions every section is designed with clearance under the bar, so
+    // the three words always land on quiet pixels. On the stacked ones content
+    // simply flows beneath them — a photo or a headline slides under
+    // "PROCHÁZKA GROUP" mid-scroll and takes the word with it. This is the
+    // faintest thing that fixes it: a scrim that is the site's own ground at
+    // the very top and nothing at all by the bar's foot, painted behind the
+    // words (the strip itself stays click-through; see the pointer-events
+    // rules below). Same gate the stacked layouts use, width OR height, so a
+    // phone gets it in both orientations and no desktop ever does.
+    @media (max-width: 820px), (max-height: 520px) {
+        &::before {
+            content: "";
+            position: absolute;
+            inset: -1px 0 auto 0;
+            height: calc(100% + 1.2rem);
+            background: linear-gradient(
+                to bottom,
+                rgba(2, 14, 21, 0.92) 0%,
+                rgba(2, 14, 21, 0.72) 55%,
+                rgba(2, 14, 21, 0) 100%
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+    }
+
+    // The bar is a full-width strip over the top of every page, but only its
+    // three words are anything. Without this the strip itself swallowed every
+    // tap and hover across the top of the screen.
+    pointer-events: none;
+
+    > * { pointer-events: auto; }
+
+    // Two words instead of three. The bar's three at their own tracking are
+    // wider than any phone — SPOJIT SE goes, because the panel this bar opens
+    // carries KONTAKT as a first-class box of its own, and a wordmark shrunk
+    // until all three fit reads as a mistake rather than a bar.
+    @include below(xs) {
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+
+        > .rotateText:last-child { display: none; }
+
+        .navbar__menu { justify-self: end; }
+    }
+
+    // All three are grid children in their own right now — the magnetic wrapper
+    // that used to place the middle one is gone, and with it the centring it
+    // did, which is why this is stated here.
+
+    .navbar__menu {
+        position: relative;
+        justify-self: center;
         display: flex;
-        align-items: center;
         justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        width: fit-content;
+        height: fit-content;
+        z-index: 165;
 
-        &:nth-of-type(1) {
-            justify-content: flex-start;
+        // It is a <button> now; these are the defaults a button brings with it
+        // that the bar has never wanted.
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--wText);
+        font: inherit;
+        cursor: pointer;
+
+        &:focus-visible {
+            outline: 1px solid var(--bgPrimary, #BBB788);
+            outline-offset: 4px;
         }
 
-        &:nth-of-type(3) {
-            justify-content: flex-end;
+        // The word is a line of caps under twenty pixels tall. The pseudo
+        // widens what a finger can land on to the 44px a tap needs without
+        // moving a single visible pixel.
+        @include touch {
+            &::after {
+                content: "";
+                position: absolute;
+                inset: -12px;
+            }
         }
 
-        .navbar__menu {
+        // Two hairlines that CROSS. Closed they lie parallel; open they meet
+        // in the middle and turn into the X — one continuous morph on the
+        // panel's own curve, each line arriving a breath after the other so
+        // the cross is drawn rather than switched. Hovering the closed button
+        // draws them toward each other: the first millimetre of the same
+        // journey, which is how the wall's boxes promise their growth too.
+        .navbar__cut {
+            position: relative;
+            flex-shrink: 0;
+            width: 20px;
+            height: 11px;
+
+            // Centre-anchored (left 50% + the -50% in every transform) so the
+            // width change below grows the line out of its own middle, and
+            // rotate(0deg) stated at rest so the cross is a per-function
+            // interpolation, not a matrix jump.
+            span {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                width: 100%;
+                height: 1px;
+                margin-top: -0.5px;
+                background-color: currentColor;
+                transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                    width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            }
+
+            span:first-child { transform: translate(-50%, -3px) rotate(0deg); }
+            span:last-child {
+                transform: translate(-50%, 3px) rotate(0deg);
+                transition-delay: 0.05s;
+            }
+        }
+
+        &:hover:not([aria-expanded="true"]) .navbar__cut span:first-child { transform: translate(-50%, -1.5px) rotate(0deg); }
+        &:hover:not([aria-expanded="true"]) .navbar__cut span:last-child { transform: translate(-50%, 1.5px) rotate(0deg); }
+
+        // Crossed, the lines also LENGTHEN — the same expand the word does:
+        // a rotated 20px line only spans 14, so the growth keeps the X at the
+        // lines' own optical size and the size change travels, never snaps.
+        &[aria-expanded="true"] .navbar__cut span:first-child { transform: translate(-50%, 0) rotate(45deg); width: 130%; }
+        &[aria-expanded="true"] .navbar__cut span:last-child { transform: translate(-50%, 0) rotate(-45deg); width: 130%; }
+
+        // Reduced motion still gets the morph, just calmer: this is pointer
+        // feedback, and an instant snap reads as broken, not as considerate.
+        // Same policy as the tiles' CALM_HOVER — one shorter curtain, no
+        // stagger.
+        @media (prefers-reduced-motion: reduce) {
+            .navbar__cut span {
+                transition-duration: 0.4s;
+                transition-delay: 0s;
+            }
+        }
+
+        .navbar__text {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            border-radius: 50%;
             width: fit-content;
-            height: fit-content;
-            z-index: 160;
+            // Was 0.75rem all round, which stood the corner marks most of a
+            // centimetre off the word. They belong almost on it.
+            margin: 0.25rem 0.35rem;
 
-            .navbar__bounds {
-                position: absolute;
-                top: 0;
-                left: 0;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: center;
-                align-content: center;
-                z-index: 4;
-                border-radius: 50%;
-
-                // I need to expand the border only when I hover over it
-                &:hover {
-                    scale: 2.5;
-                }
-            }
-
-            .navbar__text {
+            .navbar__text__content {
                 position: relative;
                 display: flex;
-                justify-content: center;
                 align-items: center;
-                flex-direction: column;
-                overflow: hidden;
-                z-index: 3;
                 width: fit-content;
-                height: 100%;
-                margin: 0.75rem;
-
-                .navbar__text__content {
-                    position: relative;
-                    display: flex;
-                    flex-direction: row;
-                    justify-content: space-between;
-                    align-items: center;
-                    width: fit-content;
-                    @include font(SCTA);
-                    overflow: hidden;
-
-                    .navbar__line__left {
-                        width: 1px;
-                        height: 100%;
-                        background-color: var(--hColor2);
-                    }
-
-                    .navbar__line__right {
-                        width: 1px;
-                        height: 100%;
-                        background-color: var(--hColor2);
-                    }
-                }
-
-                .navbar__line__up {
-                    width: 100%;
-                    height: 1px;
-                    background-color: var(--hColor2);
-                }
-
-                .navbar__line__down {
-                    width: 100%;
-                    height: 1px;
-                    background-color: var(--hColor2);
-                }
-
+                @include font(SCTA);
+                overflow: hidden;
             }
         }
     }

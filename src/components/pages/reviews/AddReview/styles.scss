@@ -1,0 +1,342 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// In the flow, at the head of the wall. It was fixed in the corner, which put
+// the page's one request after everything it is a request about.
+.AddRev {
+    position: relative;
+    z-index: 5;
+}
+
+// Flat, not blurred. `backdrop-filter` over a page that carries a shader costs
+// several times the frame rate — measured on /nabidky, 70 frames against 329
+// across the same ride — so the plate is opacity and nothing else.
+//
+// The vertical padding is a clamp rather than plain `vh` because both of these
+// plates are a thumb target: at 2.2vh a landscape phone gave the button 36px of
+// height, which is a plate you aim at rather than press. The clamp holds the
+// proportion where there is room and the `min-height` is the floor under it.
+.AddRev__button,
+.AddRev__send {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8vw;
+    min-height: 44px;
+    padding: clamp(0.85rem, 2.2vh, 1.35rem) clamp(1.1rem, 2.4vw, 2.1rem);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    background-color: rgba(2, 14, 21, 0.92);
+    color: var(--wText);
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.72rem, 0.9vw, 1rem);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    cursor: inherit;
+    pointer-events: auto;
+    transition: border-color 0.35s ease, background-color 0.35s ease;
+
+    .corner {
+        position: absolute;
+        width: 13px;
+        height: 13px;
+        border: 0 solid rgba(255, 255, 255, 0.75);
+    }
+
+    .corner--tl { top: -5px; left: -5px; border-top-width: 1px; border-left-width: 1px; }
+    .corner--tr { top: -5px; right: -5px; border-top-width: 1px; border-right-width: 1px; }
+    .corner--bl { bottom: -5px; left: -5px; border-bottom-width: 1px; border-left-width: 1px; }
+    .corner--br { bottom: -5px; right: -5px; border-bottom-width: 1px; border-right-width: 1px; }
+
+    svg { width: 18px; height: 18px; }
+
+    // Hover is a pointer's answer and nothing else. On a touchscreen it is
+    // applied on tap and then left applied, so the plate a reader last pressed
+    // stays lit as though the finger were still on it.
+    @include fine-pointer {
+        &:hover {
+            border-color: var(--wText);
+            background-color: rgba(255, 255, 255, 0.06);
+        }
+    }
+
+    @include touch {
+        gap: 3vw;
+
+        // The press itself, in the same two properties the hover used, so the
+        // plate answers a finger exactly as it answers a cursor — for as long
+        // as the finger is down.
+        &:active {
+            border-color: var(--wText);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    }
+
+    &:disabled { opacity: 0.5; }
+}
+
+.AddRev__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 910;
+    background-color: rgba(2, 14, 21, 0.8);
+
+    // Lenis is stopped while the sheet is open, but a finger dragged on the
+    // scrim is a native scroll and lenis is not the one that would carry it.
+    touch-action: none;
+}
+
+// The layer the card is laid out in, not the card. `inset: 0` with the card as
+// its flex child, because the card cannot centre itself: it used to be
+// `top: 50%` plus `transform: translateY(-50%)`, and framer-motion writes the
+// element's transform for the `y` it animates — so the -50% was gone the moment
+// the sheet opened, the card hung from the middle of the screen, and `Odeslat`
+// was below the fold at every single viewport (measured: y=876 in an 844-tall
+// phone, y=514 in a 390-tall landscape, y=1098 at 1920×1080). Layout here,
+// animation there, and the two stop overwriting each other.
+.AddRev__sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 911;
+
+    // A fixed box is laid out against the LARGE viewport, so on a phone the
+    // bottom of `inset: 0` is the strip the browser's own chrome is sitting on
+    // and the card's last centimetre is under the URL bar. `height` is the
+    // over-constrained one of top/bottom/height, so this quietly wins where
+    // `dvh` is understood and is ignored — leaving `inset` alone — where it is
+    // not. The scrim keeps `inset: 0`: it should reach behind the chrome.
+    height: 100dvh;
+
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 4vh 6vw;
+
+    // The layer covers the viewport; only the card is a thing you can press.
+    // Everything beside it falls through to the scrim, which closes.
+    pointer-events: none;
+}
+
+.AddRev__card {
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+
+    // A card, not a column of text: 34vw was 653px at 1920 and 260px at 750.
+    width: clamp(20rem, 34vw, 34rem);
+    max-width: 100%;
+    max-height: 100%;
+    padding: clamp(1.4rem, 4vh, 2.6rem) clamp(1.3rem, 2.4vw, 2.4rem);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(2, 14, 21, 0.96);
+    color: var(--wText);
+
+    .AddRev__panel__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex: 0 0 auto;
+    }
+
+    .AddRev__panel__eyebrow {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.62rem, 0.74vw, 0.86rem);
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .AddRev__panel__rule {
+        display: block;
+        flex: 0 0 auto;
+        height: 1px;
+        margin: clamp(0.7rem, 2.4vh, 1.4rem) 0 clamp(0.9rem, 3vh, 1.8rem);
+        background-color: rgba(255, 255, 255, 0.2);
+        position: relative;
+
+        @include lineSweep(x, -0.8s);
+
+        // Calm rather than off: the rule keeps its light, it stops carrying it
+        // across the card.
+        @include reduced-motion {
+            &::after { animation: none; opacity: 0.5; }
+        }
+    }
+}
+
+// The scroller is the inside of the card, never the card itself — the head above
+// it holds the close, and a head that scrolls takes the only way out of a sheet
+// that has stopped the page with it. `min-height: 0` because a flex child will
+// otherwise refuse to shrink below its content and the card grows off-screen
+// instead of scrolling.
+.AddRev__scroll {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+
+    // The page behind is stopped, not gone: without this a flick that reaches
+    // the end of the form keeps going and takes the wall with it.
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+
+    // Room for the send plate's corner marks, which sit 5px outside its box.
+    padding: 6px 6px 0;
+    margin: 0 -6px;
+}
+
+// Two strokes, not a glyph.
+.AddRev__close {
+    position: relative;
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: inherit;
+
+    span {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 20px;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.7);
+
+        &:first-child { transform: translate(-50%, -50%) rotate(45deg); }
+        &:last-child { transform: translate(-50%, -50%) rotate(-45deg); }
+    }
+
+    @include fine-pointer {
+        &:hover span { background-color: var(--wText); }
+    }
+
+    // The one control that must never be missed, at the size a thumb needs.
+    // The strokes stay where they are — the target grows around them.
+    @include touch {
+        width: 44px;
+        height: 44px;
+        margin-right: -5px;
+
+        &:active span { background-color: var(--wText); }
+    }
+}
+
+.AddRev__field {
+    display: block;
+    margin-bottom: clamp(0.9rem, 2.6vh, 1.6rem);
+
+    > span {
+        display: block;
+        margin-bottom: clamp(0.35rem, 1vh, 0.6rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.6rem, 0.72vw, 0.82rem);
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+
+        em { font-style: normal; color: rgba(255, 255, 255, 0.85); }
+    }
+
+    // The browser's own chrome removed: a rounded, shaded input is the one
+    // thing on this page that would not be drawn in hairlines.
+    input,
+    textarea {
+        appearance: none;
+        display: block;
+        width: 100%;
+        min-height: 44px;
+        padding: clamp(0.5rem, 1.4vh, 0.9rem) clamp(0.3rem, 1vw, 0.8rem);
+        border: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.28);
+        border-radius: 0;
+        background: none;
+        color: var(--wText);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.82rem, 0.95vw, 1.02rem);
+        outline: none;
+        resize: none;
+        transition: border-color 0.35s ease;
+
+        &:focus { border-bottom-color: rgba(255, 255, 255, 0.8); }
+    }
+
+    textarea { min-height: 6.5rem; }
+}
+
+// Under 16px iOS zooms the page on focus and leaves it zoomed, which on a
+// landscape phone means the sheet is wider than the screen and the reader is
+// panning a form. Measured before this: 13.12px in every field on every phone
+// stop. The clamp still governs where it is already large enough.
+@include touch {
+    .AddRev__field {
+        input,
+        textarea {
+            font-size: max(16px, clamp(0.82rem, 0.95vw, 1.02rem));
+        }
+    }
+}
+
+// Present for scripts, invisible and unreachable for people.
+.AddRev__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.AddRev__send { margin-top: 1vh; }
+
+.AddRev__note {
+    margin: clamp(0.9rem, 2.6vh, 1.6rem) 0 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.62rem, 0.74vw, 0.84rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+// Where the card stops being a panel beside the wall and becomes the sheet.
+//
+// The width alone is not the gate. A landscape phone is 844 wide and 390 tall:
+// on a width-only rule it keeps the desktop composition, and the desktop
+// composition on 390px of height is a card taller than the screen. The height
+// arm catches it, and every phone held sideways with it.
+@media only screen and (max-width: 900px), only screen and (max-height: 560px) {
+    .AddRev__sheet {
+        justify-content: center;
+        padding: 3vh 5vw;
+    }
+
+    .AddRev__card {
+        width: 100%;
+        max-width: 40rem;
+        padding: clamp(1.1rem, 3.4vh, 2rem) clamp(1.2rem, 5vw, 2.2rem);
+    }
+
+    .AddRev__field > span { font-size: 0.7rem; }
+}
+
+// 390px of height, and the keyboard will take a third of it. Everything gives
+// up its breathing room so that the form itself — which is the only reason the
+// sheet is open — keeps as much of the card as it can, and the head and the
+// send plate stay where a thumb can find them.
+@media only screen and (max-height: 460px) {
+    .AddRev__sheet { padding: 2vh 4vw; }
+
+    .AddRev__card {
+        max-width: 46rem;
+        padding: 0.8rem 1.2rem 0.9rem;
+    }
+
+    .AddRev__card .AddRev__panel__rule { margin: 0.6rem 0 0.8rem; }
+
+    .AddRev__field {
+        margin-bottom: 0.8rem;
+
+        > span { margin-bottom: 0.25rem; }
+        textarea { min-height: 5rem; }
+    }
+
+    .AddRev__note { margin-top: 0.9rem; }
+}

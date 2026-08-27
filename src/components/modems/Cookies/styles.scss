@@ -1,1955 +1,521 @@
 @use "../../../styles/system/_shortcuts.scss" as *;
-@media (min-aspect-ratio: 1/1) {
-    @media only screen and (min-width: 1730px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
 
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
+// The cookie-preferences sheet — see index.jsx.
+//
+// This file replaces 1,954 lines that said the same thing thirteen times, once
+// per hand-written band of `(min-aspect-ratio) + (min-width) + (max-width) +
+// (min-height)`. Those bands did not tile the plane: a 1,250px-wide landscape
+// window, a 955px one, a 995px-wide portrait one all fell BETWEEN them and got
+// no styles whatsoever — an unstyled full-page block of text over the site. The
+// sheet is one fluid layout now, with the site's own stops for the two places
+// the composition genuinely changes and capability queries for the rest.
+//
+// Everything here is layout. The categories, their copy and the writing of the
+// visitor's answers live in index.jsx and in CookiesProvider, untouched.
 
-                p {
-                    font-size: 1.5rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
+// The cover. A full-viewport pane of the site's ground, blurred, that the sheet
+// floats on. 100dvh under 100vh so a phone's collapsing address bar cannot
+// leave a strip of live page peeking out at the bottom.
+.CookiesModem {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
 
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
+    // Above the navbar (160). The page that opens this also says so, for the
+    // case where the section around it ever gains a stacking context; saying it
+    // here as well means the sheet is correct wherever it is mounted — the
+    // consent bar mounts the same component.
+    z-index: 1000;
 
-            .cookies__content {
-                width: 60%;
-                height: 100%;
-                padding: 15vh 2.5vw 5vh 2.5vw;
-                gap: 2.5vh;
+    // Opaque, and deliberately so. The old cover was a translucent pane over a
+    // blur, which is a fine gesture on a page of pictures and the wrong one
+    // here: the navbar's MENU and the page's own ghost headings read straight
+    // through the sheet's copy, and a preferences dialog is the last place on
+    // this site allowed to be hard to read. (backdrop-filter is also simply
+    // absent on some of the machines this is checked on, so the translucency
+    // was buying an unreliable blur at the cost of a certain legibility
+    // problem.) The ground is given its depth by a gradient and the grid
+    // instead — both of which are ours, and neither of which moves.
+    background-color: var(--bgColor);
+    background-image: radial-gradient(
+        120% 90% at 50% 0%,
+        rgba(255, 255, 255, 0.06) 0%,
+        rgba(255, 255, 255, 0) 60%
+    );
 
-                .cookies__header {
-                    width: 100%;
-                    padding: 2rem 0;
-                    text-align: center;
+    color: var(--wText);
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+}
 
-                    h3 {
-                        font-size: 2.5rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
+// The shader, as background. It used to be a flex SIBLING of the content, which
+// is why it ate half the width at every size; here it paints the cover and
+// nothing else, and takes no taps — a finger that lands on it is a finger on
+// the backdrop, which closes.
+.CookiesModem__grid {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
 
-                    p {
-                        font-family: "Switzer";
-                        font-size: 1.3rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
+    // Faint on purpose: on a 1512px screen at full strength the lattice was
+    // the loudest thing in a dialog whose whole job is four words and four
+    // switches.
+    opacity: 0.3;
 
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 2rem;
-
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(200px, 1fr) minmax(300px, 2fr);
-                        position: relative;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.5rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 1.3rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 1.3rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 2rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
+    .ripple-grid-container {
+        width: 100%;
+        height: 100%;
     }
 
-    @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
-
-                p {
-                    font-size: 1.5rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
-
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 60%;
-                height: 100%;
-                padding: 15vh 2.5vw 5vh 2.5vw;
-                gap: 2.5vh;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 2rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 2.5rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
-
-                    p {
-                        font-family: "Switzer";
-                        font-size: 1.3rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
-
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 2rem;
-
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(200px, 1fr) minmax(300px, 2fr);
-                        position: relative;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.5rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 1.3rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 1.3rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 2rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
-
-                p {
-                    font-size: 1.5rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
-
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 60%;
-                height: 100%;
-                padding: 10vh 2.5vw 5vh 2.5vw;
-                gap: 2.5vh;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 2rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 2rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
-
-                    p {
-                        font-family: "Switzer";
-                        font-size: 1.1rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
-
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 2rem;
-
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(150px, 1fr) minmax(250px, 2fr);
-                        position: relative;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.3rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 1.1rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 1.1rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
-
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
-
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 60%;
-                height: 100%;
-                padding: 10vh 2.5vw 5vh 2.5vw;
-                gap: 2.5vh;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 1rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 1.8rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
-
-                    p {
-                        font-family: "Switzer";
-                        font-size: 0.9rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
-
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 1rem;
-
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(150px, 1fr) minmax(250px, 2fr);
-                        position: relative;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.1rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 0.9rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
-
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
-
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 60%;
-                height: 100%;
-                padding: 10vh 2.5vw 5vh 2.5vw;
-                gap: 5vh;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 2rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 1.8rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
-
-                    p {
-                        font-family: "Switzer";
-                        font-size: 0.9rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
-
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 1.5rem;
-
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(150px, 1fr) minmax(250px, 2fr);
-                        position: relative;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.1rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 0.9rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 1rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            padding: 2.5rem 1rem 1rem 1rem;
-
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 5%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 0.5rem;
-
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                }
-
-                .Svg__button_container {
-                    width: 60px;
-                    height: 60px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 30px;
-                        height: 30px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 100%;
-                height: 90%;
-                padding: 0;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 1rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 1.8rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                    }
-
-                    p {
-                        font-size: 0.9rem;
-                        color: var(--wText);
-                    }
-                }
-
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-wrap: wrap;
-                    gap: 1rem;
-
-                    .cookie__option {
-                        gap: 2rem;
-                        width: 20%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: flex-start;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.5rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.5rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.3rem;
-                                    margin: 0;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0.5rem 0;
-                            display: none;
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                margin: 0.5rem 0;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            margin: 1rem 0;
-                        }
-                    }
-                }
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 1rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
-            padding: 2.5rem 1rem 1rem 1rem;
-
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 5%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 0.5rem;
-
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                }
-
-                .Svg__button_container {
-                    width: 60px;
-                    height: 60px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 30px;
-                        height: 30px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 100%;
-                height: 90%;
-                padding: 0;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 1rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 1.5rem;
-                        color: var(--wText);
-                        margin-bottom: 0.25rem;
-                    }
-
-                    p {
-                        font-size: 0.9rem;
-                        color: var(--wText);
-                    }
-                }
-
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-wrap: wrap;
-                    gap: 1rem;
-
-                    .cookie__option {
-                        gap: 2rem;
-                        width: 20%;
-                        display: flex;
-                        align-items: center;
-                        justify-content: flex-start;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.5rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.5rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.1rem;
-                                    margin: 0;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0.5rem 0;
-                            display: none;
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                margin: 0.5rem 0;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            margin: 1rem 0;
-                        }
-                    }
-                }
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 1rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
+    // A shader is the first thing to drop for a reader who asked for less
+    // motion, and the sheet reads perfectly without it.
+    @include reduced-motion {
+        display: none;
     }
 }
 
-@media (max-aspect-ratio: 1/1) {
-    @media only screen and (min-width: 1000px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+// ── the sheet ───────────────────────────────────────────────────────────
+//
+// A column, and the only scrolling element inside it is .__scroll. The head
+// and the foot are flex: none, so the title, the close and the save button
+// hold their place however long the list is and however short the viewport.
+.CookiesModem__sheet {
+    position: relative;
+    z-index: 1;
 
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    width: min(100%, 940px);
 
-                p {
-                    font-size: 1.5rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
+    // Never taller than the room it has. The cap is the whole reason the close
+    // and the save cannot be scrolled away.
+    max-height: min(100%, 92dvh);
 
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
+    padding: clamp(1.1rem, 3.2vh, 2.6rem) clamp(1.25rem, 5vw, 3.5rem);
+    gap: clamp(0.9rem, 2.2vh, 1.6rem);
+}
 
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
+// ── head ────────────────────────────────────────────────────────────────
 
-            .cookies__content {
-                width: 60%;
-                height: 100%;
-                padding: 20vh 2.5vw 5vh 2.5vw;
-                gap: 2.5vh;
+.CookiesModem__head {
+    flex: none;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
 
-                .cookies__header {
-                    width: 100%;
-                    padding: 2.5rem 0;
-                    text-align: center;
+    h3 {
+        margin: 0;
+        font-weight: 300;
+        font-size: clamp(1.35rem, 3.2vw, 2.4rem);
+        line-height: 1.1;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+}
 
-                    h3 {
-                        font-size: 2rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
+.CookiesModem__eyebrow {
+    margin: 0 0 0.7rem;
+    font-weight: 300;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
 
-                    p {
-                        font-family: "Switzer";
-                        font-size: 1.1rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
+    em {
+        font-style: normal;
+        color: var(--hColor);
+    }
+}
 
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 2rem;
+// The close. Pinned to the SHEET's head rather than to the list — the mistake
+// that cost ContactModal and AddReview their only way out on a short viewport
+// — and never smaller than the 44px a thumb needs, at any size.
+.CookiesModem__close {
+    flex: none;
+    position: relative;
+    width: 44px;
+    height: 44px;
+    appearance: none;
+    background: none;
+    padding: 0;
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
 
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(150px, 1fr) minmax(250px, 2fr);
-                        position: relative;
+    // The cross, drawn rather than fetched: two hairlines, so it is the same
+    // 1px the rest of the page is made of and there is no icon request.
+    span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 16px;
+        height: 1px;
+        margin: -0.5px 0 0 -8px;
+        background-color: var(--wText);
+        transition: background-color 0.3s ease;
 
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
+        &:first-child { transform: rotate(45deg); }
+        &:last-child  { transform: rotate(-45deg); }
+    }
 
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
+    @include fine-pointer {
+        &:hover {
+            border-color: var(--hColor);
+            background-color: rgba(75, 218, 220, 0.08);
 
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.3rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 1.1rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 1.1rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
+            span { background-color: var(--hColor); }
         }
     }
 
-    @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+    // A tap fires pointerenter with no pointerleave, so a hover written for
+    // both would latch on for the rest of the session. The finger gets the
+    // same answer as a press, which ends when it lifts.
+    @include touch {
+        &:active {
+            border-color: var(--hColor);
+            background-color: rgba(75, 218, 220, 0.12);
 
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 10%;
-                left: 5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 1.5rem;
-
-                p {
-                    font-size: 1.5rem;
-                    font-weight: 400;
-                    margin: 0;
-                    font-family: "Switzer-Light";
-                }
-
-                .Svg__button_container {
-                    width: 75px;
-                    height: 75px;
-                    border: var(--hColor2) 1px solid;
-
-                    img {
-                        width: 40px;
-                        height: 40px;
-                    }
-                }
-            }
-
-            .cookies__content {
-                width: 80%;
-                height: 100%;
-                padding: 15vh 2.5vw 5vh 2.5vw;
-                gap: 2.5vh;
-
-                .cookies__header {
-                    width: 100%;
-                    padding: 2.5rem 0;
-                    text-align: center;
-
-                    h3 {
-                        font-size: 2rem;
-                        color: var(--wText);
-                        margin-bottom: 1rem;
-                        font-family: "Switzer-Light";
-                    }
-
-                    p {
-                        font-family: "Switzer";
-                        font-size: 1.1rem;
-                        color: var(--wText);
-                        opacity: 1;
-                    }
-                }
-
-                // Base styles that apply to all viewports
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
-                    display: grid;
-                    gap: 2rem;
-
-                    .cookie__option {
-                        display: grid;
-                        grid-template-columns: minmax(150px, 1fr) minmax(250px, 2fr);
-                        position: relative;
-
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.8rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.8rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.3rem;
-                                    margin: 0;
-                                    font-weight: 500;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 1.1rem;
-                                opacity: 0.9;
-                                line-height: 1.4;
-                                margin: 0;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0 0 0.5rem 0;
-
-                            p {
-                                color: var(--wText);
-                                opacity: 0.8;
-                                font-size: 1.1rem;
-                                margin: 0 0 0.8rem 0;
-                                line-height: 1.4;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: -1rem;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            opacity: 0.6;
-                        }
-
-                        &:last-child .devider {
-                            display: none;
-                        }
-                    }
-                }
-
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
+            span { background-color: var(--hColor); }
         }
     }
 
-    @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+    &:focus-visible {
+        outline: 1px solid var(--hColor);
+        outline-offset: 3px;
+    }
+}
 
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 2.5%;
-                left: 2.5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 0.5rem;
+.CookiesModem__lead {
+    flex: none;
+    margin: 0;
+    max-width: 66ch;
+    font-size: clamp(0.9rem, 1.05vw, 1.1rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.62);
+}
 
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                }
+// ── the list, and the one thing in here that scrolls ────────────────────
 
-                .Svg__button_container {
-                    width: 60px;
-                    height: 60px;
-                    border: var(--hColor2) 1px solid;
+.CookiesModem__scroll {
+    flex: 1 1 auto;
+    min-height: 0;          // without this the flex item refuses to shrink and
+                            // the foot is pushed off the bottom of the sheet
+    overflow-y: auto;
+    overscroll-behavior: contain;   // a flick past the end stays in the sheet
+    -webkit-overflow-scrolling: touch;
 
-                    img {
-                        width: 30px;
-                        height: 30px;
-                    }
-                }
-            }
+    // The scroller is a thumb's whole target: it must never be the element
+    // that swallows the gesture.
+    touch-action: pan-y;
 
-            .cookies__content {
-                width: 100%;
-                height: 80%;
-                padding: 5vh 2.5%;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    padding: clamp(0.8rem, 2vh, 1.4rem) 0;
 
-                .cookies__header {
-                    width: 100%;
-                    padding: 2.5rem 0;
-                    text-align: center;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.26) transparent;
 
-                    h3 {
-                        font-size: 2rem;
-                        color: var(--wText);
-                        margin-bottom: 0rem;
-                    }
+    &::-webkit-scrollbar { width: 4px; }
+    &::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.26); }
+}
 
-                    p {
-                        font-size: 1.1rem;
-                        color: var(--wText);
-                    }
-                }
+.CookiesModem__options {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
 
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
+.CookiesModem__option {
+    padding-bottom: clamp(0.9rem, 2.2vh, 1.5rem);
+    margin-bottom: clamp(0.9rem, 2.2vh, 1.5rem);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
 
-                    .cookie__option {
-                        margin-bottom: 2rem;
-                        margin-left: 2.5rem;
-                        gap: 2.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: flex-start;
+    display: grid;
+    // Wide: the switch and its name in one column, the copy beside it, the
+    // provider/cookie table last. Narrow: one column, in that order — see the
+    // stacking arm at the foot of this file.
+    grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    grid-template-areas:
+        "switch meta"
+        "desc   meta";
+    align-items: start;
+    column-gap: clamp(1rem, 3vw, 2.5rem);
+    row-gap: 0.5rem;
 
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.5rem;
+    &:last-child {
+        margin-bottom: 0;
+        padding-bottom: 0;
+        border-bottom: 0;
+    }
+}
 
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.5rem;
+// ── the switch ──────────────────────────────────────────────────────────
+//
+// A <label> wrapping the real checkbox, so the NAME is part of the target as
+// well as the track — the old 20px system checkbox was the only place a finger
+// could land, less than a quarter of the area a thumb needs. The label is 44px
+// tall by itself.
+.CookiesModem__switch {
+    grid-area: switch;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    min-height: 44px;
+    cursor: pointer;
+    user-select: none;
 
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.3rem;
-                                    margin: 0;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0.5rem 0;
-                            display: none;
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                margin: 0.5rem 0;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            margin: 1rem 0;
-                        }
-                    }
-                }
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
+    // The real control, kept in the accessibility tree and kept the thing that
+    // is actually clicked — it is simply not painted. Not display:none, which
+    // would take it off the tab order.
+    input[type="checkbox"] {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
     }
 
-    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+    &:has(input:disabled) {
+        cursor: default;
+    }
+}
 
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 2.5%;
-                left: 2.5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 0.5rem;
+.CookiesModem__track {
+    flex: none;
+    position: relative;
+    width: 46px;
+    height: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.26);
+    background-color: rgba(255, 255, 255, 0.04);
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+}
 
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                }
+.CookiesModem__knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 16px;
+    height: 16px;
+    background-color: rgba(255, 255, 255, 0.55);
+    transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1),
+                background-color 0.3s ease;
+}
 
-                .Svg__button_container {
-                    width: 60px;
-                    height: 60px;
-                    border: var(--hColor2) 1px solid;
+.CookiesModem__switch input:checked ~ .CookiesModem__track {
+    border-color: var(--hColor);
+    background-color: rgba(75, 218, 220, 0.12);
 
-                    img {
-                        width: 30px;
-                        height: 30px;
-                    }
-                }
-            }
+    .CookiesModem__knob {
+        background-color: var(--hColor);
+        transform: translateX(22px);
+    }
+}
 
-            .cookies__content {
-                width: 100%;
-                height: 80%;
-                padding: 0vh 2.5%;
+.CookiesModem__switch input:disabled ~ .CookiesModem__track {
+    opacity: 0.55;
+}
 
-                .cookies__header {
-                    width: 100%;
-                    padding: 2.5rem 0;
-                    text-align: center;
+.CookiesModem__switch input:focus-visible ~ .CookiesModem__track {
+    outline: 1px solid var(--hColor);
+    outline-offset: 3px;
+}
 
-                    h3 {
-                        font-size: 2rem;
-                        color: var(--wText);
-                        margin-bottom: 0rem;
-                    }
+.CookiesModem__name {
+    font-size: clamp(0.95rem, 1.1vw, 1.15rem);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--wText);
+}
 
-                    p {
-                        font-size: 1.1rem;
-                        color: var(--wText);
-                    }
-                }
+.CookiesModem__always {
+    display: block;
+    margin-top: 0.2rem;
+    font-style: normal;
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
+    color: rgba(255, 255, 255, 0.4);
+}
 
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
+.CookiesModem__desc {
+    grid-area: desc;
+    margin: 0;
+    max-width: 40ch;
+    font-size: clamp(0.85rem, 0.95vw, 1rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.62);
+}
 
-                    .cookie__option {
-                        margin-bottom: 2rem;
-                        margin-left: 2.5rem;
-                        gap: 2.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: flex-start;
+// Providers and cookie names. The old phone bands set `display: none` on this
+// block, which is the one thing a preferences sheet may not do — it is the
+// disclosure the toggle is consenting to. It is smaller on a phone; it is
+// never absent.
+.CookiesModem__meta {
+    grid-area: meta;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+    font-size: clamp(0.78rem, 0.85vw, 0.92rem);
+    line-height: 1.45;
 
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.5rem;
-
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.5rem;
-
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
-
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.3rem;
-                                    margin: 0;
-                                }
-                            }
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                            }
-                        }
-
-                        .cookie__option__details {
-                            padding: 0.5rem 0;
-                            display: none;
-
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                margin: 0.5rem 0;
-                            }
-                        }
-
-                        .devider {
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            margin: 1rem 0;
-                        }
-                    }
-                }
-
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
+    > div {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.1rem 0.5rem;
     }
 
-    @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .CookiesModem {
-            width: 100vw;
-            height: 100vh;
-            position: fixed;
-            background-color: var(--bgColor);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 0;
-            left: 0;
-            z-index: 150;
-            backdrop-filter: blur(25px);
-            -webkit-backdrop-filter: blur(25px);
+    dt {
+        flex: none;
+        font-size: 0.68rem;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.4);
+    }
 
-            .exit__button {
-                position: absolute;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                top: 2.5%;
-                left: 2.5%;
-                z-index: 100;
-                color: var(--wText);
-                gap: 0.5rem;
+    dd {
+        margin: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+        color: rgba(255, 255, 255, 0.72);
+    }
+}
 
-                p {
-                    font-size: 1.3rem;
-                    font-weight: 400;
-                    margin: 0;
-                }
+// ── foot ────────────────────────────────────────────────────────────────
 
-                .Svg__button_container {
-                    width: 60px;
-                    height: 60px;
-                    border: var(--hColor2) 1px solid;
+.CookiesModem__foot {
+    flex: none;
+    display: flex;
+    justify-content: flex-end;
 
-                    img {
-                        width: 30px;
-                        height: 30px;
-                    }
-                }
-            }
+    // CornerButton is a real <button> and already carries the house's 44px
+    // touch pad and its fine-pointer/:active split, so the save target needs
+    // nothing added here. It replaced a RoundButton whose inner <Link href="">
+    // navigated to the current URL on every save — through the page-transition
+    // veil — the moment a finger touched it.
+}
 
-            .cookies__content {
-                width: 100%;
-                height: 80%;
-                padding: 0vh 2.5%;
+// ── one column ──────────────────────────────────────────────────────────
+//
+// Below the xs stop there is no room to set a switch, a description and a
+// provider table beside one another, so each option becomes three stacked
+// bands. The stop is xs (750) and not sm (900) because an 820px tablet held
+// upright has room for two columns and looked half-empty without them.
+// Written out rather than as below(xs) only because the landscape arm below
+// has to sit next to it and be read against it; 749.98px is exactly what
+// below(xs) emits, and the two must not drift.
+@media (max-width: 749.98px) {
+    .CookiesModem__option {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "switch"
+            "desc"
+            "meta";
+        row-gap: 0.55rem;
+    }
 
-                .cookies__header {
-                    width: 100%;
-                    padding: 1.5rem 0;
-                    text-align: center;
+    .CookiesModem__desc,
+    .CookiesModem__meta {
+        max-width: 66ch;
+    }
+}
 
-                    h3 {
-                        font-size: 1.5rem;
-                        color: var(--wText);
-                        margin-bottom: 0rem;
-                    }
+// ── a landscape phone ───────────────────────────────────────────────────
+//
+// TWIN of the arm above, and the reason it is not written as a single
+// `(max-width: 900px), (max-height: 520px)` list: a 932×430 phone is 932px
+// wide, so no width-only gate catches it, and an 844×390 one is caught by the
+// arm above and made WORSE by it — stacked, a single option is 145px tall and
+// barely one and a half of them fit on the screen.
+//
+// A short viewport that still has width should spend the width instead. One
+// row per option, three columns, and the whole list is legible in two flicks.
+// The floor is 700px so that a 600×400 window still gets the stacked form.
+@media (max-height: 520px) and (min-width: 700px) {
+    .CookiesModem__option {
+        grid-template-columns: minmax(0, 12rem) minmax(0, 1fr) minmax(0, 1.15fr);
+        grid-template-areas: "switch desc meta";
+        column-gap: clamp(1rem, 2.5vw, 2rem);
+        align-items: center;
+    }
 
-                    p {
-                        font-size: 0.9rem;
-                        color: var(--wText);
-                    }
-                }
+    .CookiesModem__desc,
+    .CookiesModem__meta {
+        max-width: none;
+    }
+}
 
-                .cookies__options {
-                    width: 100%;
-                    height: auto;
-                    overflow-y: auto;
+// A phone in portrait: the sheet is the screen, so it fills it rather than
+// floating in it, and the head can afford to keep its eyebrow. Same stop as
+// the stacking arm above — a device narrow enough to stack is a device with no
+// room to float the sheet inside a margin.
+@include below(xs) {
+    .CookiesModem__sheet {
+        width: 100%;
+        max-height: 100%;
+        padding: clamp(1rem, 2.6vh, 2rem) 1.25rem;
+    }
 
-                    .cookie__option {
-                        margin-bottom: 1rem;
-                        margin-left: 2.5rem;
-                        gap: 1.5rem;
-                        display: flex;
-                        align-items: center;
-                        justify-content: flex-start;
+    .CookiesModem__head h3 {
+        font-size: clamp(1.3rem, 6vw, 1.8rem);
+    }
 
-                        .cookie__option__header {
-                            display: flex;
-                            flex-direction: column;
-                            gap: 0.5rem;
+    .CookiesModem__foot {
+        justify-content: center;
+    }
+}
 
-                            .checkbox__container {
-                                display: flex;
-                                align-items: center;
-                                gap: 0.5rem;
+// ── a short viewport ────────────────────────────────────────────────────
+//
+// A landscape phone is 390px tall. Fixed vh rhythm collapses there, so the
+// sheet gives its remaining room to the list and takes it from everything
+// else: the eyebrow goes, the title comes down, the lead is trimmed to one
+// line's worth of room. The close and the save stay exactly where they are.
+@media (max-height: 520px) {
+    .CookiesModem__sheet {
+        max-height: 100%;
+        padding: 0.75rem clamp(1rem, 4vw, 2.5rem);
+        gap: 0.6rem;
+    }
 
-                                input[type="checkbox"] {
-                                    width: 20px;
-                                    height: 20px;
-                                    accent-color: var(--hColor);
-                                }
+    .CookiesModem__eyebrow {
+        display: none;
+    }
 
-                                h4 {
-                                    color: var(--hColor);
-                                    font-size: 1.1rem;
-                                    margin: 0;
-                                }
-                            }
+    .CookiesModem__head h3 {
+        font-size: 1.15rem;
+    }
 
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                            }
-                        }
+    .CookiesModem__lead {
+        font-size: 0.82rem;
+        line-height: 1.4;
+        max-width: 80ch;
+    }
 
-                        .cookie__option__details {
-                            padding: 0.5rem 0;
-                            display: none;
+    .CookiesModem__scroll {
+        padding: 0.6rem 0;
+    }
 
-                            p {
-                                color: var(--wText);
-                                font-size: 0.9rem;
-                                margin: 0.5rem 0;
-                            }
-                        }
+    .CookiesModem__option {
+        padding-bottom: 0.7rem;
+        margin-bottom: 0.7rem;
+    }
 
-                        .devider {
-                            position: absolute;
-                            bottom: 0;
-                            left: 0;
-                            width: 100%;
-                            height: 1px;
-                            background-color: var(--divider);
-                            margin: 1rem 0;
-                        }
-                    }
-                }
+}
 
-                .cookies__save {
-                    width: 100%;
-                    position: relative;
-                    padding: 0rem 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        width: 100%;
-                        height: 2px;
-                        background-color: var(--wText);
-                        z-index: 0;
-                        border: 1px solid var(--wText);
-                    }
-                }
-            }
-        }
+// ── the sheet arrives without motion for those who asked ────────────────
+@include reduced-motion {
+    .CookiesModem__knob,
+    .CookiesModem__track,
+    .CookiesModem__close,
+    .CookiesModem__close span {
+        transition-duration: 0.01ms;
     }
 }

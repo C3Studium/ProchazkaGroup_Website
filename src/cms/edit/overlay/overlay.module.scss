@@ -1,0 +1,765 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../../studio/styles/tokens.module" as t;
+
+/* The colour of *being selected*, and it is deliberately not `--st-accent`.
+ *
+ * The outline used to borrow the Studio's own accent — a muted gold that reads
+ * on the admin's dark chrome and disappears against this site, which is dark
+ * sections, photographs and shader planes. Repainting `--st-accent` would have
+ * fixed the outline by turning every button, tab and focus ring in the admin
+ * orange, and the admin was never the thing that had to become more visible.
+ *
+ * So selection has a token of its own: neon orange, `#ff6a00`.
+ *
+ * ---------------------------------------------------------------------------
+ * Why the stroke is three rings and not one
+ *
+ * Measured against 31k pixels sampled from the ring itself, at every scroll
+ * position of four pages: the surfaces under it run the whole way from #000001
+ * to #ffffff. Neon orange is 7.31:1 against the darkest of them and **2.87:1**
+ * against the lightest — under the 3:1 that WCAG 1.4.11 asks of a non-text
+ * interface element. Burnt orange `#cc5500` is the evener choice (4.86 and 4.31)
+ * and still fails a mid-grey; *no single colour* clears 3:1 on both ends,
+ * because a stroke that is legible on black and one that is legible on white are
+ * different strokes.
+ *
+ * So the identity is one ring and the legibility is the two beside it: a light
+ * hairline inside, the colour, a dark hairline outside. Whatever the surface, at
+ * least one of the pair is against its opposite — black and white alone cannot
+ * both be worse than 4.58:1 at any luminance, which is where they cross. The
+ * eye reads the whole thing as an orange line; the contrast is carried by the
+ * hairlines nobody notices.
+ *
+ * A Sass variable and not only a custom property: `[data-cms-editing]` is set on
+ * an element of the *page*, which is outside this module's `.root` and therefore
+ * inherits none of its custom properties. */
+$pick: #ff6a00;
+/* The two hairlines. rgba rather than solid, so they shade what is underneath
+   instead of drawing two more lines on it. */
+$pick-edge: rgba(0, 0, 0, 0.72);
+$pick-inner: rgba(255, 255, 255, 0.82);
+
+/* The edit overlay, inside the previewed page.
+ *
+ * A CSS module, and that is not a formality: `scripts/sync-styles.js` globs
+ * every stylesheet under `src/` and concatenates the non-module ones into the
+ * public site's global sheet. A file called `overlay.scss` would put the
+ * editing chrome on every visitor's homepage.
+ *
+ * `--cms-zoom` and its reciprocal `--cms-inv` are set on the root from the zoom
+ * the host reports, and they are the only place the number appears in CSS.
+ * Anything that must stay one size on the editor's screen while the frame
+ * emulates a phone multiplies by the reciprocal: the control counter-scales
+ * wholesale in JS, and the hairlines below — which would read as thick strokes
+ * if they were scaled with everything else — widen their own stroke instead. */
+
+.root {
+  @include t.declare;
+
+  --cms-pick: #{$pick};
+  --cms-pick-soft: #{rgba(#ff6a00, 0.1)};
+  --cms-pick-edge: #{$pick-edge};
+  --cms-pick-inner: #{$pick-inner};
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147482000;
+
+  /* Chrome, not content: every pointer event belongs to the page underneath
+     unless a control below claims it back. */
+  pointer-events: none;
+
+  font-family: var(--st-font);
+  font-synthesis-weight: none;
+  -webkit-font-smoothing: antialiased;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+}
+
+/* ------------------------------------------------------------- tracking -- */
+
+/* One node per state, moved by `transform` and sized in px, both written from
+   the rAF loop. `contain: strict` keeps the size writes from touching anything
+   outside the box; `will-change` keeps it on its own layer so following a
+   section through a 550vh timeline is a composite rather than a paint. */
+.box {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  contain: strict;
+  opacity: 0;
+  will-change: transform;
+  border-radius: 1px;
+  transition: opacity 90ms linear;
+}
+
+/* Light hairline, colour, dark hairline — see the note on `$pick` for why three.
+   One `box-shadow` rather than three elements: spreads stack outwards and the
+   first is painted on top, so this is one node to move per frame. `outline`
+   could not do it either way, having no way to be counter-scaled by the zoom. */
+.boxHover {
+  box-shadow:
+    0 0 0 calc(1px * var(--cms-inv)) var(--cms-pick-inner),
+    0 0 0 calc(2.5px * var(--cms-inv)) var(--cms-pick),
+    0 0 0 calc(3.5px * var(--cms-inv)) var(--cms-pick-edge);
+}
+
+.boxSelected {
+  background: var(--cms-pick-soft);
+  box-shadow:
+    0 0 0 calc(1px * var(--cms-inv)) var(--cms-pick-inner),
+    0 0 0 calc(3px * var(--cms-inv)) var(--cms-pick),
+    0 0 0 calc(4px * var(--cms-inv)) var(--cms-pick-edge);
+}
+
+/* -------------------------------------------------------------- control -- */
+
+/* The anchored control. `transform-origin: 0 0` matters: the JS writes a
+   translate to the placement `anchor()` chose and then a `scale(1/zoom)`, and
+   any other origin would move the box away from the corner it was placed at by
+   half its own size. */
+.control {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: flex;
+  gap: var(--st-s1);
+  align-items: center;
+  padding: 5px 5px 5px 10px;
+  white-space: nowrap;
+  pointer-events: none;
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  transition: opacity 90ms linear;
+}
+
+/* Which corner it ended up on, for anyone reading the DOM — a test, or the next
+   person wondering whether it flipped. */
+.control[data-place="above"] {
+  box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.45);
+}
+
+.field {
+  flex: 0 1 auto;
+  min-width: 0;
+  max-width: 180px;
+  overflow: hidden;
+  font-size: var(--st-text-tiny);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.06em;
+  color: var(--st-ink-3);
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+}
+
+.primary,
+.ghost,
+.danger {
+  flex: none;
+  padding: 5px 10px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  line-height: 1.2;
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  transition:
+    background var(--st-fast) var(--st-ease),
+    color var(--st-fast) var(--st-ease);
+}
+
+.primary {
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+
+  &:hover {
+    background: var(--st-solid-hover);
+  }
+
+  /* Taken, and nothing has changed yet. Same button and same word — the swap to
+     Uložit / Zrušit belongs to the value, not to the click — so the only thing
+     that may differ is that it reads as held down. */
+  &[data-open] {
+    color: var(--cms-pick);
+    background: none;
+    border-color: var(--cms-pick);
+  }
+}
+
+.ghost {
+  color: var(--st-ink-2);
+  background: none;
+  border-color: var(--st-line-strong);
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.06);
+  }
+}
+
+.danger {
+  color: var(--st-danger);
+  background: none;
+  border-color: var(--st-danger-line);
+
+  &:hover {
+    background: var(--st-danger-soft);
+  }
+}
+
+.input {
+  width: 220px;
+  padding: 5px 8px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: 2px;
+
+  &:focus {
+    @include t.focus-ring;
+  }
+}
+
+.flash {
+  max-width: 260px;
+  padding-right: var(--st-s1);
+  padding-left: var(--st-s2);
+  overflow: hidden;
+  font-size: var(--st-text-tiny);
+  color: var(--cms-pick);
+  text-overflow: ellipsis;
+
+  &[data-tone="busy"] {
+    color: var(--st-ink-3);
+  }
+
+  &[data-tone="error"] {
+    color: var(--st-danger);
+  }
+}
+
+/* A save that did not happen, with the two answers to it beside the sentence.
+
+   It wraps, unlike everything else on this strip: a flash is a word and can be
+   ellipsed, but this is an instruction — which code came back, that the typed
+   text is still theirs, and what to do next — and an instruction cut off at 260
+   pixels is not one. It also does not fade, because the state it describes is
+   "your words exist only here". */
+.alert {
+  display: flex;
+  flex: 0 1 auto;
+  gap: var(--st-s1);
+  align-items: center;
+  min-width: 0;
+  max-width: 460px;
+  padding: 5px 6px 5px 10px;
+  white-space: normal;
+  border: 1px solid var(--st-danger-line);
+  border-radius: 2px;
+}
+
+.alertText {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: var(--st-text-tiny);
+  line-height: 1.35;
+  color: var(--st-danger);
+}
+
+/* Not a disabled button and not a tooltip: an editor is told, on the control
+   itself, that this field renders with emphasis its schema does not declare, and
+   that the overlay will not risk flattening it. Declared emphasis is edited in
+   place and never reaches this. See hasEmphasis() in Overlay.jsx. */
+.refusal {
+  max-width: 320px;
+  padding: 5px 10px;
+  font-size: var(--st-text-small);
+  line-height: 1.2;
+  color: var(--st-ink-3);
+  border: 1px solid var(--st-line);
+  border-radius: 2px;
+}
+
+/* What to do next, while a field that carries emphasis is being edited and
+   nothing is selected. No border and no box: it stands where the mark button
+   will be, so the control does not resize the moment a word is selected. */
+.hint {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: var(--st-text-small);
+  line-height: 1.2;
+  color: var(--st-ink-3);
+  text-overflow: ellipsis;
+}
+
+/* ---------------------------------------------------------- the element -- */
+
+/* The element being edited is a page element — a motion component that rewrites
+   its own `style` attribute every frame — so it is reached by the attribute
+   `text.js` sets on it rather than by a class React would take back or an inline
+   style motion would overwrite. `:global` because the attribute is not this
+   module's to hash. */
+/* The element being edited. The literal is the point: this rule matches a node
+   in the *page*, which inherits nothing declared on `.root`. Same three rings as
+   the selection box, drawn tight against the text rather than offset, because
+   here they mark the box a caret is inside. */
+:global([data-cms-editing]) {
+  caret-color: $pick;
+  box-shadow:
+    0 0 0 1px $pick-inner,
+    0 0 0 3px $pick,
+    0 0 0 4px $pick-edge;
+}
+
+/* -------------------------------------------------------------- library -- */
+
+/* The media library, when the host has not offered to open it at full width.
+   Counter-scaled with the rest of the chrome, which on a phone preset means it
+   is as wide as the phone — legible, and honestly cramped. See MediaModule. */
+.mediaScrim {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: calc(24px * var(--cms-inv));
+  pointer-events: auto;
+  background: var(--st-overlay);
+  backdrop-filter: blur(2px);
+}
+
+.mediaSurface {
+  display: flex;
+  flex-direction: column;
+  width: calc(100% * var(--cms-zoom));
+  max-width: 960px;
+  height: calc(100% * var(--cms-zoom));
+  max-height: 640px;
+  overflow: hidden;
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+  background: var(--st-bg);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-lg);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
+  transform: scale(var(--cms-inv));
+  transform-origin: center;
+}
+
+.mediaHead {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 46px;
+  padding: 0 var(--st-s3) 0 var(--st-s5);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.mediaTitle {
+  margin: 0;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.mediaClose {
+  width: 28px;
+  height: 28px;
+  font-size: 13px;
+  color: var(--st-ink-3);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 2px;
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.07);
+  }
+}
+
+.mediaBody {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.mediaLoading,
+.mediaError {
+  margin: auto;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.mediaError {
+  color: var(--st-danger);
+}
+
+/* ------------------------------------------------------- the set and form -- */
+
+/* Both of the popup's other bodies are a column inside `.mediaBody`, which is a
+   flex row: one strip of content, one scrolling middle, one footer that stays
+   put. The Studio's own components draw everything inside them, so what is here
+   is the frame around them and the small controls a set of pictures needs. */
+.setPane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.setLoading {
+  display: grid;
+  flex: 1;
+  place-items: center;
+}
+
+.grow {
+  flex: 1;
+}
+
+/* An <ol>, because the order is the content: a set of photographs whose order is
+   editable is a numbered list, and a screen reader that says "list, 3 items"
+   before the tiles is saying the thing the popup is for. */
+.setStrip {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  margin: 0;
+  padding: var(--st-s3) var(--st-s4);
+  overflow-x: auto;
+  list-style: none;
+  border-bottom: 1px solid var(--st-line);
+}
+
+.setTile {
+  position: relative;
+  flex: none;
+  width: 132px;
+  margin: 0;
+  overflow: hidden;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  img {
+    display: block;
+    width: 100%;
+    height: 78px;
+    object-fit: contain;
+    background: var(--st-bg);
+  }
+}
+
+/* Which member the next pick replaces. Stated on the tile rather than only in
+   the sentence below it, because "vyberte náhradu" is useless if the editor has
+   lost track of which one they pressed. */
+.setTileTarget {
+  border-color: var(--cms-pick);
+  box-shadow: 0 0 0 1px var(--cms-pick);
+}
+
+/* Reorderable. `touch-action: none` is not decoration — without it the browser
+   claims the gesture for scrolling and the pointermove events never arrive, so
+   a drag on a touchscreen or a precision trackpad silently does nothing. */
+.setTileDraggable {
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--cms-pick);
+    outline-offset: 1px;
+  }
+}
+
+/* Where it would land if the pointer were released now. Lifted rather than
+   ghosted: the tile IS at that position already (see `view` in SetModule), so
+   the shadow is saying "this is the one you are holding", not "it will go
+   here". */
+.setTileHeld {
+  cursor: grabbing;
+  border-color: var(--cms-pick);
+  box-shadow: 0 6px 18px rgb(0 0 0 / 45%);
+  transform: translateY(-2px);
+}
+
+.setCaption {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  padding: 1px 5px;
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink);
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 2px;
+}
+
+.setTileBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 4px;
+  border-top: 1px solid var(--st-line);
+}
+
+.setMini {
+  padding: 2px 5px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-2);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--st-line);
+  border-radius: 2px;
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.07);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.35;
+  }
+}
+
+.setMiniDanger {
+  color: var(--st-danger);
+  border-color: var(--st-danger-line);
+}
+
+.setEmpty,
+.setHint {
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.setHint {
+  flex: none;
+  padding: var(--st-s2) var(--st-s4);
+}
+
+/* The live region. Visible rather than clipped: a sighted editor who moved a
+   picture with the keyboard gets the same confirmation as everyone else, and an
+   empty <p> takes no height. */
+.setSaid {
+  flex: none;
+  margin: 0;
+  padding: 0 var(--st-s4);
+  font-size: var(--st-text-tiny);
+  color: var(--cms-pick);
+}
+
+.setProblem {
+  flex: none;
+  margin: 0;
+  padding: var(--st-s2) var(--st-s4);
+  font-size: var(--st-text-small);
+  color: var(--st-danger);
+  background: var(--st-danger-soft);
+}
+
+.setLibrary {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* The document form scrolls; its footer does not. `min-height: 0` is what makes
+   a flex child actually able to scroll instead of growing the dialog past the
+   viewport. */
+.docForm {
+  flex: 1;
+  min-height: 0;
+  padding: var(--st-s4);
+  overflow-y: auto;
+}
+
+/* The list body reuses `.docForm` for its scroll box; this only stops the
+   Studio's array input from sitting flush against it. */
+.listForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s3);
+}
+
+/* ----------------------------------------------------------- moderation -- */
+
+/* A review is read before it is judged, so the words get the room and the two
+   decisions sit under them rather than beside them. */
+.modRead {
+  flex: 1;
+  min-height: 0;
+  padding: var(--st-s4);
+  overflow-y: auto;
+}
+
+.modWho {
+  margin: 0 0 var(--st-s2);
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.modQuote {
+  margin: 0;
+  padding-left: var(--st-s3);
+  font-size: var(--st-text-body);
+  line-height: 1.55;
+  color: var(--st-ink);
+  border-left: 2px solid var(--st-line-strong);
+}
+
+.modState {
+  flex: none;
+  margin: 0;
+  padding: var(--st-s2) var(--st-s4);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  background: var(--st-sunken);
+  border-top: 1px solid var(--st-line);
+}
+
+.modActions {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  padding: var(--st-s3) var(--st-s4) 0;
+}
+
+.modFoot {
+  flex: none;
+  margin: 0;
+  padding: var(--st-s2) var(--st-s4) var(--st-s4);
+}
+
+.setFoot {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s3) var(--st-s4);
+  border-top: 1px solid var(--st-line);
+}
+
+.setCount {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* --------------------------------------------------- the single picture -- */
+
+/* What the field holds now, above the library that can replace it. The strip is
+   fixed and the library below it scrolls, so an editor never loses sight of
+   which picture they are changing. */
+.imageHead {
+  display: flex;
+  flex: none;
+  gap: var(--st-s4);
+  padding: var(--st-s4) var(--st-s4) var(--st-s3);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.imageNow {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 180px;
+  height: 120px;
+  margin: 0;
+  overflow: hidden;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.imageNone {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.imageMeta {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.imageName {
+  margin: 0;
+  overflow: hidden;
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.imageLabel {
+  margin-top: var(--st-s2);
+  font-size: var(--st-text-tiny);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.06em;
+  color: var(--st-ink-3);
+  text-transform: uppercase;
+}
+
+.imageActions {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  margin-top: var(--st-s2);
+}
+
+/* --------------------------------------------------------------- link -- */
+
+/* Two boxes at most, and which of them appear is the annotation's answer — see
+   LinkModule. The panel is short, so the form sits at the top rather than
+   stretching to fill a dialog sized for a media grid. */
+.linkForm {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  padding: var(--st-s4);
+  overflow-y: auto;
+
+  input {
+    width: 100%;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.linkRefusal {
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-danger);
+}

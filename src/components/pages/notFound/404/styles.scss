@@ -1,4072 +1,449 @@
 @use "../../../../styles/system/_shortcuts.scss" as *;
-@media (min-aspect-ratio: 1/1) {
-    @media only screen and (min-width: 1730px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-            z-index: 1;
 
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                pointer-events: none;
-
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 50rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(5px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-
-            .addInfo {
-                width: 100%;
-                height: 35%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 8rem;
-                            margin: 0;
-                            line-height: 0.75;
-                        }
-
-                        p {
-                            width: 30%;
-                            margin: 0;
-                            font-size: 1.5rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 20%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 70%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 75%;
-                            }
-                        }
-
-                        .details {
-                            width: 70%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 2vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 65%;
-                            gap: 1rem;
-                            margin-top: 0.5rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 2rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                    }
-                }
-            }
-        }
-
-
-        .Button__container {
-            width: 100%;
-            height: 30%;
-            position: relative;
-            pointer-events: all;
-            position: absolute;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 157;
-
-            .button {
-                pointer-events: all;
-                height: 100%;
-                position: absolute;
-                top: 50%;
-                right: 50%;
-                transform: translate(50%, -50%);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                z-index: 157;
-
-                .Round__button_container {
-                    pointer-events: all;
-                    width: 140px;
-                    height: 140px;
-
-                    a {
-                        p {
-                            font-family: "Switzer";
-                            line-height: 1.2;
-                            font-size: 1.3rem;
-                        }
-                    }
-                }
-            }
-        }
-
-        .devider {
-            position: absolute;
-            top: 50%;
-            left: 70%;
-            transform: translate(-50%, -50%);
-            background-color: var(--divider);
-            width: 80%;
-            height: 2px;
-            z-index: 2;
-        }
-    }
-
-    @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 50rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(25px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 5vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 25%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 3rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.5rem;
-                                font-size: 1.4rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 2rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 180px;
-                            height: 180px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.6rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 8rem;
-                            margin: 0;
-                            line-height: 0.75;
-                        }
-
-                        p {
-                            width: 30%;
-                            margin: 0;
-                            font-size: 1.5rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 20%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 70%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 75%;
-                            }
-                        }
-
-                        .details {
-                            width: 70%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 2vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 65%;
-                            gap: 1rem;
-                            margin-top: 0.5rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 2rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 40rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(25px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 25%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2.5rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.5rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 2rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 150px;
-                            height: 150px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.5rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 30%;
-                            margin: 0;
-                            font-size: 1.3rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 25%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 70%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 75%;
-                            }
-                        }
-
-                        .details {
-                            width: 70%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 65%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.8rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 35rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(25px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 25%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.3rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.5rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 150px;
-                            height: 150px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 30%;
-                            margin: 0;
-                            font-size: 1.1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 30%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 70%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 75%;
-                            }
-                        }
-
-                        .details {
-                            width: 70%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 75%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 30rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(25px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 25%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.3rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.5rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 130px;
-                            height: 130px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 30%;
-                            margin: 0;
-                            font-size: 1.1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 35%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 80%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 85%;
-                            }
-                        }
-
-                        .details {
-                            width: 80%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 75%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 701px) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .Intro404 {
-            width: 100vw;
-            height: 160vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 25rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(15px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 15%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 35%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.3rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.5rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 130px;
-                            height: 130px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 3rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 50%;
-                            margin: 0;
-                            font-size: 1.1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 40%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 90%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 95%;
-                            }
-                        }
-
-                        .details {
-                            width: 90%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 3rem;
-
-                            .pcopytext {
-                                font-size: 1.1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 20vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 2.5vh 0vw 2.5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 95%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
-    }
-
-    @media only screen and (min-width: 500px) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .Intro404 {
-            width: 100vw;
-            height: 160vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.3rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 20rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(15px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 15%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 45%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.1rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 110px;
-                            height: 110px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 60%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 3rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 50%;
-                            margin: 0;
-                            font-size: 1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 40%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 95%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 100%;
-                            }
-                        }
-
-                        .details {
-                            width: 95%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 2rem;
-
-                            .pcopytext {
-                                font-size: 1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 20vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 2.5vh 0vw 2.5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-
-                        .magnetic {
-                            .My__button_container {
-                                width: 150px;
-                                height: 40px;
-                                margin: 0px;
-
-                                .logo {
-                                    font-size: 0.8rem;
-                                    padding: 10px;
-                                }
-                            }
-                        }
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 100%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.3rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {
-                            font-size: 0.8rem;
-                        }
-                    }
-                }
-            }
-        }
+// The tile that has been reached for — by pointer or by tap. Its two call
+// sites are in .NotFound404__box, and they are two because the two inputs
+// cannot share a selector without the hover sticking on touch.
+@mixin boxHot {
+    border-color: rgba(255, 255, 255, 0.4);
+    background-color: rgba(2, 14, 21, 0.55);
+    z-index: 1;
+}
+
+// See index.jsx. Transparent over the shader like every other section, one
+// viewport tall, set in the site's open grammar: no boxes, hairlines only,
+// the numeral at BenefitJourney ghost weight, one accent, one faint sweep.
+.NotFound404 {
+    position: relative;
+    z-index: 2;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: center;
+    // Head-room for the fixed navbar; the flex centring keeps the stage clear
+    // of it at every height this composition fits in.
+    padding: 14vh 8vw 10vh;
+    color: var(--wText);
+    overflow: hidden;
+}
+
+// The stage owns the whole viewport band explicitly — the figure fills it as
+// the background and the L anchors to its foot; both were floating against a
+// stage that was only as tall as the eyebrow.
+.NotFound404__stage {
+    position: relative;
+    width: 100%;
+    height: calc(100svh - 24vh);
+}
+
+// ── the words above ─────────────────────────────────────────────────────
+.NotFound404__eyebrow {
+    margin: 0 0 4vh;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+
+    em {
+        font-style: normal;
+        color: var(--hColor);
     }
 }
 
-@media (max-aspect-ratio: 1/1) {
-    @media only screen and (min-width: 1000px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
+// ── the numeral ─────────────────────────────────────────────────────────
+//
+// Ghost register: enormous, weight 300, half-there. The echo is the same
+// figure a step up and to the right, outline only — the layer behind the
+// layer, which is all a missing page is.
+// The figure sits in a perspective so the extrusion is real depth, and the
+// solid leans toward the pointer on the springs the component drives.
+// The background: the numeral fills the stage behind the L, oversized past
+// any container logic — it is the ground the page stands on.
+.NotFound404__figure {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 0.82;
+    perspective: 1100px;
+    pointer-events: none;
+}
 
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
+.NotFound404__solid {
+    position: relative;
+    transform-style: preserve-3d;
+    will-change: transform;
+    // A background, stated as one — and stated HERE: the figure wrapper's
+    // entrance animates opacity to 1 inline, so a value on it loses to framer.
+    // This layer only ever gets rotate from the springs; its opacity is CSS's.
+    opacity: 0.6;
+}
 
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 35rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(25px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 25%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2.5rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1.5rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 2rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 150px;
-                            height: 150px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.5rem;
-                                }
-                            }
-                        }
-                    }
+// The extrusion: four outline slices stepping away on one diagonal AND back in
+// z, thinning as they go — the numeral as a made object, in the page's own
+// hairline weight rather than a rendered bevel.
+.NotFound404__slice {
+    position: absolute;
+    top: 0;
+    left: 0;
+    display: block;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(14rem, 52vw, 52rem);
+    line-height: 0.82;
+    letter-spacing: 0.04em;
+    z-index: 1;
+    color: transparent;
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.2);
+    pointer-events: none;
+    // The one shadow line, unmistakably BEHIND the face: a step back in z and
+    // off on the diagonal, painted under the solid by order as well as depth.
+    transform: translate3d(1.7vw, -2.2vh, -90px);
+}
 
 
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
+.NotFound404__numeral {
+    position: relative;
+    z-index: 2;
+    display: block;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(14rem, 52vw, 52rem);
+    line-height: 0.82;
+    letter-spacing: 0.04em;
+    // Face a touch fuller than the echo, so the two read as front and back.
+    color: rgba(255, 255, 255, 0.38);
+}
 
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
+// ── the lines ───────────────────────────────────────────────────────────
+//
+// The rule the numeral stands on, drawn left→right with the site's one faint
+// light on it; the drop stands at the x the caption starts from and hangs
+// down exactly the caption's head-gap.
+// Two quiet off-grid ticks — one opposite the eyebrow, one under the empty
+// left half of the baseline.
+.NotFound404__tick {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.16);
+    pointer-events: none;
+}
 
-                .bottom__footer {
-                    width: 70%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
+.NotFound404__tick--head {
+    top: 0.35rem;
+    right: 4%;
+    width: 2.5rem;
+    height: 1px;
+}
 
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
+.NotFound404__tick--foot {
+    top: 3.5vh;
+    left: 9%;
+    width: 1px;
+    height: 2.5rem;
+}
 
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 50%;
-                            margin: 0;
-                            font-size: 1.3rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 25%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 80%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 85%;
-                            }
-                        }
-
-                        .details {
-                            width: 80%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 95%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.8rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
+// ── the caption ─────────────────────────────────────────────────────────
+//
+// Right of centre, where the drop leads: the sentence, then the way home.
+// Nothing sweeps for a reader who has asked for that; the entrance itself is
+// collapsed in the component.
+@include reduced-motion {
     }
 
-    @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
+// ── the stair ───────────────────────────────────────────────────────────
+//
+// Two broad steps over the numeral: the upper set a stride to the right, the
+// lower flush left — and the lower step's first tile, the biggest thing here,
+// is the way home. Room is the point: these are read, not scanned.
+.NotFound404__stair {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+}
 
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
+// Feet on the row's floor — and the floor plan FIXED: each step is exactly
+// its rest height, so a tile that grows taller has nowhere to go but OVER the
+// line above, into the notch the upper box yields. Left to size itself, the
+// step grew with its tallest child and shoved the row above upward instead —
+// the notch hung in the air and the tile never left its rectangle.
+.NotFound404__step {
+    display: flex;
+    align-items: flex-end;
+}
 
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
+.NotFound404__step--top {
+    height: 33vh;
+}
 
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
+.NotFound404__step--bottom {
+    height: 28vh;
+}
 
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
+// The L, flush left: the short row above (the way home at 1.5× plus one tip),
+// the full row of four below, widths matched so the L reads as one object.
+// The short row rides the RIGHT end of the L now — the row itself unchanged,
+// the way home still its first tile.
+.NotFound404__step--top {
+    margin-left: 38vw;
+    margin-right: 4vw;
+}
 
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
+.NotFound404__step--bottom {
+    margin-top: -1px;
+    margin-left: 4vw;
+    margin-right: 4vw;
+}
 
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 25rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(25px);
-                        opacity: 0.65;
-                    }
-                }
-            }
+.NotFound404__box {
+    min-width: 0;
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    // The tips carry only a WEAK darkening against the ground — the numeral
+    // reads through them; the way home is the one solid thing on the stair.
+    background-color: rgba(2, 14, 21, 0.4);
+    transition: border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 10vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 25%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 35%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.5rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 50%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 130px;
-                            height: 130px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 80%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 2.5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 50%;
-                            margin: 0;
-                            font-size: 1.1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 25%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 80%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 85%;
-                            }
-                        }
-
-                        .details {
-                            width: 80%;
-                            display: flex;
-                            justify-content: flex-end;
-                            align-items: center;
-                            gap: 5rem;
-
-                            .pcopytext {
-                                font-size: 1.1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 10vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-
-                    .Links__Author {
-                        padding: 5vh 0vw 5vh 2.5vw;
-                        width: 25%;
-                        display: flex;
-                        justify-content: flex-start;
-                        align-items: center;
-                        font-family: "Switzer";
-
-                        .magnetic {
-                            .My__button_container {
-                                width: 180px;
-                                height: 45px;
-                                margin: 0px;
-
-                                .logo {
-                                    font-size: 1rem;
-                                    padding: 10px;
-                                }
-                            }
-                        }
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-evenly;
-                            width: 100%;
-                            gap: 1rem;
-
-                            a {
-                                text-decoration: none;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {}
-                    }
-                }
-            }
-        }
+    & + & {
+        margin-left: -1px;
     }
 
-    @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
-
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 40%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
-
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
-
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 25rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(15px);
-                        opacity: 0.65;
-                    }
-                }
-            }
-
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 5vh;
-                padding-top: 20vh;
-                z-index: 57;
-
-                .MainText {
-                    position: absolute;
-                    top: 15%;
-                    right: 5%;
-
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
-
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 40%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 50%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 30%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 130px;
-                            height: 130px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 80%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 50%;
-                            margin: 0;
-                            font-size: 1.1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 40%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 80%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 85%;
-                            }
-                        }
-
-                        .details {
-                            width: 80%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-start;
-                            flex-direction: column;
-                            gap: 1rem;
-                            padding: 0 2.5vw;
-
-                            .pcopytext {
-                                font-size: 1.1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 30vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-direction: column;
-
-                    .Links__Author {
-                        padding: 1vh 0vw 1vh 2.5vw;
-                        width: 80%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-family: "Switzer";
-
-                        .magnetic {
-                            .My__button_container {
-                                width: 180px;
-                                height: 45px;
-                                margin: 0px;
-
-                                .logo {
-                                    font-size: 1rem;
-                                    padding: 10px;
-                                }
-                            }
-                        }
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            flex-wrap: wrap;
-                            width: 100%;
-
-                            a {
-                                text-decoration: none;
-                                margin-left: 1rem;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {
-                            font-size: 0.9rem;
-                        }
-                    }
-                }
-            }
-        }
+    // The reached-for state, written once — because it is reached for in two
+    // different ways. A mouse hovers; a finger taps, and the component answers
+    // a tap by setting `data-hot`. `:hover` MUST stay behind fine-pointer: on
+    // touch a tap fires the hover with no leave ever to follow, and the
+    // emphasis would latch on the first tile touched and stay lit for the rest
+    // of the visit.
+    @include fine-pointer {
+        &:hover { @include boxHot; }
     }
 
-    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .Intro404 {
-            width: 100vw;
-            height: 110vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
+    &[data-hot="true"] { @include boxHot; }
+}
 
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
+// One class over two elements: an <a> wherever the tap may leave, a <button>
+// while a touch device has not reached this tile yet (see index.jsx). The
+// button's user-agent chrome has to go or the tile would grow a grey box.
+.NotFound404__box__link {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    appearance: none;
+    background: none;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    // The blue flash a mobile browser paints over a tapped anchor has no place
+    // on a tile that already answers the tap by growing.
+    -webkit-tap-highlight-color: transparent;
 
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
+    // Keyboard only, deliberately. A tap fires `focus` BEFORE `click`, so a
+    // plain `:focus` ring would light on every tapped tile — and for the same
+    // reason nothing in the component sets the reach from a focus event.
+    &:focus-visible {
+        outline: 1px solid var(--hColor);
+        outline-offset: -7px;
+    }
+}
 
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
+.NotFound404__box__body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.9rem;
+    width: 100%;
+    height: 100%;
+    padding: clamp(2rem, 2.7vw, 3.2rem);
+    transform-origin: center center;
+    will-change: transform;
+}
 
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
+// The way home is the row's landmark: taller, and its label wears the house
+// button's corners.
+.NotFound404__box--go {
+    background-color: rgba(2, 14, 21, 0.72);
+}
 
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
+.NotFound404__box--go .NotFound404__box__body {
+    align-items: flex-start;
+}
 
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 20rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(15px);
-                        opacity: 0.65;
-                    }
-                }
-            }
+.NotFound404__goLabel {
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.6rem, 2.4vw, 2.8rem);
+    line-height: 1.15;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--wText);
+}
 
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 5vh;
-                padding-top: 20vh;
-                z-index: 57;
+.NotFound404__box__cap {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--hColor);
+}
 
-                .MainText {
-                    position: absolute;
-                    top: 10%;
-                    right: 5%;
+.NotFound404__box__big {
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.3rem, 1.9vw, 2.3rem);
+    line-height: 1.1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--wText);
+}
 
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
+.NotFound404__box__text {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.9rem, 1.08vw, 1.3rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.66);
+}
 
-                        span {}
-                    }
-                }
-
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
-
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
-
-                        .text__devider {
-                            width: 60%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 80%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 30%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 130px;
-                            height: 130px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 80%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 80%;
-                            margin: 0;
-                            font-size: 1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 45%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 90%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 95%;
-                            }
-                        }
-
-                        .details {
-                            width: 90%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-start;
-                            flex-direction: column;
-                            gap: 1rem;
-                            padding: 0 2.5vw;
-
-                            .pcopytext {
-                                font-size: 1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 30vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-direction: column;
-
-                    .Links__Author {
-                        padding: 1vh 0vw 1vh 2.5vw;
-                        width: 80%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-family: "Switzer";
-
-                        .magnetic {
-                            .My__button_container {
-                                width: 180px;
-                                height: 45px;
-                                margin: 0px;
-
-                                .logo {
-                                    font-size: 1rem;
-                                    padding: 10px;
-                                }
-                            }
-                        }
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            flex-wrap: wrap;
-                            width: 100%;
-
-                            a {
-                                text-decoration: none;
-                                margin-left: 1rem;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {
-                            font-size: 0.9rem;
-                        }
-                    }
-                }
-            }
-        }
+// ── stacked: where the L has no room ────────────────────────────────────
+//
+// TWIN of STACKED_MQ in index.jsx — keep the query literally identical there
+// and here, or the script will animate a composition the stylesheet is not
+// showing.
+//
+// The height arm is not a nicety. The old gate was `max-width: 900px` alone,
+// and a phone in landscape (844×390, 932×430) is as WIDE as a small tablet and
+// 390px TALL: it kept the desktop L — two rows of fixed 33vh + 28vh tiles —
+// inside 390px of viewport, and the section's `overflow: hidden` swallowed
+// five of the six. Width cannot tell those two devices apart. Height can.
+//
+// What replaces the L is the L laid flat, not a different page: the numeral
+// still stands behind everything as the ground, the way home is still the
+// first and largest tile and still wears the house corner marks, and the five
+// tips still follow it in order. What goes is the interlock — a notch cut for
+// a tile rising out of the row below has nothing to rise out of once the rows
+// are a column, so the growth is stilled here and lives only where the two
+// fixed-height rows do (see boxAnim in index.jsx).
+@media (max-width: 899.98px), (max-height: 520px) {
+    .NotFound404 {
+        // A hairline of clearance under the fixed navbar at EVERY height: 13vh
+        // is 51px on a phone in landscape, which is inside the bar — the
+        // eyebrow was printing over the wordmark there.
+        padding: max(6rem, 13vh) 7vw clamp(2.5rem, 8vh, 5rem);
+        // The section is no longer exactly one viewport tall — it grows with
+        // its column and the page scrolls it. `overflow: hidden` on a box that
+        // stays 100svh tall while its contents run past it is what deleted the
+        // tips; the numeral is sized to its box below, so there is nothing
+        // left here that needs clipping.
+        overflow: visible;
     }
 
-    @media only screen and (min-width: 330px) and (max-width: 379px) and (min-height: 450px) {
-        .Intro404 {
-            width: 100vw;
-            height: 130vh;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            flex-direction: column;
-            color: var(--wText);
-            overflow: hidden;
-            position: relative;
+    // The stage stops being a fixed band that the composition is absolutely
+    // positioned inside, and becomes the flow its three parts sit in.
+    .NotFound404__stage {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+    }
 
-            .index {
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
+    .NotFound404__eyebrow {
+        margin-bottom: clamp(0.9rem, 3.5vh, 2.2rem);
+    }
 
-                a {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
+    // The numeral keeps its job — it is still the thing the page stands on —
+    // but it becomes a masthead rather than a backdrop, and it is sized by
+    // whichever axis runs out first: 40vw is what fills a portrait phone,
+    // 26vh is what keeps it off the floor in 390px of landscape.
+    .NotFound404__figure {
+        position: relative;
+        inset: auto;
+        padding: 0;
+        margin: 0 0 clamp(1rem, 3.5vh, 2.6rem);
+    }
 
-                    h2 {
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
+    .NotFound404__numeral,
+    .NotFound404__slice {
+        font-size: clamp(4rem, min(40vw, 27vh), 22rem);
+    }
 
-            .letter__wrapper {
-                width: 100%;
-                height: 100%;
-                top: 45%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                position: absolute;
-                z-index: -1;
+    // The echo stays — it is the depth, and the depth is the picture. Only its
+    // step shrinks, so the outline sits inside the box the face occupies
+    // instead of bleeding past a margin that is now 7vw wide.
+    .NotFound404__slice {
+        display: block;
+        transform: translate3d(1.1vw, -0.9vh, -60px);
+    }
 
-                h2 {
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    margin: 0;
+    // The L, laid flat: one column on a phone, two from 620px up — and there
+    // the way home and the first tip span the pair, which is the L's own
+    // grouping (the short upper row over the long lower one) rather than a new
+    // arrangement invented for the small screen.
+    .NotFound404__stair {
+        position: static;
+        display: grid;
+        grid-template-columns: 1fr;
+        // The seams. Every tile draws its own top and left hairline and the
+        // stair closes the figure on the other two sides: one line per seam,
+        // exactly 1px, no negative margins and nothing doubled.
+        border-right: 1px solid rgba(255, 255, 255, 0.16);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    }
 
-                    span {
-                        font-family: "Switzer-Light";
-                        font-size: 20rem;
-                        font-weight: 400;
-                        color: var(--wText);
-                        filter: blur(15px);
-                        opacity: 0.65;
-                    }
-                }
-            }
+    // The two rows are the L's structure, not the grid's — they hand their
+    // tiles straight to the stair and stop being boxes themselves.
+    .NotFound404__step,
+    .NotFound404__step--top,
+    .NotFound404__step--bottom {
+        display: contents;
+    }
 
-            .mainContent {
-                width: 100%;
-                height: 80%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                flex-direction: column;
-                gap: 5vh;
-                padding-top: 20vh;
-                z-index: 57;
+    .NotFound404__box,
+    .NotFound404__box + .NotFound404__box {
+        margin: 0;
+        border: 0;
+        border-top: 1px solid rgba(255, 255, 255, 0.16);
+        border-left: 1px solid rgba(255, 255, 255, 0.16);
+        // Nothing on this page is smaller than a thumb.
+        min-height: 4.5rem;
+    }
 
-                .MainText {
-                    position: absolute;
-                    top: 10%;
-                    right: 5%;
+    .NotFound404__box--go {
+        min-height: 6rem;
+    }
 
-                    p {
-                        font-family: "Switzer-Light";
-                        text-align: right;
-                        font-size: 2rem;
+    .NotFound404__box__body {
+        min-height: 0;
+        gap: 0.5rem;
+        padding: clamp(1.1rem, 4vw, 1.9rem) clamp(1.1rem, 4.5vw, 2.1rem);
+    }
 
-                        span {}
-                    }
-                }
+    .NotFound404__goLabel {
+        font-size: clamp(1.2rem, 5vw, 2rem);
+    }
 
-                .Content404 {
-                    width: 100%;
-                    height: 25%;
-                    position: relative;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-start;
-                    justify-content: flex-start;
+    .NotFound404__box__text {
+        font-size: clamp(0.88rem, 3.4vw, 1.05rem);
+    }
 
-                    .text__wrapper {
-                        width: 100%;
-                        height: 100%;
-                        display: flex;
-                        align-items: flex-start;
-                        justify-content: center;
-                        flex-direction: column;
-                        position: relative;
+    // Two columns as soon as a line of tip text has room for two of them.
+    @media (min-width: 620px) {
+        .NotFound404__stair {
+            grid-template-columns: 1fr 1fr;
+        }
 
-                        .text__devider {
-                            width: 60%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .text__container {
-                            width: 80%;
-                            height: 100%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-end;
-                            padding-left: 5vw;
-                            gap: 0.5rem;
-
-                            h3 {
-                                padding-bottom: 1rem;
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                            }
-
-                            p {
-                                font-size: 1.3rem;
-                                font-weight: 400;
-                                margin: 0;
-                            }
-                        }
-                    }
-                }
-
-                .Button__container {
-                    width: 100%;
-                    height: 30%;
-                    position: relative;
-                    pointer-events: all;
-
-                    .button {
-                        pointer-events: all;
-                        height: 100%;
-                        position: absolute;
-                        top: 50%;
-                        right: 30%;
-                        transform: translate(50%, -50%);
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-
-                        .Round__button_container {
-                            pointer-events: all;
-                            width: 130px;
-                            height: 130px;
-
-                            a {
-                                p {
-                                    font-family: "Switzer";
-                                    line-height: 1.2;
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-
-                    .devider {
-                        position: absolute;
-                        top: 50%;
-                        left: 70%;
-                        transform: translate(-50%, -50%);
-                        background-color: var(--divider);
-                        width: 80%;
-                        height: 2px;
-                    }
-                }
-            }
-
-            .addInfo {
-                width: 100%;
-                height: 45%;
-                display: flex;
-                justify-content: flex-start;
-                align-items: flex-start;
-                position: relative;
-
-                .bottom__footer {
-                    width: 80%;
-                    height: 100%;
-                    position: relative;
-                    display: flex;
-                    align-items: center;
-                    justify-content: flex-start;
-                    flex-direction: column;
-                    color: var(--wText);
-                    gap: 5vh;
-
-                    .header {
-                        height: 25%;
-                        width: 100%;
-                        display: flex;
-                        align-items: flex-end;
-                        justify-content: flex-start;
-                        gap: 1.5rem;
-                        padding-left: 5vw;
-                        font-family: "Switzer";
-
-                        h3 {
-                            font-size: 5rem;
-                            margin: 0;
-                            line-height: 1;
-                        }
-
-                        p {
-                            width: 80%;
-                            margin: 0;
-                            font-size: 1rem;
-                        }
-                    }
-
-                    .phone__details {
-                        width: 100%;
-                        height: 45%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: flex-start;
-                        flex-direction: column;
-                        gap: 1rem;
-
-                        .details__devider {
-                            width: 90%;
-                            height: 2px;
-                            background-color: var(--divider);
-
-                            &:nth-of-type(1) {
-                                width: 95%;
-                            }
-                        }
-
-                        .details {
-                            width: 90%;
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: flex-start;
-                            flex-direction: column;
-                            gap: 1rem;
-                            padding: 0 2.5vw;
-
-                            .pcopytext {
-                                font-size: 1rem;
-                                font-weight: 400;
-                                margin: 0;
-                                transition: opacity 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-
-                                &:hover {
-                                    opacity: 0.6;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-
-            .footer__Container {
-                width: 100%;
-                height: 30vh;
-
-                .Footer__Links {
-                    height: 100%;
-                    width: 100%;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    flex-direction: column;
-
-                    .Links__Author {
-                        padding: 1vh 0vw 1vh 2.5vw;
-                        width: 80%;
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        font-family: "Switzer";
-
-                        .magnetic {
-                            .My__button_container {
-                                width: 180px;
-                                height: 45px;
-                                margin: 0px;
-
-                                .logo {
-                                    font-size: 1rem;
-                                    padding: 10px;
-                                }
-                            }
-                        }
-                    }
-
-                    .Links__container {
-                        position: relative;
-                        display: flex;
-                        flex-direction: column;
-                        justify-content: center;
-                        align-items: flex-end;
-                        width: 100%;
-                        padding: 0% 2vw;
-                        gap: 1vh;
-
-                        .devider {
-                            position: absolute;
-                            top: 0;
-                            right: 0;
-                            width: 100%;
-                            height: 2px;
-                            background-color: var(--divider);
-                        }
-
-                        .Social__Links {
-                            position: relative;
-                            display: flex;
-                            align-items: center;
-                            justify-content: center;
-                            flex-wrap: wrap;
-                            width: 100%;
-
-                            a {
-                                text-decoration: none;
-                                margin-left: 1rem;
-                                color: var(--wText);
-                                font-size: 1.5rem;
-                                font-family: "Switzer";
-                            }
-                        }
-
-                        .Credits {
-                            font-size: 0.9rem;
-                        }
-                    }
-                }
-            }
+        .NotFound404__box--go,
+        .NotFound404__step--top .NotFound404__box:last-child {
+            grid-column: 1 / -1;
         }
     }
 }

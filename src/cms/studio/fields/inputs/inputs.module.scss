@@ -1,0 +1,723 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+@use "../../styles/tokens.module" as t;
+
+/* Every input shares one control surface, so a form of mixed field types reads
+   as one form rather than a stack of unrelated widgets. */
+.control {
+  @include t.control;
+}
+
+.controlInvalid {
+  border-color: var(--st-danger-line);
+}
+
+.mono {
+  font-family: var(--st-mono);
+  font-size: 12.5px;
+  letter-spacing: 0;
+}
+
+.number {
+  max-width: 180px;
+  font-variant-numeric: tabular-nums;
+}
+
+.date {
+  max-width: 230px;
+
+  &::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    filter: invert(0.7);
+  }
+}
+
+.stack {
+  position: relative;
+}
+
+.counter {
+  position: absolute;
+  right: var(--st-s2);
+  bottom: 7px;
+  padding: 1px var(--st-s1);
+  font-size: var(--st-text-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+  background: var(--st-sunken);
+  border-radius: 2px;
+}
+
+.counterOver {
+  color: var(--st-danger);
+}
+
+.readonlyValue {
+  padding: 9px 0;
+  font-size: var(--st-text-body);
+  color: var(--st-ink-3);
+}
+
+/* -------------------------------------------------------------- affixes -- */
+
+.affixed {
+  position: relative;
+  display: flex;
+  gap: var(--st-s1);
+  align-items: center;
+}
+
+.affixIcon {
+  position: absolute;
+  left: 11px;
+  color: var(--st-ink-4);
+  pointer-events: none;
+}
+
+.withAffix {
+  padding-left: 32px;
+}
+
+.affixAction {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--st-ink-3);
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.06);
+  }
+}
+
+.prefix {
+  flex: none;
+  font-family: var(--st-mono);
+  font-size: 12px;
+  color: var(--st-ink-4);
+}
+
+.withPrefix {
+  flex: 1;
+}
+
+/* -------------------------------------------------------------- choices --
+   A chosen option is filled in ink, exactly like a ticked checkbox. Selection is
+   achromatic across the whole Studio so the accent can keep meaning one thing. */
+
+.booleanRow {
+  padding: 3px 0;
+}
+
+.choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--st-s2);
+}
+
+.choice {
+  height: 32px;
+  padding: 0 var(--st-s4);
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  color: var(--st-ink-2);
+  cursor: pointer;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    border-color: var(--st-line-strong);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline;
+  }
+}
+
+.choiceActive {
+  font-weight: var(--st-w-medium);
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-color: var(--st-solid);
+
+  &:hover:not(:disabled) {
+    color: var(--st-on-solid);
+    background: var(--st-solid-hover);
+  }
+}
+
+/* ------------------------------------------------------------ rich text -- */
+
+.rich {
+  overflow: hidden;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  &:focus-within {
+    @include t.focus-ring;
+  }
+}
+
+.richBar {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  padding: var(--st-s1) 5px;
+  border-bottom: 1px solid var(--st-line);
+}
+
+.richButton {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 24px;
+  color: var(--st-ink-3);
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 3px;
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.07);
+  }
+
+  &:disabled {
+    opacity: 0.35;
+  }
+}
+
+.richButtonOn {
+  color: var(--st-ink);
+  background: rgba(255, 252, 247, 0.13);
+}
+
+.richGlyph {
+  display: grid;
+  place-items: center;
+  font-size: 12.5px;
+  line-height: 1;
+
+  &[data-mark="bold"] {
+    font-weight: var(--st-w-strong);
+  }
+
+  &[data-mark="italic"] {
+    font-style: italic;
+  }
+
+  &[data-mark="heading"] {
+    font-weight: var(--st-w-medium);
+  }
+}
+
+.richSpacer {
+  flex: 1;
+}
+
+.richArea {
+  display: block;
+  width: 100%;
+  padding: var(--st-s3);
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  line-height: 1.7;
+  color: var(--st-ink);
+  resize: vertical;
+  background: none;
+  border: none;
+  outline: none;
+
+  &::placeholder {
+    color: var(--st-ink-4);
+  }
+}
+
+.richPreview {
+  min-height: 120px;
+  padding: var(--st-s3) var(--st-s4);
+  font-size: var(--st-text-body);
+  line-height: 1.7;
+  color: var(--st-ink-2);
+
+  a {
+    color: var(--st-ink);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
+  }
+}
+
+.previewHeading {
+  margin: 0 0 var(--st-s2);
+  font-size: var(--st-text-lead);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.previewParagraph {
+  margin: 0 0 10px;
+}
+
+.previewList {
+  padding-left: var(--st-s5);
+  margin: 0 0 10px;
+}
+
+.richEmpty {
+  color: var(--st-ink-4);
+}
+
+.richCount {
+  display: block;
+  padding: 0 var(--st-s3) var(--st-s2);
+  font-size: var(--st-text-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+  text-align: right;
+}
+
+/* ---------------------------------------------------------------- asset -- */
+
+.asset {
+  display: block;
+}
+
+.assetEmpty {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: var(--st-s5);
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  color: var(--st-ink-3);
+  cursor: pointer;
+  background: var(--st-sunken);
+  border: 1px dashed var(--st-line-strong);
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    border-color: var(--st-ink-3);
+  }
+}
+
+.assetFilled {
+  display: flex;
+  gap: var(--st-s4);
+  padding: var(--st-s3);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+.assetThumb {
+  display: block;
+  flex: none;
+  width: 84px;
+  height: 84px;
+  overflow: hidden;
+  background: #0d0d0f;
+  border: 1px solid var(--st-line);
+  border-radius: 3px;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.assetInfo {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.assetName {
+  @include t.truncate;
+
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.assetAlt {
+  @include t.clamp-lines(2);
+
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-ink-3);
+}
+
+.assetMissing {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  font-size: var(--st-text-small);
+  color: var(--st-accent);
+}
+
+.assetActions {
+  display: flex;
+  gap: 2px;
+  margin-top: auto;
+  margin-left: -10px;
+}
+
+.fileRow {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s2) var(--st-s3);
+  color: var(--st-ink-3);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+.fileName {
+  @include t.truncate;
+
+  flex: 1;
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* ------------------------------------------------------------ reference -- */
+
+.reference {
+  display: block;
+}
+
+.refChip {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: 6px 6px 6px var(--st-s3);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+.refIcon {
+  flex: none;
+  color: var(--st-ink-4);
+}
+
+.refText {
+  display: flex;
+  flex: 1;
+  gap: var(--st-s2);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.refTitle {
+  @include t.truncate;
+
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+}
+
+.refSub {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+.refBroken {
+  font-size: var(--st-text-small);
+  color: var(--st-danger);
+}
+
+.refEmpty {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--st-s4);
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  color: var(--st-ink-3);
+  cursor: pointer;
+  background: var(--st-sunken);
+  border: 1px dashed var(--st-line-strong);
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    border-color: var(--st-ink-3);
+  }
+}
+
+.pickerBar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s3);
+  margin-bottom: var(--st-s4);
+}
+
+.pickerTabs {
+  display: flex;
+  gap: var(--st-s1);
+}
+
+.pickerTab {
+  height: 28px;
+  padding: 0 var(--st-s3);
+  font-family: var(--st-font);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+  cursor: pointer;
+  background: none;
+  border: 1px solid var(--st-line);
+  border-radius: 3px;
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    border-color: var(--st-line-strong);
+  }
+}
+
+.pickerTabOn {
+  font-weight: var(--st-w-medium);
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-color: var(--st-solid);
+
+  &:hover {
+    color: var(--st-on-solid);
+    background: var(--st-solid-hover);
+  }
+}
+
+.pickerLoading {
+  display: grid;
+  place-items: center;
+  padding: var(--st-s10);
+  color: var(--st-ink-4);
+}
+
+.pickerList {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid var(--st-line);
+}
+
+.pickerRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  padding: var(--st-s3) var(--st-s2);
+  font-family: var(--st-font);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 1px solid var(--st-line-soft);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.05);
+  }
+}
+
+.pickerTitle {
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+}
+
+.pickerSub {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+/* ------------------------------------------------------------ container --
+   Nested content is set off by a rule down its left edge rather than by a box
+   around it, so a form three objects deep does not become three nested frames. */
+
+.object {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s5);
+  padding-left: var(--st-s4);
+  border-left: 1px solid var(--st-line);
+}
+
+.array {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s3);
+  align-items: flex-start;
+}
+
+.arrayList {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  border-top: 1px solid var(--st-line);
+}
+
+.arrayItem {
+  border-bottom: 1px solid var(--st-line-soft);
+}
+
+.arrayItemError {
+  box-shadow: inset 2px 0 0 var(--st-danger);
+}
+
+.arrayHead {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s1) var(--st-s1) var(--st-s1) var(--st-s2);
+}
+
+.arrayIndex {
+  flex: none;
+  width: 16px;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+}
+
+.arrayToggle {
+  display: flex;
+  flex: 1;
+  gap: var(--st-s2);
+  align-items: center;
+  min-width: 0;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  color: var(--st-ink-2);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+  }
+}
+
+.arraySummary {
+  @include t.truncate;
+}
+
+.arraySpacer {
+  flex: 1;
+}
+
+.arrayWarn {
+  flex: none;
+  color: var(--st-danger);
+}
+
+.arrayControls {
+  display: flex;
+  flex: none;
+  gap: 0;
+}
+
+.arrayBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s5);
+  padding: var(--st-s3) var(--st-s3) var(--st-s5) var(--st-s6);
+}
+
+.arrayEmpty {
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+.arrayAdd {
+  align-self: flex-start;
+}
+
+/* --------------------------------------------------------------- notice -- */
+
+.notice,
+.fallbackNote {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  margin: 0 0 var(--st-s2);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+
+  code {
+    font-family: var(--st-mono);
+    font-size: 11.5px;
+    color: var(--st-ink-2);
+  }
+
+  svg {
+    flex: none;
+  }
+}
+
+.fallback {
+  display: block;
+}
+
+.fallbackError {
+  margin: var(--st-s2) 0 0;
+  font-size: var(--st-text-small);
+  color: var(--st-danger);
+}
+
+/* Shown in place of the add button when an array accepts more than one member
+   type, so the choice is made before an empty item exists. */
+.addChoices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--st-s2);
+  align-items: center;
+}

@@ -1,0 +1,39 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.textPressure {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+// Set at its own width, centred. It was justified edge to edge, which turned
+// the name into a rule across the footer — the letters were held apart by the
+// box rather than by the type.
+.textPressure__word {
+    display: inline-flex;
+    justify-content: center;
+    align-items: baseline;
+    line-height: 1;
+    text-transform: uppercase;
+    white-space: nowrap;
+    user-select: none;
+    color: var(--wText);
+    // The face the effect was built on, and the only one on the site with both
+    // a weight and a width axis. Switzer's variable cut has weight alone.
+    font-family: "Roboto Flex", "Switzer-Variable", sans-serif;
+    font-weight: 400;
+    font-variation-settings: "wght" 200, "wdth" 100;
+}
+
+.textPressure__char {
+    display: inline-block;
+    // Set per character by the component; this is where it starts, and where it
+    // stays if the loop never runs.
+    font-variation-settings: "wght" 200, "wdth" 100;
+    transition: font-variation-settings 0.08s linear;
+}
+
+.textPressure__space {
+    display: inline-block;
+    width: 0.22em;
+}

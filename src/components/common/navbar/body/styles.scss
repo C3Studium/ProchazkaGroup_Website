@@ -1,203 +1,545 @@
 @use "../../../../styles/system/_shortcuts.scss" as *;
 
-.navbar__body {
+// The menu. See index.jsx for what it is; this file is where it is.
+//
+// Two layers: the page's photograph across the whole screen turned down to a
+// tone, and the bento in the middle of it. Nothing here draws a border — every
+// line is one of the site's hairlines, and the ones between the boxes are where
+// the boxes meet, so nothing has to restate where they are.
+
+$rule: rgba(255, 255, 255, 0.25);
+$curtain: cubic-bezier(0.22, 1, 0.36, 1);
+
+// ── the ground ──
+.navPanel__veil {
     position: fixed;
+    inset: 0;
+    z-index: 148;
+    overflow: hidden;
+    background-color: rgba(2, 14, 21, 0.86);
+    cursor: pointer;
+}
+
+// A canvas turning over cell by cell, across the whole screen.
+//
+// There is no `filter: blur()` here and there does not need to be. The canvas is
+// given a backing store a seventh of its box (see `resolution` in PixelReveal)
+// and the browser stretches it back up — an upscaled raster is soft for free.
+// That buys the look and skips both costs: a full-screen blur re-rasterised on
+// every frame of a turnover, and a full-screen canvas repaint to feed it.
+//
+// It is also why this is nothing like the blur ContactModal refused. That was
+// `backdrop-filter` over the live WebGL shader, resampling a moving backdrop
+// every frame — measured on /nabidky at several times the frame cost.
+.navPanel__ground {
+    position: absolute;
+    inset: 0;
+    // Held back further than it looks like it needs to be. Softening raises a
+    // photograph's mean brightness — it averages the highlights outward — so
+    // the trophies and the white office came back as pale grey across the whole
+    // screen at a value that was fine on the darker frames.
+    opacity: 0.42;
+}
+
+.navPanel__veil__tint {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(2, 14, 21, 0.68);
+}
+
+// ── the panel ──
+//
+// In the middle of the screen now, and the size of the thing it holds. The bar
+// stays where it is; this is not hanging off it any more.
+// One radius, used by the box and by the line that stops short of its corners.
+.navPanel {
+    --panel-radius: clamp(14px, 1.4vw, 22px);
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    translate: -50% -50%;
+    // Both are written inline by index.jsx, which animates between the menu's
+    // size and the roster's. These are what a phone gets and the fallback if
+    // that inline style is ever absent.
+    width: min(84vw, 1360px);
+    height: min(70vh, 760px);
+    z-index: 150;
+
+    @include below-px(820) {
+        width: 92vw !important;
+        height: auto !important;
+        max-height: 82vh;
+        overflow-y: auto;
+    }
+}
+
+// The line the box comes out of, and the box's own top edge once it is there.
+// It sits outside the frame — the frame is clipped to nothing while this is
+// being drawn — and stops short of both corners, because the box is rounded
+// there and a rule carried past a curve hangs off it.
+.navPanel__edge {
+    position: absolute;
     top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: flex-end;
-    align-items: end;
-    z-index: 104;
-    overflow: visible;
+    left: var(--panel-radius);
+    right: var(--panel-radius);
+    height: 1px;
+    background-color: $rule;
+    // Drawn from the right, and it retracts back to the same end.
+    transform-origin: right center;
+    pointer-events: none;
+    z-index: 4;
 
-    .navbar__body__container {
-        z-index: 2;
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        width: 60%;
-        height: 100%;
-        gap: 2.5rem;
+    @include lineSweep(x, var(--sweep, 0s));
+}
 
-        .navbar__body__link {
-            margin: 0;
-            padding: 0;
-            overflow: visible;
-            position: relative;
+.navPanel__frame {
+    position: relative;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+    height: 100%;
+    // A sheet of its own. Darker than the ground so it reads as laid over it,
+    // still translucent so the photograph carries on through — opaque, it would
+    // be a hole cut in the picture.
+    background-color: rgba(3, 13, 19, 0.86);
+    border-radius: var(--panel-radius);
+    overflow: hidden;
+}
 
-            a {
-                text-decoration: none;
-                color: var(--wText);
-                font-family: "Switzer-light";
+// ── the rules ──
+//
+// The frame's four, and the cuts between the boxes. All of them carry the
+// travelling light; the delays are negative and in order, so one light works
+// its way through the panel rather than every rule lighting at once.
+.navPanel__rule {
+    position: absolute;
+    background-color: $rule;
+    pointer-events: none;
+    z-index: 4;
 
-                p {
-                    font-size: 2.5rem;
-                    margin: 0;
+    &--t { top: 0; left: 0; right: 0; height: 1px; @include lineSweep(x, var(--sweep, 0s)); }
+    &--b { bottom: 0; left: 0; right: 0; height: 1px; @include lineSweep(x, var(--sweep, 0s)); }
+    &--l { left: 0; top: 0; bottom: 0; width: 1px; @include lineSweep(y, var(--sweep, 0s)); }
+    &--r { right: 0; top: 0; bottom: 0; width: 1px; @include lineSweep(y, var(--sweep, 0s)); }
+}
 
-                    span {
-                        color: var(--wText);
-                    }
-                }
-            }
-        }
+// The cuts. Above the pictures — a rule that a photograph could cover is not a
+// rule the panel is built from.
+.navPanel__cut {
+    position: absolute;
+    background-color: $rule;
+    pointer-events: none;
+    z-index: 3;
 
-        .active {
-            margin: 0;
-            padding: 0;
-
-            a {
-                text-decoration: none;
-                color: var(--hColor);
-
-                p {
-                    margin: 0;
-                    font-size: 2.5rem;
-                    font-family: "Switzer";
-
-                    span {
-                        color: var(--bgColor);
-                        opacity: 1;
-                    }
-                }
-            }
-        }
-    }
-
-    .navbar__body__background {
-        position: absolute;
+    &--v {
         top: 0;
-        left: 0;
-        background-color: var(--bgColor2);
-        opacity: 0.5;
-        backdrop-filter: blur(10px);
-        width: 100%;
-        height: 100%;
-        z-index: 1;
-    }
-
-    .navbar__body__rows__container {
-        position: absolute;
-        top: 0;
+        bottom: 0;
         right: 0;
-        width: 60%;
-        height: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-        z-index: 2;
-
-        // Grid renders .grid__wrapper; it must overlay the rows, not sit in the
-        // flex flow (it would eat height and squash the rows).
-        .grid__wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 3;
-
-            .ripple-grid-container {
-                width: 100%;
-                height: 100%;
-            }
-        }
-
-        .navbar__body__rows__logo {
-            position: absolute;
-            top: 5%;
-            left: 5%;
-            width: 100%;
-            height: 10%;
-            z-index: 2;
-
-            .onViewLogo {
-                width: 25vw;
-
-                .onViewLogo__Text {
-                    h3 {
-                        span {
-                            font-size: 1.5rem;
-                            font-family: "Switzer";
-                            color: var(--wText);
-                        }
-                    }
-
-                    p {
-                        span {
-                            font-size: 1.1rem;
-                            font-family: "Switzer";
-                            color: var(--wText);
-                        }
-                    }
-                }
-            }
-        }
-
-        .navbar__body__row {
-            background-color: var(--bgColor);
-            z-index: 1;
-            width: 100%;
-            height: calc(100% / 3);
-            flex-shrink: 0;
-        }
+        width: 1px;
+        @include lineSweep(y, var(--sweep, 0s));
     }
 
-    .navbar__body__add__container {
-        position: absolute;
-        bottom: 0%;
-        right: 0%;
-        padding: 0 5%;
+    &--h {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        @include lineSweep(x, var(--sweep, 0s));
+    }
+}
+
+// ── the bento ──
+//
+// Four columns, three rows, twelve cells, eight boxes. Which box sits where is
+// named in index.jsx and placed by `grid-area`; this says how big the grid is,
+// and the two have to agree.
+//
+// The track lists are written inline by index.jsx and change on hover; these are
+// the values before anyone has touched it.
+.navPanel__bento {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    // HLAVNÍ STRÁNKA reads first, which is where a menu's own front door
+    // belongs — it was the last of eight in the bottom-right corner and easy to
+    // miss. NABÍDKA keeps the four cells: the hierarchy did not change, only
+    // the order it is read in.
+    grid-template-areas:
+        "hlavni  nabidka nabidka benefit"
+        "kontakt nabidka nabidka benefit"
+        "onas    poradci recenze  partneri";
+    min-height: 0;
+    transition:
+        grid-template-columns 0.52s $curtain,
+        grid-template-rows 0.52s $curtain;
+
+    @include below-px(820) {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-rows: repeat(4, minmax(0, 1fr));
+        grid-template-areas:
+            "hlavni   kontakt"
+            "nabidka  nabidka"
+            "benefit  onas"
+            "poradci  recenze";
+        min-height: 62vh;
+    }
+}
+
+.navPanel__box {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+
+    // Eight boxes will not go into a column anyone can reach, and PARTNEŘI is
+    // the one a phone can spare — it is the page furthest from why anyone
+    // opened the menu. The homepage stays: it is the front door.
+    @include below-px(820) {
+        &[style*="partneri"] { display: none; }
+    }
+}
+
+// The contact box is the one thing in the panel that does something rather than
+// going somewhere, and it is the only box that says so before it is reached for.
+.navPanel__box.is-contact {
+    background-color: rgba(187, 183, 136, 0.07);
+
+    .navPanel__ord { color: rgba(187, 183, 136, 0.72); }
+    .navPanel__label { color: rgba(255, 255, 255, 0.76); }
+}
+
+.navPanel__box__link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    width: 100%;
+    height: 100%;
+    padding: 1.1rem 1.2rem;
+    overflow: hidden;
+    text-align: left;
+    text-decoration: none;
+    color: var(--wText);
+    // It is a <button> in the contact box; these are the defaults a button
+    // brings that a box has never wanted.
+    background: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+
+    &:focus-visible {
+        outline: 1px solid var(--bgPrimary, #BBB788);
+        outline-offset: -5px;
+    }
+}
+
+// ── the picture in the box ──
+//
+// Which edge it unfolds from is set per box in index.jsx — always the outer
+// one, so every box opens towards the middle of the bento.
+// The two layers the reveal is built from. The outer one slides in from the
+// box's outer edge; the inner one slides the opposite way by exactly as much,
+// so the picture stays still and only the edge that uncovers it moves. Both are
+// transforms, which is what keeps the whole thing on the compositor — see the
+// note in index.jsx.
+.navPanel__box__shot,
+.navPanel__box__shot__in {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    will-change: transform;
+}
+
+// The outer one clips, and this is the whole mechanism.
+//
+// Without it the two transforms simply cancel: the outer slides a box-width to
+// the left, the inner slides a box-width to the right, and the picture lands
+// back exactly where it started — visible, because nothing was ever hiding it.
+// All eight of them sat open at once. The moving edge only exists because this
+// layer has one.
+.navPanel__box__shot { overflow: hidden; }
+
+// Holds the words up off it. A gradient rather than a flat sheet: the words sit
+// along the bottom of the box, and the picture is worth seeing above them.
+.navPanel__box__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(
+        to top,
+        rgba(3, 13, 19, 0.92) 0%,
+        rgba(3, 13, 19, 0.66) 34%,
+        rgba(3, 13, 19, 0.22) 72%,
+        rgba(3, 13, 19, 0.1) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.5s $curtain;
+
+    .is-open & { opacity: 1; }
+}
+
+.navPanel__ord,
+.navPanel__foot { position: relative; z-index: 2; }
+
+// ── the ordinal ──
+.navPanel__ord {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: auto;
+    @include font(XSBody);
+    letter-spacing: 0.14em;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.34);
+    transition: color 0.45s $curtain;
+
+    .is-open & { color: var(--bgPrimary, #BBB788); }
+}
+
+.navPanel__tick {
+    display: block;
+    width: 14px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0.3);
+    transform-origin: left center;
+    transition: transform 0.45s $curtain;
+
+    .is-open & { transform: scaleX(1); }
+}
+
+// ── the label ──
+//
+// Poppins 200 uppercase is what the page sets its own display copy in. The size
+// follows the box and the box follows the hierarchy; the hover only takes it one
+// step further, because size already means importance here.
+.navPanel__label {
+    display: block;
+    font-family: "Poppins", "Helvetica", system-ui, sans-serif;
+    font-weight: 200;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    line-height: 1.14;
+    font-size: 0.92rem;
+    color: rgba(255, 255, 255, 0.56);
+    // Two lines' worth, always. The labels are not the same length, and a box
+    // that re-wraps as its column narrows moves everything in it — which is the
+    // one thing that must not happen while the grid is in motion.
+    min-height: 2.28em;
+    // The quiet ones recede; they are never blurred. Type under a filter is
+    // re-rasterised without subpixel positioning and goes soft-edged and grey,
+    // and on a menu the words are the one thing that has to stay crisp.
+    transition:
+        color 0.4s $curtain,
+        font-size 0.5s $curtain;
+
+    [data-size="md"] & { font-size: 1.3rem; }
+    [data-size="lg"] & { font-size: clamp(1.6rem, 2.6vw, 2.6rem); }
+
+    .is-here & { color: rgba(255, 255, 255, 0.76); }
+
+    .is-open & {
+        color: var(--wText);
+        font-size: 1.08rem;
+    }
+
+    [data-size="md"].is-open & { font-size: 1.5rem; }
+    [data-size="lg"].is-open & { font-size: clamp(1.8rem, 2.9vw, 2.9rem); }
+
+    @include below-px(820) {
+        font-size: 1.05rem;
+
+        [data-size="md"] &,
+        [data-size="md"].is-open & { font-size: 1.25rem; }
+        [data-size="lg"] &,
+        [data-size="lg"].is-open & { font-size: 1.6rem; }
+    }
+}
+
+// Takes no room until it is shown: the notes are not the same length, and left
+// in flow each reserved its own height, so the labels along a row sat at
+// different heights for no reason a reader could see. `grid-template-rows:
+// 0fr -> 1fr` is the one way to animate a box from nothing to its own content
+// height without measuring it in JavaScript.
+.navPanel__note {
+    display: grid;
+    grid-template-rows: 0fr;
+    max-width: 34ch;
+    @include font(XSBody);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.7);
+    opacity: 0;
+    transition:
+        grid-template-rows 0.5s $curtain,
+        opacity 0.35s ease;
+
+    > span {
+        overflow: hidden;
+        clip-path: inset(0 0 100% 0);
+        transition: clip-path 0.5s $curtain;
+    }
+
+    .is-open & {
+        grid-template-rows: 1fr;
+        opacity: 1;
+
+        > span { clip-path: inset(0 0 0 0); }
+    }
+}
+
+// The way back out of the roster and into the menu. It sits where the clock
+// sits, because the clock is the thing the panel can most afford to stop saying
+// while there is somewhere to go back to.
+.navPanel__back {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    justify-self: start;
+    padding: 0.2rem 0.3rem;
+    @include font(legal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.62);
+    background: none;
+    border: 0;
+    cursor: pointer;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:focus-visible { color: var(--wText); }
+
+    &:focus-visible {
+        outline: 1px solid var(--bgPrimary, #BBB788);
+        outline-offset: 4px;
+    }
+}
+
+// The arrow takes the button's own colour and size — it is `currentColor` and
+// sized in em, so there is nothing to state but how much room it gets.
+.navPanel__back__arrow {
+    width: 1.1em;
+    flex-shrink: 0;
+}
+
+// ── the rail ──
+.navPanel__rail {
+    position: relative;
+    z-index: 3;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 1.2rem;
+
+    @include below-px(820) {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        gap: 0.5rem;
+        padding: 0.9rem 6vw 1.1rem;
+        text-align: center;
+    }
+}
+
+.navPanel__rail__time,
+.navPanel__rail__mark {
+    @include font(legal);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.34);
+    font-variant-numeric: tabular-nums;
+}
+
+.navPanel__rail__mark { text-align: right; }
+
+@include below-px(820) {
+    .navPanel__rail__mark { text-align: center; }
+}
+
+.navPanel__rail__links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.35rem 1.2rem;
+
+    a {
+        @include font(legal);
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        text-decoration: none;
+        color: rgba(255, 255, 255, 0.34);
+        transition: color 0.3s ease;
+
+        &:hover,
+        &:focus-visible { color: var(--wText); }
+    }
+}
+
+// Less movement, not no movement.
+//
+// This block used to switch the travelling light off, and that was the wrong
+// call twice over. `prefers-reduced-motion` is about the illusion of large
+// objects moving — parallax, push-ins, things crossing the screen. A one-pixel
+// light gliding along a hairline at a quarter opacity is none of that, and
+// killing it left a panel whose photographs still pushed in while the only
+// thing that was genuinely small and ambient was the thing that got cut.
+//
+// So the light stays, dimmer. What backs off instead is in index.jsx: the
+// pictures' drift and push-in, and the length of the ground's turnover.
+@include reduced-motion {
+    .navPanel__rule::after,
+    .navPanel__cut::after { opacity: 0.55; }
+}
+
+// ── phone, landscape ──
+//
+// The one shape neither of the other two maps survives: under 520px of height
+// the desktop bento is three crushed rows and the phone map is a column with
+// nowhere to go. Last in the file on purpose — a phone in landscape matches
+// the width-only stops above on width alone, and source order is what lets
+// this one win.
+//
+// The panel stops floating in the middle and hangs under the bar instead,
+// taking the height that is actually there. `!important` because index.jsx
+// animates the panel's width and height inline between the menu's size and
+// the roster's; there is no meaningful difference between the two at this
+// height, so the stylesheet takes the box over entirely.
+@include phs-h {
+    .navPanel {
+        top: 72px;
+        translate: -50% 0;
+        width: 94vw !important;
+        height: calc(100svh - 84px) !important;
+        max-height: none;
+        overflow: visible;
+    }
+
+    // The same eight-minus-one boxes as portrait, laid on their side: one row
+    // of the big three, one row of the rest. NABÍDKA keeps double width — the
+    // hierarchy survives the rotation — and PARTNEŘI stays the box a phone
+    // can spare, whichever way it is held.
+    .navPanel__bento {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(2, minmax(0, 1fr));
+        grid-template-areas:
+            "hlavni  nabidka nabidka benefit"
+            "kontakt onas    poradci recenze";
+        min-height: 0;
+    }
+
+    .navPanel__box[style*="partneri"] { display: none; }
+
+    // One line again, wrapping if 568px makes it: three stacked centred rows
+    // of rail were a third of the whole panel at this height.
+    .navPanel__rail {
         display: flex;
-        justify-content: space-between;
+        flex-wrap: wrap;
+        justify-content: center;
         align-items: center;
-        width: 60%;
-        height: 10%;
-        z-index: 3;
-        gap: 10rem;
-        margin: 0;
-
-        .navbar__body__add__devider {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 1rem;
-
-            .navbar__body__add-link {
-                margin: 0;
-                padding: 0;
-
-                a {
-                    text-decoration: none;
-                    color: var(--bText);
-
-                    p {
-                        font-family: "Switzer-light";
-                        font-size: 1.2rem;
-                        margin: 0;
-
-                    }
-                }
-            }
-
-            .navbar__body__icon {
-                margin: 0;
-                padding: 0;
-
-                a {
-                    text-decoration: none;
-                    color: var(--bText);
-
-                    p {
-                        font-family: "Switzer";
-                        margin: 0;
-                    }
-                }
-            }
-        }
+        gap: 0.3rem 1.1rem;
+        padding: 0.55rem 1rem;
+        text-align: center;
     }
 }

@@ -1,7 +1,13 @@
 import Head from "next/head"
 
-// import Footer from "@/components/common/footer"
-// import TermsContent from "@/components/pages/gdpr/TermsPage"
+import { footerStaticProps } from "@/cms/server/site"
+
+// The only content on this route today is the patička, which `_app` renders
+// and which therefore has to travel on this page's props. One shared
+// implementation rather than a copy per page — see @/cms/server/site/footer.
+export const getStaticProps = footerStaticProps
+
+import TermsContent from "@/components/pages/gdpr/TermsPage"
 
 export default function PrivacyPolicyPage() {
     return (
@@ -73,8 +79,7 @@ export default function PrivacyPolicyPage() {
                 </script>
             </Head>
             <main lang="cs" key="privacy-policy-page">
-                {/* <TermsContent /> */}
-                {/* <Footer /> */}
+                <TermsContent />
             </main>
         </>
     )

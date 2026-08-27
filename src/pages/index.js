@@ -3,16 +3,83 @@
 // import QNA from "@/components/common/qna";
 // import IntroStatbar from "@/components/pages/index/introStatbar";
 import MainIntro from "@/components/pages/index/main";
+import WhoWeAre from "@/components/pages/index/WhoWeAre";
+import HorizontalScroll from "@/components/pages/index/HorizontalScroll";
+import Offers from "@/components/pages/index/Offers";
+import ReviewsPreview from "@/components/pages/index/ReviewsPreview";
+import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
+import QnaContact from "@/components/pages/index/QnaContact";
 // import MainPageSection from "@/components/pages/index/MainSection";
 // import Contact from "@/components/pages/index/MainSection/Contact";
 // import IntroSMain from "@/components/pages/index/MainSection/IntroS";
 // import Testimonials from "@/components/pages/index/Testimonials";
 // import { StatbarData } from "@/constants/mainpage";
 import Head from "next/head";
+import { useRef } from "react";
+import { getAssistant, getFooterContent, getHomepageContent } from "@/cms/server/site";
 
 //WIP: Every index has to be a logo, not a greek letters
 
-export default function Home() {
+// ISR rather than SSR, and the reason is what this page is.
+//
+// Every section below is a scroll-driven animation over copy that an editor
+// changes a few times a year. getServerSideProps would put a database round
+// trip in front of the first byte of every visit — on a page whose whole
+// character is that it starts instantly — to re-fetch text that did not change
+// between those visits. So the page is built once and served from the edge as
+// static HTML, and `revalidate` lets a publish reach the public site without a
+// deploy: the first request after the window regenerates it in the background
+// while still serving the cached copy, so no visitor ever waits for the CMS.
+//
+// Ten minutes is the trade being made: an editor's change is live within ten
+// minutes, and the database is asked about the homepage at most six times an
+// hour no matter how much traffic it takes.
+const REVALIDATE_SECONDS = 600;
+
+export async function getStaticProps() {
+  // Cannot reject — every read inside answers with empty rather than throwing,
+  // so a missing table or an unreachable database yields a page identical to
+  // the one that shipped rather than a build failure. See src/cms/server/site.
+  // Both with no arguments, and that is the guarantee this page keeps: neither
+  // reader can reach a draft from here no matter what the preview does. The
+  // editable copy of this page is served to the Studio by
+  // /studio/preview/home, which is the only caller allowed to pass `draft`.
+  const [content, footer, assistant] = await Promise.all([
+    getHomepageContent(),
+    getFooterContent(),
+        getAssistant(),
+  ]);
+
+  return {
+    // `footer` is read by _app, not by this page — the patička is rendered
+    // under every route and belongs to none. See @/cms/server/site/footer.
+    props: { content, footer, assistant },
+    revalidate: REVALIDATE_SECONDS,
+  };
+}
+
+export default function Home({ content }) {
+  // Non-sticky wrapper around hero + WhoWeAre: gives the pinned hero its
+  // scroll travel and serves as the progress target for its parallax.
+  const heroStackRef = useRef(null);
+
+  // The page never decides what to render on missing content — each section
+  // owns its own fallback, because each one knows what "nothing" should look
+  // like for it. All this does is stop an absent `content` from being a
+  // property access on undefined.
+  const {
+    hero = {},
+    horizontal = {},
+    offers = {},
+    whoWeAre = {},
+    reviews = [],
+    reviewsCopy = {},
+    consultants = [],
+    advisorsCopy = {},
+    advisorFormCopy = {},
+    qna = {},
+  } = content || {};
+
   return (
     <>
       <Head>
@@ -106,7 +173,42 @@ export default function Home() {
         </script>
       </Head>
       <main lang="cs" key="index">
-        <MainIntro />
+        <div className="HeroStack" ref={heroStackRef}>
+          <MainIntro scrollTarget={heroStackRef} copy={hero} />
+          {/* `docId` is the siteCopy block each section's copy came from, and it
+              is present only when this page is being rendered inside the Studio
+              preview — see editableDoc() in @/cms/server/site/homepage. It is
+              what lets a section mark its own text and photo as editable; on the
+              public homepage it is undefined and the annotation helper answers
+              with nothing.
+
+              Every section below takes one now, and most take a `copy` object
+              that carries it alongside the words. The shape of each is the
+              seam's, not this page's: what this file does is hand each section
+              its own block and nothing else. */}
+          <WhoWeAre
+            scrollTarget={heroStackRef}
+            text={whoWeAre.text}
+            photo={whoWeAre.photo}
+            docId={whoWeAre.docId}
+          />
+        </div>
+        <HorizontalScroll copy={horizontal} />
+        <Offers
+          partnerLogos={offers.partnerLogos}
+          copyLines={offers.copyLines}
+          photo={offers.photo}
+          title={offers.title}
+          docId={offers.docId}
+          copyMark={offers.copyMark}
+        />
+        <ReviewsPreview reviews={reviews} copy={reviewsCopy} />
+        <ChooseAdvisor
+          consultants={consultants}
+          copy={advisorsCopy}
+          formCopy={advisorFormCopy}
+        />
+        <QnaContact copy={qna} />
         {/* <IntroStatbar data={StatbarData} /> */}
         {/* <IntroSMain /> */}
         {/* <Testimonials /> */}

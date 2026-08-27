@@ -1,93 +1,84 @@
 @use "../../../../../../styles/system/_shortcuts.scss" as *;
 
-.magnetic {
-    z-index: 70; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
+// Safe rotation: CSS keyframe on a self-contained, clipped, fixed-size layer.
+// No per-frame JS transforms, no backdrop-filter — the whole animation lives
+// on the compositor inside this 168px circle, so it cannot oscillate page
+// height or flicker strips at layer edges.
+.RotatingButton {
+    position: relative;
+    width: 168px;
+    height: 168px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    contain: layout paint;
+    cursor: pointer;
 
-    .Rotating__button_container {
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        border-radius: 50%;
-        width: 150px;
-        height: 150px;
-        border: var(--hColor2) 2.5px solid;
-        z-index: 100;
-        cursor: pointer;
+    .RotatingButton__ring {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        animation: RotatingButton-spin 16s linear infinite;
         will-change: transform;
-        font-family: "Switzer";
-        // backdrop-filter on a continuously rotating element forces backdrop
-        // re-sampling every frame and flickers strips at compositing-layer
-        // edges in Chromium; a translucent fill gives the same look on dark bg.
-        background-color: rgba(5, 10, 16, 0.35);
 
-        .Rotating__button_Bounds {
+        span {
             position: absolute;
-            top: 0;
-            left: 0;
-            display: flex;
-            width: 100%;
-            height: 100%;
-            justify-content: center;
-            align-content: center;
-            z-index: 4;
-            border-radius: 50%;
-            will-change: transform;
+            inset: 0;
+            display: block;
+            text-align: center;
+            font-family: "Switzer-Light";
+            font-weight: 300;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            line-height: 1;
+            padding-top: 8px;
+            color: var(--wText);
+        }
+    }
 
-            // I need to expand the border only when I hover over it
-            &:hover {
-                scale: 3;
+    .RotatingButton__center {
+        width: 54px;
+        height: 54px;
+        border-radius: 50%;
+        background-color: var(--wText);
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    // Pointer feedback only where a pointer can hover — after a tap, :hover
+    // sticks, and a badge whose ring froze the first time it was touched reads
+    // as broken.
+    @include fine-pointer {
+        &:hover {
+            .RotatingButton__ring {
+                animation-play-state: paused;
+            }
+
+            .RotatingButton__center {
+                transform: scale(1.2);
             }
         }
+    }
 
-        .a {
-            text-decoration: none;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 50%;
-            z-index: 3;
+    @include below-px(820) {
+        width: 128px;
+        height: 128px;
 
-            .Rotating__button_Center {
-                position: absolute;
-                left: 50%;
-                top: 50%;
-                transform: translate(-50%, -50%);
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                width: 25%;
-                height: 25%;
-                z-index: 2;
-                border-radius: 50%;
-                background-color: var(--wText);
-            }
-
-            p {
-                position: relative;
-                width: 100%;
-                height: 100%;
-                margin: 0;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                text-transform: uppercase;
-                font-weight: 300;
-                color: var(--wText);
-                pointer-events: none; // Prevent text from interfering with hover
-
-                .Rotating__button_letter {
-                    position: absolute;
-                    font-size: 0.9rem;
-                    top: calc(50%);
-                    left: calc(50%);
-                    transform-origin: 0 0; // Rotate around the center
-                    /* Optional: add transition for smoothness */
-                }
-
-            }
+        .RotatingButton__ring span {
+            font-size: 0.65rem;
+            padding-top: 6px;
         }
+
+        .RotatingButton__center {
+            width: 40px;
+            height: 40px;
+        }
+    }
+}
+
+@keyframes RotatingButton-spin {
+    to {
+        transform: rotate(360deg);
     }
 }

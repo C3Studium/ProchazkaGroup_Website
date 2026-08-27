@@ -1,0 +1,745 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Advisor picker + contact form. Columns split at 31vw and 65vw — the same x
+// where ReviewsPreview's closing lines end above, so the verticals continue.
+// The form owns the CENTER column, the advisor profile the right one.
+.ChooseAdvisor {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 31vw 34vw 1fr;
+    // An implicit grid row sizes to its tallest column and would quietly run
+    // past the section's 100vh — on short viewports the columns then bleed into
+    // the section below. Pinning the row to the section's own height makes the
+    // columns exactly viewport-tall, and anything that cannot fit compresses
+    // inside them (the advisor list scrolls) instead of spilling out.
+    grid-template-rows: minmax(0, 100%);
+    color: var(--wText);
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+
+    h2, h3 {
+        margin: 0;
+        font-weight: 200;
+    }
+
+    // Every column is a grid item, and a grid item's minimum is min-content
+    // unless told otherwise — so one non-wrapping line (the tel: link, the
+    // advisor's surname) could push its track wider than the viewport and
+    // hand the whole document a horizontal scrollbar. Zeroed here once, for
+    // all three, so a track can never outgrow its share of the row.
+    .ChooseAdvisor__left,
+    .ChooseAdvisor__formCol,
+    .ChooseAdvisor__profile {
+        min-width: 0;
+    }
+
+    // ---- left column ----
+    .ChooseAdvisor__left {
+        grid-column: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 16vh 3vw 4.5vh 4vw;
+
+        h2 {
+            text-transform: uppercase;
+            font-size: clamp(1.9rem, 2.75vw, 3.2rem);
+            line-height: 1.15;
+        }
+
+        .ChooseAdvisor__list {
+            list-style: none;
+            margin: 4.5vh 0 0;
+            padding: 0;
+            // The consultant roster is CMS-driven: eleven names fit a tall
+            // desktop, but a short viewport (or a longer roster) cannot grow
+            // the column — the section is 100vh. The list is the one part with
+            // no fixed claim to its space, so it gives way and scrolls within
+            // itself; on the viewports this page designs for it fits and the
+            // scrollbar never appears. Touch scrolls it natively (lenis leaves
+            // touch alone); the address and hours below stay pinned in view.
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            scrollbar-width: thin;
+
+            li {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1vw;
+                padding: 0.75vh 0.6vw;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+                cursor: pointer;
+                isolation: isolate;
+
+                // The ground comes in from the left, the way every rule and
+                // every review on this page does. It is a wash rather than a
+                // fill — the rows are separated by hairlines and a solid block
+                // between two of them would read as a different component.
+                &::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    z-index: -1;
+                    background-image: linear-gradient(
+                        to right,
+                        rgba(255, 255, 255, 0.09),
+                        rgba(255, 255, 255, 0)
+                    );
+                    transform: scaleX(0);
+                    transform-origin: left center;
+                    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+                }
+
+                // The name goes with it, the small distance the ground travels
+                // under it — so the row leans towards the reader rather than
+                // just lighting up.
+                .name {
+                    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+                }
+
+                &.isActive {
+                    &::before {
+                        transform: scaleX(1);
+                    }
+
+                    .name {
+                        transform: translateX(0.35vw);
+                    }
+                }
+
+                // The hover-follow wash is a mouse gesture. On touch a tap
+                // fires the same :hover and it sticks to the last-touched row,
+                // which reads as a second selection beside the real one — so
+                // only a fine pointer gets it; a tap answers with .isActive.
+                @include fine-pointer {
+                    &:hover {
+                        &::before {
+                            transform: scaleX(1);
+                        }
+
+                        .name {
+                            transform: translateX(0.35vw);
+                        }
+                    }
+                }
+
+                .name {
+                    font-size: clamp(0.85rem, 0.95vw, 1.05rem);
+                }
+
+                .radio {
+                    flex-shrink: 0;
+                    width: 15px;
+                    height: 15px;
+                    border-radius: 50%;
+                    border: 1.5px solid rgba(255, 255, 255, 0.6);
+                }
+
+                &.isActive .radio {
+                    border-color: var(--hColor2);
+                    background: radial-gradient(circle, var(--hColor2) 0 45%, transparent 50%);
+                }
+            }
+        }
+
+        .ChooseAdvisor__where {
+            margin-top: auto;
+
+            .ChooseAdvisor__where__head {
+                display: flex;
+                align-items: center;
+                gap: 2vw;
+
+                h3 {
+                    font-size: clamp(1.3rem, 1.75vw, 2rem);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.35);
+                    padding-bottom: 1vh;
+                }
+
+                .pin {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    width: 3.9rem;
+                    height: 3.9rem;
+                    border: 1px solid rgba(255, 255, 255, 0.6);
+                    border-radius: 50%;
+                }
+            }
+
+            p {
+                margin: 1.2vh 0 0;
+                opacity: 0.8;
+                font-size: clamp(0.85rem, 1vw, 1.1rem);
+            }
+        }
+
+        .ChooseAdvisor__help {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1vw;
+            margin-top: 5vh;
+            font-size: clamp(0.85rem, 1vw, 1.1rem);
+            white-space: nowrap;
+
+            .ChooseAdvisor__help__phone {
+                color: var(--hColor2);
+                font-size: clamp(0.9rem, 1.05vw, 1.2rem);
+                letter-spacing: 0.02em;
+                white-space: nowrap;
+                padding: 0.5rem 0.9rem;
+                text-decoration: underline;
+                text-decoration-thickness: 1.5px;
+                text-underline-offset: 0.25em;
+            }
+        }
+    }
+
+    // ---- middle column: the form ----
+    .ChooseAdvisor__formCol {
+        grid-column: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8vh;
+        // asymmetric block: the form box ends 10vh above the section edge
+        padding: 6vh 3.5vw 2vh;
+
+        .ChooseAdvisor__claim {
+            margin: 0;
+            text-transform: uppercase;
+            font-size: clamp(1.2rem, 1.7vw, 2rem);
+            line-height: 1.5;
+            max-width: 25vw;
+        }
+
+        // The mark on a field that will not be skipped. Accent, and set just off
+        // the baseline so it reads as a mark on the label rather than as part
+        // of the word.
+        .req {
+            margin-left: 0.15em;
+            color: var(--hColor);
+            font-size: 0.9em;
+            vertical-align: super;
+            line-height: 0;
+        }
+
+        .ChooseAdvisor__form {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 1.4vh;
+            margin-top: 7vh;
+            flex: 1; // stretch to the column's bottom padding edge (90vh)
+            padding: 2.5vh 2.5vw;
+
+            // corner brackets lift the form out of the dark background,
+            // using the same line language as the buttons
+            > .corner {
+                position: absolute;
+                width: 16px;
+                height: 16px;
+                border: 0 solid rgba(255, 255, 255, 0.6);
+            }
+
+            > .corner--tl { top: 0; left: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+            > .corner--tr { top: 0; right: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+            > .corner--bl { bottom: 0; left: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+            > .corner--br { bottom: 0; right: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+            h3 {
+                text-transform: uppercase;
+                font-size: clamp(1.5rem, 2vw, 2.4rem);
+                margin-bottom: 1vh;
+            }
+
+            .label {
+                display: block;
+                text-transform: uppercase;
+                font-size: clamp(0.65rem, 0.78vw, 0.9rem);
+                letter-spacing: 0.1em;
+                opacity: 0.85;
+                margin-bottom: 0.8vh;
+                transition: color 0.25s ease, opacity 0.25s ease;
+            }
+
+            label:focus-within .label {
+                opacity: 1;
+                color: var(--hColor);
+            }
+
+            // Everything a browser brings of its own: the inset shadow Safari
+            // puts on text fields, the rounding iOS adds, the system font a
+            // control falls back to, the yellow autofill wash Chrome paints
+            // straight over the dark ground. A field here is a line with words
+            // over it and nothing else.
+            input,
+            textarea,
+            select,
+            button {
+                appearance: none;
+                -webkit-appearance: none;
+                border-radius: 0;
+                box-shadow: none;
+                font: inherit;
+                letter-spacing: inherit;
+            }
+
+            input {
+                width: 100%;
+                background: transparent;
+                border: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+                color: var(--wText);
+                font-family: "Poppins", sans-serif;
+                font-weight: 200;
+                font-size: clamp(1rem, 1.15vw, 1.3rem);
+                padding: 0.3rem 0.2rem;
+                outline: none;
+
+                &::placeholder {
+                    color: rgba(255, 255, 255, 0.45);
+                }
+
+                &:focus {
+                    border-bottom-color: var(--hColor);
+                }
+
+                // Chrome paints autofill with an inset shadow, which no
+                // background rule can override — this is the one way through it.
+                &:-webkit-autofill,
+                &:-webkit-autofill:hover,
+                &:-webkit-autofill:focus {
+                    -webkit-text-fill-color: var(--wText);
+                    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+                    transition: background-color 9999s linear;
+                    caret-color: var(--wText);
+                }
+            }
+
+            .telRow {
+                display: flex;
+                align-items: flex-end;
+                gap: 0.6rem;
+
+                .prefix {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.2rem;
+                    white-space: nowrap;
+                    font-size: clamp(1rem, 1.15vw, 1.3rem);
+                    padding-bottom: 0.3rem;
+                }
+            }
+
+            .timeRow {
+                .times {
+                    display: flex;
+                    gap: 4vw;
+
+                    label {
+                        display: flex;
+                        align-items: flex-end;
+                        gap: 0.6rem;
+                        font-size: clamp(0.85rem, 1vw, 1.1rem);
+
+                        input {
+                            width: 4vw;
+                        }
+                    }
+                }
+            }
+
+            .gdpr {
+                margin: 2vh 0 0;
+                max-width: 20vw;
+                font-size: clamp(0.7rem, 0.8vw, 0.9rem);
+                line-height: 1.45;
+                opacity: 0.8;
+
+                a {
+                    color: var(--wText);
+                    text-decoration: underline;
+                    text-underline-offset: 0.25em;
+                }
+            }
+
+            .ChooseAdvisor__submit {
+                align-self: flex-end;
+                margin-top: auto; // pins to the bottom of the bracketed box
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: clamp(1.4rem, 1.9vw, 2.3rem);
+                letter-spacing: 0.06em;
+                padding: 0.7rem 1.4rem;
+            }
+        }
+    }
+
+    // ---- right column: advisor profile ----
+    .ChooseAdvisor__profile {
+        grid-column: 3;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 11vh 3.5vw 5vh;
+
+        .ChooseAdvisor__photo {
+            position: relative;
+            width: 100%;
+            height: 48vh;
+            align-self: center;
+            flex-shrink: 0;
+        }
+
+        .ChooseAdvisor__name {
+            margin-top: 3.5vh;
+            text-transform: uppercase;
+            font-size: clamp(2.1rem, 3vw, 3.7rem);
+            line-height: 1.15;
+
+            .city {
+                margin-left: 1.8vw;
+                font-size: clamp(0.9rem, 1.15vw, 1.3rem);
+                letter-spacing: 0.1em;
+            }
+        }
+
+        .ChooseAdvisor__social {
+            display: flex;
+            gap: 2.5vw;
+            margin-top: 2.2vh;
+            font-size: clamp(1rem, 1.2vw, 1.3rem);
+
+            span {
+                display: inline-flex;
+                align-items: center;
+                gap: 0.4rem;
+            }
+        }
+
+        // label first, then the action: number below it
+        .ChooseAdvisor__callText {
+            margin-top: auto;
+            align-self: center;
+            text-transform: uppercase;
+            font-size: clamp(0.95rem, 1.1vw, 1.25rem);
+            letter-spacing: 0.06em;
+        }
+
+        .ChooseAdvisor__phone {
+            margin-top: 2vh;
+            align-self: center;
+            color: var(--hColor2);
+            text-decoration: underline;
+            text-decoration-thickness: 1.5px;
+            text-underline-offset: 0.3em;
+            font-size: clamp(1.7rem, 2.2vw, 2.7rem);
+            letter-spacing: 0.02em;
+            text-transform: none;
+            padding: 0.8rem 1.4rem;
+        }
+    }
+
+    // ---- structural lines ----
+    .ChooseAdvisor__line {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.25);
+        pointer-events: none;
+    }
+
+    // continues ReviewsPreview's bottom-line left end (31vw), full height
+    .ChooseAdvisor__line--vLeft {
+        left: 31vw;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        transform-origin: center top; // carries on down from ReviewsPreview's bottom-line end
+
+        @include lineSweep(y, 0s);
+    }
+
+    // continues ReviewsPreview's v2 (65vw), full height
+    .ChooseAdvisor__line--vRight {
+        left: 65vw;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        transform-origin: center top; // carries on down from ReviewsPreview's v2
+
+        @include lineSweep(y, -0.8s);
+    }
+
+    // accent running along the heading and the advisor list
+    .ChooseAdvisor__line--vAccent {
+        left: 1.7vw;
+        top: 18vh;
+        width: 1px;
+        height: 58vh;
+        transform-origin: center top;
+
+        @include lineSweep(y, -1.6s);
+    }
+
+    // bracket around the claim text (middle column): horizontal below it...
+    .ChooseAdvisor__line--hClaim {
+        left: 31vw;
+        top: 25vh;
+        width: 30.5vw;
+        height: 1px;
+        transform-origin: left center; // starts on vLeft (31vw), runs right
+
+        @include lineSweep(x, -2.4s);
+    }
+
+    // ...and a shortened vertical at 61.5vw — deliberately floating,
+    // not connecting to the top edge
+    .ChooseAdvisor__line--vClaim {
+        left: 61.5vw;
+        top: 12vh;
+        width: 1px;
+        height: 18vh;
+        transform-origin: center bottom; // rises from the claim's horizontal
+
+        @include lineSweep(y, -3.2s);
+    }
+
+    // above the help row
+    .ChooseAdvisor__line--hHelp {
+        left: 0;
+        top: 89vh;
+        width: 31vw;
+        height: 1px;
+        transform-origin: right center; // grows back from vLeft
+
+        @include lineSweep(x, -4s);
+    }
+
+    // under the advisor name (right column)
+    .ChooseAdvisor__line--hName {
+        left: 68.5vw;
+        top: 74.5vh;
+        width: 23.5vw;
+        height: 1px;
+        transform-origin: left center;
+
+        @include lineSweep(x, -4.8s);
+    }
+
+    // ---- touch ergonomics — capability, not width: an iPad in landscape is
+    // 1180px wide and still a finger ----
+    @include touch {
+        .ChooseAdvisor__left {
+            // the 44px rows below cost the column ~170px it does not have on a
+            // tablet in landscape (the row is pinned to 100vh) — the column
+            // pays for them out of its own air instead of hiding two names
+            padding-top: 11vh;
+
+            .ChooseAdvisor__list {
+                margin-top: 2.5vh;
+            }
+
+            .ChooseAdvisor__help {
+                margin-top: 3vh;
+            }
+
+            .ChooseAdvisor__list li {
+                // a row is a target; 44px is the floor a fingertip can trust
+                min-height: 44px;
+                padding-top: 0.4rem;
+                padding-bottom: 0.4rem;
+            }
+
+            .ChooseAdvisor__help .ChooseAdvisor__help__phone {
+                padding: 0.7rem 1rem;
+            }
+        }
+
+        .ChooseAdvisor__formCol {
+            gap: 5vh;
+
+            .ChooseAdvisor__form {
+                margin-top: 4vh;
+            }
+        }
+
+        .ChooseAdvisor__formCol .ChooseAdvisor__form {
+            input {
+                // 16px is the line under which iOS zooms the page on focus;
+                // the max() holds it wherever the rem base dips below that
+                font-size: max(16px, clamp(1rem, 1.15vw, 1.3rem));
+                min-height: 44px;
+                padding-top: 0.45rem;
+                padding-bottom: 0.45rem;
+            }
+
+            .timeRow .times label {
+                // the From/To fields inherit the same floor via `input` above;
+                // the words beside them just need to sit on the same baseline
+                align-items: center;
+            }
+        }
+    }
+
+    // ---- short laptop (1280×720 and kin): same composition, less air — the
+    // form box was running a few px past the column's 100vh, and the heading's
+    // 16vh of sky is the cheapest thing on the page ----
+    @include lt-h {
+        .ChooseAdvisor__left {
+            padding-top: 12vh;
+        }
+
+        .ChooseAdvisor__formCol {
+            gap: 5vh;
+
+            .ChooseAdvisor__form {
+                margin-top: 4vh;
+            }
+        }
+    }
+
+    // Calm, not killed: the section still enters (framer's rise is a single
+    // settle), the rows still answer a tap — only the perpetual light running
+    // the rules goes dark, the same way every other section puts it out.
+    @include reduced-motion {
+        .ChooseAdvisor__line::after {
+            animation: none;
+            background-image: none;
+            filter: none;
+        }
+    }
+
+    @include below-px(820) {
+        grid-template-columns: 1fr;
+        grid-template-rows: none; // rows are content-sized again once stacked
+        height: auto;
+
+        .ChooseAdvisor__left,
+        .ChooseAdvisor__formCol,
+        .ChooseAdvisor__profile {
+            grid-column: 1;
+            padding: 5vh 6vw;
+        }
+
+        // qualified with the column, or the base 25vw cap (written one level
+        // deeper) outweighs this and the claim sets one word to a line
+        .ChooseAdvisor__formCol .ChooseAdvisor__claim {
+            max-width: none;
+        }
+
+        .ChooseAdvisor__formCol .ChooseAdvisor__form {
+            margin-top: 4vh;
+            padding: 3vh 4vw;
+
+            .gdpr {
+                max-width: none;
+            }
+
+            .timeRow .times label input {
+                width: 20vw;
+            }
+        }
+
+        .ChooseAdvisor__help {
+            // at 390px there is not always room for the words and the number
+            // on one line; the row may break rather than push the viewport
+            flex-wrap: wrap;
+            row-gap: 1.2vh;
+        }
+
+        .ChooseAdvisor__line {
+            display: none;
+        }
+    }
+
+    // Phone in landscape: 100vh is 320–430px and each desktop column runs past
+    // 600 — the composition cannot fit and must not clip. The section gives up
+    // its viewport height and reflows: list and form side by side (the pair
+    // the reader acts on), the chosen advisor full-width below with the
+    // portrait beside the name instead of above it. The structural lines are
+    // drawn in vh against a 100vh canvas that no longer exists, so they go.
+    // Written after the 820 stop on purpose: an 800–820 viewport that is also
+    // short is a phone on its side, and this layout is the one that fits it.
+    @include phl-h {
+        height: auto;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: none; // rows are content-sized again once reflowed
+
+        .ChooseAdvisor__left {
+            grid-column: 1;
+            grid-row: 1;
+            padding: 7vh 3vw 5vh 5vw;
+        }
+
+        .ChooseAdvisor__formCol {
+            grid-column: 2;
+            grid-row: 1;
+            gap: 4vh;
+            padding: 7vh 5vw 5vh 3vw;
+
+            .ChooseAdvisor__claim {
+                max-width: none;
+            }
+
+            .ChooseAdvisor__form {
+                margin-top: 0;
+
+                .timeRow .times {
+                    gap: 2rem;
+
+                    label input {
+                        width: 5rem;
+                    }
+                }
+            }
+        }
+
+        .ChooseAdvisor__profile {
+            grid-column: 1 / -1;
+            grid-row: 2;
+            display: grid;
+            grid-template-columns: minmax(0, 38vw) 1fr;
+            align-items: start;
+            column-gap: 5vw;
+            row-gap: 2.2vh;
+            padding: 5vh 5vw 7vh;
+
+            .ChooseAdvisor__photo {
+                grid-column: 1;
+                grid-row: 1 / 5;
+                align-self: start;
+                height: 72vh;
+            }
+
+            .ChooseAdvisor__name {
+                grid-column: 2;
+                margin-top: 0;
+            }
+
+            .ChooseAdvisor__social {
+                grid-column: 2;
+                margin-top: 0;
+            }
+
+            // in the desktop column these centered themselves and rode
+            // margin-top: auto to the section's floor; beside the portrait
+            // they are two more lines of the same left-aligned stack
+            .ChooseAdvisor__callText,
+            .ChooseAdvisor__phone {
+                grid-column: 2;
+                justify-self: start;
+                align-self: auto;
+                margin-top: 0;
+            }
+        }
+
+        .ChooseAdvisor__line {
+            display: none;
+        }
+    }
+}

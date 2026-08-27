@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useMemo } from "react";
 
 const alphabet = [
@@ -54,21 +54,40 @@ const findAlphabetIndex = (char) => {
     return fallback ? fallback.index : 26;
 };
 
+// x2 must sit in [0,1]: framer hands opacity tweens to WAAPI, and WAAPI
+// (unlike the JS interpolator this curve was written for) rejects a bezier
+// with an out-of-range x — which threw mid-swap and broke the menu text.
+const SPIN_EASE = [0.6, 0.05, 0, 0.9];
+
+// One column of the word: a 1ch window the alphabet track scrolls behind.
+// The window itself is animated too — a column that has no letter in the new
+// word closes to zero width on the same clock the others spin on, so the word
+// (and whatever button wears it) changes width as one continuous gesture
+// instead of snapping when the letter count changes.
 const AlphabetChar = ({ char, duration = 0.5 }) => {
     const index = findAlphabetIndex(char);
     const translateY = `${-(index * 100)}%`;
+    const size = { duration, ease: SPIN_EASE };
 
     return (
         <motion.span
-            className="scrollToText__char__track"
-            animate={{ y: translateY }}
-            transition={{ duration, ease: [0.6, 0.05, -0.01, 0.9] }}
+            className="scrollToText__char"
+            initial={{ width: "0ch", marginLeft: "0rem", marginRight: "0rem", opacity: 0 }}
+            animate={{ width: "1ch", marginLeft: "0.15rem", marginRight: "0.15rem", opacity: 1 }}
+            exit={{ width: "0ch", marginLeft: "0rem", marginRight: "0rem", opacity: 0 }}
+            transition={size}
         >
-            {alphabet.map((item) => (
-                <span key={`${item.letter}-${item.index}`} className="scrollToText__char__letter">
-                    {item.letter}
-                </span>
-            ))}
+            <motion.span
+                className="scrollToText__char__track"
+                animate={{ y: translateY }}
+                transition={{ duration, ease: SPIN_EASE }}
+            >
+                {alphabet.map((item) => (
+                    <span key={`${item.letter}-${item.index}`} className="scrollToText__char__letter">
+                        {item.letter}
+                    </span>
+                ))}
+            </motion.span>
         </motion.span>
     );
 };
@@ -78,13 +97,19 @@ export const ScrollToText = ({ text = "", duration = 0.6 }) => {
 
     return (
         <p className="scrollToText">
-            {chars.map((char, index) => (
-                <AlphabetChar
-                    key={`${char}-${index}`}
-                    char={char}
-                    duration={duration}
-                />
-            ))}
+            {/* Keyed by POSITION, not by letter: when the word changes, each
+                column that survives spins its track to the new letter instead
+                of being torn down, and only the head-count difference enters
+                or leaves — through the width animation above. */}
+            <AnimatePresence initial={false}>
+                {chars.map((char, index) => (
+                    <AlphabetChar
+                        key={index}
+                        char={char}
+                        duration={duration}
+                    />
+                ))}
+            </AnimatePresence>
         </p>
     );
 };

@@ -1,0 +1,235 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* Same row grammar as the document list: a hairline between rows, no cards, no
+   zebra, everything on the page gutter. A user is a row like any other. */
+
+.legend {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+
+  svg {
+    flex: none;
+    color: var(--st-ink-4);
+  }
+}
+
+.rows {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  min-height: var(--st-row);
+  padding: 10px var(--st-gutter);
+  border-bottom: 1px solid var(--st-line-soft);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.03);
+  }
+}
+
+/* A deactivated account is dimmed rather than hidden or struck through: it is
+   still a real account someone can restore, and it has to stay readable. */
+.rowOff {
+  .avatar,
+  .identity {
+    opacity: 0.5;
+  }
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  font-size: var(--st-text-tiny);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.04em;
+  color: var(--st-ink-2);
+  background: var(--st-raised);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+.identity {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.name {
+  @include t.truncate;
+
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+/* Marking your own row matters here more than anywhere else in the Studio —
+   every control on it can lock you out of the screen you are standing on. */
+.you {
+  padding: 1px 5px;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-accent);
+  background: var(--st-accent-soft);
+  border-radius: 2px;
+}
+
+.email {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.state {
+  flex: none;
+  width: 150px;
+}
+
+.role {
+  flex: none;
+  width: 140px;
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  gap: var(--st-s1);
+}
+
+.lockNote {
+  display: flex;
+  flex: none;
+  gap: var(--st-s1);
+  align-items: center;
+  width: 110px;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-ink-4);
+
+  svg {
+    flex: none;
+  }
+}
+
+/* ------------------------------------------------------------- dialogs -- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s5);
+}
+
+.input {
+  @include t.control;
+}
+
+.failure {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-danger);
+  background: var(--st-danger-soft);
+  border: 1px solid var(--st-danger-line);
+  border-radius: var(--st-radius);
+
+  svg {
+    flex: none;
+    margin-top: 1px;
+  }
+}
+
+.issuedIntro {
+  margin: 0 0 var(--st-s4);
+  font-size: var(--st-text-body);
+  line-height: 1.6;
+  color: var(--st-ink-2);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
+  }
+}
+
+.secretRow {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  margin-bottom: var(--st-s4);
+}
+
+/* The one place in the Studio that shows a credential. Monospaced and
+   selectable, because the fallback when the clipboard is refused is a person
+   reading it or dragging over it. */
+.secret {
+  flex: 1;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+  white-space: nowrap;
+  user-select: all;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-accent-line);
+  border-radius: var(--st-radius);
+}
+
+.issuedWarning {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.55;
+  color: var(--st-ink-3);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--st-accent);
+  }
+}
+
+/* Narrow windows drop the columns that are context rather than content, exactly
+   as the document list does. */
+@media (max-width: 900px) {
+  .row {
+    padding: 10px var(--st-s5);
+  }
+
+  .state,
+  .lockNote,
+  .legend {
+    display: none;
+  }
+
+  .role {
+    width: 118px;
+  }
+}

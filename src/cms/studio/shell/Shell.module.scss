@@ -1,0 +1,20 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+.shell {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+}
+
+/* `position: relative` so a view can dock something over its own body — the
+   moderation queue's bulk bar — without escaping to the viewport and covering
+   the navigation. */
+.workspace {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}

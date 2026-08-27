@@ -1,0 +1,215 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Stats + CTA section (first panel of the horizontal scroll). Shares column
+// boundaries with .WhoWeAre (3.5 | 23.4 | 49.8 | 64.5 | 93.5 vw), so its top
+// line catches the connector running down from that section:
+//   c1 pad | c2 stats-left | c3 stats-right | c4/c5 cta | c6 pad
+.FirstTime {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 3.5vw 19.9vw 26.4vw 14.7vw 29vw 1fr;
+    // 10vh of head room, then two fixed 36vh stat rows: that puts the bottom
+    // line at exactly 82vh — the height the HScroll baseline continues at.
+    grid-template-rows: 10vh 1px 36vh 36vh 1fr 3vh;
+    // r1 pad | r2 top line | r3 stats A | r4 stats B | r5 scroll | r6 pad
+
+    .FirstTime__line {
+        // Relative only so the sweep inside it has something to sit in — these
+        // are grid items and their placement is unaffected.
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.25);
+        pointer-events: none;
+    }
+
+    // vertical: carries WhoWeAre's connector across the head-room row. That
+    // connector runs to its own section's bottom edge, which is this section's
+    // top edge, so this one starts at 0 and runs to the top line at 10vh —
+    // same column boundary (49.8vw), so the two read as one unbroken line.
+    .FirstTime__line--connectorIn {
+        grid-column: 4;
+        grid-row: 1;
+        justify-self: start;
+        width: 1px;
+        height: 100%;
+        transform-origin: center top; // carries on downwards from WhoWeAre
+
+        @include lineSweep(y, 0s);
+    }
+
+    // horizontal: below the head-room row — the WhoWeAre connector lands on it
+    // at 49.8vw, which is 64% along this 23.4vw→64.5vw span. The draw-in
+    // scales from exactly that point, so the line grows out of the junction.
+    .FirstTime__line--top {
+        grid-column: 3 / 5;
+        grid-row: 2;
+        width: 100%;
+        height: 1px;
+        transform-origin: 64% center;
+
+        @include lineSweep(x, -0.8s);
+    }
+
+    // vertical: between the two stat columns, from the top line to the bottom line
+    .FirstTime__line--statsDivider {
+        grid-column: 3;
+        grid-row: 2 / 5;
+        justify-self: start;
+        width: 1px;
+        height: 100%;
+        transform-origin: center top; // hangs down from the top line
+
+        @include lineSweep(y, -1.6s);
+    }
+
+    // horizontal: between the two stat rows
+    .FirstTime__line--statsRow {
+        grid-column: 2 / 4;
+        grid-row: 3;
+        align-self: end;
+        width: 100%;
+        height: 1px;
+        // spans 3.5vw→49.8vw, so the divider at 23.4vw crosses it at 43%
+        transform-origin: 43% center;
+
+        @include lineSweep(x, -2.4s);
+    }
+
+    // horizontal: closes the stats block, runs under the CTA heading and all
+    // the way to the right edge — the HScroll baseline picks it up in panel 2
+    .FirstTime__line--bottom {
+        grid-column: 3 / 7;
+        grid-row: 4;
+        align-self: end;
+        width: 100%;
+        height: 1px;
+        // The long connector: starts at the divider's foot and runs left→right
+        // out of the panel — the HScroll baseline continues it through panels
+        // 2 and 3, so this one must draw in that direction.
+        transform-origin: left center;
+
+        @include lineSweep(x, -3.2s);
+    }
+
+    .FirstTime__stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0.25rem;
+        padding: 2.5vh 2vw;
+        color: var(--wText);
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+
+        .FirstTime__stat__value {
+            font-size: clamp(2.2rem, 3.4vw, 4rem);
+            line-height: 1;
+            color: var(--hColor);
+        }
+
+        .FirstTime__stat__label {
+            font-size: clamp(0.9rem, 1.1vw, 1.15rem);
+            letter-spacing: 0.03em;
+        }
+    }
+
+    .FirstTime__stat--0 { grid-column: 2; grid-row: 3; }
+    .FirstTime__stat--1 { grid-column: 3; grid-row: 3; }
+    .FirstTime__stat--2 { grid-column: 2; grid-row: 4; }
+    .FirstTime__stat--3 { grid-column: 3; grid-row: 4; }
+
+    .FirstTime__cta {
+        grid-column: 4 / 6;
+        grid-row: 3 / 5;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        justify-content: center;
+        gap: 1.25rem;
+        text-align: right;
+
+        p {
+            margin: 0;
+            color: var(--wText);
+            font-family: "Poppins", sans-serif;
+            font-weight: 200;
+            font-size: clamp(1rem, 1.3vw, 1.35rem);
+            line-height: 1.4;
+            max-width: 28rem;
+        }
+
+        h2 {
+            margin: 0;
+            color: var(--wText);
+            font-family: "Switzer-Light";
+            font-weight: 300;
+            text-transform: uppercase;
+            font-size: clamp(2.2rem, 3.8vw, 4.4rem);
+            line-height: 1.1;
+            letter-spacing: 0.03em;
+        }
+    }
+
+    .FirstTime__scroll {
+        grid-column: 1 / -1;
+        grid-row: 5;
+        justify-self: center;
+        align-self: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--wText);
+        font-family: "Switzer-Light";
+        font-size: 0.9rem;
+
+        .FirstTime__scroll__arrow {
+            font-size: 1.3rem;
+        }
+    }
+
+    @include below-px(820) {
+        height: auto;
+        grid-template-columns: 6vw 44vw 44vw 6vw;
+        grid-template-rows: 4vh auto auto 4vh auto 3vh;
+        // r1 pad | r2 stats A | r3 stats B | r4 pad | r5 cta | r6 pad
+
+        .FirstTime__line--top,
+        .FirstTime__line--bottom {
+            display: none;
+        }
+
+        .FirstTime__line--statsDivider {
+            grid-column: 3;
+            grid-row: 2 / 4;
+        }
+
+        .FirstTime__line--statsRow {
+            grid-column: 2 / 4;
+            grid-row: 2;
+        }
+
+        .FirstTime__stat {
+            padding: 3vh 2vw;
+        }
+
+        .FirstTime__stat--0 { grid-column: 2; grid-row: 2; }
+        .FirstTime__stat--1 { grid-column: 3; grid-row: 2; }
+        .FirstTime__stat--2 { grid-column: 2; grid-row: 3; }
+        .FirstTime__stat--3 { grid-column: 3; grid-row: 3; }
+
+        .FirstTime__cta {
+            grid-column: 2 / 4;
+            grid-row: 5;
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .FirstTime__scroll {
+            display: none;
+        }
+    }
+}

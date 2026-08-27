@@ -1,0 +1,460 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. Rows read downwards, well apart and set in from the page. The
+// two cells of a row share an edge; nothing else touches anything.
+
+// ── when the wall becomes one column ────────────────────────────────────
+//
+// Not a width alone. A 932×430 phone held sideways is wider than the `sm` stop
+// and is still a phone: the two-column composition puts a whole heading beside
+// a whole block inside 430px of height, which leaves the heading under the
+// navbar and the block with room for its words and none for its picture.
+//
+// The second clause is bounded on width as well as height so that a desktop
+// window dragged short — which is a wide screen with a mouse, not a phone —
+// keeps the composition it was drawn for.
+//
+// STACKED in index.jsx is the same query in JavaScript. The two decide the same
+// thing about the same page and must be changed together.
+@mixin stacked {
+    @media (max-width: 899.98px),
+        (max-width: 1100px) and (max-height: 520px) and (orientation: landscape) {
+        @content;
+    }
+}
+
+.OfferWall {
+    // The section's own vertical rhythm, named once because three things need
+    // the same numbers: the padding, the rail that has to end exactly where the
+    // padding does, and the gap a link is drawn across. Written in vh they drift
+    // apart the first time one of them is edited, and on a short viewport they
+    // all collapse together — hence clamp rather than a bare vh.
+    --wall-top: clamp(20px, 4vh, 60px);
+    --wall-foot: clamp(90px, 20vh, 260px);
+    --wall-gap: clamp(70px, 14vh, 190px);
+
+    position: relative;
+    z-index: 3;
+    padding: var(--wall-top) 6vw var(--wall-foot) 12vw;
+    color: var(--wText);
+}
+
+// ── the layer everything stands in front of ─────────────────────────────
+//
+// Hairlines at nothing in particular. On their own they would be wallpaper;
+// what makes them read as distance is that they drift the other way to the
+// page while four other things drift with it at four other rates.
+.OfferWall__depth {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: -8vh;
+    bottom: -8vh;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.OfferWall__depth__rule {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.035);
+
+    // Two weights, so the field itself has a front and a back.
+    &.is-near {
+        background-color: rgba(255, 255, 255, 0.07);
+    }
+
+    // Slower still out here, and fainter again — this layer is the farthest
+    // thing on the page and should be the last thing anyone notices moving.
+    @include lineSweep(y, 0s, 13s, 13, 0.3);
+
+    // Never in step: six rules blinking together is a page with a pulse.
+    &:nth-child(2)::after { animation-delay: -2.1s; }
+    &:nth-child(3)::after { animation-delay: -4.4s; }
+    &:nth-child(4)::after { animation-delay: -6.5s; }
+    &:nth-child(5)::after { animation-delay: -8.9s; }
+    &:nth-child(6)::after { animation-delay: -11s; }
+}
+
+.OfferWall__depth__tick {
+    position: absolute;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+// ── the rail ────────────────────────────────────────────────────────────
+//
+// The journey, kept in the margin. It is the only thing in the section that
+// follows the scroll, and out here it cannot cross a word.
+//
+// 6vw is the page's own left edge — the line OfferOpen sets its type against
+// directly above. The rail continues it, which is what stops the wall's deeper
+// indent from reading as the page shifting sideways between two sections.
+.OfferWall__rail {
+    position: absolute;
+    left: 6vw;
+    top: var(--wall-top);
+    bottom: var(--wall-foot);
+    width: 1px;
+}
+
+// The light that runs down the rules on the homepage — see lineSweep in
+// system/_shortcuts.scss, which FirstTime and WhoWeAre are drawn with. Half as
+// visible here, and nothing else changed: the same gradient head and the same
+// glow, turned down. This page is the one with the reading on it, and a rule
+// should read as a rule that happens to catch the light rather than as a rule
+// with a light running down it.
+.OfferWall__rail__line {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(255, 255, 255, 0.12);
+
+    @include lineSweep(y, 0s, 7.5s, 13, 0.5);
+}
+
+.OfferWall__rail__walked {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 1px;
+    background-color: var(--hColor);
+    opacity: 0.55;
+}
+
+.OfferWall__rail__tick {
+    position: absolute;
+    left: -3px;
+    width: 7px;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+// ── a row ───────────────────────────────────────────────────────────────
+.OfferWall__row {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    // Air. A run of bands with nothing between them is a wall, and a wall is
+    // what this used to be. The same measure the link is drawn across.
+    margin-bottom: var(--wall-gap);
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.OfferWall__cell {
+    position: relative;
+    flex: none;
+    will-change: transform;
+}
+
+// ── a heading ───────────────────────────────────────────────────────────
+.OfferWall__head {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 3vw 0 0;
+
+    &.is-end {
+        align-items: flex-end;
+        text-align: right;
+        padding: 0 3vw 0 0;
+
+        .OfferWall__head__rule {
+            transform-origin: right center;
+        }
+    }
+}
+
+.OfferWall__n {
+    margin: 0 0 1.2rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+    color: var(--hColor);
+}
+
+.OfferWall__title {
+    margin: 0;
+    max-width: 16ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.5rem, 2.3vw, 3rem);
+    line-height: 1.08;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.OfferWall__head__rule {
+    position: relative;
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: clamp(14px, 3vh, 40px) 0 clamp(12px, 2.4vh, 32px);
+    transform-origin: left center;
+    background-color: rgba(255, 255, 255, 0.22);
+
+    @include lineSweep(x, -3.2s, 8s, 13, 0.5);
+}
+
+.OfferWall__lead {
+    margin: 0;
+    max-width: 32ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.95rem, 1.15vw, 1.35rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+// ── a block ─────────────────────────────────────────────────────────────
+.OfferWall__block {
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background-color: rgba(2, 14, 21, 0.5);
+}
+
+.OfferWall__marks {
+    position: absolute;
+    inset: 12px;
+    z-index: 3;
+    pointer-events: none;
+
+    i {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border: 0 solid rgba(255, 255, 255, 0.4);
+    }
+
+    .OfferWall__marks__tl { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+    .OfferWall__marks__tr { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+    .OfferWall__marks__bl { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+    .OfferWall__marks__br { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+}
+
+// Held well back. It is scaled past its own box in the component so the drift
+// has somewhere to go — see the note there.
+.OfferWall__block__photo {
+    position: absolute;
+    inset: 0;
+    opacity: 0.34;
+    filter: saturate(0.5);
+    will-change: transform;
+}
+
+.OfferWall__block__scrim {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(2, 12, 18, 0.92) 0%,
+        rgba(2, 12, 18, 0.6) 34%,
+        rgba(2, 12, 18, 0.06) 68%
+    );
+    pointer-events: none;
+}
+
+// Room around the words. This is most of the breathing: the cell is the same
+// size it was and the sentence sits in the middle of it rather than against
+// its edge.
+.OfferWall__block__copy {
+    position: absolute;
+    inset: 0;
+    will-change: transform;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: clamp(8px, 1.8vh, 22px);
+    padding: clamp(22px, 6vh, 74px) clamp(20px, 4vw, 78px);
+
+    .OfferWall__block.is-end & {
+        align-items: flex-end;
+        text-align: right;
+    }
+}
+
+.OfferWall__block__n {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.28em;
+    color: var(--hColor);
+}
+
+.OfferWall__block__title {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.6rem, 2.5vw, 3.3rem);
+    line-height: 1.06;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.75);
+}
+
+.OfferWall__block__body {
+    margin: 0;
+    max-width: 32ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(1rem, 1.25vw, 1.5rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.84);
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.85);
+}
+
+// ── what ties the rows together ─────────────────────────────────────────
+//
+// A hairline per gap, leaving the block above and arriving at the one below.
+// It lives in the space between rows — the one place on this page a line can go
+// without crossing something somebody is reading — and it is why the rows can
+// stand as far apart as they do without coming loose from each other.
+//
+// Exactly the gap, taken from the same custom property the gap is set with: a
+// line that is drawn 14vh across a gap that is 12vh arrives inside the block
+// below it.
+.OfferWall__link {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    height: var(--wall-gap);
+    overflow: visible;
+    pointer-events: none;
+    will-change: transform;
+}
+
+.OfferWall__link__line {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.26);
+    stroke-width: 1;
+}
+
+// The same line again, a little off it and fainter — one line seen from
+// slightly the wrong place, which is the cheapest depth there is.
+.OfferWall__link__ghost {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.09);
+    stroke-width: 1;
+}
+
+// The same light again, by hand: these are paths and the mixin needs a box.
+// White rather than the accent, and at the halved weight the rest of the page
+// now uses — the accent version was the one thing here that asked to be looked
+// at, and it was a graphic in a margin.
+.OfferWall__link__walk {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.19);
+    stroke-width: 1;
+    stroke-dasharray: 9 91;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.15));
+    animation: OfferWall__walk 7.5s linear infinite;
+}
+
+// Every other gap starts halfway through, so the seven of them are never in
+// step and the page never blinks all at once.
+.OfferWall__row:nth-child(even) .OfferWall__link__walk {
+    animation-delay: -3.7s;
+}
+
+.OfferWall__row:nth-child(3n) .OfferWall__link__walk {
+    animation-duration: 9.5s;
+}
+
+@keyframes OfferWall__walk {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+}
+
+.OfferWall__link__end {
+    fill: var(--hColor);
+    opacity: 0.4;
+}
+
+// Nothing walks anywhere for a reader who has asked for that. The five drifts
+// are stilled in the component, where they are made — see index.jsx.
+@media (prefers-reduced-motion: reduce) {
+    .OfferWall__link__walk,
+    .OfferWall__rail__line::after,
+    .OfferWall__depth__rule::after,
+    .OfferWall__head__rule::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+// ── one column ──────────────────────────────────────────────────────────
+//
+// A phone, either way up, and a tablet held upright. The wall is not a wall
+// here: it is a heading, then the blocks that answer it, then the next heading,
+// one at a time and full width.
+@include stacked {
+    .OfferWall {
+        --wall-top: clamp(12px, 2vh, 28px);
+        --wall-foot: clamp(64px, 14vh, 150px);
+        --wall-gap: clamp(48px, 9vh, 110px);
+    }
+
+    // A narrow column of one thing at a time; a field of vertical rules behind
+    // it is six lines with nothing to be behind.
+    .OfferWall__depth {
+        display: none;
+    }
+
+    // And the gap a line would cross is a different shape once the rows stack:
+    // the line would draw across a phone's whole width to say something the
+    // stacking has already said.
+    .OfferWall__link {
+        display: none;
+    }
+
+    .OfferWall__row {
+        flex-direction: column;
+        // Beats the height the component measures its rows in, which is a
+        // fraction of a screen and means nothing once a row is a stack of
+        // full-width things that size themselves.
+        height: auto !important;
+    }
+
+    .OfferWall__cell {
+        width: 100% !important;
+    }
+
+    .OfferWall__head {
+        padding: 0 0 clamp(28px, 6vh, 72px);
+
+        &.is-end {
+            align-items: flex-start;
+            text-align: left;
+            padding: 0 0 clamp(28px, 6vh, 72px);
+
+            .OfferWall__head__rule {
+                transform-origin: left center;
+            }
+        }
+    }
+
+    // Floor first, so a phone in landscape still gets a block it can read;
+    // cap second, so a tablet held upright does not get 660px of picture with
+    // two lines of type at the bottom of it.
+    .OfferWall__block {
+        min-height: clamp(240px, 52vh, 560px);
+        margin-bottom: clamp(24px, 5vh, 56px);
+
+        &:last-child {
+            margin-bottom: 0;
+        }
+    }
+
+    .OfferWall__block__copy {
+        padding: clamp(20px, 5vh, 54px) clamp(20px, 7vw, 60px);
+
+        .OfferWall__block.is-end & {
+            align-items: flex-start;
+            text-align: left;
+        }
+    }
+}

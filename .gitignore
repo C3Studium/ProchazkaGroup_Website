@@ -36,6 +36,12 @@ yarn-error.log*
 local.env
 
 
+# CMS file store — the persistence adapter used while there is no
+# SUPABASE_SERVICE_ROLE_KEY (src/cms/server/fileStore). It is a developer's own
+# content, rebuilt from the fixtures whenever it is missing, and it holds session
+# rows. Delete the directory to reset it.
+.cms-dev/
+
 # vercel
 .vercel
 

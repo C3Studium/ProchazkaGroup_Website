@@ -1,0 +1,285 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* No cards. The two regions are told apart by a hairline that runs the full
+   height of the canvas and by the space around their contents — which is also
+   what lets both of them reach the bottom of the viewport instead of stopping
+   at the fold with an empty half-screen underneath. */
+
+.body {
+  overflow: hidden;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  height: 100%;
+}
+
+.primary {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--st-s8) var(--st-gutter) 0;
+}
+
+.side {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-width: 0;
+  min-height: 0;
+  border-left: 1px solid var(--st-line);
+}
+
+/* `min-width: 0` is load-bearing, not defensive. A grid item's automatic minimum
+   is its content, so without it a long document title in the list below pushes
+   this pane wider than its own column and the state and timestamp fall off the
+   right edge of the window. */
+.recentPane,
+.actionsPane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--st-s8) var(--st-gutter) 0;
+}
+
+.actionsPane {
+  padding-bottom: var(--st-s6);
+  border-top: 1px solid var(--st-line);
+}
+
+/* --------------------------------------------------------------- section -- */
+
+.head {
+  display: flex;
+  flex: none;
+  gap: var(--st-s4);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 28px;
+  padding-bottom: var(--st-s3);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.eyebrow {
+  @include t.eyebrow;
+
+  margin: 0;
+  color: var(--st-ink-2);
+}
+
+.inlineLoading {
+  display: grid;
+  place-items: center;
+  padding: var(--st-s10);
+  color: var(--st-ink-4);
+}
+
+/* ----------------------------------------------------------------- count -- */
+
+/* The one number the client came for. It is set in ink rather than in the accent
+   on purpose: the accent already carries this count in the navigation, and a
+   screen where the largest element is also the most saturated has nowhere left
+   to go when something is actually urgent. */
+.count {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: baseline;
+  margin: var(--st-s6) 0 0;
+
+  /* Proportional figures, not tabular. `tabular-nums` gives every digit the
+     width of a zero, which makes a standalone number at 48px look gappy — it is
+     for columns that have to align vertically, and this one aligns with nothing. */
+  strong {
+    @include t.display;
+  }
+
+  span {
+    font-size: var(--st-text-lead);
+    font-weight: var(--st-w-book);
+    color: var(--st-ink-3);
+  }
+}
+
+.countNote {
+  margin: var(--st-s2) 0 var(--st-s6);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.peek {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  padding: 0 0 var(--st-s6);
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+  border-top: 1px solid var(--st-line);
+}
+
+.peekRow {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: baseline;
+  padding: 10px 0;
+  text-decoration: none;
+  border-bottom: 1px solid var(--st-line-soft);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.03);
+
+    .peekText {
+      color: var(--st-ink-2);
+    }
+  }
+}
+
+.peekName {
+  @include t.truncate;
+
+  flex: none;
+  width: 132px;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.peekText {
+  @include t.truncate;
+
+  flex: 1;
+  font-size: var(--st-text-body);
+  color: var(--st-ink-3);
+  transition: color var(--st-fast) var(--st-ease);
+}
+
+/* ---------------------------------------------------------------- recent -- */
+
+.recent {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  padding: 0 0 var(--st-s6);
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.recentRow {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  padding: 10px 0;
+  text-decoration: none;
+  border-bottom: 1px solid var(--st-line-soft);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.03);
+  }
+}
+
+.recentText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.recentTitle {
+  @include t.truncate;
+
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+}
+
+.recentType {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.recentTime {
+  flex: none;
+  width: 96px;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+  text-align: right;
+}
+
+/* --------------------------------------------------------------- actions -- */
+
+.links {
+  display: flex;
+  flex-direction: column;
+  padding: var(--st-s2) 0 0;
+  margin: 0;
+  list-style: none;
+}
+
+.link {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  height: 32px;
+  font-size: var(--st-text-body);
+  color: var(--st-ink-2);
+  text-decoration: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  svg {
+    flex: none;
+    color: var(--st-ink-4);
+    transition: color var(--st-fast) var(--st-ease);
+  }
+
+  &:hover {
+    color: var(--st-ink);
+
+    svg {
+      color: var(--st-ink);
+    }
+  }
+}
+
+/* Narrow: one column, and the body scrolls as a whole rather than as two
+   independent panes — two scroll areas side by side stop paying for themselves
+   once neither is wide enough to hold a line of text. */
+@media (max-width: 1080px) {
+  .body {
+    overflow-y: auto;
+  }
+
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+  }
+
+  .side {
+    border-top: 1px solid var(--st-line);
+    border-left: none;
+  }
+
+  .primary,
+  .recentPane,
+  .actionsPane {
+    padding-right: var(--st-s5);
+    padding-left: var(--st-s5);
+  }
+
+  .peek,
+  .recent {
+    overflow: visible;
+  }
+
+  .recentType,
+  .recentTime {
+    display: none;
+  }
+}

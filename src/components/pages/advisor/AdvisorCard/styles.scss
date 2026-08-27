@@ -1,0 +1,483 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// A phone, whatever it is opened on.
+//
+// The card is capped and centred and the shader behind it is the rest of the
+// screen — no ground of its own. This is the page reached from a business card
+// or a QR code, so it is built at that width on purpose rather than reflowing
+// into a desktop layout that nobody arrives at.
+//
+// Every vertical rhythm below is a clamp rather than plain `vh`, because the
+// card was written almost entirely in `vh` and a `vh` on a phone held sideways
+// is a third of what it is on a laptop. Measured before this, at 844×390: the
+// form's fields sat 10px apart, its plate had 15px of padding, and the name
+// input was 30px tall — a third of what a thumb needs. The clamp keeps the
+// proportion where there is room and puts a floor under it where there is not.
+//
+// The one place the composition itself changes is the bottom of this file: a
+// phone held sideways cannot carry a 550px portrait above a form in 390px of
+// screen, and there the card opens into two columns.
+.AdvCard {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: clamp(4.5rem, 16vh, 11rem) 5vw clamp(3.5rem, 14vh, 9rem);
+    color: var(--wText);
+}
+
+.AdvCard__card {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    display: flex;
+    flex-direction: column;
+}
+
+// The person and the ask as two groups rather than five siblings. It does
+// nothing at all until the card goes two-column in landscape: `display:
+// contents` hands its children straight back to the card's own column, so the
+// portrait composition is laid out exactly as it was before this element
+// existed.
+.AdvCard__head {
+    display: contents;
+}
+
+// ---- the person ------------------------------------------------------------
+.AdvCard__photo {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    overflow: hidden;
+    outline: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(2, 14, 21, 0.5);
+
+    .AdvCard__photo__empty {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.05),
+            rgba(255, 255, 255, 0.01)
+        );
+    }
+}
+
+.AdvCard__who {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: clamp(1rem, 3vh, 1.9rem);
+}
+
+.AdvCard__name {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.5rem, 8vw, 2.1rem);
+    line-height: 1.05;
+
+    .AdvCard__city {
+        display: block;
+        margin-top: clamp(0.4rem, 1.2vh, 0.75rem);
+        font-size: 0.34em;
+        letter-spacing: 0.24em;
+        color: rgba(255, 255, 255, 0.45);
+    }
+}
+
+.AdvCard__stats {
+    display: flex;
+    gap: 1rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.82rem;
+    color: rgba(255, 255, 255, 0.6);
+
+    span { display: inline-flex; align-items: center; gap: 0.4rem; }
+}
+
+.AdvCard__motto {
+    margin: clamp(0.9rem, 2.6vh, 1.7rem) 0 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.AdvCard__rule {
+    position: relative;
+    display: block;
+    height: 1px;
+    margin: clamp(1.2rem, 3.4vh, 2.2rem) 0;
+    background-color: rgba(255, 255, 255, 0.2);
+
+    @include lineSweep(x, -0.9s);
+
+    // Calm rather than off: the rule keeps its light, it stops carrying it
+    // across the card.
+    @include reduced-motion {
+        &::after { animation: none; opacity: 0.5; }
+    }
+}
+
+// ---- and the ask -----------------------------------------------------------
+.AdvCard__form {
+    position: relative;
+    margin-top: clamp(1.6rem, 5vh, 3.2rem);
+    padding: clamp(1.5rem, 4vh, 2.6rem) clamp(1.4rem, 6vw, 2.2rem);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background-color: rgba(2, 14, 21, 0.5);
+
+    h2 {
+        margin: 0 0 clamp(1rem, 3vh, 1.9rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        text-transform: uppercase;
+        font-size: 1.05rem;
+        letter-spacing: 0.06em;
+    }
+
+    // Pulled back up under the heading it belongs to. The offset has to track
+    // the heading's own margin, so it is the same clamp negated — a fixed -2vh
+    // over a floored margin closed the gap entirely on a short screen.
+    .AdvCard__form__for {
+        margin: clamp(-1.25rem, -2vh, -0.66rem) 0 clamp(1.1rem, 3.4vh, 2.1rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.5);
+
+        em {
+            font-style: normal;
+            color: var(--wText);
+            letter-spacing: 0.04em;
+        }
+    }
+
+    label { display: block; margin-bottom: clamp(0.9rem, 2.6vh, 1.6rem); }
+
+    .label {
+        display: block;
+        margin-bottom: clamp(0.3rem, 0.9vh, 0.55rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.64rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    // The browser's own chrome removed: a rounded, shaded input is the one thing
+    // on this card that would not be drawn in hairlines. `border-radius: 0`
+    // because iOS rounds a field's corners on its own and `appearance: none`
+    // does not always take that with it.
+    //
+    // The 44px floor is the field as a target rather than as a line of type:
+    // the padding is a share of the height and on a landscape phone that share
+    // was 4px.
+    input,
+    textarea {
+        appearance: none;
+        display: block;
+        width: 100%;
+        min-height: 44px;
+        padding: clamp(0.5rem, 1.2vh, 0.85rem) 0;
+        border: 0;
+        border-radius: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.26);
+        background: none;
+        color: var(--wText);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.95rem;
+        outline: none;
+        transition: border-color 0.35s ease;
+
+        &:focus { border-bottom-color: rgba(255, 255, 255, 0.8); }
+    }
+
+    // The one field somebody will actually spend time in, so it is a box rather
+    // than a rule: a long answer on a single underline reads as an afterthought.
+    textarea {
+        min-height: 6.5rem;
+        padding: clamp(0.55rem, 1.4vh, 0.95rem) 1rem;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        line-height: 1.55;
+        resize: none;
+
+        &:focus { border-color: rgba(255, 255, 255, 0.8); }
+    }
+
+    .telRow {
+        display: flex;
+        align-items: baseline;
+        gap: 0.6rem;
+
+        .prefix {
+            font-family: "Switzer-Light", sans-serif;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.55);
+            white-space: nowrap;
+        }
+    }
+
+    .timeRow {
+        margin-bottom: clamp(0.9rem, 2.6vh, 1.6rem);
+
+        .times {
+            display: flex;
+            gap: 1.2rem;
+
+            label {
+                flex: 1;
+                margin: 0;
+                display: flex;
+                align-items: baseline;
+                gap: 0.5rem;
+                font-family: "Switzer-Light", sans-serif;
+                font-size: 0.78rem;
+                color: rgba(255, 255, 255, 0.55);
+            }
+        }
+    }
+
+    .gdpr {
+        margin: 0 0 clamp(1rem, 3vh, 1.9rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.68rem;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.4);
+    }
+}
+
+.AdvCard__req { font-style: normal; color: rgba(255, 255, 255, 0.85); }
+
+.AdvCard__submit { width: 100%; justify-content: center; }
+
+// On a wide screen it is still a phone; the room around it is the shader.
+@include from-px(901) {
+    .AdvCard { padding: clamp(4.5rem, 18vh, 12rem) 6vw clamp(3.5rem, 16vh, 10rem); }
+    .AdvCard__name { font-size: 2.1rem; }
+}
+
+// Present for scripts, invisible and unreachable for people.
+.AdvCard__trap {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.AdvCard__note {
+    margin: clamp(0.8rem, 2.4vh, 1.5rem) 0 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.66rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.38);
+}
+
+// What stands where the form was, once it has been sent. Same plate, so the
+// card does not appear to change shape underneath the answer — including the
+// padding, which was `6vw` with nothing capping it: on a 440px card at 1920 it
+// left 115px of margin on each side of a 210px column of text.
+.AdvCard__thanks {
+    position: relative;
+    margin-top: clamp(1.6rem, 5vh, 3.2rem);
+    padding: clamp(1.8rem, 5vh, 3.2rem) clamp(1.4rem, 6vw, 2.2rem);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background-color: rgba(2, 14, 21, 0.5);
+
+    h2 {
+        margin: 0 0 clamp(0.7rem, 2vh, 1.3rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        text-transform: uppercase;
+        font-size: 1.15rem;
+        letter-spacing: 0.06em;
+    }
+
+    p {
+        margin: 0 0 clamp(1rem, 3vh, 1.9rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.92rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.7);
+    }
+}
+
+// The second step, and only ever the second: the review is already ours and
+// safe before Google is mentioned at all.
+//
+// It is offered to everybody who writes one. Showing it only to the people who
+// wrote something kind is review gating, which Google prohibits — and the code
+// has no idea what the sentiment was anyway, which is how it should stay.
+.AdvCard__google {
+    margin-bottom: clamp(1.2rem, 3.4vh, 2.2rem);
+
+    .AdvCard__google__rule {
+        position: relative;
+        display: block;
+        height: 1px;
+        margin-bottom: clamp(1rem, 3vh, 1.9rem);
+        background-color: rgba(255, 255, 255, 0.18);
+
+        @include lineSweep(x, -1.4s);
+
+        @include reduced-motion {
+            &::after { animation: none; opacity: 0.5; }
+        }
+    }
+
+    .AdvCard__google__ask {
+        margin: 0 0 clamp(0.9rem, 2.6vh, 1.6rem);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.86rem;
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    // Stacked at every width, because there is no width at which they are not.
+    // The two labels are 190px and 200px inside a plate whose content column is
+    // 370px at its widest — on a row they wrapped anyway and came out ragged,
+    // one long line and one short one hanging under its left end. Full-width
+    // plates instead, the same shape as the send button that stood here a
+    // moment ago.
+    .AdvCard__google__row {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+
+        .cornerButton { justify-content: center; }
+    }
+}
+
+// ---- touch -----------------------------------------------------------------
+//
+// The card is one form and two plates, so there is not much here: the fields
+// have to be reachable and unable to zoom the page, the plates have to answer a
+// finger, and the hover states have to stop being applied by a tap and then
+// left applied.
+@include touch {
+    .AdvCard {
+        // Under 16px iOS zooms the page on focus and leaves it zoomed, which on
+        // a landscape phone means a card wider than the screen. 0.95rem is
+        // 15.2px, which is exactly on the wrong side of it.
+        .AdvCard__form input,
+        .AdvCard__form textarea {
+            font-size: max(16px, 0.95rem);
+        }
+
+        // The plate grows around the label rather than the label growing: the
+        // corner marks take the button's box, so this is also the frame getting
+        // the room it wants on a phone.
+        .cornerButton {
+            min-height: 44px;
+            padding-block: 0.75rem;
+        }
+
+        // Applied on tap and then left applied — the corners of the button a
+        // reader last pressed stay pulled out as though the finger were still
+        // on it. The gesture is not lost, it moves to the press.
+        .cornerButton:hover:not(:disabled) {
+            .corner { transform: none; }
+            .cornerButton__arrow { transform: none; }
+        }
+
+        .cornerButton:active:not(:disabled) {
+            .corner--tl { transform: translate(-3px, -3px); }
+            .corner--tr { transform: translate(3px, -3px); }
+            .corner--bl { transform: translate(-3px, 3px); }
+            .corner--br { transform: translate(3px, 3px); }
+            .cornerButton__arrow { transform: translate(2px, -2px); }
+        }
+
+        // "více" is 36×16 — a real link at a size no thumb can aim at. The
+        // padding is what a finger gets; the link's own two rules are its
+        // underline and they are pushed back down to where the text is, so
+        // nothing about the drawing changes.
+        .moreLink {
+            padding: 0.85rem 0.4rem;
+            // Taken straight back off the flow: the target grows, the line of
+            // type it sits in is the same length it was, and "více" does not
+            // get pushed onto a line of its own to make room for its own
+            // padding.
+            margin-inline: -0.4rem;
+
+            &::before,
+            &::after {
+                left: 0.4rem;
+                right: 0.4rem;
+                bottom: calc(0.85rem - 0.3em);
+            }
+        }
+    }
+}
+
+// ---- a phone held sideways -------------------------------------------------
+//
+// Width alone cannot see this one: 844×390 is wider than the desktop stop and
+// shorter than the same phone held upright. `phs-h` is the min-width 480 /
+// max-height 520 / landscape stop, so it catches every phone on its side and
+// nothing that is standing up.
+//
+// The single column is the whole problem here. The portrait alone is 550px in a
+// 390px viewport — a screen and a half before the name arrives and three before
+// the form does, on the one page whose entire purpose is the form. Side by
+// side, the person and the ask arrive together and the card fits in about one
+// screen and a quarter.
+//
+// Last in the file on purpose: it has to beat the min-width 901 block above,
+// which a 932px-wide phone in landscape also matches.
+@include phs-h {
+    // Side room is the composition's own: the thing that looks like a fixed
+    // decoration at the left edge in a dev browser is Next's dev-tools portal
+    // (<nextjs-portal>), which does not exist in a build — designing around it
+    // would cost the smallest screens real width for nothing.
+    .AdvCard {
+        padding: clamp(4.5rem, 16vh, 11rem) clamp(1.5rem, 4vw, 3rem) clamp(2.5rem, 10vh, 7rem);
+    }
+
+    .AdvCard__card {
+        max-width: min(94vw, 900px);
+        flex-direction: row;
+        align-items: flex-start;
+        gap: clamp(1.4rem, 3.5vw, 2.6rem);
+    }
+
+    .AdvCard__head {
+        display: flex;
+        flex-direction: column;
+        flex: 0 0 clamp(150px, 34%, 280px);
+    }
+
+    // Height-led rather than width-led: at the column's own width the 4/5 crop
+    // is 337px tall in a viewport that has 390.
+    .AdvCard__photo { max-height: 52vh; }
+
+    .AdvCard__name { font-size: clamp(1.25rem, 3.2vw, 1.9rem); }
+
+    // Two lines of name and two counts do not sit on one line in a 260px
+    // column; the counts drop under the city.
+    .AdvCard__who {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: clamp(0.5rem, 1.6vh, 0.9rem);
+    }
+
+    .AdvCard__motto {
+        font-size: 0.86rem;
+        line-height: 1.5;
+    }
+
+    // The rule closes the left-hand column rather than dividing the card, so it
+    // only needs the space above it.
+    .AdvCard__rule { margin: clamp(1rem, 3vh, 1.6rem) 0 0; }
+
+    .AdvCard__form,
+    .AdvCard__thanks {
+        flex: 1 1 auto;
+        min-width: 0;
+        margin-top: 0;
+    }
+}

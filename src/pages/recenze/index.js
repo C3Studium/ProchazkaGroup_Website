@@ -1,11 +1,51 @@
-// import Footer from "@/components/common/footer";
-// import Navbar from "@/components/common/navbar";
-// import Cursor from "@/components/common/navbar/cursor";
-// import ReviewsList from "@/components/modems/Rezence";
-// import ReviewsIntro from "@/components/pages/reviews/reviews";
 import Head from "next/head";
 
-export default function ReviewsPage() {
+import ReviewsHero from "@/components/pages/reviews/ReviewsHero";
+import ReviewWall from "@/components/pages/reviews/ReviewWall";
+import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, readEditable, readPublished } from "@/cms/server/site"
+
+// ISR on the same terms as the other pages: reviews are approved by an editor a
+// few times a month, and `revalidate` is what lets an approval reach the public
+// site without a deploy.
+const REVALIDATE_SECONDS = 600
+
+export async function getStaticProps(context) {
+    // This page read `getFooterContent()` with no arguments, which is the public
+    // reading whoever is asking: inside the Studio's editing frame the patička
+    // therefore carried no document id and none of its four annotated lines
+    // existed. Measured — 0 annotated elements on /recenze against 4 on /kontakt
+    // and /nabidky, which take the shared `footerStaticProps` and get the switch
+    // for free. `draft` is true exactly when the request carries the bypass
+    // cookie /api/studio/edit sets for a signed-in editor.
+    const draft = Boolean(context?.draftMode)
+    const read = draft ? readEditable : readPublished
+
+    // Cannot reject — every read inside answers with empty rather than throwing,
+    // so an unreachable database yields the page with an empty wall rather than
+    // a build failure. See @/cms/server/site.
+    const [reviews, consultants, footer, contact, assistant] = await Promise.all([
+        getApprovedReviews({ limit: 200 }),
+        getConsultants({ kind: 'consultant' }),
+        getFooterContent({ draft }),
+        getContactContent({ draft }),
+        getAssistant({ read }),
+    ])
+
+    return {
+        props: {
+            // An id per review, because the wall places each card by attribute
+            // and the store's rows do not carry one the client can see.
+            reviews: reviews.map((review, index) => ({ id: `r${index}`, ...review })),
+            consultants: consultants.map((c) => c.name).filter(Boolean),
+            footer,
+            contact,
+            assistant,
+        },
+        revalidate: REVALIDATE_SECONDS,
+    }
+}
+
+export default function ReviewsPage({ reviews = [], consultants = [] }) {
     return (
         <>
             <Head>
@@ -82,9 +122,8 @@ export default function ReviewsPage() {
                 </script>
             </Head>
             <main lang="cs" key="reviews-page">
-                {/* <ReviewsIntro /> */}
-                {/* <ReviewsList /> */}
-                {/* <Footer /> */}
+                <ReviewsHero count={reviews.length} />
+                <ReviewWall reviews={reviews} consultants={consultants} />
             </main>
         </>
     )

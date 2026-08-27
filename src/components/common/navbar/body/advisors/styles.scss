@@ -1,0 +1,308 @@
+@use "../../../../../styles/system/_shortcuts.scss" as *;
+
+// The roster inside the menu's panel. See index.jsx for what it is; this file is
+// where it is. The vocabulary is the panel's own — hairlines where two blocks
+// meet, portraits that unfold from the outer edge — at the size a wall of faces
+// needs.
+
+$rule: rgba(255, 255, 255, 0.25);
+$curtain: cubic-bezier(0.22, 1, 0.36, 1);
+
+// ── the wall ──
+//
+// Flex, not grid, and the reason is the whole behaviour: a grid track is shared
+// down a column, so widening one cell widens every cell under it. A flex line is
+// shared by the blocks IN it, so what one block takes it takes from its own row
+// and nowhere else. See index.jsx.
+.navAdv {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    min-height: 0;
+    // Room for the lead to grow into without leaning on the panel's frame.
+    padding: 14px;
+    gap: 0;
+
+    @include below-px(900) {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+}
+
+.navAdv__lead {
+    display: flex;
+    min-width: 0;
+
+    @include below-px(900) {
+        flex: none !important;
+        min-height: 46vh;
+    }
+}
+
+.navAdv__rest {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 100;
+    flex-basis: 0;
+    min-width: 0;
+    min-height: 0;
+
+    @include below-px(900) {
+        flex: none !important;
+    }
+}
+
+.navAdv__row {
+    display: flex;
+    min-height: 0;
+    min-width: 0;
+
+    @include below-px(900) {
+        flex: none !important;
+        min-height: 34vh;
+    }
+
+    // A phone cannot hold five faces abreast — at 390px that is a 74px sliver
+    // with a chin in it. The row wraps into pairs and the wall becomes the
+    // vertical list a phone reads anyway.
+    @include below(xs) {
+        flex-wrap: wrap;
+        min-height: 0;
+    }
+}
+
+.navAdv__cell {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    // A block is a share of its row, never a width of its own — that is what
+    // keeps the row full to both edges at every frame while one of them grows.
+    flex-basis: 0;
+    flex-shrink: 1;
+
+    @include below-px(900) {
+        flex: 1 1 0 !important;
+    }
+
+    // Two to a line, tall enough for a face and a name. The !important is the
+    // same story as the rules above it: index.jsx animates flex-grow inline,
+    // and on a phone the trading is off.
+    @include below(xs) {
+        flex: 1 1 42% !important;
+        min-height: 220px;
+    }
+
+    // Where two blocks meet. They resize rather than move, so these stay
+    // adjacent — there is never a gap to close or a line drawn twice.
+    &::after,
+    &::before {
+        content: "";
+        position: absolute;
+        background-color: $rule;
+        pointer-events: none;
+        z-index: 3;
+    }
+
+    &::after { top: 0; bottom: 0; right: 0; width: 1px; }
+    &::before { left: 0; right: 0; bottom: 0; height: 1px; }
+}
+
+.navAdv__cell__link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    width: 100%;
+    height: 100%;
+    padding: 0.9rem 1rem;
+    overflow: hidden;
+    text-decoration: none;
+    color: var(--wText);
+
+    &:focus-visible {
+        outline: 1px solid var(--bgPrimary, #BBB788);
+        outline-offset: -5px;
+    }
+}
+
+// The two layers the reveal is built from — see the note in index.jsx. The
+// outer one clips, and that is the whole mechanism: without it the two
+// transforms simply cancel and every portrait sits open at once.
+.navAdv__shot,
+.navAdv__shot__in {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    will-change: transform;
+}
+
+.navAdv__shot { overflow: hidden; }
+
+// The face at rest: held right back, and desaturated so the block reads as one
+// material rather than ten photographs at different exposures. The cell that is
+// open covers it with the same picture at full strength, so nothing has to fade
+// this one out.
+.navAdv__ghost {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    background-position: center 20%;
+    background-size: cover;
+    opacity: 0.2;
+    filter: grayscale(1) contrast(0.9);
+    transition: opacity 0.5s $curtain;
+
+    .is-open & { opacity: 0.32; }
+}
+
+.navAdv__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(
+        to top,
+        rgba(3, 13, 19, 0.94) 0%,
+        rgba(3, 13, 19, 0.66) 32%,
+        rgba(3, 13, 19, 0.18) 68%,
+        rgba(3, 13, 19, 0.06) 100%
+    );
+    // Present at rest, not only on hover. The faces are visible in every cell
+    // now, so every name is lying on a photograph — and a name over a dark suit
+    // at no contrast is a name nobody reads. It deepens for the cell that is
+    // open, where there is a motto and a number under it as well.
+    opacity: 0.62;
+    transition: opacity 0.5s $curtain;
+
+    .is-open & { opacity: 1; }
+}
+
+.navAdv__ord,
+.navAdv__foot { position: relative; z-index: 2; }
+
+.navAdv__ord {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: auto;
+    @include font(XSBody);
+    letter-spacing: 0.14em;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.3);
+    transition: color 0.45s $curtain;
+
+    .is-open & { color: var(--bgPrimary, #BBB788); }
+}
+
+.navAdv__tick {
+    display: block;
+    width: 14px;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0.3);
+    transform-origin: left center;
+    transition: transform 0.45s $curtain;
+
+    .is-open & { transform: scaleX(1); }
+}
+
+.navAdv__name {
+    display: block;
+    font-family: "Poppins", "Helvetica", system-ui, sans-serif;
+    font-weight: 200;
+    letter-spacing: 0.02em;
+    line-height: 1.16;
+    font-size: 0.86rem;
+    color: rgba(255, 255, 255, 0.78);
+    // Two lines' worth, always. The names are not the same length, and a cell
+    // that re-wraps as its column narrows moves everything in it — the one
+    // thing that must not happen while the grid is in motion.
+    min-height: 1.2em;
+    transition:
+        color 0.4s $curtain,
+        font-size 0.5s $curtain;
+
+    [data-lead] & { font-size: 1.3rem; }
+
+    .is-open & {
+        color: var(--wText);
+        font-size: 1.05rem;
+    }
+
+    [data-lead].is-open & { font-size: 1.6rem; }
+}
+
+// Takes no room until it is shown, so the names along a row sit at one height
+// whatever the mottos are doing.
+.navAdv__moto {
+    display: grid;
+    grid-template-rows: 0fr;
+    max-width: 30ch;
+    @include font(XSBody);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.72);
+    opacity: 0;
+    transition:
+        grid-template-rows 0.5s $curtain,
+        opacity 0.35s ease;
+
+    > span {
+        overflow: hidden;
+        clip-path: inset(0 0 100% 0);
+        transition: clip-path 0.5s $curtain;
+    }
+
+    .is-open & {
+        grid-template-rows: 1fr;
+        opacity: 1;
+
+        > span { clip-path: inset(0 0 0 0); }
+    }
+}
+
+// Phone, landscape. The widest of them (932×430) clears the 900px stop above
+// on width alone and would get the desktop wall at a height where a row is a
+// strip of chins. The same treatment as portrait — a scrolling column, the
+// trading disabled — with heights sized to the short viewport rather than to
+// 46vh of a tall one. After every width-only stop above, because a landscape
+// phone matches those on width alone and source order is the tiebreak.
+@include phs-h {
+    .navAdv {
+        flex-direction: column;
+        overflow-y: auto;
+    }
+
+    .navAdv__lead {
+        flex: none !important;
+        min-height: 250px;
+    }
+
+    .navAdv__rest { flex: none !important; }
+
+    .navAdv__row {
+        flex: none !important;
+        min-height: 210px;
+    }
+
+    .navAdv__cell { flex: 1 1 0 !important; }
+}
+
+.navAdv__tel {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    @include font(XSBody);
+    letter-spacing: 0.06em;
+    color: var(--bgPrimary, #BBB788);
+    opacity: 0;
+    transform: translateY(4px);
+    transition:
+        opacity 0.35s ease 0.1s,
+        transform 0.45s $curtain 0.1s;
+
+    .is-open & {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

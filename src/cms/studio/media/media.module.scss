@@ -1,0 +1,407 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+.library {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+/* -------------------------------------------------------------- dropzone -- */
+
+.dropZone {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dropOverlay {
+  position: absolute;
+  inset: var(--st-s2);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--st-text-body);
+  color: var(--st-accent);
+  pointer-events: none;
+  background: rgba(16, 16, 17, 0.92);
+  border: 1px dashed var(--st-accent-line);
+  border-radius: var(--st-radius-lg);
+}
+
+.dropInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  align-items: center;
+  width: 100%;
+  padding: var(--st-s6);
+  font-family: var(--st-font);
+  cursor: pointer;
+  background: none;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: var(--st-radius);
+  transition: border-color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    border-color: var(--st-ink-3);
+  }
+}
+
+.dropCompact .dropInner {
+  padding: var(--st-s4);
+}
+
+.dropIcon {
+  color: var(--st-ink-4);
+}
+
+.dropTitle {
+  font-size: var(--st-text-body);
+  color: var(--st-ink-2);
+}
+
+.dropHint {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+.queue {
+  position: absolute;
+  right: var(--st-s4);
+  bottom: var(--st-s4);
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s1);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: var(--st-s2);
+    align-items: center;
+    padding: 6px 10px;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-2);
+    background: var(--st-raised);
+    border: 1px solid var(--st-line-strong);
+    border-radius: var(--st-radius);
+  }
+}
+
+.queueName {
+  @include t.truncate;
+
+  max-width: 200px;
+}
+
+.queue_uploading {
+  color: var(--st-ink-3);
+}
+
+.queue_done {
+  color: var(--st-ink);
+}
+
+.queue_failed {
+  color: var(--st-danger);
+}
+
+/* ------------------------------------------------------------------ bar -- */
+
+.libraryBar {
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  height: 46px;
+  padding: 0 var(--st-gutter);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.grow {
+  flex: 1;
+}
+
+.count {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+  white-space: nowrap;
+}
+
+/* Missing alt text is a real defect, so it uses the accent — the one hue in the
+   Studio that means "this wants your attention" — rather than its own yellow. */
+.altWarning {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--st-text-small);
+  color: var(--st-accent);
+  white-space: nowrap;
+}
+
+.libraryBody {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ----------------------------------------------------------------- grid -- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--st-s5) var(--st-s4);
+  padding: var(--st-s6) var(--st-gutter) var(--st-s10);
+}
+
+/* The tile is the image plus its name — not a bordered card containing them.
+   Only the thumbnail has an edge, because an image genuinely needs one to sit
+   against a dark ground. */
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  font-family: var(--st-font);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:focus-visible {
+    outline: none;
+
+    .thumb {
+      @include t.focus-outline;
+    }
+  }
+
+  &:hover .thumb {
+    border-color: var(--st-line-strong);
+  }
+
+  &:hover .tileName {
+    color: var(--st-ink);
+  }
+}
+
+.tileSelected .thumb {
+  border-color: var(--st-ink);
+  box-shadow: 0 0 0 1px var(--st-ink);
+}
+
+.thumb {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+
+  /* Checkerboard so a logo on transparency is legible instead of vanishing. */
+  background-color: #0d0d0f;
+  background-image:
+    linear-gradient(45deg, rgba(255, 252, 247, 0.025) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 252, 247, 0.025) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 252, 247, 0.025) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 252, 247, 0.025) 75%);
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  background-size: 12px 12px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    border-color var(--st-fast) var(--st-ease),
+    box-shadow var(--st-fast) var(--st-ease);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.tileMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-top: var(--st-s2);
+}
+
+.tileName {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  transition: color var(--st-fast) var(--st-ease);
+}
+
+.tileSub {
+  font-size: var(--st-text-tiny);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+}
+
+/* Flagged on the tile rather than only in the detail panel — a library of
+   twenty images should say which ones are unfinished without being opened. */
+.tileFlag {
+  position: absolute;
+  top: var(--st-s2);
+  right: var(--st-s2);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--st-accent);
+  background: rgba(10, 10, 11, 0.9);
+  border-radius: 3px;
+}
+
+.pager {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  justify-content: center;
+  padding: var(--st-s5);
+  border-top: 1px solid var(--st-line);
+}
+
+.pagerLabel {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+}
+
+/* --------------------------------------------------------------- detail -- */
+
+.detail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 320px;
+  background: var(--st-rail);
+  border-left: 1px solid var(--st-line);
+}
+
+.detailHead {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 46px;
+  padding: 0 var(--st-s2) 0 var(--st-s5);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.detailTitle {
+  @include t.eyebrow;
+
+  margin: 0;
+  color: var(--st-ink-2);
+}
+
+.detailBody {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  padding: var(--st-s5);
+  overflow-y: auto;
+}
+
+.detailPreview {
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--st-s5);
+  overflow: hidden;
+  background: #0d0d0f;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  img {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+  }
+}
+
+.detailLabel {
+  display: block;
+  margin-bottom: var(--st-s2);
+  font-size: var(--st-text-tiny);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--st-ink-2);
+}
+
+.detailInput {
+  @include t.control;
+
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.detailHint {
+  margin: var(--st-s2) 0 0;
+  font-size: var(--st-text-small);
+  line-height: 1.55;
+  color: var(--st-ink-4);
+}
+
+.detailFacts {
+  margin: var(--st-s6) 0 0;
+  border-top: 1px solid var(--st-line);
+
+  div {
+    display: flex;
+    gap: var(--st-s3);
+    justify-content: space-between;
+    padding: var(--st-s2) 0;
+    border-bottom: 1px solid var(--st-line-soft);
+  }
+
+  dt {
+    flex: none;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-4);
+  }
+
+  dd {
+    @include t.truncate;
+
+    margin: 0;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-2);
+  }
+}
+
+.detailFoot {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s3) var(--st-s3) var(--st-s3) var(--st-s5);
+  border-top: 1px solid var(--st-line);
+}
+
+@media (max-width: 900px) {
+  .libraryBar,
+  .grid {
+    padding-right: var(--st-s5);
+    padding-left: var(--st-s5);
+  }
+
+  .detail {
+    width: 260px;
+  }
+}

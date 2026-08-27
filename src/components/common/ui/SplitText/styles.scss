@@ -1,0 +1,10 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Word-level reveal. Words are inline-block so they can be translated; the
+// spaces sit outside them, so wrapping still happens at the right places.
+.splitText {
+    .splitText__word {
+        display: inline-block;
+        will-change: transform, opacity;
+    }
+}

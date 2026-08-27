@@ -1,0 +1,256 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+.filterSelect {
+  width: 180px;
+}
+
+.sort {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  color: var(--st-ink-4);
+}
+
+.sortSelect {
+  width: 170px;
+}
+
+.refreshing {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* A one-line explanation of a screen an editor has not seen before. Sits on the
+   page gutter with the toolbar and the rows, not indented as an aside. */
+.scopeNote {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s3) var(--st-gutter);
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+  border-bottom: 1px solid var(--st-line-soft);
+
+  svg {
+    flex: none;
+    color: var(--st-ink-4);
+  }
+}
+
+.rows {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* The row actions overlay the right end of the row rather than taking a column
+   of their own. A permanent column would put a destructive control in front of
+   the eye on every line of a list that is mostly read, and it would cost the
+   width the title needs. */
+.rowItem {
+  position: relative;
+}
+
+/* Rows are separated by a hairline and nothing else — no cards, no zebra. At
+   this density the rule is enough to track a line across, and it keeps the eye
+   on content rather than on containers. */
+.row {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  min-height: var(--st-row);
+  padding: 10px var(--st-gutter);
+  cursor: pointer;
+  border-bottom: 1px solid var(--st-line-soft);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.03);
+  }
+
+  &:focus-visible {
+    outline: none;
+    background: rgba(255, 252, 247, 0.05);
+    box-shadow: inset 2px 0 0 var(--st-accent);
+  }
+}
+
+.thumb {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.thumbIcon {
+  color: var(--st-ink-4);
+}
+
+.text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  @include t.truncate;
+
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.subtitle {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.rowBadge {
+  flex: none;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+}
+
+.state {
+  flex: none;
+  width: 116px;
+}
+
+.updated {
+  flex: none;
+  width: 100px;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+  text-align: right;
+}
+
+.chevron {
+  flex: none;
+  color: var(--st-ink-4);
+  opacity: 0;
+  transition: opacity var(--st-fast) var(--st-ease);
+}
+
+.row:hover .chevron,
+.row:focus-visible .chevron {
+  opacity: 1;
+}
+
+/* The actions take the place of the timestamp rather than sitting on top of it.
+   An earlier version faded over it with a gradient and left half a date legible
+   underneath, which looked like a rendering bug. Swapping the two is honest:
+   the right end of a row shows when it last changed, or what you can do to it,
+   never both. */
+.rowActions {
+  position: absolute;
+  top: 50%;
+  right: var(--st-gutter);
+  z-index: 1;
+  display: flex;
+  gap: var(--st-s1);
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--st-fast) var(--st-ease);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+/* `focus-within` on the item, not `hover` on the row: tabbing to an action must
+   not make it vanish because the pointer is elsewhere. */
+.rowItem:hover .rowActions,
+.rowItem:focus-within .rowActions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The chevron rule above reveals it on `.row:hover`, which is true whenever
+   these are. Written one class deeper (`.rowItem … .row .chevron`) so it wins on
+   specificity rather than on which rule happens to come last. */
+.rowItem:hover .updated,
+.rowItem:focus-within .updated,
+.rowItem:hover .row .chevron,
+.rowItem:focus-within .row .chevron {
+  opacity: 0;
+}
+
+.updated {
+  transition: opacity var(--st-fast) var(--st-ease);
+}
+
+/* Touch has no hover, so the actions would be unreachable. There the row keeps
+   both: the actions sit after the timestamp instead of replacing it. */
+@media (hover: none) {
+  .rowActions {
+    position: static;
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .rowItem {
+    display: flex;
+    align-items: center;
+  }
+
+  .rowItem .row {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.pagination {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  justify-content: center;
+  padding: var(--st-s6);
+}
+
+.pages {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+}
+
+/* Narrow windows drop the columns that are context rather than content. */
+@media (max-width: 900px) {
+  .row {
+    padding: 10px var(--st-s5);
+  }
+
+  .updated,
+  .filterSelect {
+    display: none;
+  }
+
+  .state {
+    width: auto;
+  }
+
+  /* Follows the row's gutter, or the actions float away from the edge. */
+  .rowActions {
+    right: var(--st-s5);
+  }
+
+  .scopeNote {
+    padding-inline: var(--st-s5);
+  }
+}

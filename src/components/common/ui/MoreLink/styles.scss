@@ -1,0 +1,74 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.moreLink {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    color: inherit;
+    // the rules below are this link's underline; the text-decoration one would
+    // sit at its own offset and there would visibly be two
+    text-decoration: none;
+
+    // The arrow's box is what expands, not the arrow. It is pinned to the right
+    // of that box and the box clips, so the arrow is uncovered from its own tail
+    // forwards as the room appears — it arrives pointing the way it is going,
+    // instead of growing in place. The width it opens to carries the gap, so
+    // nothing has to animate a margin.
+    .moreLink__arrow {
+        display: inline-flex;
+        align-items: center;
+        justify-content: flex-end;
+        width: 0;
+        opacity: 0;
+        overflow: hidden;
+        transition:
+            width 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.24s ease-out;
+    }
+
+    // Both rules span the link, so the drawn one lengthens with it as the arrow
+    // opens out — the line arrives at the arrow rather than stopping short of it.
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -0.3em;
+        height: 1px;
+        background-color: currentColor;
+        pointer-events: none;
+    }
+
+    // the resting hairline
+    &::before {
+        opacity: 0.35;
+    }
+
+    // ...and the one that runs across it, from the left
+    &::after {
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &:hover,
+    &:focus-visible {
+        .moreLink__arrow {
+            width: 1.5em;
+            opacity: 1;
+        }
+
+        &::after {
+            transform: scaleX(1);
+        }
+    }
+
+    // Nothing to expand into and no pointer to expand for: show the arrow.
+    @media (hover: none) {
+        .moreLink__arrow {
+            width: 1.5em;
+            opacity: 1;
+        }
+    }
+}

@@ -1,0 +1,67 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.cornerMarks {
+    position: absolute;
+    // Almost on the word: enough to clear the letterforms, not enough to read
+    // as a box drawn around them.
+    inset: -3px -5px;
+    pointer-events: none;
+}
+
+// Same shape and weight as the ones on the buttons, so the page has one
+// vocabulary for "this can be used" rather than two.
+.cornerMarks__mark {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    border: 0 solid var(--wText);
+    opacity: 0;
+    // Waiting outside, where they came from and where they go back to. The
+    // cursor's own marks close inwards the same way; a set that opened outwards
+    // instead would read as a different gesture in the same place.
+    transition:
+        transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.24s ease;
+}
+
+.cornerMarks__mark--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    transform: translate(-5px, -5px);
+}
+
+.cornerMarks__mark--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    transform: translate(5px, -5px);
+    transition-delay: 0.03s;
+}
+
+.cornerMarks__mark--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    transform: translate(-5px, 5px);
+    transition-delay: 0.06s;
+}
+
+.cornerMarks__mark--br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    transform: translate(5px, 5px);
+    transition-delay: 0.09s;
+}
+
+// Closed in. Staggered by the delays above, so they arrive one after another.
+[data-marks]:hover > .cornerMarks .cornerMarks__mark,
+[data-marks]:focus-visible > .cornerMarks .cornerMarks__mark {
+    opacity: 1;
+    transform: translate(0, 0);
+}

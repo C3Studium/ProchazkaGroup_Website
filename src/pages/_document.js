@@ -1,15 +1,34 @@
 import { Html, Head, Main, NextScript } from "next/document";
 import Script from "next/script";
 
+// Derived from the environment rather than written out, because the hostname IS
+// the project ref and a pinned one goes stale silently: this was preconnecting
+// to a Supabase project the site no longer uses, which costs a DNS lookup and a
+// TLS handshake to a host nothing ever asks for. next.config.mjs derives the
+// image host the same way and for the same reason.
+const supabaseOrigin = (() => {
+  try {
+    return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin;
+  } catch {
+    // No URL configured, or a malformed one. A preconnect is an optimisation;
+    // its absence must never be what stops the document from rendering.
+    return null;
+  }
+})();
+
 export default function Document() {
   return (
-    <Html lang="cs">
+    <Html lang="cs" data-preload="1">
       <Head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
-        <link rel="preconnect" href="https://syjlnusygybtuzoxirnw.supabase.co" />
-        <link rel="dns-prefetch" href="https://syjlnusygybtuzoxirnw.supabase.co" />
+        {supabaseOrigin ? (
+          <>
+            <link rel="preconnect" href={supabaseOrigin} />
+            <link rel="dns-prefetch" href={supabaseOrigin} />
+          </>
+        ) : null}
         
         {/* Google Tag Manager */}
         <Script id="google-tag-manager" strategy="afterInteractive">

@@ -1,0 +1,205 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+.spinner {
+  display: inline-block;
+  border: 1.5px solid currentcolor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  opacity: 0.55;
+  animation: spin 0.62s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ----------------------------------------------------------------- badge --
+   A status badge used to be a bordered, tinted pill — four of them in a column
+   turned a list into a set of traffic lights. It is now a dot and a caption:
+   the dot carries the state, the caption names it, and neither is a box.
+
+   Only two of the four tones are a hue at all. "Published" is the brightest
+   because live content is the notable state, not because green means good. */
+
+.badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.dot {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  background: currentcolor;
+  border-radius: 50%;
+}
+
+.neutral {
+  color: var(--st-ink-3);
+
+  .dot {
+    background: var(--st-ink-4);
+  }
+}
+
+.positive {
+  color: var(--st-ink-2);
+
+  .dot {
+    background: var(--st-ink);
+  }
+}
+
+.warning,
+.accent {
+  color: var(--st-accent);
+}
+
+.danger {
+  color: var(--st-danger);
+}
+
+/* ------------------------------------------------------------------ empty --
+   Left-aligned on the page gutter rather than floated in the middle of the
+   canvas: an empty list is still that screen, and centring it makes the app look
+   like it has fallen over. */
+
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 52ch;
+  padding: var(--st-s16) var(--st-gutter) var(--st-s12);
+}
+
+.emptyCompact {
+  padding: var(--st-s8) 0 var(--st-s6);
+}
+
+.emptyIcon {
+  display: block;
+  margin-bottom: var(--st-s4);
+  color: var(--st-ink-4);
+}
+
+.emptyTitle {
+  @include t.section-title;
+
+  margin: 0;
+}
+
+.emptyCompact .emptyTitle {
+  font-size: var(--st-text-lead);
+  letter-spacing: 0;
+}
+
+.emptyText {
+  max-width: 46ch;
+  margin: var(--st-s2) 0 0;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  line-height: 1.65;
+  color: var(--st-ink-3);
+}
+
+.emptyAction {
+  margin-top: var(--st-s5);
+}
+
+.error .emptyIcon {
+  color: var(--st-danger);
+}
+
+/* -------------------------------------------------------------- skeleton -- */
+
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+}
+
+.skeletonRow {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  padding: 0 var(--st-gutter);
+  border-bottom: 1px solid var(--st-line-soft);
+  animation: fade 1.1s ease-in-out infinite alternate;
+}
+
+.skeletonLines {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--st-s2);
+}
+
+.skeletonBlock {
+  display: block;
+  height: 9px;
+  background: rgba(255, 252, 247, 0.06);
+  border-radius: 2px;
+}
+
+.skeletonGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--st-s3);
+  padding: var(--st-s5) var(--st-gutter);
+}
+
+.skeletonTile {
+  aspect-ratio: 4 / 3;
+  background: rgba(255, 252, 247, 0.05);
+  border-radius: var(--st-radius);
+  animation: fade 1.1s ease-in-out infinite alternate;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0.4;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+/* ---------------------------------------------------------- section head --
+   A section is named by a small-caps rule across the top of it, not by a card
+   around it. This is the piece that replaces every border in the old overview. */
+
+.sectionHead {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: flex-end;
+  justify-content: space-between;
+  min-height: 26px;
+  padding-bottom: var(--st-s3);
+  margin-bottom: var(--st-s4);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.sectionTitle {
+  @include t.eyebrow;
+
+  margin: 0;
+  color: var(--st-ink-2);
+}
+
+.sectionHint {
+  margin: var(--st-s1) 0 0;
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-book);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--st-ink-3);
+}

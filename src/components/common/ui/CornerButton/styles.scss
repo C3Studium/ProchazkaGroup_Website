@@ -1,0 +1,96 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+.cornerButton {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+
+    // The class goes on a <button> as often as on a link — the contact sheet's
+    // send, the advisor card's — and a bare <button> is painted by the browser:
+    // a light grey face, its own border, its own font. Nothing else in here
+    // ever mentions a background, so on those two the button came out as a
+    // solid white bar in the middle of a page drawn entirely in hairlines.
+    appearance: none;
+    background: none;
+    border: 0;
+    cursor: pointer;
+
+    color: var(--wText);
+    text-decoration: none;
+    text-transform: uppercase;
+    font-family: "Switzer-Light";
+    font-weight: 300;
+    font-size: 1rem;
+    letter-spacing: 0.1em;
+
+    .corner {
+        position: absolute;
+        width: 9px;
+        height: 9px;
+        border: 0 solid var(--wText);
+        transition: transform 0.3s ease;
+    }
+
+    .corner--tl { top: 0; left: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+    .corner--tr { top: 0; right: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+    .corner--bl { bottom: 0; left: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+    .corner--br { bottom: 0; right: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+    .cornerButton__arrow {
+        font-size: 0.85em;
+        transition: transform 0.3s ease;
+    }
+
+    // The browser used to say this by greying its own face, and that face has
+    // just been taken away — the advisor card's send is disabled while it is
+    // sending, and without this it looks exactly like a button that will work.
+    &:disabled {
+        opacity: 0.45;
+        cursor: default;
+    }
+
+    // On touch the visual button stays exactly as drawn — a hairline-cornered
+    // label barely 30px tall — but the thing a finger can hit grows to the
+    // 44px minimum. The ::after is centred on the button and never smaller
+    // than it, so wide buttons keep their full width and only gain height.
+    // It paints nothing and, being part of the button, taps on it are taps
+    // on the button.
+    @include touch {
+        &::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: max(100%, 44px);
+            height: max(100%, 44px);
+        }
+    }
+
+    // The corners spread and the arrow leans for a POINTER. A finger has no
+    // hover to leave: the tap latches this on and nothing ever clears it, so
+    // every button a touch reader has ever pressed stays spread behind them.
+    // The same gesture gets it as a press instead, which ends when the finger
+    // lifts.
+    @include fine-pointer {
+        &:hover:not(:disabled) {
+            .corner--tl { transform: translate(-3px, -3px); }
+            .corner--tr { transform: translate(3px, -3px); }
+            .corner--bl { transform: translate(-3px, 3px); }
+            .corner--br { transform: translate(3px, 3px); }
+            .cornerButton__arrow { transform: translate(2px, -2px); }
+        }
+    }
+
+    @include touch {
+        &:active:not(:disabled) {
+            .corner--tl { transform: translate(-3px, -3px); }
+            .corner--tr { transform: translate(3px, -3px); }
+            .corner--bl { transform: translate(-3px, 3px); }
+            .corner--br { transform: translate(3px, 3px); }
+            .cornerButton__arrow { transform: translate(2px, -2px); }
+        }
+    }
+}

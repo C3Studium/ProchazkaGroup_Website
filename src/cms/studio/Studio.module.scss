@@ -1,0 +1,107 @@
+@use "../../styles/system/_shortcuts.scss" as *;
+@use "./styles/tokens.module" as t;
+
+/* The Studio owns the viewport. `position: fixed` rather than a full-height
+   block because the public `_app` renders a navbar, a footer and a WebGL canvas
+   around every page and none of those files are editable from this build. */
+.root {
+  @include t.declare;
+
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: flex;
+  overflow: hidden;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  font-synthesis-weight: none;
+  line-height: 1.45;
+  color: var(--st-ink);
+  text-rendering: optimizeLegibility;
+  background: var(--st-bg);
+  -webkit-font-smoothing: antialiased;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font-family: inherit;
+    letter-spacing: inherit;
+  }
+
+  /* Tabular figures everywhere a number is compared against another number —
+     counts, dates, sizes. Set once here so no component has to remember. */
+  :where(kbd, code, samp) {
+    font-family: var(--st-mono);
+  }
+
+  /* One focus treatment for the whole surface. Components override it only where
+     the element draws its own border and the ring belongs inside. */
+  :where(a, button, [tabindex]):focus-visible {
+    @include t.focus-outline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+}
+
+.boot {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  color: var(--st-ink-4);
+}
+
+/* The only rules the Studio emits outside its own subtree. They exist because
+   the public `_app` mounts a marketing navbar, a footer, a cursor and a WebGL
+   canvas around every page, and that file is not this build's to edit.
+   Hidden rather than merely covered: the shader ground keeps burning frames
+   behind an opaque overlay, and the chrome stays in the tab order where a
+   keyboard user would fall into it.
+
+   Anchored on `:has(.root)` rather than written as bare `:global` rules — CSS
+   Modules requires every selector to carry a local class, and this way the
+   rules also switch themselves off the moment the Studio unmounts, with no flag
+   to set or clear. Scroll locking is done from JS instead, since it must hold
+   even in a browser without `:has()`. */
+body:has(.root) :global(.neural-tunnel--page),
+body:has(.root) :global(.navbar__container),
+body:has(.root) :global(.SiteFooter),
+body:has(.root) :global(.cursor) {
+  display: none !important;
+}
+
+/* One rule that is not about the site's chrome. `/studio/edit` frames a page and
+   lets the overlay portal its popup into *this* document, on a layer numbered for
+   the framed page's document — where nothing competes with it. Here it competes
+   with `.root` above, which is opaque and higher, so the popup was drawn and
+   painted over: `elementFromPoint` at the dialog's own centre answered the
+   iframe. The number it has to clear is declared in this file, so the correction
+   is declared here too.
+
+   Matched on the attribute's **presence**, not on a value. It used to read
+   `[data-cms-overlay="media"]`, and when the one popup grew a body per kind the
+   overlay started writing `popup` there — so this rule stopped matching and every
+   popup opened invisibly behind the Studio, which is what "clicking an image does
+   nothing" was. A selector that goes stale when a value is renamed is a selector
+   that will do it again; the presence of the attribute is the thing this rule is
+   actually about. The same rule, with the same stale value, is in
+   preview.module.scss — inert there, because `/studio/preview` arms no overlay
+   and therefore has no popup to raise. */
+body:has(.root) :global([data-cms-overlay]) {
+  z-index: 2147483100;
+}

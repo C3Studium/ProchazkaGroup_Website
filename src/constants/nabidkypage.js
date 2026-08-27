@@ -2,6 +2,9 @@ export const projects = [
     {
         number: '01',
         title: 'Pojistné Hlášení',
+        dealFigure: '50 %',
+        deal: 'sleva na roční předplatné',
+        tag: 'Pojištění',
         description: '50% sleva na roční předplatné pro všechny klienty Procházka Group.',
         href: 'https://www.pojistnehlaseni.cz/',
         src: '/assets/backgrounds/partners/pojistnehlaseni.webp',
@@ -11,6 +14,9 @@ export const projects = [
     {
         number: '02',
         title: 'ElevenCosmetic',
+        dealFigure: '10 %',
+        deal: 'sleva na jakýkoliv produkt',
+        tag: 'Kosmetika',
         description: '10% slevu pro naše klienty - na jakýkoliv produkt, který si vyberete.',
         href: 'https://www.elevencosmetic.cz/',
         src: '/assets/backgrounds/partners/elevencosmetic.webp',
@@ -20,6 +26,9 @@ export const projects = [
     {
         number: '03',
         title: 'ReKvítka',
+        dealFigure: null,
+        deal: 'Sleva se právě vyjednává',
+        tag: 'Květiny',
         description: 'Sleva pro naše klienty ve stavu vyjednávání, brzy bude aktualizováno.',
         href: 'https://re-kvitka.cz/',
         src: '/assets/backgrounds/partners/rekvitko.webp',
@@ -29,6 +38,9 @@ export const projects = [
     {
         number: '04',
         title: 'Project 04',
+        dealFigure: null,
+        deal: 'Brzy bude doplněno',
+        tag: 'Připravujeme',
         description: 'Stále v přípravě, brzy bude aktualizováno.',
         href: 'https://www.google.com',
         src: '/assets/prebuild/house.webp',

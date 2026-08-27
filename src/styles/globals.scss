@@ -8,6 +8,11 @@
 
 @import url("../../public/Fonts/synonym/css/synonym.css");
 @import url("../../public/Fonts/switzer/css/switzer.css");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300&display=swap");
+// Loaded for one element: the footer's wordmark, which is set with a variable
+// weight and width per letter (see ui/TextPressure). Nothing else on the site
+// uses it, and only the two axes it actually reads are requested.
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@100..1000&display=swap");
 
 // Legacy tokens from the pre-remodel design. Components that are still live
 // (navbar, hero, transition, preloader) reference these; delete each once the
@@ -30,10 +35,7 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Switzer-Light", sans-serif;
-  // Dark, not --bgColor: the body is normally hidden behind the fixed
-  // BackgroundGradient canvas, so it only ever shows through paint glitches
-  // and overscroll — bright blue there reads as a flickering bar.
-  background-color: var(--bgColor2, #050A10);
+  background-color: #020E15;
 
   * {
     box-sizing: border-box;
@@ -48,3 +50,46 @@ body {
     width: 0px;
   }
 }
+
+// Travel for the lineSweep mixin (styles/system/_shortcuts.scss). Kept here
+// because keyframes are a global emitter and the shortcut API is meant to stay
+// side-effect-free.
+//
+// The distance comes off the element as --sweep-travel: it depends on how long
+// the light is relative to its rule, which is the mixin's business, and these
+// are shared by every rule on the page.
+//
+// The light stays inside its rule from end to end rather than sliding in from
+// outside it, which is what lets the rule keep its overflow visible — nothing
+// ever needs clipping, so the glow can spill off the hairline, and that is the
+// only reason any of this is visible at all. The ends are handled by opacity
+// instead: the light kindles just inside the start and is out by the finish.
+//
+// The motion is spent by 62% and the rest of the cycle is the rule lying dark.
+// Without that pause it reads as a permanent moving highlight, not as a pulse.
+@keyframes lineSweepX {
+  0% { transform: translateX(0%); opacity: 0; }
+  8% { opacity: 1; }
+  54% { opacity: 1; }
+  62% { transform: translateX(var(--sweep-travel)); opacity: 0; }
+  100% { transform: translateX(var(--sweep-travel)); opacity: 0; }
+}
+
+@keyframes lineSweepY {
+  0% { transform: translateY(0%); opacity: 0; }
+  8% { opacity: 1; }
+  54% { opacity: 1; }
+  62% { transform: translateY(var(--sweep-travel)); opacity: 0; }
+  100% { transform: translateY(var(--sweep-travel)); opacity: 0; }
+}
+
+// A page can hold the footer back while it is still offering to continue — the
+// about page does, until its history has been opened. The footer is mounted once
+// in _app and is not any page's child, so the signal has to come through the
+// document rather than through props.
+body[data-footer="hidden"] .SiteFooter {
+  display: none;
+}
+
+
+

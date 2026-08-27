@@ -1,0 +1,311 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* Upravit kontent.
+
+   Only the chrome this view adds. The toolbar, the stage and the frame inside it
+   are `preview.module.scss` — one set of rules for one thing that appears on two
+   screens — and the classes below sit beside them rather than restating them.
+
+   `.module.scss` is not a preference. scripts/sync-styles.js globs every
+   stylesheet under src/ and concatenates the non-module ones into the site's
+   public sheet; named `EditView.scss`, this file would ship the admin's CSS to
+   every visitor. */
+
+.view {
+  display: grid;
+  /* head / toolbar / strip / stage. Everything above the stage is `auto` and the
+     stage takes what is left — the page is the tool, so it gets the room. */
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  min-width: 0;
+  height: 100%;
+  min-height: 0;
+}
+
+/* ---------------------------------------------------------------- head --- */
+
+/* Shorter than ViewHeader, and deliberately so: that header is sized for a title
+   plus a sentence of explanation above a list, and this screen spends every
+   pixel it can on the page underneath. It keeps the one thing every Studio
+   screen shares — the `--st-gutter` left edge — so the eye still reads it as the
+   same product. */
+.head {
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  height: 46px;
+  padding: 0 var(--st-gutter);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  color: var(--st-ink-3);
+}
+
+.title {
+  @include t.truncate;
+
+  margin: 0;
+  font-size: var(--st-text-lead);
+  font-weight: var(--st-w-medium);
+  letter-spacing: -0.01em;
+  color: var(--st-ink);
+}
+
+/* "Editing is on", as a fact rather than a control.
+
+   Deliberately not a toggle, a switch or anything else with two positions: the
+   whole argument for a second address is that this one is always the editor and
+   the preview is always the preview, so there is no position for either of them
+   to be left in. It carries the accent because the accent means attention and
+   this is the one thing to know before the first click. */
+.live {
+  display: inline-flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: 3px var(--st-s3);
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-accent);
+  border: 1px solid var(--st-accent-line);
+  border-radius: 999px;
+}
+
+.liveDot {
+  width: 5px;
+  height: 5px;
+  background: var(--st-accent);
+  border-radius: 50%;
+}
+
+/* Náhled is on: editing is off and the page is answering the mouse again.
+
+   Achromatic rather than a second colour, for the same reason `.chipOn` is: the
+   accent means "this writes" and there is exactly one thing on this screen that
+   does. Dropping it is the signal — the badge stays in place and stops shouting,
+   so the two states are told apart by the word and by the weight of the pill
+   rather than by a hue an editor has to learn. */
+.livePaused {
+  color: var(--st-ink-3);
+  border-color: var(--st-line);
+
+  .liveDot {
+    background: var(--st-ink-4);
+  }
+}
+
+/* The two page-level actions in the head. Everything else there truncates or
+   gives up its room; these must not, because a Publikovat that has been squeezed
+   to "Publik…" is the one control on the screen that has to be unambiguous. */
+.headAction {
+  flex: none;
+}
+
+.count {
+  flex: none;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+  white-space: nowrap;
+}
+
+/* Not an error colour — a page with nothing annotated on it is the normal state
+   of seven of the eight routes, and the strip below says why. */
+.countZero {
+  color: var(--st-ink-4);
+}
+
+/* The preview's `.chip` is drawn for a button; borrowed for a link it needs the
+   two declarations the preview host makes globally inside its own subtree and
+   the Studio's root does not. */
+.chipLink {
+  color: var(--st-ink-2);
+  text-decoration: none;
+}
+
+/* --------------------------------------------------------------- strip --- */
+
+/* What saving means, on screen the whole time.
+
+   A toast would have been cheaper and is the wrong shape: the question ("is this
+   live?") occurs to an editor at an unpredictable moment, usually the one right
+   after a toast has faded. This is one line, it never moves, and it is the only
+   place in the product where the draft rule is stated next to the thing that
+   follows it. */
+.strip {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  padding: var(--st-s2) var(--st-gutter);
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.4;
+  color: var(--st-ink-3);
+  background: var(--st-rail);
+  border-bottom: 1px solid var(--st-line);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink-2);
+  }
+}
+
+.stripIcon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--st-ink-4);
+}
+
+/* A Náhled that did not happen, in the strip's own place rather than beside it.
+   The accent, because this is the one line on the screen that is about something
+   the editor has to act on: their text is still only in the page. */
+.stripWarn {
+  color: var(--st-accent);
+
+  .stripIcon {
+    color: var(--st-accent);
+  }
+}
+
+/* ------------------------------------------------------------- publikovat --- */
+
+/* The blocks that would go live, named before anything happens. A list rather
+   than a count: "2 bloky" is not something an editor can check, and this is the
+   only action in the mode that the public sees. */
+.publishList {
+  display: grid;
+  gap: var(--st-s2);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.publishItem {
+  display: grid;
+  gap: 2px;
+  padding: var(--st-s3);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  &[data-failed="true"] {
+    border-color: var(--st-danger-line, var(--st-line-strong));
+  }
+}
+
+.publishTitle {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: baseline;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+/* A block that has never been published at all. Worth saying: publishing it is
+   not "update the page", it is "put this on the site for the first time". */
+.publishFirst {
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-accent);
+}
+
+.publishMeta {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+  word-break: break-word;
+}
+
+.publishError {
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-danger, var(--st-accent));
+}
+
+/* The server's own field paths. Monospaced because they are paths, not prose —
+   `items.0.label` has to be copyable into the document editor's field list. */
+.publishFields {
+  display: grid;
+  gap: 2px;
+  padding: var(--st-s2) 0 0;
+  margin: 0;
+  list-style: none;
+
+  code {
+    font-family: var(--st-font-mono, ui-monospace, monospace);
+    font-size: var(--st-text-micro);
+    color: var(--st-ink-2);
+  }
+}
+
+.publishNote {
+  margin: var(--st-s3) 0 0;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-ink-3);
+}
+
+/* --------------------------------------------------------------- stage --- */
+
+/* The stage's own rules come from preview.module.scss; this only takes away the
+   border the preview's grid does not need either, and gives the empty and
+   loading states something to sit in the middle of. */
+.stage {
+  position: relative;
+}
+
+.booting {
+  display: inline-flex;
+  gap: var(--st-s3);
+  align-items: center;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.empty {
+  position: absolute;
+  right: var(--st-s4);
+  bottom: var(--st-s4);
+  left: var(--st-s4);
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  padding: var(--st-s3) var(--st-s4);
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-accent);
+  background: var(--st-rail);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+  }
+}
+
+/* -------------------------------------------------------------- narrow --- */
+
+/* The strip is the first thing to go, not the toolbar: the controls are how the
+   editor works and the sentence is something they read once. It stays reachable
+   as the sidebar row's title and in the document editor's own notice. */
+@media (max-width: 900px) {
+  .view {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  .strip {
+    display: none;
+  }
+}

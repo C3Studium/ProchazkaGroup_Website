@@ -1,0 +1,562 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* ---------------------------------------------------------------- button --
+   Five variants, one hue between them.
+
+   The old palette filled "approve" with green and "reject" with red, which made
+   every queue row shout twice and made the actual primary action indistinguish-
+   able from the destructive one. Here the hierarchy is carried by weight:
+
+     primary / positive  solid, achromatic — the brightest thing on the screen,
+                         and there is only ever one of them in view
+     secondary           hairline outline
+     ghost               text only
+     danger              text only at rest; it turns brick on hover and focus,
+                         so the colour of the consequence appears at the moment
+                         of intent rather than sitting in the layout all day
+*/
+
+.button {
+  position: relative;
+  display: inline-flex;
+  gap: var(--st-s2);
+  align-items: center;
+  justify-content: center;
+  font-family: var(--st-font);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink-2);
+  /* Set explicitly because Button also renders as a link when given `href`. */
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.38;
+  }
+
+  &:focus-visible {
+    @include t.focus-outline;
+  }
+
+  svg {
+    flex: none;
+  }
+}
+
+.md {
+  height: 34px;
+  padding: 0 var(--st-s3);
+  font-size: var(--st-text-body);
+}
+
+.sm {
+  height: 28px;
+  padding: 0 10px;
+  font-size: var(--st-text-small);
+}
+
+.lg {
+  height: 42px;
+  padding: 0 var(--st-s5);
+  font-size: 15px;
+}
+
+/* The one action on a screen that the eye should land on. Achromatic on purpose:
+   brightness alone is a stronger signal than any hue, and it leaves the accent
+   free to mean one thing. */
+.primary,
+.positive {
+  font-weight: var(--st-w-medium);
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-color: var(--st-solid);
+
+  &:hover:not(:disabled) {
+    background: var(--st-solid-hover);
+    border-color: var(--st-solid-hover);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--st-ink-2);
+    border-color: var(--st-ink-2);
+  }
+}
+
+.secondary {
+  color: var(--st-ink);
+  border-color: var(--st-line-strong);
+
+  &:hover:not(:disabled) {
+    background: rgba(255, 252, 247, 0.05);
+    border-color: rgba(255, 252, 247, 0.26);
+  }
+
+  &:active:not(:disabled) {
+    background: rgba(255, 252, 247, 0.09);
+  }
+}
+
+.ghost {
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.06);
+  }
+
+  &:active:not(:disabled) {
+    background: rgba(255, 252, 247, 0.1);
+  }
+}
+
+/* Destructive. No resting fill and no resting hue — the colour of the
+   consequence appears when the pointer or the keyboard actually reaches it.
+
+   It does keep an outline at rest, though, and that is not decoration: paired
+   against `ghost` in a confirm dialog ("Zrušit" / "Zamítnout") two bare text
+   buttons are indistinguishable, and the one you must not press by accident is
+   exactly the wrong one to leave unmarked. Outline against solid also gives the
+   queue row a legible pair — reject reads as the lighter of two buttons rather
+   than as a label. */
+.danger {
+  color: var(--st-ink-2);
+  border-color: var(--st-line-strong);
+
+  &:hover:not(:disabled),
+  &:focus-visible:not(:disabled) {
+    color: var(--st-danger);
+    background: var(--st-danger-soft);
+    border-color: var(--st-danger-line);
+  }
+
+  &:active:not(:disabled) {
+    background: rgba(222, 116, 102, 0.2);
+  }
+}
+
+.loading .label,
+.loading svg {
+  opacity: 0.28;
+}
+
+.spin {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border: 1.5px solid currentcolor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: rotate 0.62s linear infinite;
+}
+
+@keyframes rotate {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.iconButton {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  color: var(--st-ink-3);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.06);
+  }
+
+  &:active {
+    background: rgba(255, 252, 247, 0.1);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline;
+  }
+
+  /* `tone` is still part of this component's API; it now changes the hover
+     colour rather than painting the control at rest. */
+  &.danger:hover {
+    color: var(--st-danger);
+    background: var(--st-danger-soft);
+  }
+
+  &.positive:hover {
+    color: var(--st-ink);
+  }
+}
+
+/* -------------------------------------------------------------- checkbox --
+   Selection is achromatic like the primary button — the accent stays reserved
+   for attention, and a page of ticked boxes should not read as an alert. */
+
+.checkbox {
+  display: inline-flex;
+  gap: var(--st-s2);
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+
+  input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.box {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: transparent;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line-strong);
+  border-radius: 3px;
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+}
+
+.checkbox:hover .box {
+  border-color: rgba(255, 252, 247, 0.34);
+}
+
+.checkbox input:checked + .box {
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-color: var(--st-solid);
+}
+
+.checkbox input:indeterminate + .box {
+  color: var(--st-ink);
+  border-color: var(--st-ink-3);
+}
+
+.checkbox input:focus-visible + .box {
+  @include t.focus-outline;
+}
+
+.checkLabel {
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-2);
+}
+
+.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* ---------------------------------------------------------------- toggle -- */
+
+.toggle {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+
+  input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+  }
+}
+
+.track {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 19px;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line-strong);
+  border-radius: 11px;
+  transition:
+    background var(--st-mid) var(--st-ease),
+    border-color var(--st-mid) var(--st-ease);
+}
+
+.knob {
+  position: absolute;
+  top: 2.5px;
+  left: 2.5px;
+  width: 12px;
+  height: 12px;
+  background: var(--st-ink-3);
+  border-radius: 50%;
+  transition:
+    background var(--st-mid) var(--st-ease),
+    transform var(--st-mid) var(--st-ease);
+}
+
+.toggle input:checked + .track {
+  background: rgba(255, 252, 247, 0.16);
+  border-color: var(--st-line-strong);
+}
+
+.toggle input:checked + .track .knob {
+  background: var(--st-ink);
+  transform: translateX(15px);
+}
+
+.toggle input:focus-visible + .track {
+  @include t.focus-outline;
+}
+
+.toggleLabel {
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-2);
+}
+
+/* ------------------------------------------------------------- segmented --
+   Was a filled pill group, which is the shape every dark admin template uses for
+   its filters. Now it is a tab strip: the active one is simply brighter and
+   heavier, marked by a rule it sits on rather than a box it sits in. */
+
+.segmented {
+  display: inline-flex;
+  gap: var(--st-s5);
+  align-items: stretch;
+  align-self: stretch;
+  margin-bottom: -1px;
+}
+
+.segment {
+  position: relative;
+  display: inline-flex;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: 0 1px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-3);
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  &::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    content: "";
+    background: transparent;
+    transition: background var(--st-fast) var(--st-ease);
+  }
+
+  &:hover {
+    color: var(--st-ink-2);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(3px);
+  }
+}
+
+.segmentActive {
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+
+  &::after {
+    background: var(--st-ink);
+  }
+}
+
+/* The count is the one place in a filter row that is allowed to be a colour:
+   it is a number of things waiting for you. */
+.segmentCount {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+  transition: color var(--st-fast) var(--st-ease);
+}
+
+.segmentActive .segmentCount {
+  color: var(--st-accent);
+}
+
+/* ---------------------------------------------------------------- search -- */
+
+.search {
+  display: flex;
+  flex: 1;
+  gap: var(--st-s2);
+  align-items: center;
+  min-width: 0;
+  max-width: 320px;
+  height: 34px;
+  padding: 0 var(--st-s1) 0 10px;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    border-color var(--st-fast) var(--st-ease),
+    box-shadow var(--st-fast) var(--st-ease);
+
+  &:hover:not(:focus-within) {
+    border-color: var(--st-line-strong);
+  }
+
+  &:focus-within {
+    @include t.focus-ring;
+  }
+
+  input {
+    flex: 1;
+    min-width: 0;
+    font-family: var(--st-font);
+    font-size: var(--st-text-body);
+    font-weight: var(--st-w-book);
+    color: var(--st-ink);
+    background: none;
+    border: none;
+    outline: none;
+
+    &::placeholder {
+      color: var(--st-ink-4);
+    }
+
+    &::-webkit-search-cancel-button {
+      display: none;
+    }
+  }
+}
+
+.searchIcon {
+  flex: none;
+  color: var(--st-ink-4);
+}
+
+/* ---------------------------------------------------------------- select -- */
+
+.selectWrap {
+  position: relative;
+  display: block;
+}
+
+.select {
+  @include t.control;
+
+  height: 34px;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-right: 30px;
+  cursor: pointer;
+
+  option {
+    color: var(--st-ink);
+    background: #17171a;
+  }
+}
+
+.selectChevron {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  color: var(--st-ink-4);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+
+/* ----------------------------------------------------------- field shell --
+   Labels are set as small caps. At this density a size step between label and
+   value is not enough to separate them, but a change of case is — and it gives
+   a long form a scannable left edge. */
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+}
+
+.fieldHead {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: baseline;
+  justify-content: space-between;
+  min-height: 14px;
+}
+
+.fieldLabel {
+  font-size: var(--st-text-tiny);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--st-ink-2);
+}
+
+.required {
+  margin-left: 3px;
+  color: var(--st-accent);
+}
+
+.fieldDescription {
+  margin: -4px 0 0;
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-book);
+  line-height: 1.55;
+  color: var(--st-ink-3);
+}
+
+.fieldMessage {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: 0;
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-book);
+  color: var(--st-danger);
+
+  svg {
+    flex: none;
+  }
+}
+
+/* The control itself is owned by the input component; the shell only tints its
+   border so every field type signals an error identically. */
+.fieldError {
+  input:not([type="checkbox"]),
+  textarea,
+  select,
+  .box {
+    border-color: var(--st-danger-line);
+  }
+}
+
+/* `ui.width` lets a schema pair two short fields on one line. The editor form is
+   a grid, so this is a column span rather than a float.
+
+   Doubled up as `.field.fieldHalf` to outweigh `.form > *`, which sets every
+   direct child to `1 / -1` for the full-width default. Both are one class worth
+   of specificity, so which one won depended on the order the two CSS modules
+   happened to be bundled in — and the full-width rule was winning, which is why
+   no schema could use this until now. */
+.field.fieldHalf {
+  grid-column: span 1;
+}

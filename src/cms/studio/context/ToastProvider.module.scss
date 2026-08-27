@@ -1,0 +1,120 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* The stack is rendered by ToastProvider, which sits *above* the Studio root in
+   the tree — so it is not a descendant of the element the design tokens are
+   declared on and cannot inherit them. It declares its own copy. Without this
+   every `var(--st-*)` below resolves to nothing and the toast comes out as
+   unstyled text on a transparent ground.
+   `fixed` for the same reason: there is no positioned Studio ancestor to
+   measure against out here. */
+.stack {
+  @include t.declare;
+
+  position: fixed;
+  bottom: var(--st-s5);
+  left: var(--st-s5);
+  z-index: 2147483100;
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  font-family: var(--st-font);
+  pointer-events: none;
+}
+
+/* One toast shape for all three tones. The rule down the left edge is the only
+   thing that changes, and only two of the three tones colour it — "saved
+   successfully" does not need to be green to be understood. */
+.toast {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  min-width: 300px;
+  max-width: 420px;
+  padding: var(--st-s3) var(--st-s3) var(--st-s3) var(--st-s4);
+  pointer-events: auto;
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-left: 2px solid var(--st-ink-3);
+  border-radius: var(--st-radius);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  animation: rise var(--st-mid) var(--st-ease);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.description {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* Undo is the reason this stack exists — the queue's whole speed argument rests
+   on mistakes being cheap — so it is the one control here with any weight. */
+.action {
+  flex: none;
+  padding: 5px 10px;
+  font-family: inherit;
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-on-solid);
+  cursor: pointer;
+  background: var(--st-solid);
+  border: none;
+  border-radius: 3px;
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: var(--st-solid-hover);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline;
+  }
+}
+
+.close {
+  flex: none;
+  padding: 0 var(--st-s1);
+  font-size: 17px;
+  line-height: 1;
+  color: var(--st-ink-4);
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink-2);
+  }
+}
+
+.positive {
+  border-left-color: var(--st-ink);
+}
+
+.danger {
+  border-left-color: var(--st-danger);
+}
+
+.neutral {
+  border-left-color: var(--st-accent);
+}

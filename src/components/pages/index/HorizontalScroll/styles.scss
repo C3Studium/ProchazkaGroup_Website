@@ -1,0 +1,577 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Sticky horizontal scroll: outer section provides 300vh of scroll distance,
+// the sticky viewport pins for its duration and the 300vw track slides left.
+.HScroll {
+    position: relative;
+    height: 300vh;
+    // No top margin: FirstTime's top line must meet the WhoWeAre connector
+    // at the shared section boundary.
+
+    // FirstTime rides as the first panel: constrain it to the panel box.
+    .HScroll__track > .FirstTime {
+        flex: 0 0 100vw;
+        width: 100vw;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    // Set from the release (see index.jsx). Only the content blocks read it,
+    // so the rules survive the hand-off and the section leaves as a bare
+    // network of lines rather than as a slab.
+    --hscroll-fade: 1;
+    --hscroll-lift: 0vh;
+    --hscroll-shift: 0vw;
+
+    // `translate` rather than `transform`: these elements already carry framer
+    // transforms and the two compose instead of one replacing the other.
+    .HScroll__body,
+    .HScroll__photo,
+    .HScroll__stack,
+    .HScroll__ctaWrap,
+    .HScroll__cta {
+        opacity: var(--hscroll-fade);
+        translate: var(--hscroll-shift) var(--hscroll-lift);
+    }
+
+    .HScroll__sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    .HScroll__track {
+        display: flex;
+        width: 300vw;
+        height: 100%;
+        will-change: transform;
+    }
+
+    .HScroll__panel {
+        position: relative;
+        flex: 0 0 100vw;
+        height: 100%;
+    }
+
+    .HScroll__heading {
+        margin: 0;
+        color: var(--wText);
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+        font-size: clamp(2.4rem, 3.4vw, 4.2rem);
+        line-height: 1.15;
+    }
+
+    .HScroll__info {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+
+        .HScroll__info__icon {
+            flex-shrink: 0;
+            margin-top: 0.35rem;
+            color: var(--hColor);
+        }
+
+        p {
+            margin: 0;
+            color: var(--wText);
+            font-family: "Poppins", sans-serif;
+            font-weight: 200;
+            text-transform: uppercase;
+            font-size: clamp(1.15rem, 1.5vw, 1.75rem);
+            line-height: 1.5;
+            letter-spacing: 0.02em;
+        }
+    }
+
+    .HScroll__line {
+        position: absolute;
+        // Stated rather than left to auto: the deck of cards sits at 3 and the
+        // rules have to be behind it. Left implicit, the panel's own stacking
+        // and the deck's 3D context made the order depend on markup order,
+        // which is not something a rule's position on screen should turn on.
+        z-index: 0;
+        background-color: rgba(255, 255, 255, 0.25);
+        pointer-events: none;
+    }
+
+    // The panels' call to action carries the section — sized to lead, not to
+    // sit quietly next to the copy.
+    .HScroll__cta {
+        font-size: clamp(1.3rem, 1.9vw, 2.3rem);
+        letter-spacing: 0.14em;
+        padding: 1.1rem 2.2rem;
+        gap: 0.8rem;
+
+        .corner {
+            width: 16px;
+            height: 16px;
+        }
+
+        .corner--tl { border-top-width: 2px; border-left-width: 2px; }
+        .corner--tr { border-top-width: 2px; border-right-width: 2px; }
+        .corner--bl { border-bottom-width: 2px; border-left-width: 2px; }
+        .corner--br { border-bottom-width: 2px; border-right-width: 2px; }
+
+        &:hover {
+            .corner--tl { transform: translate(-5px, -5px); }
+            .corner--tr { transform: translate(5px, -5px); }
+            .corner--bl { transform: translate(-5px, 5px); }
+            .corner--br { transform: translate(5px, 5px); }
+        }
+    }
+
+    // Continuous baseline at 82vh (+1px = FirstTime's bottom line height):
+    // enters panel 2 at its left edge, runs through it and ends in panel 3 on
+    // the down-line at 40vw (track x = 100vw + 100vw + 48vw = 248vw).
+    .HScroll__baseline {
+        top: calc(82vh + 1px);
+        left: 100vw;
+        width: 148vw;
+        height: 1px;
+        transform-origin: left center; // continues FirstTime's bottom line
+
+        @include lineSweep(x, 0s);
+    }
+
+    .HScroll__scrollHint {
+        position: absolute;
+        bottom: 4vh;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--wText);
+        font-family: "Switzer-Light";
+        font-size: 0.9rem;
+
+        .HScroll__scrollHint__arrow {
+            font-size: 1.3rem;
+        }
+    }
+
+    // ---- Panel 1: Pro naše klienty ----
+    .HScroll__panel--clients {
+        .HScroll__heading {
+            position: absolute;
+            top: 27vh;
+            left: 7vw;
+        }
+
+        .HScroll__info {
+            position: absolute;
+            top: 39vh;
+            left: 7vw;
+            width: 32vw;
+        }
+
+        // sits clear above the rule at 73vh
+        .HScroll__ctaWrap {
+            position: absolute;
+            bottom: 31vh;
+            left: 7vw;
+        }
+
+        // in the right half of the panel, sitting high
+        .HScroll__stack {
+            position: absolute;
+            top: 42%;
+            left: 74vw;
+            transform: translate(-50%, -50%);
+            // Above the rules, which are pinned to 0.
+            z-index: 3;
+        }
+
+        // One card's contents: the picture, and its caption on the bottom rail.
+        .HScroll__card {
+            position: relative;
+            width: 100%;
+            height: 100%;
+
+            .gridDistortion {
+                position: absolute;
+                inset: 0;
+            }
+
+            img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+        }
+
+        .HScroll__card__caption {
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 0.7rem 1rem;
+            // Enough ground under it to read against a photograph, and no more.
+            background-image: linear-gradient(
+                to top,
+                rgba(2, 14, 21, 0.92),
+                rgba(2, 14, 21, 0)
+            );
+            color: var(--wText);
+            font-family: "Poppins", sans-serif;
+            font-weight: 200;
+            font-size: clamp(0.8rem, 0.95vw, 1rem);
+            letter-spacing: 0.04em;
+        }
+
+        // rules framing the wheels — the crossing sits on the stack's centre
+        .HScroll__line--stackH {
+            left: 56vw;
+            top: 42%;
+            width: 44vw;
+            height: 1px;
+            transform-origin: left center;
+
+            @include lineSweep(x, -0.8s);
+        }
+
+        .HScroll__line--stackV {
+            left: 74vw;
+            top: 12vh;
+            height: 62vh;
+            width: 1px;
+            transform-origin: center top;
+
+            @include lineSweep(y, -1.6s);
+        }
+
+
+        // vertical crossing the baseline (82vh), tail below it like the design.
+        // The baseline crosses it at 84.1% of its height — the draw grows out
+        // of that point, so it reads as branching off the baseline.
+        .HScroll__line--v {
+            left: 51vw;
+            top: 45vh;
+            width: 1px;
+            height: 44vh;
+            transform-origin: center 84.1%;
+
+            @include lineSweep(y, -2.4s);
+        }
+
+        // above the heading, running in from the left edge
+        .HScroll__line--hTop {
+            left: 0;
+            top: 20vh;
+            width: 44vw;
+            height: 1px;
+            transform-origin: left center;
+
+            @include lineSweep(x, -3.2s);
+        }
+
+        // short rule beside the heading and copy
+        .HScroll__line--vLeft {
+            left: 4vw;
+            top: 20vh;
+            width: 1px;
+            height: 34vh;
+            transform-origin: center top;
+
+            @include lineSweep(y, -4s);
+        }
+
+        // under the CTA, tying it back to the vertical at 51vw
+        .HScroll__line--hCta {
+            left: 4vw;
+            top: 73vh;
+            width: 47vw;
+            height: 1px;
+            transform-origin: left center;
+
+            @include lineSweep(x, -4.8s);
+        }
+
+        .HScroll__scrollHint {
+            left: 47.5vw;
+            bottom: 17vh;
+            transform: none;
+        }
+    }
+
+    // ---- Panel 3: Přidejte se k nám ----
+    .HScroll__panel--join {
+        .HScroll__photo {
+            position: absolute;
+            top: 21vh;
+            left: 6.5vw;
+            width: 32vw;
+            height: 55vh;
+        }
+
+        .HScroll__body {
+            position: absolute;
+            top: 33vh;
+            left: 42vw;
+            width: 34vw;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 3.5vh;
+        }
+
+        // runs from the baseline crossing to the very bottom edge — the next
+        // section below the horizontal scroll continues this line at 40vw
+        // baseline crosses this one at 67.3% of its height
+        .HScroll__line--v {
+            left: 40vw;
+            top: 45vh;
+            bottom: 0;
+            width: 1px;
+            transform-origin: center 67.3%;
+
+            @include lineSweep(y, -5.6s);
+        }
+
+        // above the body copy, from the vertical out to the right edge
+        .HScroll__line--hTop {
+            left: 40vw;
+            top: 24vh;
+            width: 55vw;
+            height: 1px;
+            transform-origin: left center;
+
+            @include lineSweep(x, 0s);
+        }
+
+        // right-hand rule dropping from that horizontal
+        .HScroll__line--vRight {
+            left: 95vw;
+            top: 24vh;
+            width: 1px;
+            height: 40vh;
+            transform-origin: center top;
+
+            @include lineSweep(y, -0.8s);
+        }
+    }
+
+    @include below-px(820) {
+        // No horizontal scroll on small screens: panels stack vertically.
+        height: auto;
+
+        .HScroll__sticky {
+            position: static;
+            height: auto;
+            overflow: visible;
+        }
+
+        .HScroll__track {
+            width: 100%;
+            height: auto;
+            flex-direction: column;
+            transform: none !important;
+        }
+
+        .HScroll__track > .FirstTime {
+            flex: none;
+            width: 100%;
+            height: auto;
+            overflow: visible;
+        }
+
+        .HScroll__panel {
+            flex: none;
+            width: 100%;
+            height: auto;
+            // No minimum: the panels' stacked content fills its own height
+            // now, and an 80vh floor only opened dead stretches between the
+            // deck and the next panel on tablets.
+            padding: 2vh 0;
+        }
+
+        .HScroll__line,
+        .HScroll__scrollHint {
+            display: none;
+        }
+
+        // The release choreography belongs to the pinned ride: unpinned, the
+        // section scrolls away like any other, and lifting/fading the content
+        // while it is still being read is just text disappearing under the
+        // reader. The custom properties arrive inline (framer), so the reads
+        // are neutralised rather than the values.
+        .HScroll__body,
+        .HScroll__photo,
+        .HScroll__stack,
+        .HScroll__ctaWrap,
+        .HScroll__cta {
+            opacity: 1;
+            translate: none;
+        }
+
+        .HScroll__panel--clients {
+            .HScroll__heading { position: static; margin: 8vh 6vw 3vh; }
+            .HScroll__info { position: static; margin: 0 6vw; width: auto; }
+            .HScroll__ctaWrap { position: static; margin: 4vh 6vw; }
+
+            // The deck at the column's width. It used to be the desktop deck
+            // under transform: scale(0.6) — a 500px layout box on a 390px
+            // screen (clipped at the right edge, blank space where the scale
+            // shrank it) with the caption at two-thirds size on top of
+            // CardSwap's own scale steps. The card is now cut to the viewport
+            // in useDeckLayout (index.jsx); this clamp mirrors that formula,
+            // and the padding makes room for the fan (it leans up and right by
+            // two card-distances) inside a box that clips.
+            //
+            // The clip is the point: CardSwap's deal drops the front card
+            // 640px straight down and parks it there for half the cycle. The
+            // pinned ride never shows this — the sticky viewport clips it —
+            // but stacked there is no viewport, and the parked card sat on
+            // top of whatever content came next. Clipped at the deck's own
+            // box, the card deals off the bottom edge and comes back, which
+            // is the same picture the desktop shows.
+            --deck-w: clamp(240px, 72vw, 420px);
+
+            .HScroll__stack {
+                position: static;
+                width: fit-content;
+                // Hard cap, not a nicety: the server renders the desktop deck
+                // and useDeckLayout only corrects it after hydration. For one
+                // paint the box holds a 500px card, and a mobile browser that
+                // sees content wider than its layout viewport expands the
+                // viewport to fit — and does not contract it again once the
+                // deck has resized. Capped, the first paint clips instead of
+                // overflowing and the viewport never moves.
+                max-width: 100%;
+                box-sizing: border-box;
+                margin: 4vh auto 6vh;
+                transform: none;
+                overflow: clip;
+                padding: calc(var(--deck-w) * 0.24) calc(var(--deck-w) * 0.2) 8px 8px;
+            }
+
+            // CardSwap scales itself down at 768px and 480px on top of
+            // whatever size it is given. The deck is already sized for this
+            // viewport — a second scale would shrink it twice and leave the
+            // layout box wrong again.
+            .HScroll__stack .card-swap-container {
+                transform: none;
+            }
+
+            // At deck-for-phone size the caption's vw clamp bottoms out
+            // unreadably small against a photograph.
+            .HScroll__card__caption {
+                font-size: 0.85rem;
+                padding: 0.55rem 0.8rem;
+            }
+        }
+
+        .HScroll__panel--join {
+            .HScroll__photo {
+                position: static;
+                width: 88vw;
+                height: 44vh;
+                margin: 0 6vw;
+            }
+
+            .HScroll__body {
+                position: static;
+                width: auto;
+                margin: 4vh 6vw;
+            }
+        }
+
+    }
+
+    // Phone in landscape (844×390 up to 932×430): wider than the stacking
+    // cutoff, so it gets the full pinned ride — at 390px of height. The
+    // desktop measures collide there: the paragraph ran into the CTA parked
+    // at bottom 31vh, the join panel's body overran the bottom edge, and the
+    // 400px-tall deck was taller than the viewport (the deck itself is cut
+    // for this in useDeckLayout; here is everything CSS owns). Type steps
+    // down against the short edge and the blocks spread back out.
+    @include phl-h {
+        .HScroll__heading {
+            font-size: clamp(1.7rem, 6.5vh, 2.4rem);
+        }
+
+        .HScroll__info {
+            gap: 0.6rem;
+
+            .HScroll__info__icon {
+                width: 20px;
+                height: 20px;
+                margin-top: 0.2rem;
+            }
+
+            p {
+                font-size: 0.95rem;
+            }
+        }
+
+        .HScroll__cta {
+            font-size: 1.05rem;
+            padding: 0.7rem 1.4rem;
+        }
+
+        .HScroll__panel--clients {
+            .HScroll__heading { top: 16vh; }
+
+            .HScroll__info {
+                top: 34vh;
+                width: 34vw;
+            }
+
+            // Clear of the paragraph above and under the 73vh rule, not
+            // across it.
+            .HScroll__ctaWrap { bottom: 8vh; }
+
+            // The deck is short-edge sized now; centred a touch lower so the
+            // fan's upward lean clears the header.
+            .HScroll__stack { top: 54%; }
+
+            .HScroll__card__caption {
+                font-size: 0.8rem;
+                padding: 0.45rem 0.7rem;
+            }
+
+            .HScroll__scrollHint {
+                bottom: 4vh;
+                font-size: 0.75rem;
+            }
+        }
+
+        .HScroll__panel--join {
+            .HScroll__photo {
+                top: 24vh;
+                height: 58vh;
+                width: 30vw;
+            }
+
+            .HScroll__body {
+                top: 14vh;
+                left: 42vw;
+                width: 48vw;
+                gap: 2.2vh;
+            }
+        }
+    }
+
+    // Short laptop (1280×720 and kin): the deck itself is resized in
+    // useDeckLayout; seated a little lower so the fan's upward lean clears
+    // the header instead of grazing it.
+    @include lt-h {
+        .HScroll__panel--clients .HScroll__stack { top: 47%; }
+    }
+
+    // Calm, not killed: the rules stay, the scroll choreography stays (it
+    // follows the reader's own scrolling) — only the light that travels the
+    // rules on its own stops. The keyframes own the head's opacity, so with
+    // the animation gone the gradient would stand still at full strength;
+    // opacity puts it out.
+    @include reduced-motion {
+        .HScroll__line::after {
+            animation: none;
+            opacity: 0;
+        }
+    }
+}

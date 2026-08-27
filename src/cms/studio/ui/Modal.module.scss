@@ -1,0 +1,110 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: var(--st-s8);
+  background: var(--st-overlay);
+  backdrop-filter: blur(3px);
+  animation: fade var(--st-fast) var(--st-ease);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The one place elevation is real: a dialog genuinely floats above the surface,
+   so it is allowed the border and the shadow that the rest of the Studio does
+   without. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 100%;
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-lg);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.62);
+  animation: lift var(--st-mid) var(--st-ease);
+}
+
+@keyframes lift {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}
+
+.sm {
+  max-width: 420px;
+}
+
+.md {
+  max-width: 620px;
+}
+
+.lg {
+  max-width: 940px;
+}
+
+.xl {
+  width: 1100px;
+  max-width: 100%;
+  height: 720px;
+  max-height: 100%;
+}
+
+.head {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--st-s5) var(--st-s3) var(--st-s4) var(--st-s6);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.headText {
+  min-width: 0;
+}
+
+.title {
+  @include t.section-title;
+
+  margin: 0;
+}
+
+.description {
+  margin: var(--st-s1) 0 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.body {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  padding: var(--st-s6);
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  gap: var(--st-s2);
+  justify-content: flex-end;
+  padding: var(--st-s4) var(--st-s6);
+  border-top: 1px solid var(--st-line);
+}
+
+.confirmText {
+  margin: 0;
+  font-size: var(--st-text-body);
+  line-height: 1.65;
+  color: var(--st-ink-2);
+}

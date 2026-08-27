@@ -1,7 +1,13 @@
 import Head from "next/head"
 
-// import Footer from "@/components/common/footer"
-// import CookiesContent from "@/components/pages/cookies/CookiesPage"
+import { footerStaticProps } from "@/cms/server/site"
+
+// The only content on this route today is the patička, which `_app` renders
+// and which therefore has to travel on this page's props. One shared
+// implementation rather than a copy per page — see @/cms/server/site/footer.
+export const getStaticProps = footerStaticProps
+
+import CookiesContent from "@/components/pages/cookies/CookiesPage"
 
 export default function CookiesPage() {
     return (
@@ -76,8 +82,7 @@ export default function CookiesPage() {
                 </script>
             </Head>
             <main lang="cs">
-                {/* <CookiesContent /> */}
-                {/* <Footer /> */}
+                <CookiesContent />
             </main>
         </>
     )

@@ -1,0 +1,579 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// The heading's rules and the selected row's number were a saturated royal blue,
+// #2f7fd6. It appeared nowhere else on the site — not in the palette, not in any
+// other section — and against a page of navy and turquoise it read as a stray
+// rather than as an accent. They are white now, like every other line here; the
+// heading's rule is simply the most present of them, which is what makes it the
+// heading's.
+$rule: rgba(255, 255, 255, 0.55);
+
+// The same ground the showcase's cards carry — black at 0.6, so whatever is
+// behind it is knocked back by the same amount and the two sections read as one
+// material. Nothing here is opaque: what removes the showcase is its own clip
+// closing on this seam, not this panel covering it.
+$panel: rgba(0, 0, 0, 0.6);
+
+// "Naši kolegové": the roster on one half, the person on the other.
+//
+// Two boxes, and the split matters. `.Colleagues` is 260vh and never leaves the
+// normal flow — it is what the scroll is measured against, and a sticky element
+// cannot be that. `.Colleagues__stage` is the screen, pinned for the whole of
+// it: the first 37.5% is the two halves closing, the rest is the detail being
+// drawn in.
+//
+// Must match COLLEAGUES_BOX_VH and COLLEAGUES_OVERLAP_VH in ../aboutStack.js —
+// Sass cannot read that file, so these are the second copies and it says so.
+// The pull-back puts this pin exactly where the showcase's squeeze begins.
+.Colleagues {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 260vh;
+    margin-top: -150vh;
+
+    @include below-px(820) {
+        height: auto;
+        margin-top: 0;
+    }
+
+    // A phone on its side is 800-and-some pixels wide, so the width test above
+    // reads it as a desktop and hands it the pinned two-column stage — which at
+    // 390px of height put the heading through the navbar and ten rows in a
+    // space that gives each of them two finger-widths less than a tap needs.
+    // The height is what identifies it (phs: max-height 520px), and it takes
+    // the same stacked flow the portrait phone does.
+    @include phs-h {
+        height: auto;
+        margin-top: 0;
+    }
+}
+
+// The stacked flow, named once and reached from two directions: narrow
+// viewports (portrait phones, portrait tablets) and short ones (phones on
+// their side). The two queries cannot be one expression, so the rules live
+// here rather than being written twice.
+@mixin colleagues-stacked {
+    position: static;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+
+    // The section's choreography is desktop's: the halves close over a pinned
+    // stage, the detail is drawn in over the rest of the pin, and standing
+    // aside for the history fades the stage where it stands. None of those
+    // gestures exist in a stacked flow — there is no pin to measure them
+    // against, so the heading sat at opacity 0 at the top of the section and
+    // the dismissal blanked two screens of in-flow page. The inline styles are
+    // framer's, so overriding them takes the one thing that beats an inline
+    // declaration.
+    opacity: 1 !important;
+    pointer-events: auto !important;
+
+    // The halves are inline transforms set from JS, and there is nothing to
+    // close on here — the two simply stack.
+    .Colleagues__list,
+    .Colleagues__panel {
+        flex: none;
+        transform: none !important;
+    }
+
+    .Colleagues__list {
+        padding: 8vh 6vw 4vh;
+    }
+
+    // The scroll-drawn detail, finished rather than absent — same reasoning
+    // as the stage above.
+    .Colleagues__heading {
+        opacity: 1 !important;
+
+        .Colleagues__heading__line i {
+            transform: none !important;
+        }
+    }
+
+    .Colleagues__meta,
+    .Colleagues__links {
+        opacity: 1 !important;
+    }
+
+    .Colleagues__row {
+        flex: none;
+    }
+
+    .Colleagues__name {
+        padding: 1.6vh 0 1.6vh 0;
+        grid-template-columns: 7vw 1fr;
+
+        // A shorter step than the desktop one, and it has to override the
+        // transform rather than add a padding of its own: the two would
+        // otherwise stack and the row would move twice as far.
+        &:hover,
+        &.is-active {
+            .Colleagues__name__index,
+            .Colleagues__name__who {
+                transform: translateX(1.5vw);
+            }
+        }
+    }
+
+    .Colleagues__panel {
+        height: 70vh;
+    }
+
+    .Colleagues__meta {
+        left: 6vw;
+        bottom: 12vh;
+        max-width: 60vw;
+    }
+
+    .Colleagues__links {
+        right: 6vw;
+        bottom: 4vh;
+    }
+
+    .Colleagues__frame,
+    .Colleagues__line--seam,
+    .Colleagues__line--rail,
+    .Colleagues__line--overHeading {
+        display: none;
+    }
+}
+
+.Colleagues__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+
+    // ---- the left half: the roster ----
+    .Colleagues__list {
+        position: relative;
+        flex: 0 0 47vw;
+        display: flex;
+        flex-direction: column;
+        // The top is deeper than the rule above the heading (10vh) so that the
+        // heading sits under that rule rather than on it. The left stays level
+        // with it: the rule down the margin and the dividers under the names
+        // both start here, and the text is inset from them by the heading's and
+        // the rows' own padding.
+        padding: 13vh 4vw 4vh 3.5vw;
+        background-color: $panel;
+    }
+
+    .Colleagues__heading {
+        margin: 0;
+        // Off the margin rule, and into the same column the row numbers start
+        // in — the heading was set flush against it, so the corner the two rules
+        // make had the word wedged into it.
+        padding-left: 2.5vw;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        // Room for the rule that hangs below each line, so the second word is
+        // not sitting on the first one's mark.
+        gap: 0.28em;
+        color: var(--wText);
+        font-family: "Switzer-Light";
+        font-weight: 300;
+        text-transform: uppercase;
+        font-size: clamp(1.8rem, 3.2vw, 3.8rem);
+        line-height: 1.15;
+        letter-spacing: 0.01em;
+
+        // Each line carries its own rule, and the rule runs past the word: an
+        // underline that ends exactly where the text does reads as a mistake in
+        // the kerning, not as a mark.
+        .Colleagues__heading__line {
+            position: relative;
+            padding-right: 2.5vw;
+
+            i {
+                position: absolute;
+                left: 0;
+                right: 0;
+                // Below the line box rather than inside it. At `0.08em` the rule
+                // sat about a sixth of an em under the baseline, which on a 48px
+                // heading is close enough to read as part of the letters instead
+                // of as a mark under them.
+                bottom: -0.1em;
+                height: 2px;
+                background-color: $rule;
+                transform-origin: left center;
+            }
+        }
+    }
+
+    // The whole roster, in one screen, without scrolling inside itself.
+    //
+    // It takes the room left over from the heading and the rows divide it up —
+    // so the list is sized by how many people there are rather than the number
+    // of people being chosen to suit a row height. Ten of them at present; add
+    // to src/constants/people.js and the rows simply get shorter.
+    .Colleagues__names {
+        flex: 1;
+        margin: 4vh 0 0;
+        padding: 0;
+        min-height: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        // Between one row and the next. Kept a little wider than the gap inside
+        // a row (below), because that difference is the whole reason a divider
+        // reads as belonging to the name above it rather than floating between
+        // two of them.
+        gap: 1vh;
+    }
+
+    .Colleagues__row {
+        flex: 1 1 0;
+        min-height: 0;
+    }
+
+    .Colleagues__row {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        // The divider was flush under its name — measured, nought pixels, and
+        // still only ten after a first pass at it. The room for this came out of
+        // the list's bottom padding and the gap between rows rather than out of
+        // the row height, because ten people have to fit on one screen.
+        gap: 1.8vh;
+    }
+
+    // A button, not a link: it selects which person the panel is showing, and
+    // it does not navigate anywhere.
+    .Colleagues__name {
+        appearance: none;
+        border: 0;
+        background: none;
+        padding: 0 0 0 2.5vw;
+        display: grid;
+        grid-template-columns: 3.5vw 1fr;
+        align-items: baseline;
+        gap: 1vw;
+        text-align: left;
+        color: rgba(255, 255, 255, 0.72);
+        font-family: "Switzer-Light";
+        font-weight: 300;
+        // The site runs its own cursor; a row that switched to a hand would be
+        // the only element on the page that does.
+        cursor: inherit;
+        transition: color 0.45s ease;
+
+        // The step to the right on hover is a transform on the two cells, not
+        // padding on the grid around them.
+        //
+        // It was `padding-left: 2.5vw → 3.4vw`, eased over 0.45s. Padding is a
+        // layout property: easing it re-laid this grid — and the 1fr column, and
+        // the text in it — on every frame, on two rows at once, for every hover.
+        // Measured over a sweep of forty hovers it was 292 extra layouts and
+        // 791ms of extra scripting; the p90 frame went from 25ms to 92ms.
+        // Translating the cells lands in the same place and never leaves the
+        // compositor.
+        //
+        // It has to be the cells rather than the button, because the button
+        // already carries a transform: the row's own arrival animates `x` on it,
+        // and an inline style is not something a stylesheet can add to.
+        .Colleagues__name__index,
+        .Colleagues__name__who {
+            transition: transform 0.45s ease, color 0.45s ease;
+        }
+
+        .Colleagues__name__index {
+            font-size: clamp(0.65rem, 0.8vw, 0.95rem);
+            letter-spacing: 0.14em;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .Colleagues__name__who {
+            font-size: clamp(0.85rem, 1.15vw, 1.4rem);
+            letter-spacing: 0.01em;
+        }
+
+        &:hover,
+        &.is-active {
+            color: var(--wText);
+
+            .Colleagues__name__index,
+            .Colleagues__name__who {
+                transform: translateX(0.9vw);
+            }
+
+            // Brightens with the name rather than departing from it.
+            .Colleagues__name__index { color: var(--wText); }
+        }
+    }
+
+    // ---- the right half: the person ----
+    .Colleagues__panel {
+        position: relative;
+        flex: 1;
+        background-color: $panel;
+        overflow: hidden;
+    }
+
+    // What the portraits are multiplied into, and it has to be OPAQUE.
+    //
+    // `multiply` blends with the backdrop of its stacking context, and against
+    // a translucent one there is nothing to multiply by: the source comes
+    // through unchanged. The panel's ground is black at 0.6, so the first
+    // version of this left every portrait's white studio backdrop showing and
+    // turned the whole half grey — the exact opposite of asking for a dark
+    // panel. That is not a tuning problem, it is what the blend mode does.
+    //
+    // So the plate is solid, and it is painted the colour the translucent panel
+    // resolves to over the shader behind it. Nothing visible is given up except
+    // the shader's drift under this one half; what is gained is a ground the
+    // cutouts can actually be dropped into.
+    //
+    // Bright over the figure, dark everywhere else — the falloff is the whole
+    // trick. Where the plate is light the person survives the multiply and the
+    // white around them goes to the plate's colour; where it is dark, both go
+    // dark together and the panel is simply the panel.
+    .Colleagues__pool {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        // Smaller and gentler than it was. The old one held near-white out to
+        // 38% of the radius and then fell from 188 to 74 by 62% — a hundred and
+        // fourteen levels across a quarter of the radius, which is a visible
+        // ring, and it read as a lamp switched on behind the person rather than
+        // as light falling off. The peak is down from 210 to 198, the ellipse is
+        // in from 40/60 to 32/48, and the fall is spread over eight stops with
+        // no step steeper than about three levels per percent against the old
+        // four and three quarters.
+        //
+        // The ellipse had to come in twice. Spreading the fall alone made the
+        // light BIGGER, not smaller: the half-brightness point moved from 57%
+        // of the old radius out to 67% of the new one, which at 36/54 put it
+        // further from the centre in absolute terms than it started. Measured
+        // against the box, half-light now sits at 21.3% of the width where it
+        // was at 22.8%, and the dark closes at 29.8% where it was at 32%.
+        //
+        // The outermost stop is not free to change: this plate covers the whole
+        // half, so its edge colour IS the panel's, and it has to keep matching
+        // the list beside it.
+        background:
+            radial-gradient(
+                32% 48% at 50% 50%,
+                #c6ccd1 0%,
+                #bcc2c8 25%,
+                #a5acb3 42%,
+                #858d95 56%,
+                #626a72 68%,
+                #444c54 78%,
+                #2c343c 86%,
+                #181f26 93%,
+                #070f15 100%
+            ),
+            #070f15;
+    }
+
+    // One portrait now, not ten stacked. What changes it is the grid inside —
+    // see ui/PixelReveal — so there is nothing here to fade.
+    .Colleagues__portrait {
+        position: absolute;
+        inset: 0;
+        // Multiplying drops the cutout's white into whatever is under it
+        // exactly — masking it out would leave a halo on every strand of hair.
+        mix-blend-mode: multiply;
+    }
+
+    // ---- detail ----
+    // The frame's inset, named once: the marks draw on it and the counter, the
+    // motto and the links all sit inside it. They used to be placed against the
+    // panel's own edges instead, which put them outside the very frame that is
+    // there to say where to look.
+    --frame-top: 9vh;
+    --frame-x: 6vw;
+    --frame-bottom: 7vh;
+
+    .Colleagues__frame {
+        position: absolute;
+        inset: var(--frame-top) var(--frame-x) var(--frame-bottom);
+        pointer-events: none;
+
+        .Colleagues__frame__corner {
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            border: 0 solid rgba(255, 255, 255, 0.45);
+        }
+
+        .Colleagues__frame__corner--tl { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+        .Colleagues__frame__corner--tr { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+        .Colleagues__frame__corner--bl { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+        .Colleagues__frame__corner--br { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+    }
+
+    .Colleagues__meta {
+        position: absolute;
+        z-index: 1;
+        left: calc(var(--frame-x) + 1.8vw);
+        bottom: calc(var(--frame-bottom) + 3vh);
+        max-width: 20vw;
+    }
+
+    .Colleagues__counter {
+        display: block;
+        margin-bottom: 1.2vh;
+        font-family: "Switzer-Light";
+        font-size: clamp(0.68rem, 0.8vw, 0.95rem);
+        letter-spacing: 0.16em;
+        color: rgba(255, 255, 255, 0.42);
+
+        em {
+            font-style: normal;
+            color: var(--wText);
+        }
+    }
+
+    .Colleagues__moto {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.6);
+        font-family: "Switzer-Light";
+        font-size: clamp(0.85rem, 1vw, 1.15rem);
+        line-height: 1.5;
+    }
+
+    .Colleagues__links {
+        position: absolute;
+        z-index: 1;
+        right: calc(var(--frame-x) + 1.8vw);
+        bottom: calc(var(--frame-bottom) + 3vh);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        gap: 0.7rem;
+
+        a {
+            display: grid;
+            place-items: center;
+            width: 40px;
+            height: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+            transition: border-color 0.35s ease, color 0.35s ease;
+
+            &:hover {
+                border-color: rgba(255, 255, 255, 0.75);
+                color: var(--wText);
+            }
+        }
+    }
+
+    // ---- rules ----
+    .Colleagues__line {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.22);
+        pointer-events: none;
+    }
+
+    // down the page margin, tying the rows together
+    .Colleagues__line--rail {
+        left: 3.5vw;
+        top: 10vh;
+        width: 1px;
+        height: 78vh;
+        transform-origin: center top;
+
+        @include lineSweep(y, -0.4s);
+    }
+
+    // above the heading, running out to the seam
+    .Colleagues__line--overHeading {
+        left: 3.5vw;
+        top: 10vh;
+        width: 43.5vw;
+        height: 1px;
+        transform-origin: left center;
+
+        @include lineSweep(x, -1.2s);
+    }
+
+    // one under each name
+    .Colleagues__line--row {
+        position: relative;
+        height: 1px;
+        transform-origin: left center;
+        background-color: rgba(255, 255, 255, 0.16);
+
+        @include lineSweep(x, -2s);
+    }
+
+    // The seam, drawn from the middle outwards — it is the mark of where the
+    // two halves met, not a border either of them brought with it.
+    .Colleagues__line--seam {
+        left: 47vw;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        transform-origin: center center;
+        z-index: 2;
+
+        @include lineSweep(y, -2.8s);
+    }
+
+    @include below-px(820) {
+        @include colleagues-stacked;
+    }
+
+    // A phone in landscape — see the note on the box above. Everything the
+    // stacked flow states in vh is restated here in px, because a vh is four
+    // pixels on a 390px-tall screen: the rows had come out at 32px against the
+    // 44px a tap needs, and the list's own top padding had all but vanished.
+    @include phs-h {
+        @include colleagues-stacked;
+
+        .Colleagues__list {
+            padding: 56px 6vw 28px;
+        }
+
+        .Colleagues__name {
+            // 14px each side of a ~17px line box is what actually lands the
+            // row at the 44px a tap needs — 12px measured out at 41.
+            padding: 14px 0;
+            grid-template-columns: 3.5rem 1fr;
+        }
+
+        // The screen is short, so the portrait takes all of it rather than
+        // seven tenths — 70vh of a landscape phone is a letterbox.
+        .Colleagues__panel {
+            height: 100vh;
+        }
+
+        .Colleagues__meta {
+            bottom: 76px;
+        }
+
+        .Colleagues__links {
+            bottom: 20px;
+        }
+    }
+
+    // A tap has nothing to gain from a 40px box missing at 44 — same hairline,
+    // four more pixels of target.
+    @include touch {
+        .Colleagues__links a {
+            width: 44px;
+            height: 44px;
+        }
+    }
+
+    // The sweeps are the one motion here that runs unasked and forever; the
+    // rest of the section moves only as far as the reader scrolls it. Calm the
+    // rules down to the plain hairlines they decorate — the same answer
+    // WhoWeAre and ChooseAdvisor give.
+    @include reduced-motion {
+        .Colleagues__line::after {
+            animation: none;
+            background-image: none;
+            filter: none;
+        }
+    }
+}

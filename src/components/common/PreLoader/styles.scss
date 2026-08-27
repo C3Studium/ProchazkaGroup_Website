@@ -1,69 +1,286 @@
 @use "../../../styles/system/_shortcuts.scss" as *;
 
-.Preloader__Main {
-    position: fixed;
-    top: 0;
-    left: 0;
-    margin: 0;
-    padding: 0;
-    width: 100%;
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 1009;
-    backdrop-filter: blur(5px);
-    background-color: transparent;
+// The first-load curtain. Hidden unless <html data-preload="1"> (rendered by
+// the server on every full document load, stripped when the curtain leaves).
+// TRANSPARENT: the shader ground shows through — heroes and the navbar hold
+// their entrances behind it.
+.PGLoad {
+    display: none;
+}
 
-    .Preloader__text {
+html[data-preload="1"] {
+    // Belt and braces under the frozen Lenis: no native scroll either.
+    overflow: hidden;
+
+    .PGLoad {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: block;
         color: var(--wText);
-        position: relative;
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
-        flex-direction: column;
-        width: 30%;
-        gap: 0.05rem;
-        z-index: 10;
-
-        h1 {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: fit-content;
-            height: fit-content;
-
-            span {
-                color: var(--wText);
-                font-weight: 300;
-                font-style: normal;
-                margin: 0;
-                font-size: 4rem;
-                text-transform: uppercase;
-                font-family: 'Switzer', sans-serif;
-            }
-        }
-
-        p {
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: fit-content;
-            height: fit-content;
-
-            span {
-                color: var(--wText);
-                font-weight: 300;
-                font-style: normal;
-                margin: 0;
-                font-size: 1.5rem;
-                text-transform: uppercase;
-                font-family: 'Switzer', sans-serif;
-            }
-        }
     }
 
+    // The whole page waits out the curtain — but it is RENDERED the whole
+    // time: opacity zero (not visibility) plus an early layer promotion, so
+    // the browser rasterizes the page long before the reveal and the clip's
+    // first frame has nothing left to build. Interaction stays off.
+    main {
+        opacity: 0;
+        pointer-events: none;
+        will-change: clip-path, transform, opacity;
+    }
+
+    // The navbar waits out the curtain; removing the attribute releases this
+    // hold and the transition below IS its entrance.
+    .navbar__container {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+    }
+}
+
+// The reveal: the clip rectangle, the zoom and the fade-in are all driven as
+// inline styles on <main> by the preloader (cheaper than CSS vars on <html>,
+// which recalced the whole document every frame).
+
+.navbar__container {
+    transition:
+        opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s,
+        transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+}
+
+// ── the mosaic ──────────────────────────────────────────────────────────
+//
+// An irregular cluster of hairline rectangles on a shared track grid; the
+// geometry is animated inline (left/top/width/height in % of this stage), so
+// a hot box genuinely pushes everything else aside. Holes are holes.
+// ~85% of the screen, centred — oversized on purpose. The mosaic runs UNDER
+// the wordmark and the counter (z-order below), so the big blocks can reach
+// into the text's corner without ever sitting on the words.
+// The whole screen is the stage — the bands run past its edges on purpose.
+.PGLoad__stage {
+    position: absolute;
+    top: 2vh;
+    left: 0;
+    right: 0;
+    height: 96vh;
+    z-index: 1;
+}
+
+.PGLoad__box {
+    position: absolute;
+}
+
+.PGLoad__box__skin {
+    position: absolute;
+    inset: 0;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(2, 14, 21, 0.26);
+    overflow: hidden;
+}
+
+// The page the active square stands for — just the name, centred, set in
+// the caps register. No pictures: the box IS the page for a moment.
+.PGLoad__box__label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1rem, 1.4vw, 1.6rem);
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    text-indent: 0.26em;
+    color: var(--wText);
+    white-space: nowrap;
+}
+
+// The text itself is a separate layer: it takes the screen-edge slide (a
+// transform written by the layout loop) without disturbing the flex centre.
+.PGLoad__box__label__txt {
+    display: inline-block;
+    will-change: transform;
+}
+
+// The house corners — worn only by the ACTIVE box (the wrapper's opacity is
+// animated), at full strength.
+.PGLoad__box__marks {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.PGLoad__mark {
+    position: absolute;
+    width: 9px;
+    height: 9px;
+    pointer-events: none;
+}
+
+.PGLoad__mark--tl { top: 6px; left: 6px; border-top: 1px solid rgba(255, 255, 255, 0.75); border-left: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--tr { top: 6px; right: 6px; border-top: 1px solid rgba(255, 255, 255, 0.75); border-right: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--br { bottom: 6px; right: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.75); border-right: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--bl { bottom: 6px; left: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.75); border-left: 1px solid rgba(255, 255, 255, 0.75); }
+
+// ── the wordmark ────────────────────────────────────────────────────────
+//
+// Bottom-left, per the prototype: the small line ABOVE, the oversized name
+// under it. Every character is its own element for the write/unwrite.
+.PGLoad__word {
+    position: absolute;
+    left: 6vw;
+    bottom: 7vh;
+    z-index: 3;
+    // The wordmark sits in the same half-light as the active boxes.
+    opacity: 0.4;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+}
+
+.PGLoad__line {
+    display: block;
+    white-space: nowrap;
+}
+
+.PGLoad__line--eyebrow {
+    font-size: clamp(0.85rem, 1.15vw, 1.3rem);
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.PGLoad__line--name {
+    font-size: clamp(3rem, 7vw, 8rem);
+    line-height: 0.95;
+    letter-spacing: 0.01em;
+    color: var(--wText);
+}
+
+.PGLoad__ch {
+    display: inline-block;
+    will-change: transform, opacity;
+}
+
+// ── the counter and the bar ─────────────────────────────────────────────
+.PGLoad__pct {
+    position: absolute;
+    right: 6vw;
+    bottom: 7vh;
+    z-index: 3;
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(2.1rem, 3.3vw, 3.6rem);
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.75);
+    font-variant-numeric: tabular-nums;
+}
+
+.PGLoad__bar {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 10px;
+    z-index: 3;
+    background-color: rgba(255, 255, 255, 0.08);
+    overflow: hidden;
+}
+
+.PGLoad__bar__fill {
+    position: absolute;
+    inset: 0;
+    transform-origin: left center;
+    background-color: rgba(255, 255, 255, 0.85);
+}
+
+// ── the window frame ────────────────────────────────────────────────────
+.PGLoad__frame {
+    position: fixed;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    pointer-events: none;
+}
+
+// ── responsive ──────────────────────────────────────────────────────────
+//
+// The band GEOMETRY is responsive inside liveRects (bandsFor picks a
+// portrait / short-wide / desktop dress from the viewport) — these queries
+// only re-set the TYPE so the wordmark, the counter and the boxes' labels
+// compose on narrow and short screens.
+@media (max-width: 900px) {
+    // Wordmark and counter share the bottom edge on a phone: both shrink
+    // until "Procházka Group" and "100 %" clear each other at 390px.
+    .PGLoad__word {
+        left: 5vw;
+        bottom: 6vh;
+        gap: 0.45rem;
+    }
+
+    .PGLoad__line--eyebrow {
+        font-size: 0.72rem;
+        letter-spacing: 0.24em;
+    }
+
+    .PGLoad__line--name {
+        font-size: clamp(1.7rem, 7.5vw, 3.4rem);
+    }
+
+    .PGLoad__pct {
+        right: 5vw;
+        bottom: 6.5vh;
+        font-size: clamp(1.4rem, 4.5vw, 2.4rem);
+    }
+
+    // The label must fit the ACTIVE box, which is small on a phone — the
+    // longest page name ("Benefit program") inside a grown side-band box.
+    .PGLoad__box__label {
+        font-size: clamp(0.7rem, 3vw, 1rem);
+        letter-spacing: 0.18em;
+        text-indent: 0.18em;
+    }
+
+    .PGLoad__bar {
+        height: 8px;
+    }
+}
+
+// Phone landscape: the height is the scarce side — cap the name against it
+// (this block follows the width query, so it wins where both apply).
+@media (max-height: 480px) {
+    .PGLoad__word {
+        left: 5vw;
+        bottom: 6vh;
+        gap: 0.35rem;
+    }
+
+    .PGLoad__line--eyebrow {
+        font-size: 0.72rem;
+        letter-spacing: 0.24em;
+    }
+
+    .PGLoad__line--name {
+        font-size: clamp(1.6rem, 6.5vh, 2.4rem);
+    }
+
+    .PGLoad__pct {
+        right: 5vw;
+        bottom: 6vh;
+        font-size: clamp(1.3rem, 7vh, 2rem);
+    }
+
+    .PGLoad__box__label {
+        font-size: clamp(0.7rem, 3.4vh, 0.95rem);
+        letter-spacing: 0.18em;
+        text-indent: 0.18em;
+    }
+
+    .PGLoad__bar {
+        height: 8px;
+    }
 }

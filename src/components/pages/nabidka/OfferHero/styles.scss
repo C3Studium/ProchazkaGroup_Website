@@ -1,0 +1,599 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Hero of /nabidka. The picture is the section that follows, seen from close
+// up; scrolling pulls the camera back off it until it is full bleed and the
+// statistics rail can take it over. Everything here is either the aperture or
+// something anchored to its edges — see index.jsx for the motion.
+.OfferHero {
+    // Sticky travel. 70vh of scroll to open the aperture and settle, which is
+    // about half a wheel-throw: long enough to read as a camera move, short
+    // enough that nobody is scrolling through a held frame.
+    position: relative;
+    // Below the rail, which is pulled up over this section's last screen.
+    z-index: 1;
+    width: 100%;
+    height: 170vh;
+
+    .OfferHero__viewport {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        // Must stay transparent. The gyroid shader in _app is this page's
+        // ground and it shows through everything the aperture is not.
+        overflow: hidden;
+    }
+
+    // The shader, as a bitmap — the same capture the statistics section uses,
+    // so the two sit behind each other with nothing between them. See the
+    // cover effect in index.jsx for why the live one is off here.
+    .OfferHero__still {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background-color: #020E15;
+        background-image: url("/assets/backgrounds/tunnel_still.webp");
+        background-size: cover;
+        background-position: center;
+        pointer-events: none;
+    }
+
+    // --- aperture -------------------------------------------------------
+
+    .OfferHero__aperture,
+    .OfferHero__reveal {
+        position: absolute;
+        inset: 0;
+        // Both carry a clip-path from a different source (scroll / entry) and
+        // the browser intersects them. Neither may be given a background:
+        // whatever is painted here is painted inside the window.
+        will-change: clip-path;
+    }
+
+    .OfferHero__zoom,
+    .OfferHero__photo {
+        position: absolute;
+        inset: 0;
+        will-change: transform;
+
+        .gridDistortion,
+        .gridDistortion__canvas,
+        .gridDistortion__fallback {
+            width: 100%;
+            height: 100%;
+        }
+
+        // Driven from index.jsx: the canvas comes off before this frame is
+        // handed to the rail, leaving the ordinary <Image> underneath, which
+        // is exactly what the rail draws. The component's own 0.35s ease still
+        // does the arrival; on the way out it only adds a lag the scroll can
+        // outrun, and it is short enough not to.
+        .gridDistortion__canvas.is-ready {
+            opacity: var(--shader-fade, 1);
+            // No transition on the way out — see shaderFade in index.jsx. The
+            // component's own ease is what turned a one-frame switch into a
+            // visible cross-fade of two copies of the same photograph.
+            transition: none;
+        }
+    }
+
+    .OfferHero__scrim {
+        position: absolute;
+        inset: 0;
+        background-color: #000;
+        pointer-events: none;
+    }
+
+    // Only the left edge, and only as far in as the headline reaches. A scrim
+    // over the whole plate to make two lines of type legible would cost the
+    // photograph everything it was opened for.
+    .OfferHero__shade {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        background-image: linear-gradient(
+            to right,
+            rgba(0, 0, 0, 0.74) 0%,
+            rgba(0, 0, 0, 0.46) 22%,
+            rgba(0, 0, 0, 0) 52%
+        );
+    }
+
+    // --- the line the picture opens out of ------------------------------
+
+    .OfferHero__seam {
+        position: absolute;
+        // `top` is animated for the roof edge and `bottom` for the floor one,
+        // so neither may be pinned here — the modifier below clears whichever
+        // one this rule would otherwise leave standing.
+        top: 50%;
+        // Fed from the component: the seam has to be exactly as wide as the
+        // plate the picture opens into, and that width is derived at runtime
+        // from the photograph's aspect. See plateFor() in index.jsx.
+        left: var(--plate-left, 34%);
+        right: var(--plate-right, 6%);
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.75);
+        // Grows from the middle outwards, so the picture arrives from a point
+        // rather than from one side.
+        transform-origin: center;
+        pointer-events: none;
+        filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+    }
+
+    .OfferHero__seam--floor {
+        top: auto;
+        bottom: 50%;
+    }
+
+    // --- the two rules the plate sits on --------------------------------
+
+    .OfferHero__rule {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1px;
+        pointer-events: none;
+
+        .OfferHero__rule__line {
+            // The hairline itself. lineSweep may only ever go on one of these
+            // — a 1px box with a position — never on the container, which has
+            // been the cause of two full-height gradient blocks on this site.
+            position: absolute;
+            inset: 0;
+            display: block;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.18);
+            transform-origin: center;
+            @include lineSweep(x, -2.2s);
+        }
+    }
+
+    .OfferHero__rule--bottom .OfferHero__rule__line {
+        @include lineSweep(x, -4.9s);
+    }
+
+    // --- corner marks that spread with the aperture ---------------------
+
+    .OfferHero__frame {
+        position: absolute;
+        pointer-events: none;
+
+        .OfferHero__frame__marks {
+            position: absolute;
+            // Sat just outside the aperture edge, so the marks read as
+            // registration on the picture rather than as a border touching it.
+            inset: -10px;
+        }
+    }
+
+    .OfferHero__mark {
+        position: absolute;
+        width: clamp(14px, 1.4vw, 22px);
+        height: clamp(14px, 1.4vw, 22px);
+        border: 0 solid rgba(255, 255, 255, 0.55);
+
+        &--tl {
+            top: 0;
+            left: 0;
+            border-top-width: 1px;
+            border-left-width: 1px;
+        }
+
+        &--tr {
+            top: 0;
+            right: 0;
+            border-top-width: 1px;
+            border-right-width: 1px;
+        }
+
+        &--bl {
+            bottom: 0;
+            left: 0;
+            border-bottom-width: 1px;
+            border-left-width: 1px;
+        }
+
+        &--br {
+            bottom: 0;
+            right: 0;
+            border-bottom-width: 1px;
+            border-right-width: 1px;
+        }
+    }
+
+    // --- the question the next section answers --------------------------
+
+    .OfferHero__handoff {
+        position: absolute;
+        // Centred on the picture it is written over, not hung off an edge:
+        // by the time it arrives the picture is the whole viewport and there
+        // are no edges left to hang from.
+        left: 50%;
+        top: 50%;
+        // This translate is the centring and nothing else may be written to
+        // this element's transform. framer moves the box inside instead.
+        transform: translate(-50%, -50%);
+        // Sized in px against the heading's own scale, not in ch against the
+        // root font — at 58ch the box was 535px wide under 51px type, which
+        // broke the line four times and left "ČR" alone on the last one.
+        width: min(1040px, 84vw);
+        z-index: 4;
+        pointer-events: none;
+    }
+
+    .OfferHero__handoff__inner {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.6em;
+        text-align: center;
+    }
+
+    .OfferHero__handoff__label {
+        display: flex;
+        align-items: center;
+        gap: 0.7em;
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.62rem, 0.72vw, 0.78rem);
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.6);
+
+        .OfferHero__handoff__tick {
+            display: block;
+            width: clamp(20px, 2.4vw, 40px);
+            height: 1px;
+            background-color: var(--hColor);
+        }
+    }
+
+    .OfferHero__handoff__title {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(1.5rem, 2.9vw, 3.2rem);
+        line-height: 1.24;
+        text-wrap: balance;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        color: var(--wText);
+        text-shadow: 0 2px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    // --- copy -----------------------------------------------------------
+
+    .OfferHero__copy {
+        position: absolute;
+        inset: 0;
+        z-index: 3;
+        display: grid;
+        // One column of text with the plate behind it, not four corners with
+        // the plate in the hole between them. The second column exists only to
+        // park the scroll hint against the right edge.
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: auto 1fr auto;
+        padding: 13vh 7vw 5vh;
+        // The copy sits over the picture, so it must not eat the pointer
+        // anywhere it is only air. Each interactive child takes it back.
+        pointer-events: none;
+
+        a,
+        button {
+            pointer-events: auto;
+        }
+    }
+
+    .OfferHero__eyebrow {
+        grid-column: 1;
+        grid-row: 1;
+        align-self: start;
+        display: flex;
+        align-items: center;
+        gap: 0.7em;
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.62rem, 0.72vw, 0.78rem);
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.62);
+
+        .OfferHero__eyebrow__tick {
+            display: block;
+            width: clamp(24px, 3vw, 52px);
+            height: 1px;
+            background-color: var(--hColor);
+        }
+    }
+
+    .OfferHero__title {
+        grid-column: 1;
+        grid-row: 2;
+        align-self: center;
+        justify-self: start;
+        // Runs past the plate's left edge on purpose. Type that stops short of
+        // the picture and type that crosses it are different pictures: the
+        // first is a caption, the second is the page.
+        max-width: 52vw;
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(2.3rem, 4.4vw, 5.2rem);
+        line-height: 1.1;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--wText);
+        // Against the photograph the letterforms need an edge of their own;
+        // the shade behind them does the rest.
+        text-shadow: 0 2px 30px rgba(0, 0, 0, 0.45);
+
+        .OfferHero__title__accent {
+            color: var(--hColor);
+        }
+    }
+
+    .OfferHero__lead {
+        grid-column: 1;
+        grid-row: 3;
+        align-self: end;
+        justify-self: start;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5em;
+        max-width: 38ch;
+        // Hangs off a rule rather than a box, which is how the rest of the
+        // site attaches a block to nothing.
+        padding-left: 1.6em;
+        border-left: 1px solid rgba(255, 255, 255, 0.16);
+
+        .OfferHero__lead__text {
+            margin: 0;
+            font-family: "Switzer-Light", sans-serif;
+            font-size: clamp(1rem, 1.18vw, 1.28rem);
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.82);
+        }
+    }
+
+    .OfferHero__hint {
+        grid-column: 2;
+        grid-row: 3;
+        align-self: end;
+        justify-self: end;
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        font-size: clamp(0.62rem, 0.72vw, 0.78rem);
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+
+        .arrowIcon {
+            width: 0.9em;
+            height: 0.9em;
+        }
+    }
+
+    // --- narrow / short viewports ---------------------------------------
+
+    // One column: at this width the plate is nearly the full page and there is
+    // no second column to put anything in.
+    // No room beside the plate for a headline to cross it, so the copy takes
+    // the two corners under it instead and the plate returns to centre.
+    @include below(md) {
+        height: 155vh;
+
+        .OfferHero__shade {
+            display: none;
+        }
+
+        .OfferHero__copy {
+            grid-template-columns: minmax(0, 1fr) auto;
+            grid-template-rows: auto 1fr auto;
+            padding: 12vh 6vw 5vh;
+        }
+
+        .OfferHero__hint {
+            grid-column: 2;
+            grid-row: 1;
+            align-self: start;
+        }
+
+        .OfferHero__title {
+            grid-column: 1;
+            grid-row: 3;
+            align-self: end;
+            max-width: 20ch;
+            font-size: clamp(1.9rem, 3.4vw, 2.8rem);
+            line-height: 1.18;
+            text-shadow: none;
+        }
+
+        .OfferHero__lead {
+            grid-column: 2;
+            grid-row: 3;
+            align-self: end;
+            justify-self: end;
+            max-width: 32ch;
+        }
+    }
+
+    // One column. Two columns of text under a plate this narrow leaves neither
+    // of them a measure worth reading.
+    @include below(sm) {
+        height: 150vh;
+
+        .OfferHero__copy {
+            grid-template-rows: auto 1fr auto auto;
+            // Stacked, the two blocks used to reach 4px into the picture at
+            // 390x844. The picture cannot give the room back — its height is
+            // the photograph's aspect, not a cap — so the copy takes some of
+            // it here, and the portrait-phone block below takes the rest by
+            // giving the headline the width the grid was holding from it.
+            padding-bottom: 3.5vh;
+        }
+
+        .OfferHero__title {
+            grid-row: 3;
+            max-width: none;
+            font-size: clamp(2rem, 5.4vw, 3rem);
+        }
+
+        .OfferHero__lead {
+            grid-column: 1;
+            grid-row: 4;
+            justify-self: start;
+            max-width: none;
+            margin-top: 1.3em;
+        }
+    }
+
+    // A phone in portrait that is not a 390x844 phone.
+    //
+    // The stacked composition above was tuned on that screen, where the plate
+    // and the copy come to 9px short of the viewport — so it has nothing to
+    // give, and a phone that is shorter, or narrower, spends what is not
+    // there. Measured at 360x640 the headline was drawn straight across the
+    // middle of the photograph; `below(md)` has already switched off the shade
+    // that would have made it legible.
+    //
+    // The headline is where the room is. The grid keeps a second column for
+    // the scroll hint, which sits in row 1 — but a column is a column in every
+    // row, so 68px of nothing stood beside the headline all the way down the
+    // page. At 360 that broke "Nemáte na vaše" over two lines and the whole
+    // headline over four; given the width back it is the two lines the copy
+    // was written to have, and that alone is most of the overlap.
+    //
+    // Two queries rather than one because there are two ways to run out of
+    // room and they are not the same condition: a 375x812 phone is tall and
+    // still too narrow for this headline at its full size, and a 500x700 one
+    // would be the other way round.
+    @include below(sm) {
+        @media (orientation: portrait) and (max-width: 400px),
+            (orientation: portrait) and (max-height: 720px) {
+            .OfferHero__title {
+                grid-column: 1 / -1;
+                font-size: clamp(1.45rem, 7.7vw, 2.2rem);
+                line-height: 1.16;
+            }
+
+            .OfferHero__lead {
+                grid-column: 1 / -1;
+                margin-top: 1.1em;
+                gap: 1.2em;
+
+                .OfferHero__lead__text {
+                    font-size: clamp(0.86rem, 3.9vw, 1rem);
+                    line-height: 1.5;
+                }
+            }
+        }
+    }
+
+    // A phone held sideways. 844x390 matches `below(sm)` on width alone, and
+    // the stacked composition it inherits there is unreadable: measured, the
+    // eyebrow sat inside the navbar, the scroll hint sat on top of the navbar's
+    // own call to action, and the headline was drawn across the middle of the
+    // photograph with no shade under it — three blocks of type and a plate do
+    // not stack in 390px of height.
+    //
+    // Landscape gets the arrangement landscape was designed for instead: the
+    // plate on the right, the copy standing beside it. The plate's own geometry
+    // is the SHORT_LANDSCAPE tier in index.jsx and this query is its twin —
+    // move one and the other has to move with it, or the copy will be laid out
+    // beside a plate that is still a full-width band.
+    //
+    // Height rather than width is what qualifies this: `phs-h` is min-width
+    // 480 and max-height 520, which is every phone in landscape and no tablet.
+    @include phs-h {
+        // Back on. `below(md)` switches it off because the copy there stacks
+        // under the picture and never crosses it — but this composition puts
+        // the headline beside the plate, so the moment the aperture starts
+        // opening the photograph arrives underneath the type exactly as it
+        // does on a desktop. The gradient reaches 52% and the copy column
+        // ends at 48%, so it is already the right width for this layout.
+        .OfferHero__shade {
+            display: block;
+        }
+
+        // 150vh of a 390px screen is 195px of scroll to open the whole
+        // aperture — less than one flick, so the picture snaps rather than
+        // opens. The travel is what this section is; it has to survive the
+        // viewport being short.
+        height: 230vh;
+
+        .OfferHero__copy {
+            // One column, in the half of the screen the plate is not in.
+            grid-template-columns: minmax(0, 1fr);
+            grid-template-rows: auto 1fr auto;
+            // The navbar is 78-82px tall at every width and does not shrink
+            // with the viewport, so the clearance above the eyebrow cannot be
+            // a share of one: 12vh of 390px is 47px, and that is what put
+            // "Nabídka" underneath "Procházka Group".
+            padding: clamp(84px, 23vh, 104px) 52vw clamp(16px, 5vh, 28px) 6vw;
+        }
+
+        .OfferHero__title {
+            grid-column: 1;
+            grid-row: 2;
+            align-self: center;
+            max-width: none;
+            font-size: clamp(1.25rem, 3.3vw, 2.05rem);
+            line-height: 1.16;
+        }
+
+        .OfferHero__lead {
+            grid-column: 1;
+            grid-row: 3;
+            align-self: end;
+            justify-self: start;
+            max-width: none;
+            margin-top: 0;
+            gap: 0.9em;
+
+            .OfferHero__lead__text {
+                font-size: clamp(0.82rem, 1.55vw, 1rem);
+                line-height: 1.5;
+            }
+        }
+
+        // Out of the grid entirely. At the top of a 390px screen it lands in
+        // the navbar's row, a few pixels under the "Spojit se" it is not; and
+        // there is no second column left to park it in. Below the plate's
+        // bottom-right corner there is nothing else, and that is the direction
+        // it is pointing anyway.
+        .OfferHero__hint {
+            position: absolute;
+            right: 5vw;
+            bottom: clamp(12px, 4vh, 22px);
+        }
+    }
+
+    // Laptops with little height. The headline still has to reach across the
+    // plate's left edge — a headline that stops just short of it reads as a
+    // failed alignment rather than as a decision, and at the size this rule
+    // used to set it stopped 62px short and looked exactly like that.
+    @include lt-h {
+        .OfferHero__copy {
+            // 11vh of a 720px window is 79px and the navbar is 81 — a floor,
+            // because the bar's height is fixed and this clearance is not.
+            padding-top: max(88px, 11vh);
+        }
+
+        .OfferHero__title {
+            font-size: clamp(1.8rem, 3.9vw, 3.4rem);
+        }
+
+        .OfferHero__lead {
+            gap: 1.1em;
+        }
+    }
+
+    @include reduced-motion {
+        .OfferHero__rule__line::after {
+            animation: none;
+        }
+    }
+}

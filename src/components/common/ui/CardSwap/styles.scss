@@ -1,0 +1,44 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx. The geometry and the motion are the component's own; what is
+// changed here is only how a card looks.
+.card-swap-container {
+    position: relative;
+    perspective: 900px;
+    overflow: visible;
+    transform-style: preserve-3d;
+}
+
+.card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    overflow: hidden;
+
+    // Square, and ruled at the weight the rest of the page is ruled at. The
+    // original rounds these to 12px and outlines them in solid white, which is
+    // a softness and a brightness this page does not have anywhere.
+    border-radius: 0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    // Opaque. At 92% the rules behind the deck showed faintly through the
+    // photographs, which reads as a line crossing the card whether it is in
+    // front of it or not.
+    background-color: #020e15;
+
+    transform-style: preserve-3d;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+// The two steps the original ships with, kept as they were.
+@media (max-width: 768px) {
+    .card-swap-container {
+        transform: scale(0.75);
+    }
+}
+
+@media (max-width: 480px) {
+    .card-swap-container {
+        transform: scale(0.55);
+    }
+}

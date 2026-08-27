@@ -1,0 +1,85 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. The hairline that carries one section into the next.
+.Seam {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    pointer-events: none;
+
+    // The one number the svg, the line's landing point and the page margin all
+    // have to agree on. Declared here rather than repeated in three rules so
+    // that the narrow override below is a single line and cannot half-apply.
+    --seam-pad: 6vw;
+
+    // `tall` is a share of the viewport, because that is what a connector
+    // between two full-height sections is measured in — but a share of 390px
+    // is 62px, and a line that leaves one section, turns twice and lands on
+    // the next needs more room than that to read as a journey rather than a
+    // kink. The floor is what a phone in landscape gets; the ceiling stops a
+    // tall desktop window from opening a hole between two sections.
+    height: clamp(70px, calc(var(--seam-tall, 18) * 1vh), calc(var(--seam-tall, 18) * 11px));
+}
+
+.Seam__svg {
+    position: absolute;
+    inset: 0 var(--seam-pad);
+    width: calc(100% - 2 * var(--seam-pad));
+    height: 100%;
+    overflow: visible;
+}
+
+.Seam__line {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.26);
+    stroke-width: 1;
+}
+
+.Seam__ghost {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.09);
+    stroke-width: 1;
+}
+
+// The homepage's light, at the halved weight this page uses everywhere. The
+// path cannot take the mixin — it needs a box — so it carries the same reading
+// by hand.
+.Seam__walk {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.19);
+    stroke-width: 1;
+    stroke-dasharray: 9 91;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.15));
+    animation: Seam__walk 8s linear infinite;
+}
+
+@keyframes Seam__walk {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+}
+
+.Seam__stop {
+    position: absolute;
+    bottom: 0;
+    // Where the path actually lands: the svg is inset by the padding on both
+    // sides, so `to` is a share of what is left, not of the whole box.
+    left: calc(var(--seam-pad) + var(--seam-to, 0.5) * (100% - 2 * var(--seam-pad)));
+    width: 7px;
+    height: 7px;
+    translate: -50% 50%;
+    border: 1px solid var(--hColor);
+    background-color: rgba(2, 14, 21, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .Seam__walk {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+@include below(sm) {
+    .Seam {
+        --seam-pad: 5vw;
+    }
+}

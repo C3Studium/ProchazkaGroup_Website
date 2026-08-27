@@ -14,7 +14,15 @@
     @include font(SCTA);
     font-family: "Switzer-Light";
     font-weight: 400;
-    height: 1em;
+    // A hair shorter than the letter cell the track is built from. Both were
+    // exactly 1em, and 1em here is 20.7969px — so by the twentieth letter the
+    // track's -(index * 100%) had accumulated enough sub-pixel rounding to let
+    // the top of the *next* letter show under the current one. It read as a row
+    // of specks under the word. The trim comes off the bottom, where the window
+    // is showing the gap rather than the glyph: the text is uppercase, so
+    // nothing descends into the two pixels being given up. One was not enough —
+    // the drift is per letter index, so the worst case sets the number.
+    height: calc(1em - 2px);
     overflow: hidden;
     display: flex;
     flex-direction: row;
@@ -22,14 +30,28 @@
     align-items: flex-start;
     pointer-events: none;
 
+    // The per-column window. NO overflow clipping here: wide glyphs (M, W)
+    // are wider than the 1ch cell and always overhung it — clipping them cut
+    // their strokes. A column closing to zero width fades out instead, so the
+    // glyph never shows a hard edge; the parent still does the vertical trim.
+    .scrollToText__char {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        flex: 0 0 auto;
+        height: 1em;
+        margin: 0 0.15rem;
+    }
+
     .scrollToText__char__track {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
+        flex: 0 0 auto;
         width: auto;
         height: 1em;
-        margin: 0 0.15rem;
+        margin: 0;
         padding: 0;
 
         .scrollToText__char__letter {

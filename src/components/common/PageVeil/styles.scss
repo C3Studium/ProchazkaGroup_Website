@@ -1,0 +1,49 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+
+// The page-to-page veil: same visual system as the preloader (it reuses the
+// PGLoad classes wholesale), shown under its own attribute so the two never
+// collide. While it is up: no scroll, no pointer, navbar rides its hold out.
+html[data-veil="1"] {
+    overflow: hidden;
+
+    // The new page mounts UNDER the veil mid-run; a momentarily-wide element
+    // on it (a horizontal rail before its own clamp lands) must not widen the
+    // document — on emulated/real mobile that can expand the layout viewport.
+    // `clip` forbids the overflow without creating a scroll container.
+    body {
+        overflow: clip;
+    }
+
+    .PGVeil {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: block;
+        color: var(--wText);
+    }
+
+    // Same hold the preloader uses; the shared transition on
+    // .navbar__container animates it out AND back in.
+    .navbar__container {
+        opacity: 0;
+        transform: translateY(-10px);
+        pointer-events: none;
+    }
+
+    main {
+        pointer-events: none;
+        will-change: clip-path, transform, opacity;
+    }
+}
+
+// The exit (and the covered ride): the old page eases down and away around
+// the point the visitor was looking at; once the route swaps, the same rule
+// keeps the NEW page invisible until the window opens. During the reveal the
+// transition must NOT apply — the clip writes are per-frame.
+html[data-veil="1"]:not([data-preload-reveal="1"]) main {
+    opacity: 0;
+    transform: scale(0.955);
+    transition:
+        opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}

@@ -1,0 +1,581 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. One board, twenty years, drawn across rather than down — and a
+// head you can take hold of and walk through them.
+.Divergence {
+    position: relative;
+    z-index: 3;
+    height: 260vh;
+    color: var(--wText);
+}
+
+.Divergence__stick {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 3vh;
+    padding: 14vh 7vw 8vh;
+}
+
+.Divergence__head {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 1vw 4vw;
+}
+
+.Divergence__n {
+    grid-column: 1;
+    margin: 0 0 1rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.32em;
+    color: var(--hColor);
+}
+
+.Divergence__title {
+    grid-column: 1;
+    grid-row: 2;
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(2rem, 3.4vw, 4.2rem);
+    line-height: 1.05;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.Divergence__lead {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0;
+    max-width: 36ch;
+    text-align: right;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.95rem, 1.2vw, 1.4rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+// ── the board ───────────────────────────────────────────────────────────
+.Divergence__board {
+    position: relative;
+    // Comes up out of its own foot rather than out of nothing in the middle.
+    transform-origin: center bottom;
+    flex: 1;
+    min-height: 0;
+    padding: 4vh 4.5rem 5vh 5.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background-color: rgba(2, 14, 21, 0.42);
+    cursor: ew-resize;
+    // Not `none`. The board is half a phone screen tall and a thumb that lands
+    // on it has usually come to scroll the page: `none` took every one of those
+    // gestures and gave back nothing, which on a phone is a section the page
+    // cannot be scrolled past. `pan-y` leaves vertical to the browser — and the
+    // pointercancel it sends when it claims a gesture is what drops the scrub.
+    touch-action: pan-y;
+    user-select: none;
+}
+
+.Divergence__marks {
+    position: absolute;
+    inset: 10px;
+    z-index: 6;
+    pointer-events: none;
+
+    i {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        border: 0 solid rgba(255, 255, 255, 0.42);
+    }
+
+    .Divergence__marks__tl { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+    .Divergence__marks__tr { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+    .Divergence__marks__bl { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+    .Divergence__marks__br { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+}
+
+.Divergence__ground {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+// The rectangle everything is drawn in, and the thing the pointer is measured
+// against — the head has to land on the year under the cursor, not on the year
+// under the cursor plus a margin.
+.Divergence__plot {
+    position: relative;
+    height: 100%;
+}
+
+.Divergence__ink {
+    position: absolute;
+    inset: 0;
+    will-change: clip-path;
+}
+
+.Divergence__svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+// Where it is going, at the weight of a pencil line; and where it has got to,
+// at full weight. Same paths twice — the difference is only what is showing.
+.Divergence__svg.is-ahead {
+    opacity: 0.28;
+}
+
+.Divergence__rule {
+    stroke: rgba(255, 255, 255, 0.075);
+    stroke-width: 1;
+}
+
+.Divergence__inflace {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.28);
+    stroke-width: 1;
+    stroke-dasharray: 5 5;
+}
+
+.Divergence__area--s {
+    fill: rgba(75, 218, 220, 0.1);
+    stroke: none;
+}
+
+.Divergence__line {
+    fill: none;
+    stroke-linecap: round;
+}
+
+.Divergence__line--s {
+    stroke: var(--hColor);
+    stroke-width: 2;
+}
+
+.Divergence__line--bez {
+    stroke: rgba(255, 255, 255, 0.55);
+    stroke-width: 1.5;
+}
+
+// ── the head ────────────────────────────────────────────────────────────
+.Divergence__hand {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 5;
+    width: 0;
+    pointer-events: none;
+    will-change: left;
+}
+
+.Divergence__hand__rule {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.5);
+    transition: background-color 0.3s ease;
+}
+
+.Divergence__hand.is-held .Divergence__hand__rule {
+    background-color: var(--hColor);
+}
+
+// The two figures ride the head at the height of their own curve, so the number
+// is beside the line it belongs to and never beside the other one.
+.Divergence__read {
+    position: absolute;
+    left: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    translate: 0 -50%;
+    padding-left: 0.9rem;
+    white-space: nowrap;
+    will-change: top;
+
+    i {
+        position: absolute;
+        left: 0;
+        width: 5px;
+        height: 5px;
+        translate: -50% 0;
+    }
+
+    b {
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(1.1rem, 1.7vw, 2.1rem);
+        letter-spacing: 0.01em;
+        line-height: 1;
+    }
+}
+
+.Divergence__read--s {
+    i { background-color: var(--hColor); }
+    b { color: var(--hColor); }
+}
+
+.Divergence__read--bez {
+    i { background-color: rgba(255, 255, 255, 0.6); }
+    b { color: rgba(255, 255, 255, 0.62); }
+}
+
+// Past three quarters of the way there is no room to the right of the head, so
+// the figures cross to the other side of it rather than running off the board.
+// The year does the same: half of it hung outside the frame at the last year,
+// which is exactly where a reader who has dragged the head to the end is
+// looking.
+.Divergence__hand.is-late .Divergence__year {
+    translate: -100% 0;
+}
+
+.Divergence__hand.is-late .Divergence__read {
+    left: auto;
+    right: 0;
+    flex-direction: row-reverse;
+    padding: 0 0.9rem 0 0;
+
+    i {
+        left: auto;
+        right: 0;
+        translate: 50% 0;
+    }
+}
+
+// Square, like everything else on this site that can be used.
+.Divergence__grip {
+    position: absolute;
+    left: 0;
+    bottom: -1px;
+    width: 34px;
+    height: 34px;
+    translate: -50% 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    padding: 0;
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    background-color: rgba(2, 14, 21, 0.92);
+    cursor: ew-resize;
+    pointer-events: auto;
+    transition:
+        border-color 0.3s ease,
+        scale 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+
+    i {
+        display: block;
+        width: 1px;
+        height: 12px;
+        background-color: rgba(255, 255, 255, 0.7);
+        transition: background-color 0.3s ease;
+    }
+
+    &:focus-visible {
+        border-color: var(--hColor);
+        scale: 1.1;
+    }
+
+    // Hover only where a pointer can leave again. A tap on iOS fires the enter
+    // and never the leave, so a hovered handle stays hovered for the rest of
+    // the visit.
+    @include fine-pointer {
+        &:hover {
+            border-color: var(--hColor);
+            scale: 1.1;
+        }
+    }
+
+    // Thirty-four pixels is the drawing, not the target. The handle keeps its
+    // size and grows an invisible margin to be caught by.
+    @include touch {
+        &::before {
+            content: "";
+            position: absolute;
+            inset: -10px;
+        }
+    }
+}
+
+.Divergence__hand.is-held .Divergence__grip {
+    border-color: var(--hColor);
+    scale: 1.1;
+
+    i {
+        background-color: var(--hColor);
+    }
+}
+
+// Above the grip and inside the plot: below it, it landed on the axis and
+// printed one year over another.
+.Divergence__year {
+    position: absolute;
+    left: 0;
+    bottom: 3.6vh;
+    translate: -50% 0;
+    padding: 0.3rem 0.5rem;
+    background-color: rgba(2, 14, 21, 0.92);
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+    color: var(--hColor);
+}
+
+// ── the labels outside the plot ─────────────────────────────────────────
+.Divergence__rules {
+    position: absolute;
+    left: 0;
+    top: 4vh;
+    bottom: 5vh;
+    width: 5.5rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.34);
+
+    span {
+        position: absolute;
+        right: 1.1rem;
+        transform: translateY(-50%);
+        white-space: nowrap;
+    }
+}
+
+.Divergence__years {
+    position: absolute;
+    left: 5.5rem;
+    right: 4.5rem;
+    bottom: 1.2vh;
+    display: flex;
+    justify-content: space-between;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    color: rgba(255, 255, 255, 0.22);
+}
+
+// ── the key ─────────────────────────────────────────────────────────────
+.Divergence__foot {
+    display: flex;
+    align-items: center;
+    gap: 2.2vw;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.62rem, 0.76vw, 0.82rem);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.Divergence__key {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+
+    i {
+        display: block;
+        width: 24px;
+        height: 1px;
+    }
+
+    .Divergence__key__ours { background-color: var(--hColor); height: 2px; }
+    .Divergence__key__plain { background-color: rgba(255, 255, 255, 0.55); }
+    .Divergence__key__dash {
+        background-image: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.32) 50%,
+            transparent 50%
+        );
+        background-size: 10px 1px;
+    }
+}
+
+.Divergence__note {
+    margin-left: auto;
+    letter-spacing: 0.12em;
+    text-transform: none;
+    color: rgba(255, 255, 255, 0.3);
+}
+
+@include below(sm) {
+    .Divergence__stick {
+        padding: 12vh 5vw 6vh;
+    }
+
+    .Divergence__head {
+        grid-template-columns: 1fr;
+    }
+
+    .Divergence__lead {
+        grid-column: 1;
+        grid-row: 3;
+        margin-top: 1.6vh;
+        text-align: left;
+    }
+
+    .Divergence__board {
+        padding: 4vh 1rem 5vh 3.2rem;
+    }
+
+    .Divergence__rules {
+        width: 3.2rem;
+    }
+
+    .Divergence__years {
+        left: 3.2rem;
+        right: 1rem;
+    }
+
+    .Divergence__foot {
+        flex-wrap: wrap;
+        gap: 0.8rem 1.6rem;
+    }
+
+    .Divergence__note {
+        margin-left: 0;
+        width: 100%;
+    }
+}
+
+// ── phone, landscape ────────────────────────────────────────────────────
+//
+// Three hundred and ninety pixels of height for a heading, a board and a key.
+// The board is the only one of the three worth anything here, so the words go
+// back beside each other the way they are on a desktop and everything else is
+// measured in what is left over. Written after the `below(sm)` block above,
+// which a phone in landscape also matches on width — this is the stop that has
+// to win.
+@include phs-h {
+    // Clear of the bar, which is seventy-eight pixels of a three-hundred-and-
+    // ninety pixel screen and does not shrink for the occasion.
+    .Divergence__stick {
+        gap: 0.7rem;
+        padding: clamp(5.4rem, 23vh, 6rem) 4vw 1rem;
+    }
+
+    // One line rather than three. The number, the title and the instruction all
+    // sit on the same baseline: two of those rows were only ever there because
+    // there was room for them.
+    .Divergence__head {
+        display: flex;
+        align-items: baseline;
+        gap: 0 1.4rem;
+    }
+
+    .Divergence__n {
+        flex: 0 0 auto;
+        margin: 0;
+        font-size: 0.6rem;
+        letter-spacing: 0.26em;
+    }
+
+    .Divergence__title {
+        flex: 0 1 auto;
+        font-size: clamp(1.1rem, 2.6vw, 1.6rem);
+    }
+
+    .Divergence__lead {
+        margin: 0 0 0 auto;
+        max-width: 34ch;
+        text-align: right;
+        font-size: 0.72rem;
+        line-height: 1.4;
+    }
+
+    .Divergence__board {
+        padding: 1.6vh 0.9rem 3.6vh 2.6rem;
+    }
+
+    .Divergence__marks {
+        inset: 6px;
+    }
+
+    .Divergence__rules {
+        top: 1.6vh;
+        bottom: 3.6vh;
+        width: 2.6rem;
+        font-size: 0.56rem;
+        letter-spacing: 0.08em;
+
+        span {
+            right: 0.5rem;
+        }
+
+        // Five figures inside two hundred pixels is a stack, not an axis. The
+        // rules themselves stay — it is only their labels that cannot all fit.
+        span:nth-child(even) {
+            display: none;
+        }
+    }
+
+    .Divergence__years {
+        left: 2.6rem;
+        right: 0.9rem;
+        bottom: 0.5vh;
+        font-size: 0.56rem;
+        letter-spacing: 0.08em;
+    }
+
+    .Divergence__read {
+        gap: 0.35rem;
+        padding-left: 0.7rem;
+
+        b {
+            font-size: 0.95rem;
+        }
+    }
+
+    .Divergence__hand.is-late .Divergence__read {
+        padding: 0 0.7rem 0 0;
+    }
+
+    // The year has to sit above the handle and below the lower of the two
+    // figures, and on a two-hundred-pixel plot that is a band about thirty
+    // pixels deep. The handle gives up eight of them — the drawing shrinks, the
+    // thing a finger has to hit does not (see the touch rule above).
+    .Divergence__grip {
+        width: 26px;
+        height: 26px;
+
+        i {
+            height: 9px;
+        }
+    }
+
+    // Three point six vh is thirty-four pixels on a laptop and fourteen on a
+    // phone held sideways, which put the year under the handle. Set against the
+    // handle rather than against the viewport, because the handle is what it
+    // has to clear.
+    .Divergence__year {
+        bottom: 0.9rem;
+        padding: 0.2rem 0.4rem;
+        font-size: 0.58rem;
+        letter-spacing: 0.14em;
+    }
+
+    .Divergence__foot {
+        flex-wrap: nowrap;
+        gap: 2vw;
+        font-size: 0.56rem;
+        letter-spacing: 0.14em;
+    }
+
+    .Divergence__key i {
+        width: 16px;
+    }
+
+    .Divergence__note {
+        margin-left: auto;
+        width: auto;
+    }
+}

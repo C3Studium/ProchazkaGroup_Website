@@ -1,0 +1,184 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Shares column boundaries with .FirstTime (3.5 | 23.4 | 49.8 | 64.5 | 93.5 vw)
+// so the vertical connector meets FirstTime's top line across the boundary.
+.WhoWeAre {
+    // Reverse of the footer reveal: this section slides UP over the pinned
+    // hero, so it needs its own layer. It used to carry an opaque background to
+    // hide that section too; it no longer does, because the page's shader
+    // ground sits behind everything and an opaque section is a hole in it. The
+    // hero fades its own layers out before this one arrives instead.
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    height: 100vh;
+    // Pulled up so the cover finishes after 92vh of scroll instead of 110vh;
+    // the JS y-offset (18vh → 0) hands the section back to this flow position,
+    // so at rest there is no gap and the lines below still line up.
+    margin-top: -8vh;
+    display: grid;
+    grid-template-columns: 3.5vw 19.9vw 26.4vw 14.7vw 29vw 1fr;
+    grid-template-rows: 8vh auto 1fr;
+    // r1 pad | r2 text+photo | r3 connector runs to the bottom edge
+
+    .WhoWeAre__text {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        padding-left: 5vw;
+
+        p {
+            margin: 0;
+            color: var(--wText);
+            font-family: "Poppins", sans-serif;
+            font-weight: 200;
+            text-transform: uppercase;
+            // Tracks the column it lives in rather than sitting at one size:
+            // 40px was drawn at ~1512 and overflowed the viewport's height by
+            // 1280×720. 2.6vw passes through ~39px right there and relieves
+            // the narrower stops without changing the large ones.
+            font-size: clamp(1.6rem, 2.6vw, 2.6rem);
+            line-height: 1.25;
+            letter-spacing: 0;
+
+            // words stay whole; only whole words wrap, characters inside don't
+            .word {
+                display: inline-block;
+                white-space: pre;
+            }
+        }
+    }
+
+    .WhoWeAre__photo {
+        grid-column: 4 / 6;
+        grid-row: 2 / 4;
+        justify-self: end;
+        align-self: start;
+        position: relative;
+        width: 76%;
+        aspect-ratio: 395 / 445;
+        max-height: 78vh;
+        min-height: 0;
+    }
+
+    .WhoWeAre__line {
+        // Relative only so the sweep inside it has something to sit in — these
+        // are grid items and their placement is unaffected.
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.25);
+        pointer-events: none;
+    }
+
+    // vertical: starts partway down the text, runs to the very bottom edge of
+    // the section, where FirstTime's top line picks it up
+    .WhoWeAre__line--connector {
+        grid-column: 4;
+        grid-row: 2 / 4;
+        justify-self: start;
+        align-self: end;
+        width: 1px;
+        height: 80%;
+        transform-origin: center top; // draws downwards, towards FirstTime
+
+        @include lineSweep(y, 0s);
+    }
+
+    // horizontal: just below the text, crossing the connector
+    // spans 29.56vw→58.33vw, so the connector at 49.8vw crosses it at 70.3% —
+    // the draw-in grows outwards from exactly that crossing
+    .WhoWeAre__line--textUnder {
+        grid-column: 3 / 5;
+        grid-row: 3;
+        align-self: start;
+        justify-self: center;
+        width: 70%;
+        height: 1px;
+        margin-top: 2vh;
+        transform-origin: 70.3% center;
+
+        @include lineSweep(x, -0.8s);
+    }
+
+    // Calm, not killed: the hairlines stay and still draw in with the scroll
+    // (scrubbed, not autonomous); only the endlessly travelling light goes.
+    // Everything the ::after is — gradient, glow, animation — is the sweep, so
+    // it is cleared whole. Sits after the modifier blocks above because the
+    // sweep is declared inside them: at equal specificity this wins on source
+    // order, and inside `.WhoWeAre__line` it would lose the same way.
+    @include reduced-motion {
+        .WhoWeAre__line::after {
+            animation: none;
+            background-image: none;
+            filter: none;
+        }
+    }
+
+    @include below-px(820) {
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 4vh;
+        padding: 6vh 6vw;
+
+        .WhoWeAre__text {
+            padding-left: 0;
+
+            p {
+                font-size: clamp(1.2rem, 5vw, 2rem);
+            }
+        }
+
+        .WhoWeAre__photo {
+            width: 100%;
+            max-height: none;
+        }
+
+        .WhoWeAre__line {
+            display: none;
+        }
+    }
+
+    // Phone in landscape (≤520px tall; phs picks up every landscape width from
+    // 568×320 up, so phl needs no block of its own). Width alone lands these
+    // devices in the desktop grid — an 844×390 phone is "desktop" to every
+    // rule above — where thirteen 50px lines burst out of a 390px viewport.
+    // Sits after the stacked layout above and wins on source order over it for
+    // the 568–820 widths where both match. Text and photo go side by side so
+    // neither fights the height, and the section keeps height: auto — the
+    // over-slide is driven by vh transforms and survives the section being
+    // taller than the screen.
+    @include phs-h {
+        height: auto;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 6vw;
+        padding: 12vh 6vw 10vh;
+        margin-top: -8vh;
+
+        .WhoWeAre__text {
+            flex: 1 1 auto;
+            min-width: 0;
+            padding-left: 0;
+
+            p {
+                // Keyed to the height, which is the scarce axis here: the
+                // paragraph has to land its ~13 lines inside one short screen.
+                font-size: clamp(0.85rem, 4.4vh, 1.2rem);
+            }
+        }
+
+        .WhoWeAre__photo {
+            flex: 0 0 auto;
+            align-self: center;
+            // Never wider than its share of the row, never taller than the
+            // screen minus the padding — whichever bites first.
+            width: min(34vw, 55vh);
+            max-height: none;
+        }
+
+        .WhoWeAre__line {
+            display: none;
+        }
+    }
+}

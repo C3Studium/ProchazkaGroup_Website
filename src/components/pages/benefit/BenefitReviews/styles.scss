@@ -1,0 +1,426 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. What people say, as one belt under the doubt it answers.
+$curtain: cubic-bezier(0.22, 1, 0.36, 1);
+
+// ── the three compositions, as media queries ───────────────────────────────
+//
+// TWINS of MQ_PHONE / MQ_TABLET / MQ_PHONE_LAND in index.jsx. The card's width
+// is decided there and its height here, so these have to be the same stops on
+// both sides or the card comes out the wrong shape.
+//
+// below(xs) is (max-width: 749.98px); MQ_TABLET is (max-width: 999.98px),
+// written here as below-px(999.98px).
+//
+// phone-land is the height arm, and it is the one that matters: a phone in
+// landscape is 844 or 932px wide and would otherwise take the tablet
+// composition — a 400px-tall card — on a viewport 390px tall. Nested inside
+// below(md) it comes out as one query, exactly MQ_PHONE_LAND. It must stay
+// LAST in this file, after every width-only rule it has to beat.
+@mixin phone-land {
+    @include below(md) {
+        @media (max-height: 520px) and (orientation: landscape) {
+            @content;
+        }
+    }
+}
+
+.BenReviews {
+    position: relative;
+    z-index: 2;
+    // vh with a floor and a ceiling: 6vh is 65px on a desktop and 23px on a
+    // phone held sideways, and the rhythm the section was drawn with is the
+    // desktop one. The clamp keeps it from collapsing; phone-land takes it
+    // back down deliberately, because there the whole viewport is 390px and
+    // every one of them is needed by the belt.
+    padding: clamp(2rem, 6vh, 5.5rem) 0 clamp(1.4rem, 4vh, 3.5rem);
+    color: var(--wText);
+
+    @include phone-land {
+        padding: 1.1rem 0 0.8rem;
+    }
+}
+
+.BenReviews__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 2rem 4vw;
+    padding: 0 8vw;
+    margin-bottom: 5vh;
+
+    @include below-px(900) {
+        flex-direction: column;
+        gap: 0.8rem;
+        padding: 0 6vw;
+    }
+
+    @include phone-land {
+        gap: 0.35rem;
+        margin-bottom: 1.4rem;
+    }
+}
+
+.BenReviews__eyebrow {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7);
+
+    em {
+        font-style: normal;
+        color: var(--hColor);
+        margin-right: 0.7em;
+    }
+}
+
+.BenReviews__lead {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.9rem, 1vw, 1.15rem);
+    color: rgba(255, 255, 255, 0.55);
+}
+
+// The belt. The wall clips it; the track is moved by the loop and nothing
+// else, and its width is whatever its cards add up to — the loop wraps
+// against that sum, which the trade conserves by construction.
+.BenReviews__wall {
+    position: relative;
+    overflow: hidden;
+    // Also set inline in index.jsx, deliberately — see the note there. This
+    // rule is the readable one; that one is the one that is in force before
+    // this file is.
+    contain: paint;
+    // Fade the belt's edges to nothing, so it has no visible start or end.
+    mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 7%, #000 93%, transparent);
+}
+
+.BenReviews__track {
+    display: flex;
+    gap: 1.1vw;
+    width: max-content;
+    padding: 0.5vh 0;
+}
+
+// One card: the site's quiet box — hairline, dark glass, hashtag in accent,
+// name in caps. Height is the belt's; width is a traded share.
+.BenReviews__card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: clamp(17rem, 38vh, 30rem);
+    padding: clamp(1.1rem, 1.6vw, 1.7rem);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background-color: rgba(2, 14, 21, 0.66);
+    transition: border-color 0.45s $curtain, background-color 0.45s $curtain;
+    // The whole card is the tap target — 300×320 on a phone, far past 44px —
+    // so nothing here needs a hit area of its own. The highlight goes because
+    // the belt is moving: a grey flash left behind on a card that has since
+    // travelled on reads as a rendering fault, and :active below says the same
+    // thing where the card actually is.
+    -webkit-tap-highlight-color: transparent;
+
+    &.is-open {
+        border-color: rgba(255, 255, 255, 0.32);
+        background-color: rgba(2, 14, 21, 0.85);
+    }
+
+    // The lift and the dim are hover, and hover on a touch screen is a trap:
+    // the tap that raises pointerenter never raises pointerleave, so whatever
+    // it turned on stays on. Fenced off from coarse pointers entirely — and
+    // the belt's own pause is gated the same way, in index.jsx.
+    @include fine-pointer {
+        &:hover {
+            border-color: rgba(255, 255, 255, 0.26);
+        }
+    }
+
+    @include touch {
+        &:active {
+            border-color: rgba(255, 255, 255, 0.34);
+            background-color: rgba(2, 14, 21, 0.86);
+        }
+    }
+
+    // Tablet, 1000 down — twin of MQ_TABLET; see the note there for why the
+    // stop is 1000 and not md. Capped so a 1180-tall iPad in portrait does not
+    // get a 450px card.
+    //
+    // FIRST, because this and below(xs) are two plain max-width queries of
+    // equal specificity — the narrower one only wins by coming after it.
+    @include below-px(999.98px) {
+        height: clamp(16rem, 34vh, 25rem);
+    }
+
+    // Phone: one quote at a time, and roughly as tall as it is wide.
+    @include below(xs) {
+        height: clamp(15rem, 38vh, 22rem);
+    }
+
+    // Phone in landscape: 390px of viewport, all in. min-height is dropped
+    // here — 17rem is 272px, which would be the belt AND the heading AND the
+    // section's padding on a screen that has 390px of everything.
+    @include phone-land {
+        height: clamp(8.5rem, 55vh, 13.2rem);
+        padding: 0.85rem 0.95rem;
+    }
+}
+
+.BenReviews__tag {
+    margin-bottom: 0.8rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--hColor);
+    // #BENEFITPROGRAM is one unbreakable word with a quarter-em of tracking on
+    // it. On a narrow card it does not wrap and it does not clip — it simply
+    // draws past the card's edge and over the neighbour's hashtag, which is
+    // what it was doing on a phone. Ellipsised instead: the tag is a label,
+    // and a label may be shortened.
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    @include phone-land {
+        margin-bottom: 0.5rem;
+    }
+}
+
+.BenReviews__text {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.88rem, 1vw, 1.05rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.8);
+    // A quote longer than the card is cut off at whatever pixel the box ends
+    // on, mid-word, and that reads as broken rather than as continued. The
+    // fade says the sentence goes on — which is the thing the card is asking
+    // to be opened for.
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent);
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 2.4em), transparent);
+
+    @include phone-land {
+        font-size: 0.82rem;
+        line-height: 1.45;
+    }
+}
+
+.BenReviews__by {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+
+    @include phone-land {
+        margin-top: 0.6rem;
+        padding-top: 0.55rem;
+    }
+}
+
+// The touch reader's version of the cursor label. Absolute so it costs the
+// card no height, and shown by media query alone — see index.jsx, where it is
+// always rendered for exactly that reason.
+.BenReviews__more {
+    display: none;
+
+    @include touch {
+        display: block;
+        position: absolute;
+        right: 0;
+        top: 0.9rem;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.6rem;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        color: var(--hColor);
+    }
+}
+
+.BenReviews__who {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+
+    // Keep clear of the ČÍST CELÉ marker sitting on the same line.
+    @include touch {
+        padding-right: 5.5rem;
+    }
+}
+
+.BenReviews__for {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+// ── the sheet — the reviews page's expanding modem, on this page's belt ──
+//
+// Under the cursor (1100) and over everything else, like the site's other
+// sheets (1001/1002): the pointer is the one thing never underneath.
+
+.BenReviews__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    background-color: rgba(2, 10, 15, 0.72);
+    backdrop-filter: blur(6px);
+}
+
+.BenReviews__sheetWrap {
+    position: fixed;
+    inset: 0;
+    z-index: 1002;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6vh 6vw;
+
+    @include below(xs) {
+        padding: 4vh 5vw;
+    }
+
+    @include phone-land {
+        padding: 3vh 8vw;
+    }
+}
+
+.BenReviews__sheet {
+    display: flex;
+    flex-direction: column;
+    width: min(46rem, 100%);
+    max-height: 82vh;
+    padding: clamp(1.6rem, 2.6vw, 2.6rem);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(3, 13, 19, 0.97);
+    // The sheet is PORTALLED to document.body, so it is outside .BenReviews
+    // and inherits nothing from it. Every other piece of text in here names
+    // its own colour and so never noticed; .BenReviews__who does not, and in
+    // the card it was inheriting the section's --wText. Out here it inherited
+    // the body's, and the customer's name — the one thing that says whose
+    // review this is — came out all but invisible against the dark sheet, at
+    // every viewport. The portal root carries the section's colour.
+    color: var(--wText);
+    // The quote is the point of the sheet, so it is the quote that scrolls
+    // when there is not enough room — never the sheet off the screen. On a
+    // phone in landscape there are 390px to work in and the head, the rule and
+    // the name take a third of it; the text keeps the rest and pans.
+    min-height: 0;
+
+    @include phone-land {
+        max-height: 94vh;
+        padding: 1rem 1.2rem;
+    }
+}
+
+.BenReviews__sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex: 0 0 auto;
+    margin-bottom: 1.2rem;
+
+    @include phone-land {
+        margin-bottom: 0.6rem;
+    }
+}
+
+.BenReviews__sheet__close {
+    appearance: none;
+    flex: 0 0 auto;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: none;
+    width: 2.2rem;
+    height: 2.2rem;
+    color: var(--wText);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.3s ease;
+
+    &:focus-visible {
+        border-color: var(--hColor);
+    }
+
+    @include fine-pointer {
+        &:hover {
+            border-color: var(--hColor);
+        }
+    }
+
+    // 2.2rem is 35px, and 35px is not a thumb. The drawn box stays the size
+    // the sheet was drawn with; the HIT area grows past it through a
+    // pseudo-element, so the only thing that changes is what can be reached.
+    @include touch {
+        position: relative;
+
+        &::before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 44px;
+            height: 44px;
+            transform: translate(-50%, -50%);
+        }
+    }
+}
+
+.BenReviews__sheet__text {
+    margin: 0;
+    min-height: 0;
+    overflow-y: auto;
+    // The sheet is inside a lenis page that has been stopped for the duration.
+    // pan-y is what hands this box its own thumb back — and it is `pan-y`
+    // rather than anything stricter because the belt below must never be able
+    // to eat a vertical scroll.
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(1rem, 1.2vw, 1.2rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.88);
+
+    @include phone-land {
+        font-size: 0.92rem;
+        line-height: 1.5;
+    }
+}
+
+.BenReviews__sheet__by {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    flex: 0 0 auto;
+    margin-top: 1.4rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+
+    // The card's touch marker is a child of a .BenReviews__by, not of this —
+    // but the sheet reuses .BenReviews__who, and in here there is nothing to
+    // keep clear of.
+    .BenReviews__who {
+        padding-right: 0;
+    }
+
+    @include phone-land {
+        margin-top: 0.7rem;
+        padding-top: 0.6rem;
+    }
+}

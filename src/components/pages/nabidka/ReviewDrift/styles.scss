@@ -1,0 +1,494 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. A wall of what people said, turned away from the reader and
+// drifting — the opposite end of the same page from the offer, which holds
+// perfectly still because it is the part with the reading in it.
+.RevDrift {
+    position: relative;
+    // Over the chart, not after it. The board above is pinned and its last
+    // stretch of scroll is a still picture; the wall comes up into that instead
+    // of waiting for it to finish. Its own top edge is masked away to nothing,
+    // so what happens there is the cards arriving out of the chart rather than
+    // a second section starting.
+    z-index: 4;
+    margin-top: -14vh;
+    padding: 0 0 9vh;
+    color: var(--wText);
+}
+
+// Over the wall rather than stacked on top of it, and a third of the way down
+// it. Stacked, the words had to sit at the very top of the section and the
+// section had to start a long way below the chart to give them room; this way
+// the wall begins where the chart ends and the words are where they read best.
+.RevDrift__head {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    // Well down the wall. High up it lands under the bar; halfway down it has
+    // drifting cards above it and below it, which is what makes it read as a
+    // heading laid on the wall rather than one stacked above it.
+    top: 42%;
+    padding: 0 6vw;
+    max-width: 56ch;
+    pointer-events: none;
+}
+
+// Ground under them. The cards behind are dim and drifting, and a heading has
+// to win against whatever happens to be passing.
+//
+// An ellipse rather than a band: the band was a rectangle of darkness with a
+// soft right edge and two hard ones, and what showed on the page was a panel
+// laid over the wall with a visible line along its top. This has no edge
+// anywhere — it is a shadow the heading casts, which is all it was ever meant
+// to be.
+.RevDrift__head::before {
+    content: "";
+    position: absolute;
+    left: -20vw;
+    top: -40vh;
+    width: 96vw;
+    height: 120vh;
+    background: radial-gradient(
+        ellipse 46% 40% at 34% 50%,
+        rgba(2, 12, 18, 0.93) 0%,
+        rgba(2, 12, 18, 0.74) 42%,
+        rgba(2, 12, 18, 0.32) 70%,
+        rgba(2, 12, 18, 0) 100%
+    );
+    pointer-events: none;
+}
+
+.RevDrift__head > * {
+    position: relative;
+}
+
+.RevDrift__more {
+    pointer-events: auto;
+}
+
+.RevDrift__n {
+    margin: 0 0 1.2rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+    color: var(--hColor);
+}
+
+.RevDrift__title {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.8rem, 3.2vw, 3.8rem);
+    line-height: 1.06;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+.RevDrift__lead {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.6rem 2.2rem;
+    margin: 2.6vh 0 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.95rem, 1.15vw, 1.35rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+// A word with a rule under it that draws on approach — the site's own way of
+// saying "there is more of this".
+.RevDrift__more {
+    position: relative;
+    font-size: 0.74rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--wText);
+    text-decoration: none;
+
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: -0.5em;
+        height: 1px;
+        background-color: var(--hColor);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &:hover::after,
+    &:focus-visible::after {
+        transform: scaleX(1);
+    }
+}
+
+// ── what carries over from the offer ────────────────────────────────────
+//
+// The wall above this is threaded with hairlines and so is the space between
+// its rows; without them this section starts again from nothing. So one comes
+// down the margin, turns in at the number and stops — the same line, the same
+// weight, and the same light running down it at the same halved strength.
+.RevDrift__thread {
+    position: absolute;
+    z-index: 2;
+    left: 6vw;
+    top: 0;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.16);
+    transform-origin: center top;
+
+    @include lineSweep(y, -2.6s, 9s, 13, 0.5);
+}
+
+.RevDrift__thread__in {
+    position: absolute;
+    z-index: 2;
+    left: 6vw;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.16);
+    transform-origin: left center;
+}
+
+.RevDrift__thread__stop {
+    position: absolute;
+    z-index: 2;
+    left: 6vw;
+    width: 7px;
+    height: 7px;
+    translate: -50% -50%;
+    border: 1px solid var(--hColor);
+    background-color: rgba(2, 14, 21, 0.9);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .RevDrift__thread::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+// ── the wall ────────────────────────────────────────────────────────────
+.RevDrift__wall {
+    position: relative;
+    // Tall enough that the words can sit in the middle of it with wall on both
+    // sides of them.
+    height: 118vh;
+    overflow: hidden;
+
+    // Faded at every edge, so the drift has nowhere it visibly begins or ends.
+    mask-image:
+        radial-gradient(ellipse 80% 84% at 50% 48%, #000 34%, transparent 100%),
+        linear-gradient(to bottom, transparent, #000 26%, #000 82%, transparent);
+    mask-composite: intersect;
+    -webkit-mask-image:
+        radial-gradient(ellipse 80% 84% at 50% 48%, #000 34%, transparent 100%),
+        linear-gradient(to bottom, transparent, #000 26%, #000 82%, transparent);
+    -webkit-mask-composite: source-in;
+}
+
+// The 3D, one element in from the mask.
+//
+// They were the same element: a box that both established a perspective and
+// carried a mask. A compositor is entitled to rasterise a masked subtree once
+// and reuse it, and a subtree in its own 3D context is exactly the kind it will
+// do that to — which shows up as transforms that keep changing on elements
+// whose pixels never do. Splitting the two costs nothing and takes the case
+// away.
+.RevDrift__view {
+    position: absolute;
+    inset: 0;
+    perspective: 1300px;
+    perspective-origin: 50% 50%;
+}
+
+// Height comes from the component and is the same for every column — see the
+// note there. Left to the flex box it was the tallest column's, and the short
+// ones came up short.
+.RevDrift__plane {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    display: flex;
+    align-items: flex-start;
+    transform-style: preserve-3d;
+    transform-origin: 50% 50%;
+    will-change: transform;
+}
+
+.RevDrift__col {
+    position: relative;
+    width: clamp(230px, 20vw, 330px);
+    padding: 0 11px;
+    transform-style: preserve-3d;
+}
+
+// No `will-change` here. It is the one hint that asks for a permanent layer,
+// and a permanent layer inside a 3D context is the one most likely to be drawn
+// once and kept. This element's transform is rewritten every frame; it does not
+// need to be promised anything.
+.RevDrift__track {
+    display: flex;
+    flex-direction: column;
+    transform-style: preserve-3d;
+}
+
+// ── a card ──────────────────────────────────────────────────────────────
+//
+// Height comes from the component, which reads it off how much the person
+// wrote. Nothing here is rounded and nothing is on a plate: it is the same box
+// the offer above is made of, seen at an angle.
+.RevDrift__card {
+    position: relative;
+    flex: 0 0 auto;
+    width: 100%;
+    outline: none;
+    transform-style: preserve-3d;
+}
+
+.RevDrift__card__face {
+    position: absolute;
+    inset: 0 0 var(--rd-gap, 22px);
+    display: flex;
+    flex-direction: column;
+    padding: 1.6rem 1.5rem 1.3rem;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background-color: rgba(2, 14, 21, 0.72);
+    opacity: 0.58;
+    transform: translateZ(0);
+    transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.RevDrift__card.is-active .RevDrift__card__face {
+    opacity: 1;
+    border-color: rgba(255, 255, 255, 0.34);
+    transform: translateZ(70px);
+}
+
+// Where there is no cursor there is no resting state and a raised one — there
+// is only what the wall looks like, most of the time, to almost everybody. Half
+// lit is what a card looks like when something else on the page is the subject;
+// here the wall *is* the page. Still under the heading's shadow, still short of
+// the card a finger is actually on.
+@include touch {
+    .RevDrift__card__face {
+        opacity: 0.74;
+    }
+}
+
+.RevDrift__marks {
+    position: absolute;
+    inset: 8px;
+    pointer-events: none;
+
+    i {
+        position: absolute;
+        width: 5px;
+        height: 5px;
+        border: 0 solid rgba(255, 255, 255, 0.4);
+    }
+
+    i:nth-child(1) { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+    i:nth-child(2) { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+    i:nth-child(3) { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+    i:nth-child(4) { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+}
+
+.RevDrift__card__tag {
+    margin-bottom: 0.9rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: var(--hColor);
+}
+
+.RevDrift__card__text {
+    flex: 1;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.52;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.RevDrift__card__by {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.RevDrift__card__who {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+}
+
+.RevDrift__card__for {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    color: rgba(255, 255, 255, 0.42);
+}
+
+@include below(sm) {
+    .RevDrift {
+        margin-top: -9vh;
+        padding: 0 0 4vh;
+    }
+
+    .RevDrift__head {
+        top: 38%;
+        max-width: none;
+        padding: 0 6vw;
+    }
+
+    .RevDrift__head::before {
+        // Starts a fifth of a screen off the left and must not therefore be
+        // more than six fifths wide: 140 put its right edge at 120vw and gave
+        // a phone 78px of horizontal scroll.
+        left: -20vw;
+        top: -30vh;
+        width: 120vw;
+        height: 100vh;
+        background: radial-gradient(
+            ellipse 44% 34% at 46% 50%,
+            rgba(2, 12, 18, 0.94) 0%,
+            rgba(2, 12, 18, 0.78) 44%,
+            rgba(2, 12, 18, 0) 100%
+        );
+    }
+
+    // The ellipse is a fraction of the wall's own width, so on a phone it
+    // reaches nearly two hundred pixels past the screen and the outermost
+    // column is cut off at the edge at half brightness rather than faded out
+    // before it. Narrower here, on purpose.
+    .RevDrift__wall {
+        height: 108vh;
+
+        mask-image:
+            radial-gradient(ellipse 62% 84% at 50% 48%, #000 26%, transparent 100%),
+            linear-gradient(to bottom, transparent, #000 22%, #000 84%, transparent);
+        -webkit-mask-image:
+            radial-gradient(ellipse 62% 84% at 50% 48%, #000 26%, transparent 100%),
+            linear-gradient(to bottom, transparent, #000 22%, #000 84%, transparent);
+    }
+
+    .RevDrift__col {
+        width: clamp(190px, 42vw, 250px);
+    }
+
+    .RevDrift__card__text {
+        font-size: 0.86rem;
+    }
+}
+
+// The advisor block sits over the foot of the wall. The wall is masked away at
+// its own bottom edge, so the overlap happens inside the fade and neither of
+// them has a visible end.
+.NabidkaHandover {
+    position: relative;
+    z-index: 4;
+    margin-top: -16vh;
+}
+
+@include below(sm) {
+    .NabidkaHandover {
+        margin-top: -8vh;
+    }
+}
+
+// ── phone, landscape ────────────────────────────────────────────────────
+//
+// Four hundred pixels of height for a wall whose smallest card is a hundred and
+// seventy tall. The card shrinks in the component (see `unit` there); what is
+// left for the stylesheet is the fades, which are written as fractions of the
+// wall and therefore eat a short one alive — at 118vh of 390 the two gradients
+// between them were leaving about a third of it lit.
+@include phs-h {
+    .RevDrift {
+        margin-top: -6vh;
+        padding: 0 0 3vh;
+    }
+
+    .RevDrift__wall {
+        height: 168vh;
+
+        mask-image:
+            radial-gradient(ellipse 76% 92% at 50% 48%, #000 40%, transparent 100%),
+            linear-gradient(to bottom, transparent, #000 14%, #000 88%, transparent);
+        -webkit-mask-image:
+            radial-gradient(ellipse 76% 92% at 50% 48%, #000 40%, transparent 100%),
+            linear-gradient(to bottom, transparent, #000 14%, #000 88%, transparent);
+    }
+
+    .RevDrift__head {
+        top: 40%;
+        max-width: 46ch;
+        padding: 0 5vw;
+    }
+
+    .RevDrift__head::before {
+        top: -34vh;
+        width: 118vw;
+        height: 110vh;
+    }
+
+    .RevDrift__n {
+        margin: 0 0 0.6rem;
+        font-size: 0.64rem;
+    }
+
+    .RevDrift__lead {
+        gap: 0.4rem 1.6rem;
+        margin-top: 1.4vh;
+        font-size: 0.84rem;
+    }
+
+    .RevDrift__col {
+        width: clamp(150px, 20vw, 200px);
+        padding: 0 7px;
+    }
+
+    .RevDrift__card__face {
+        padding: 0.8rem 0.8rem 0.7rem;
+    }
+
+    .RevDrift__card__tag {
+        margin-bottom: 0.45rem;
+        font-size: 0.54rem;
+    }
+
+    .RevDrift__card__text {
+        font-size: 0.7rem;
+        line-height: 1.44;
+    }
+
+    .RevDrift__card__by {
+        margin-top: 0.55rem;
+        padding-top: 0.5rem;
+    }
+
+    .RevDrift__card__who {
+        font-size: 0.66rem;
+    }
+
+    .RevDrift__card__for {
+        font-size: 0.58rem;
+    }
+
+    .NabidkaHandover {
+        margin-top: -5vh;
+    }
+}

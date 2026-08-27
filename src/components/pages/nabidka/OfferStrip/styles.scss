@@ -1,0 +1,719 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// The band's half of the stacked gate. Identical to StatRail's, and to
+// isStacked() in index.jsx, and it has to stay identical: the two components
+// are one sticky screen and a band laid out for a phone underneath a set of
+// counts laid out for a laptop is a collision, not a composition.
+@mixin stacked {
+    @media (max-width: 899.98px) and (min-height: 520.02px) {
+        @content;
+    }
+}
+
+// See index.jsx. A band of rectangles running out of the three counts, in the
+// site's own weights: hairline borders, no rounding, no fills except where a
+// photograph is the content.
+.OfferStrip {
+    position: absolute;
+    inset: 0;
+    // The band is wider than the screen; what hangs off either side is cut
+    // here rather than given a scrollbar.
+    overflow: hidden;
+    // It is walked by the page's scroll, not by the pointer — see index.jsx.
+    // Only the boxes take a pointer, and only so that they can be hovered.
+    pointer-events: none;
+    color: var(--wText);
+}
+
+.OfferStrip__plane {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform;
+}
+
+// One box. Everything on the plane is one of these.
+.OfferStrip__box {
+    position: absolute;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(2, 14, 21, 0.42);
+    pointer-events: auto;
+    // The hover the navbar's boxes have: it steps forward, it does not swell.
+    transition:
+        transform 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        border-color 0.42s ease,
+        background-color 0.42s ease;
+
+    // Only where there is something to hover with. On touch this same rule
+    // fires on the tap that opens a square and never comes off again, because
+    // no pointerleave follows a finger — so one tap left a box permanently
+    // lifted and lit. What a finger gets instead is the open state itself,
+    // which it toggles; see useCoarsePointer in index.jsx.
+    @include fine-pointer {
+        &:hover {
+            z-index: 4;
+            transform: scale(1.035);
+            border-color: rgba(255, 255, 255, 0.55);
+            background-color: rgba(2, 14, 21, 0.72);
+        }
+    }
+
+    @include touch {
+        cursor: pointer;
+    }
+}
+
+// ── a section's words ───────────────────────────────────────────────────
+//
+// Outside the wall and with nothing drawn round them. The boxes carry the
+// section's content; the heading is the page talking about it.
+.OfferStrip__words {
+    position: absolute;
+    pointer-events: none;
+}
+
+.OfferStrip__n {
+    margin: 0 0 1.8rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.32em;
+    color: var(--hColor);
+}
+
+.OfferStrip__title {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(2.4rem, 4.2vw, 5rem);
+    line-height: 1.08;
+    letter-spacing: 0.01em;
+    text-transform: uppercase;
+}
+
+// Between the title and what it is about, drawn out as the section arrives —
+// the site's own grammar for a statement: eyebrow, title, rule, answer.
+.OfferStrip__words__rule {
+    display: block;
+    width: 100%;
+    height: 1px;
+    margin: 3.2vh 0 2.8vh;
+    transform-origin: left center;
+    background-color: rgba(255, 255, 255, 0.24);
+}
+
+.OfferStrip__lead {
+    margin: 0;
+    // A narrower measure than the rule above it: a line of forty characters is
+    // read, a line of sixty is scanned.
+    max-width: 38ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(1.05rem, 1.4vw, 1.62rem);
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+// ── what a section shows ────────────────────────────────────────────────
+.OfferStrip__stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 2.2rem 2.4rem;
+
+    .OfferStrip__stat__value {
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        // Oversized on purpose: a crate this size with a two-centimetre number
+        // in it is a crate with nothing in it.
+        font-size: clamp(3rem, 6.4vw, 8rem);
+        line-height: 0.92;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .OfferStrip__stat__label {
+        margin-top: 1rem;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.68rem, 0.86vw, 0.96rem);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.58);
+    }
+}
+
+// One of the four squares in section 01's L. Its number is the whole of it at
+// rest; the label is what the pointer is for.
+.OfferStrip__square {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 2rem 2.2rem;
+
+    // The number and its line, as one thing: they grow together under the
+    // pointer, from the corner they stand in, so the block gets emphasis
+    // without the type walking around inside it.
+    .OfferStrip__square__body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        transform-origin: left bottom;
+    }
+    // From its own middle, so a square that grows a little grows evenly and
+    // does not walk out of the L.
+    transform-origin: center center;
+
+    .OfferStrip__square__value {
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(2.8rem, 4.8vw, 6rem);
+        line-height: 0.94;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .OfferStrip__square__label {
+        margin-top: 0.9rem;
+        max-width: 18ch;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.66rem, 0.82vw, 0.9rem);
+        letter-spacing: 0.16em;
+        line-height: 1.4;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.6);
+    }
+}
+
+.OfferStrip__item {
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 2rem;
+
+    .OfferStrip__item__n {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.66rem;
+        letter-spacing: 0.22em;
+        color: var(--hColor);
+    }
+
+    .OfferStrip__item__title {
+        margin-top: auto;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(1rem, 1.3vw, 1.45rem);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+    }
+
+    .OfferStrip__item__body {
+        margin-top: 1rem;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.82rem, 0.98vw, 1.06rem);
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.6);
+    }
+}
+
+// A short line of copy that belongs to the box beside it rather than to the
+// section's own text box — the join the reading order needs.
+.OfferStrip__note {
+    display: flex;
+    align-items: flex-end;
+    padding: 2rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.9rem, 1.1vw, 1.2rem);
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+.OfferStrip__photo {
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    padding: 2rem;
+
+    .OfferStrip__photo__caption {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.7rem, 0.86vw, 0.94rem);
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        text-shadow: 0 2px 18px rgba(0, 0, 0, 0.9);
+    }
+}
+
+// The map and the projection, until they are built.
+.OfferStrip__plate {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 1.6rem;
+
+    .corner {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        border: 0 solid rgba(255, 255, 255, 0.55);
+    }
+
+    .corner--tl { top: -6px; left: -6px; border-top-width: 1px; border-left-width: 1px; }
+    .corner--tr { top: -6px; right: -6px; border-top-width: 1px; border-right-width: 1px; }
+    .corner--bl { bottom: -6px; left: -6px; border-bottom-width: 1px; border-left-width: 1px; }
+    .corner--br { bottom: -6px; right: -6px; border-bottom-width: 1px; border-right-width: 1px; }
+
+    .OfferStrip__plate__label {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.92rem;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.75);
+    }
+
+    .OfferStrip__plate__note {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.7rem;
+        letter-spacing: 0.2em;
+        color: var(--hColor);
+    }
+}
+
+// ── the foot: one rule, a dot per section ───────────────────────────────
+.OfferStrip__rule {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    // Drawn from the end the band starts at.
+    transform-origin: left center;
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.OfferStrip__stop {
+    position: absolute;
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    // Tighter, because the rule it hangs under has moved down to clear the
+    // wall's own floor and there is less room under it.
+    padding-top: 0.9rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.55);
+
+    // The same dot the reviews run along their rules on the home page: a core
+    // and a soft field around it, in the accent.
+    .OfferStrip__stop__dot {
+        position: absolute;
+        top: -4px;
+        left: 0;
+        width: 8px;
+        height: 8px;
+        margin-left: -4px;
+        border-radius: 50%;
+        background-color: var(--hColor);
+        box-shadow: 0 0 12px rgba(75, 218, 220, 0.55);
+    }
+
+    .OfferStrip__stop__n {
+        color: var(--hColor);
+    }
+}
+
+// ── the map ────────────────────────────────────────────────────────────
+//
+// See EuropeMap.jsx. The outlines are paths, not a library, and everything
+// here is weight rather than movement: a country reached for takes the light
+// and the rest give it up.
+.OfferStrip__map {
+    // No frame and no ground, at rest or under the pointer. The map draws its
+    // own edge out of the countries; a box round it is a line round a line, and
+    // the generic box's hover — which darkens and steps forward — would darken
+    // and step forward the entire map the moment anybody reached for a country
+    // in it.
+    border: 0;
+    background-color: transparent;
+    padding: 0;
+    pointer-events: auto;
+
+    &:hover {
+        transform: none;
+        border-color: transparent;
+        background-color: transparent;
+    }
+
+    // The box is not the target — the countries in it are.
+    @include touch {
+        cursor: default;
+    }
+}
+
+// The box the section gives it can be any shape; the map inside it keeps its
+// own. The flags are placed in percentages of this frame, so the frame has to
+// be exactly the map's proportions or every flag lands off its country.
+.EuropeMap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+}
+
+// With a line of type under it, the box is a column: the map takes what is
+// left after the line, and the line is what it is. `min-height: 0` because a
+// flex item's floor is its content, and the frame's content is an svg that
+// would happily be a thousand pixels tall.
+.EuropeMap--read {
+    flex-direction: column;
+    justify-content: flex-start;
+
+    .EuropeMap__frame {
+        height: auto;
+        flex: 1 1 auto;
+        min-height: 0;
+        width: 100%;
+    }
+
+    // Said in the line below instead, where it can be read.
+    .EuropeMap__flag__year {
+        display: none;
+    }
+}
+
+// The map's answer, in words. One line, always present so the map does not
+// change height when a country is touched, and holding the invitation when
+// nothing is.
+.EuropeMap__read__line {
+    display: flex;
+    align-items: baseline;
+    gap: 0.7rem;
+    width: 100%;
+    height: 36px;
+    margin: 0;
+    padding-top: 0.7rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    color: rgba(255, 255, 255, 0.82);
+
+    .EuropeMap__read__year {
+        color: var(--hColor);
+    }
+
+    .EuropeMap__read__hint {
+        font-size: 0.66rem;
+        letter-spacing: 0.16em;
+        color: rgba(255, 255, 255, 0.45);
+    }
+}
+
+.EuropeMap__frame {
+    position: relative;
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    // aspect-ratio comes from the projection — see EuropeMap.jsx.
+}
+
+// Stretched to its box rather than fitted inside it: the flags are positioned
+// in percentages of the same box, and a letterboxed svg would put them off the
+// countries they belong to.
+.EuropeMap__plate {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+// Everything that is not one of ours.
+.EuropeMap__context path {
+    fill: rgba(255, 255, 255, 0.02);
+    stroke: rgba(255, 255, 255, 0.09);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.EuropeMap__market {
+    // The whole country answers the pointer, not the flag standing on it.
+    pointer-events: auto;
+    cursor: default;
+    // The shape's own box, not the svg's: without this a scale is measured
+    // from the map's top-left corner and a country an inch across walks half
+    // the continent to grow by a tenth.
+    transform-box: fill-box;
+    transform-origin: center;
+    fill: rgba(255, 255, 255, 0.06);
+    stroke: rgba(255, 255, 255, 0.34);
+    stroke-width: 1.2;
+    vector-effect: non-scaling-stroke;
+    transition:
+        fill 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+        stroke 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+
+    // The one this page is about, lit at rest.
+    &.is-home {
+        fill: rgba(75, 218, 220, 0.13);
+        stroke: rgba(75, 218, 220, 0.75);
+    }
+
+    &.is-held {
+        fill: rgba(75, 218, 220, 0.16);
+        stroke: var(--hColor);
+    }
+
+    // ...and it keeps more of itself than the others do when somebody is
+    // looking at a different country.
+    &.is-home.is-dim {
+        fill: rgba(75, 218, 220, 0.07);
+        stroke: rgba(75, 218, 220, 0.4);
+    }
+
+    // The others step back rather than the held one shouting.
+    &.is-dim {
+        fill: rgba(255, 255, 255, 0.025);
+        stroke: rgba(255, 255, 255, 0.14);
+    }
+}
+
+// ── the flags, on the countries ─────────────────────────────────────────
+.EuropeMap__flags {
+    position: absolute;
+    inset: 0;
+    // The layer itself is the thing that was swallowing every pointer: a bare
+    // div with no background is still an element with an area, and it covers
+    // the whole map.
+    pointer-events: none;
+}
+
+.EuropeMap__flag {
+    position: absolute;
+    // Out of the pointer's way: the country underneath is the target. Still a
+    // button, so the keyboard can still reach it.
+    pointer-events: none;
+
+    // A finger cannot aim at Slovenia. On touch the flag takes the pointer
+    // back and carries a target larger than itself — deliberately not 44px:
+    // sixteen countries stand within 90 pixels of each other on a phone, and a
+    // target that size would cover four of its neighbours and answer for them.
+    // It is a map pin, and the line under the map says which one answered.
+    @include touch {
+        pointer-events: auto;
+
+        &::before {
+            content: "";
+            position: absolute;
+            inset: -7px;
+        }
+    }
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: default;
+    // Its own middle, so a flag that grows grows evenly about the country it
+    // stands on.
+    transform-origin: center center;
+    z-index: 1;
+
+    .EuropeMap__flag__mark {
+        display: block;
+        line-height: 0;
+        outline: 1px solid rgba(255, 255, 255, 0.35);
+        // The flags are the one thing on this page with colour in them, so they
+        // are held back until they are the one being read.
+        filter: saturate(0.3);
+        opacity: 0.8;
+        transition:
+            filter 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+            opacity 0.42s cubic-bezier(0.22, 1, 0.36, 1),
+            outline-color 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &.is-held {
+        z-index: 3;
+
+        .EuropeMap__flag__mark {
+            filter: none;
+            opacity: 1;
+            outline-color: var(--hColor);
+        }
+    }
+
+    &.is-dim .EuropeMap__flag__mark {
+        opacity: 0.45;
+    }
+}
+
+// The year, inside the country the flag is standing on. Counter-scaled against
+// its own flag, which is half as big again by the time this is readable.
+.EuropeMap__flag__year {
+    position: absolute;
+    top: 100%;
+    margin-top: 0.25rem;
+    transform: scale(0.7);
+    transform-origin: center top;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.2em;
+    color: var(--hColor);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+// ── the band on a phone ────────────────────────────────────────────────
+//
+// The composition changes in index.jsx — the words go above the wall rather
+// than in the notch it leaves, and the wall is two by two rather than an L.
+// What changes here is only the type, and it has to: a slot is the screen's own
+// width, so on a phone every measure written as a fraction of it is 390px, and
+// a 38px heading in 343 of those is two words a line.
+@include stacked {
+    .OfferStrip__n {
+        margin: 0 0 0.9rem;
+        font-size: 0.66rem;
+    }
+
+    .OfferStrip__title {
+        font-size: clamp(1.45rem, 6.6vw, 2.1rem);
+        line-height: 1.14;
+    }
+
+    .OfferStrip__words__rule {
+        margin: 1.6vh 0 1.4vh;
+    }
+
+    .OfferStrip__lead {
+        // The rule above it is the measure now: at 88% of a phone a line is
+        // fifty characters, which is inside what is read rather than scanned.
+        max-width: none;
+        font-size: clamp(0.86rem, 3.6vw, 1rem);
+        line-height: 1.5;
+    }
+
+    .OfferStrip__square {
+        padding: 1.1rem 1.2rem;
+
+        .OfferStrip__square__value {
+            font-size: clamp(1.6rem, 8vw, 2.4rem);
+        }
+
+        .OfferStrip__square__label {
+            margin-top: 0.6rem;
+            max-width: none;
+            font-size: 0.6rem;
+            letter-spacing: 0.12em;
+        }
+    }
+
+    .OfferStrip__stop {
+        padding-top: 0.7rem;
+        font-size: 0.6rem;
+
+        .OfferStrip__stop__name {
+            // The band is two sections long and the second one's name is
+            // twenty-three characters; at 390px it would run off the screen it
+            // is naming.
+            overflow: hidden;
+            max-width: 62vw;
+            text-overflow: ellipsis;
+        }
+    }
+}
+
+// ── the band on a short laptop ─────────────────────────────────────────
+//
+// 1280 × 720 and 1440 × 800. The wall keeps its L, but its side is cut down to
+// whatever two rows fit in the height — see SquareWall — and the notch the
+// heading stands in is a square of that side, so at 720 the heading and its
+// lead ran 287px into a notch 274 tall and the last line of the lead sat on
+// the wall's top edge. The words are set to the room there is.
+@include lt-h {
+    .OfferStrip__n {
+        margin: 0 0 1.2rem;
+    }
+
+    .OfferStrip__title {
+        font-size: clamp(2rem, 3.6vw, 4rem);
+    }
+
+    .OfferStrip__words__rule {
+        margin: 2.4vh 0 2.2vh;
+    }
+
+    .OfferStrip__lead {
+        font-size: clamp(0.95rem, 1.25vw, 1.4rem);
+        line-height: 1.55;
+    }
+}
+
+// ── the band on a phone held sideways ──────────────────────────────────
+//
+// The counts keep their wide composition here — three cells across a screen
+// this shape is what the wide one is for — but the band cannot: see the short
+// entry in SECTIONS, where the words move out beside the wall. What is left to
+// do here is the type, which has to fit a column a third of 844px wide and a
+// square 129 on a side.
+//
+// Written against the height alone, because that is the constraint and because
+// modeFor() in StatRail answers exactly this query.
+@media (max-height: 520px) {
+    .OfferStrip__n {
+        margin: 0 0 0.8rem;
+        font-size: 0.62rem;
+    }
+
+    .OfferStrip__title {
+        font-size: clamp(1.2rem, 2.5vw, 1.7rem);
+        line-height: 1.12;
+    }
+
+    .OfferStrip__words__rule {
+        margin: 1.6vh 0 1.4vh;
+    }
+
+    .OfferStrip__lead {
+        max-width: none;
+        font-size: clamp(0.78rem, 1.15vw, 0.95rem);
+        line-height: 1.5;
+    }
+
+    .OfferStrip__square {
+        padding: 1rem 1.1rem;
+
+        .OfferStrip__square__value {
+            font-size: clamp(1.5rem, 3vw, 2.2rem);
+        }
+
+        .OfferStrip__square__label {
+            margin-top: 0.5rem;
+            font-size: 0.58rem;
+            letter-spacing: 0.12em;
+        }
+    }
+
+    .OfferStrip__stop {
+        padding-top: 0.6rem;
+        font-size: 0.6rem;
+    }
+}
+
+// Calm, not still. The band is walked by the page's scroll and that stays —
+// stopping it would leave the section pinned on a screen that no longer
+// answers. What goes is the motion nothing asked for: the step-forward under
+// the pointer, and the springs that push a country's neighbours aside.
+@include reduced-motion {
+    .OfferStrip__box {
+        transition: border-color 0.42s ease, background-color 0.42s ease;
+
+        &:hover {
+            transform: none;
+        }
+    }
+}

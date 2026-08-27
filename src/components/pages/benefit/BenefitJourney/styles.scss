@@ -1,0 +1,418 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. Three rows read downwards in the homepage's open grammar —
+// no boxes anywhere: a frameless photograph drifting inside its crop, the
+// words under an oversized ghost numeral, ONE baseline hairline per row drawn
+// in from the copy's side, and a single straight vertical thread through each
+// gap standing at the x the next baseline starts from.
+.BenefitJourney {
+    position: relative;
+    z-index: 2;
+    // The top pad is floored rather than left as plain vh. The navbar is ~80px
+    // tall at every width the site has and it is fixed, so it belongs to no
+    // section; 14vh is 165px on a desktop and 55px on a phone in landscape,
+    // and at 55px the eyebrow renders behind it. Same reasoning as the foot:
+    // a fixed vh rhythm is a rhythm only while the viewport is tall.
+    padding: clamp(96px, 14vh, 220px) 8vw clamp(72px, 18vh, 260px);
+    color: var(--wText);
+}
+
+// ── the head ────────────────────────────────────────────────────────────
+.BenefitJourney__head {
+    margin-bottom: clamp(48px, 12vh, 180px);
+}
+
+.BenefitJourney__eyebrow {
+    margin: 0 0 1.4rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+
+    em {
+        font-style: normal;
+        color: var(--hColor);
+    }
+}
+
+.BenefitJourney__title {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(2rem, 3.2vw, 3.8rem);
+    line-height: 1.06;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.BenefitJourney__rule {
+    position: relative;
+    display: block;
+    width: min(34vw, 520px);
+    height: 1px;
+    margin: 3vh 0 2.4vh;
+    transform-origin: left center;
+    background-color: rgba(255, 255, 255, 0.22);
+
+    @include lineSweep(x, -2.6s, 8s, 13, 0.5);
+}
+
+.BenefitJourney__lead {
+    margin: 0;
+    max-width: 44ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.95rem, 1.15vw, 1.35rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+// ── a row ───────────────────────────────────────────────────────────────
+//
+// Two cells side by side and nothing drawn around them. The photograph's
+// side alternates down the page; DOM order stays photo-then-words so a phone
+// can stack them that way without caring which side the desktop chose. The
+// gap below each row is exactly the height of the vertical thread that
+// crosses it — see __drop.
+.BenefitJourney__row {
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 13vh;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
+
+    &.is-photo-right {
+        flex-direction: row-reverse;
+    }
+}
+
+// ── the photograph ──────────────────────────────────────────────────────
+//
+// Held well back — the words are the reason anybody is here — and scaled a
+// little past its box in the component so the drift has somewhere to go. No
+// frame: it stands taller than the row's words, its foot on the baseline,
+// its head in the open.
+.BenefitJourney__shot {
+    position: relative;
+    flex: none;
+    margin-top: -5vh;
+    overflow: hidden;
+}
+
+.BenefitJourney__shot__img {
+    position: absolute;
+    inset: 0;
+    opacity: 0.35;
+    filter: saturate(0.5);
+    will-change: transform;
+}
+
+// Darkest along the copy's side and the foot, so the picture hands over to
+// the dark the words stand on instead of stopping at an edge.
+.BenefitJourney__shot__scrim {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    .BenefitJourney__row.is-photo-right & {
+        background:
+            linear-gradient(to top, rgba(2, 12, 18, 0.62) 0%, rgba(2, 12, 18, 0.04) 46%),
+            linear-gradient(to left, rgba(2, 12, 18, 0.12) 55%, rgba(2, 12, 18, 0.72) 100%);
+    }
+
+    .BenefitJourney__row.is-photo-left & {
+        background:
+            linear-gradient(to top, rgba(2, 12, 18, 0.62) 0%, rgba(2, 12, 18, 0.04) 46%),
+            linear-gradient(to right, rgba(2, 12, 18, 0.12) 55%, rgba(2, 12, 18, 0.72) 100%);
+    }
+}
+
+// ── the words ───────────────────────────────────────────────────────────
+//
+// Set toward the photograph, so a row's sentence and its picture meet near
+// the middle of the screen instead of running to opposite margins.
+.BenefitJourney__copy {
+    position: relative;
+    z-index: 2;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 1.6vh;
+    padding: 5vh 3vw 6vh;
+    will-change: transform;
+
+    .BenefitJourney__row.is-photo-right & {
+        align-items: flex-end;
+        text-align: right;
+    }
+}
+
+// The step at FirstTime-stat scale: big, light and half-there — the numeral
+// carries the count, the small caps line under it carries the words.
+.BenefitJourney__ord {
+    display: block;
+    margin-bottom: 0.6vh;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(4rem, 9vw, 9rem);
+    line-height: 0.88;
+    letter-spacing: 0.02em;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.BenefitJourney__n {
+    margin: 0 0 0.6vh;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    color: var(--hColor);
+
+    span {
+        color: rgba(255, 255, 255, 0.5);
+        margin-left: 0.5em;
+    }
+}
+
+.BenefitJourney__statement {
+    margin: 0;
+    max-width: 15ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(2rem, 2.5vw, 3.4rem);
+    line-height: 1.06;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    text-shadow: 0 2px 24px rgba(0, 0, 0, 0.75);
+}
+
+.BenefitJourney__body {
+    margin: 0.8vh 0 0;
+    max-width: 34ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.95rem, 1.15vw, 1.4rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.82);
+}
+
+.BenefitJourney__note {
+    margin: 0;
+    max-width: 34ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.82rem, 0.95vw, 1.05rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.46);
+}
+
+// ── the rules ───────────────────────────────────────────────────────────
+//
+// One baseline per row, under everything, drawn in from the copy's side —
+// scaleX lives on the element in the component, the origin lives here, keyed
+// off which side the photograph took.
+.BenefitJourney__baseline {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+
+    .BenefitJourney__row.is-photo-right & {
+        transform-origin: left center;
+    }
+
+    .BenefitJourney__row.is-photo-left & {
+        transform-origin: right center;
+    }
+}
+
+// The thread through the gap: one straight vertical hairline, the height of
+// the row's margin exactly, standing at the x the next row's baseline starts
+// from — quiet, no dash, no glow. It is what makes three steps this far
+// apart one journey.
+.BenefitJourney__drop {
+    position: absolute;
+    top: 100%;
+    width: 1px;
+    height: 13vh;
+    background-color: rgba(255, 255, 255, 0.18);
+    transform-origin: center top;
+    pointer-events: none;
+
+    &.is-at-left {
+        left: 0;
+    }
+
+    &.is-at-right {
+        right: 0;
+    }
+}
+
+// Nothing sweeps for a reader who has asked for that.
+@include reduced-motion {
+    .BenefitJourney__rule::after {
+        animation: none;
+        opacity: 0;
+    }
+}
+
+// ── a phone ─────────────────────────────────────────────────────────────
+//
+// One column: photograph above its words, baselines only — the gap a thread
+// would cross is a different shape stacked, and the stacking already says
+// what the thread says.
+//
+// The gate carries a HEIGHT arm beside the width one. `below(sm)` alone is
+// max-width 899.98px, and a 932×430 phone is 932px wide: it sat on the desktop
+// composition, where a row is `62vh` — 266px — holding a copy column that
+// measures well over 300px, so the words ran straight through the baseline
+// under them and into the next step. 520px is the same threshold `phs`/`phl`
+// use: it clears the tallest phone in landscape and stays under the shortest
+// tablet.
+@media (max-width: 899.98px), (max-height: 520px) {
+    .BenefitJourney {
+        padding: clamp(96px, 10vh, 160px) 6vw clamp(64px, 12vh, 180px);
+    }
+
+    .BenefitJourney__head {
+        margin-bottom: clamp(36px, 8vh, 110px);
+    }
+
+    .BenefitJourney__rule {
+        width: min(60vw, 520px);
+    }
+
+    .BenefitJourney__row {
+        flex-direction: column !important;
+        height: auto !important;
+        margin-bottom: clamp(40px, 7vh, 96px);
+    }
+
+    .BenefitJourney__shot {
+        width: 100% !important;
+        // A fixed 42vh is 164px on a phone held sideways — a 5:1 letterbox
+        // with nothing in it. Floored and capped like every other vh rhythm
+        // in this file.
+        min-height: clamp(220px, 42vh, 460px);
+        margin-top: 0;
+    }
+
+    .BenefitJourney__shot__scrim {
+        background: linear-gradient(
+            to top,
+            rgba(2, 12, 18, 0.85) 0%,
+            rgba(2, 12, 18, 0.25) 45%,
+            rgba(2, 12, 18, 0.05) 75%
+        ) !important;
+    }
+
+    // Flush with the photograph above it and with the baseline under it. The
+    // 6vw here used to sit INSIDE the section's own 6vw, so the words were
+    // indented 12vw while the picture and the rule ran to 6vw — three
+    // different left edges in a section whose whole grammar is alignment.
+    .BenefitJourney__copy {
+        width: 100% !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        padding: clamp(20px, 4.5vh, 56px) 0 clamp(24px, 5.5vh, 64px);
+    }
+
+    .BenefitJourney__baseline {
+        transform-origin: left center !important;
+    }
+
+    .BenefitJourney__drop {
+        display: none;
+    }
+}
+
+// ── a phone held sideways ───────────────────────────────────────────────
+//
+// The block above has caught it and made it safe; this makes it good. Stacked
+// on a 844×390 screen a row is a full-bleed letterbox photograph with a
+// column of type under it that uses 40% of the width and leaves the rest
+// empty — the worst of both compositions. Sideways there is width to spare
+// and no height at all, so the two cells come back side by side and the row
+// is measured against the words in it rather than against the viewport.
+//
+// Everything here has to be `!important` because the stacked block it undoes
+// is: the widths in the component are inline styles, which is what forced
+// that hand in the first place.
+@include phs-h {
+    .BenefitJourney__row {
+        flex-direction: row !important;
+        align-items: stretch;
+        // Tall enough for the words, and the words are what set it. No vh:
+        // a row on this device is taller than the screen and that is correct.
+        min-height: 0;
+        margin-bottom: clamp(40px, 12vh, 96px);
+    }
+
+    // Two classes, so this beats the single-class rule above it whichever
+    // order they land in — the alternation is the section's spine.
+    .BenefitJourney__row.is-photo-right {
+        flex-direction: row-reverse !important;
+    }
+
+    .BenefitJourney__shot {
+        width: 44% !important;
+        min-height: 62vh;
+        margin-top: 0;
+    }
+
+    // The side wash comes back with the side-by-side: the picture hands over
+    // to the dark the words stand on, which is a horizontal handover again.
+    .BenefitJourney__row.is-photo-right .BenefitJourney__shot__scrim {
+        background:
+            linear-gradient(to top, rgba(2, 12, 18, 0.5) 0%, rgba(2, 12, 18, 0.04) 46%),
+            linear-gradient(to left, rgba(2, 12, 18, 0.12) 55%, rgba(2, 12, 18, 0.72) 100%) !important;
+    }
+
+    .BenefitJourney__row.is-photo-left .BenefitJourney__shot__scrim {
+        background:
+            linear-gradient(to top, rgba(2, 12, 18, 0.5) 0%, rgba(2, 12, 18, 0.04) 46%),
+            linear-gradient(to right, rgba(2, 12, 18, 0.12) 55%, rgba(2, 12, 18, 0.72) 100%) !important;
+    }
+
+    .BenefitJourney__copy {
+        width: 56% !important;
+        padding: clamp(18px, 5vh, 40px) 4vw clamp(22px, 6vh, 48px) !important;
+    }
+
+    .BenefitJourney__row.is-photo-right .BenefitJourney__copy {
+        align-items: flex-end !important;
+        text-align: right !important;
+    }
+
+    .BenefitJourney__row.is-photo-right .BenefitJourney__baseline {
+        transform-origin: left center !important;
+    }
+
+    .BenefitJourney__row.is-photo-left .BenefitJourney__baseline {
+        transform-origin: right center !important;
+    }
+
+    // Sized off the width again, not off a height there is none of.
+    .BenefitJourney__ord {
+        font-size: clamp(3rem, 7vw, 5rem);
+    }
+
+    .BenefitJourney__statement {
+        font-size: clamp(1.4rem, 3vw, 2.2rem);
+        max-width: 18ch;
+    }
+
+    .BenefitJourney__body {
+        font-size: clamp(0.85rem, 1.6vw, 1.05rem);
+    }
+
+    .BenefitJourney__note {
+        font-size: clamp(0.78rem, 1.35vw, 0.92rem);
+    }
+}

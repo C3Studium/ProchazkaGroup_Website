@@ -1,0 +1,334 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* The rail is darker than the workspace so the light falls on the content. It
+   carries no internal horizontal rules: the old version tried to line its brand
+   block up with the view header, which is impossible once a header can grow a
+   breadcrumb, and a rule that nearly lines up is worse than no rule at all. */
+.sidebar {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: var(--st-sidebar);
+  background: var(--st-rail);
+  border-right: 1px solid var(--st-line);
+  /* Width is the only thing that animates. The labels are switched off outright
+     rather than faded, because a half-transparent word next to an icon reads as
+     a disabled row for the two hundred milliseconds it is on screen. */
+  transition: width var(--st-mid) var(--st-ease);
+}
+
+.head {
+  display: flex;
+  flex: none;
+  align-items: center;
+  padding: var(--st-s5) var(--st-s3) var(--st-s8) var(--st-s5);
+}
+
+.brand {
+  display: flex;
+  flex: 1;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  text-decoration: none;
+
+  &:hover .brandText {
+    color: var(--st-ink);
+  }
+}
+
+.collapseToggle {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  color: var(--st-ink-4);
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink-2);
+    background: rgba(255, 252, 247, 0.06);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(1px);
+  }
+}
+
+.mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-radius: var(--st-radius);
+}
+
+.brandText {
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.02em;
+  color: var(--st-ink-2);
+  transition: color var(--st-fast) var(--st-ease);
+}
+
+.scroll {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  padding-bottom: var(--st-s5);
+  overflow-y: auto;
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.groupLabel {
+  @include t.eyebrow;
+
+  padding: var(--st-s6) var(--st-s5) var(--st-s2);
+  color: var(--st-ink-3);
+}
+
+/* Full-bleed rows rather than inset pills. A pill inside a rail is a container
+   inside a container; a row that runs the width of the rail is just structure. */
+.item {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  height: 34px;
+  padding: 0 var(--st-s5);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-2);
+  text-decoration: none;
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.04);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(-2px);
+  }
+}
+
+.itemIcon {
+  flex: none;
+  color: var(--st-ink-4);
+  transition: color var(--st-fast) var(--st-ease);
+}
+
+.item:hover .itemIcon {
+  color: var(--st-ink-3);
+}
+
+.itemLabel {
+  @include t.truncate;
+
+  flex: 1;
+}
+
+/* Achromatic: which screen you are on is not an alert. */
+.active {
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+  background: rgba(255, 252, 247, 0.055);
+  box-shadow: inset 2px 0 0 var(--st-ink);
+
+  .itemIcon {
+    color: var(--st-ink);
+  }
+}
+
+/* A count is a number, not a pill. The queue is the one place the accent earns
+   its keep in the navigation — it means "this many are waiting for you". */
+.count {
+  flex: none;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+}
+
+.countHot {
+  font-weight: var(--st-w-medium);
+  color: var(--st-accent);
+}
+
+.hint {
+  padding: var(--st-s2) var(--st-s5);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+.footer {
+  flex: none;
+  padding: var(--st-s3) var(--st-s3) var(--st-s3) var(--st-s5);
+  border-top: 1px solid var(--st-line);
+}
+
+.user {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.avatar {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.04em;
+  color: var(--st-ink-2);
+  background: rgba(255, 252, 247, 0.07);
+  border-radius: 50%;
+}
+
+.userText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.userName {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.userMail {
+  @include t.truncate;
+
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-3);
+}
+
+.siteLink {
+  display: inline-flex;
+  gap: 7px;
+  align-items: center;
+  padding: var(--st-s3) 0 var(--st-s1);
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-4);
+  text-decoration: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink-2);
+  }
+}
+
+/* The rail, reduced to its icons. The queue count survives the collapse as a mark
+   in the corner of its row — it is the one number worth keeping when everything
+   else in the navigation has been reduced to a glyph.
+
+   Written once as a mixin and applied twice: an editor's stored choice, and the
+   narrow viewport where the choice is not really available. The two used to be
+   able to drift; a row that lost its label under the media query but kept its
+   left padding under the toggle is the sort of thing nobody notices until the
+   client does. */
+@mixin rail {
+  width: 60px;
+
+  .brandText,
+  .itemLabel,
+  .groupLabel,
+  .userText {
+    display: none;
+  }
+
+  .head {
+    flex-direction: column;
+    gap: var(--st-s2);
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  .brand,
+  .item,
+  .footer {
+    flex: none;
+    justify-content: center;
+    padding-right: 0;
+    padding-left: 0;
+  }
+
+  /* Kept as a hairline, so a collapsed rail still says where "Obsah" starts.
+     Removing it outright ran the three groups together into one strip of
+     twelve identical glyphs. */
+  .groupLabel {
+    display: block;
+    height: 1px;
+    padding: 0;
+    margin: var(--st-s4) var(--st-s4) var(--st-s3);
+    overflow: hidden;
+    text-indent: -999px;
+    background: var(--st-line-soft);
+  }
+
+  .item {
+    position: relative;
+  }
+
+  .count {
+    position: absolute;
+    top: 3px;
+    right: 7px;
+    font-size: 9px;
+    line-height: 1;
+  }
+
+  .user {
+    flex-direction: column;
+    gap: var(--st-s2);
+  }
+
+  .siteLink {
+    justify-content: center;
+    width: 100%;
+    font-size: 0;
+  }
+}
+
+.sidebar.collapsed {
+  @include rail;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    @include rail;
+  }
+
+  /* The stored choice cannot be acted on at this width, so the control that
+     sets it stops claiming it can. */
+  .collapseToggle {
+    display: none;
+  }
+}

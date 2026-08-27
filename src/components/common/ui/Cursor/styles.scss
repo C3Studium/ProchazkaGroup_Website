@@ -1,0 +1,126 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.cursor {
+    position: fixed;
+    inset: 0;
+    // Above everything. This is the pointer: there is no layer on the site it is
+    // correct to be underneath, because whatever is on top is exactly what is
+    // being pointed at.
+    //
+    // It was 1002, which was chosen to clear the contact sheet (1001) — and then
+    // the advisors sheet arrived at 1002 as well. Equal z-index is decided by
+    // document order, and that sheet is a portal appended to <body> after this
+    // is, so it won every time and the marks asked into a layer nobody could
+    // see. The number is now clear of the whole ladder rather than one step
+    // above whatever the tallest thing happened to be that week: the preloader
+    // is 1009, the page transition 1003, the sheets 1001 and 1002.
+    z-index: 1100;
+    pointer-events: none;
+}
+
+// A fixed 28px box carried at the pointer. Nothing inside it ever resizes; the
+// corners only travel the few pixels between where they wait and where they
+// close, which is the whole interaction.
+.cursor__mark {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    translate: -50% -50%;
+    will-change: left, top;
+    transition: opacity 0.2s ease;
+}
+
+.cursor__dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background-color: var(--hColor);
+}
+
+// The same shape the buttons are framed with, at the same weight as the page's
+// rules. They wait a little outside the box and unseen; over something usable
+// they come in to its corners.
+.cursor__corner {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border: 0 solid var(--hColor);
+    opacity: 0;
+    transition:
+        transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.22s ease;
+}
+
+.cursor__corner--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    transform: translate(-6px, -6px);
+}
+
+.cursor__corner--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    transform: translate(6px, -6px);
+    transition-delay: 0.03s;
+}
+
+.cursor__corner--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    transform: translate(-6px, 6px);
+    transition-delay: 0.06s;
+}
+
+.cursor__corner--br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    transform: translate(6px, 6px);
+    transition-delay: 0.09s;
+}
+
+// Closed in. The stagger above means they arrive one after another rather than
+// all at once, which is what keeps it from reading as a state flipping.
+.cursor__mark.is-active .cursor__corner {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+// Words beside the marks, and only when the target asks for them by name. Set
+// outside the 28px box so the marks keep their size — the label is a note the
+// cursor is carrying, not part of it.
+.cursor__label {
+    position: absolute;
+    top: 50%;
+    left: 26px;
+    transform: translateY(-50%);
+    padding-left: 0.6em;
+    white-space: nowrap;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--wText);
+    opacity: 0;
+    // Held behind its own left edge until there is something to say.
+    clip-path: inset(-40% 100% -40% 0%);
+    transition:
+        opacity 0.28s ease,
+        clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &.is-on {
+        opacity: 1;
+        clip-path: inset(-40% 0% -40% 0%);
+    }
+}

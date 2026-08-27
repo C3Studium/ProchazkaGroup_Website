@@ -1,0 +1,282 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* The queue is the screen this client lives in, so it is the one screen built
+   around reading rather than around listing. Everything below serves three
+   moves in order: see who it is about, read what they wrote, decide. */
+
+.shortcuts {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  margin: 0;
+
+  div {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  dt {
+    display: flex;
+    gap: 2px;
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-3);
+  }
+
+  kbd {
+    display: grid;
+    place-items: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 4px;
+    font-family: var(--st-font);
+    font-size: var(--st-text-micro);
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink-3);
+    border: 1px solid var(--st-line-strong);
+    border-radius: 3px;
+  }
+}
+
+.queue {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+/* Three columns: identity rail, reading column, decision. The rail is a fixed
+   width so every name in the queue starts on the same vertical, which is what
+   lets the eye run down it without re-finding the line each time. */
+.row {
+  display: grid;
+  grid-template-columns: 18px 210px minmax(0, 1fr) auto;
+  gap: var(--st-s6);
+  align-items: start;
+  padding: var(--st-s5) var(--st-gutter);
+  border-bottom: 1px solid var(--st-line-soft);
+  transition:
+    background var(--st-fast) var(--st-ease),
+    box-shadow var(--st-fast) var(--st-ease);
+}
+
+/* The cursor row, moved by j/k as well as by the mouse. The accent means one
+   thing across the whole Studio — "your attention is here" — and this is its
+   most literal use. */
+.rowFocused {
+  background: rgba(255, 252, 247, 0.026);
+  box-shadow: inset 2px 0 0 var(--st-accent);
+}
+
+.rowSelected {
+  background: rgba(255, 252, 247, 0.055);
+}
+
+.rowBusy {
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.select {
+  padding-top: 2px;
+}
+
+/* ------------------------------------------------------------------ who -- */
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.name {
+  @include t.truncate;
+
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+/* Three steps, not two: the name, who it is about, and when. ink-4 is not used
+   here at all — "před 3 dny" is information the decision depends on, and ink-4
+   sits at 3.1:1, which is a tint for a separator, not a colour for a fact. */
+.about {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
+  }
+}
+
+.when {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.flags {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: flex-start;
+  margin-top: var(--st-s2);
+}
+
+/* ----------------------------------------------------------------- read -- */
+
+/* The one block of prose in the whole admin, and it is set like prose: reading
+   size, open leading, full ink, and a measure that stops at something a person
+   can actually track across. */
+.read {
+  min-width: 0;
+  padding-top: 1px;
+}
+
+.message {
+  max-width: 68ch;
+  margin: 0;
+  font-size: var(--st-text-lead);
+  font-weight: var(--st-w-book);
+  line-height: 1.62;
+  color: var(--st-ink);
+  white-space: pre-wrap;
+}
+
+.noMessage {
+  font-size: var(--st-text-body);
+  font-style: italic;
+  color: var(--st-ink-3);
+}
+
+.fallbackSub {
+  margin: var(--st-s2) 0 0;
+  font-size: var(--st-text-body);
+  color: var(--st-ink-3);
+}
+
+/* --------------------------------------------------------------- decide -- */
+
+/* Present on the row the cursor is on, and only there. Space is reserved either
+   way, so nothing reflows as the cursor moves. */
+.decide {
+  display: flex;
+  flex: none;
+  gap: var(--st-s1);
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--st-fast) var(--st-ease);
+}
+
+.row:hover .decide,
+.rowFocused .decide,
+.rowSelected .decide,
+.decide:focus-within {
+  opacity: 1;
+}
+
+/* Without a pointer there is no hover, so nothing would ever reveal them. */
+@media (hover: none) {
+  .decide {
+    opacity: 1;
+  }
+}
+
+/* -------------------------------------------------------------- bulk bar -- */
+
+/* Floats over the queue instead of taking a band off the bottom of it: the bar
+   exists only while a selection does, and the rows underneath are what the
+   selection is about. The dock does the centring so the bar's own transform is
+   free for the entrance — the two fighting over one `transform` is the usual
+   reason a bar like this animates from the wrong place. */
+.bulkDock {
+  position: absolute;
+  right: var(--st-gutter);
+  bottom: var(--st-s6);
+  left: var(--st-gutter);
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.bulkBar {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  max-width: 100%;
+  padding: var(--st-s2) var(--st-s2) var(--st-s2) var(--st-s4);
+  pointer-events: auto;
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-lg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+  animation: rise var(--st-mid) var(--st-ease);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+.bulkCount {
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+  white-space: nowrap;
+}
+
+/* Narrow: the identity rail folds above the text rather than squeezing it, and
+   the decision moves under both. Reading width is the last thing to give. */
+@media (max-width: 1180px) {
+  .shortcuts {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 18px minmax(0, 1fr);
+    gap: var(--st-s3) var(--st-s4);
+  }
+
+  .who {
+    flex-flow: row wrap;
+    gap: var(--st-s2);
+    align-items: baseline;
+  }
+
+  .flags {
+    flex-direction: row;
+    margin-top: 0;
+  }
+
+  .read,
+  .decide {
+    grid-column: 2;
+  }
+
+  .decide {
+    justify-content: flex-start;
+    opacity: 1;
+  }
+}
+
+@media (max-width: 900px) {
+  .row {
+    padding: var(--st-s5);
+  }
+
+  .bulkDock {
+    right: var(--st-s5);
+    left: var(--st-s5);
+  }
+}

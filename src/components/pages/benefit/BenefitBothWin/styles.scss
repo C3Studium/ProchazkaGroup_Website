@@ -1,0 +1,935 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// 05 + 06. Open composition in the homepage's structural grammar: hairline
+// rules are GRID ITEMS that draw themselves in (see index.jsx for the order),
+// the copy hangs in the air between them, and nothing is boxed. The two
+// movements share one vertical axis — the boundary between the two content
+// columns, at 50% of the content span — which the divider, the connector and
+// the join divider all sit on, so the eye reads one line falling through the
+// whole section.
+.BenBothWin {
+    position: relative;
+    width: 100%;
+    color: var(--wText);
+
+    .BenBothWin__eyebrow {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(0.68rem, 0.8vw, 0.92rem);
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+
+        em {
+            font-style: normal;
+            color: var(--hColor);
+        }
+    }
+
+    // Column heads and path heads: the same small-caps voice as the eyebrows,
+    // without the accent — the numbers are the only accented things here.
+    .BenBothWin__label {
+        margin: 0 0 2.6vh;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(0.72rem, 0.85vw, 0.95rem);
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    .BenBothWin__rule {
+        // Relative only so the light sweep inside has something to sit in —
+        // these are grid items and their placement is unaffected.
+        position: relative;
+        background-color: rgba(255, 255, 255, 0.22);
+        pointer-events: none;
+    }
+
+    // ------------------------------------------------------------- 05: doubt
+    .BenBothWin__doubt {
+        // Air above the hinge, floored and capped: 20vh alone is 216px on a
+        // 1080 desktop and 78px on a phone in landscape, and only one of those
+        // is the gap this question wants.
+        padding: clamp(5rem, 20vh, 13rem) 6vw 0;
+    }
+
+    // Its own box, so the letters answer a hand that is actually near them —
+    // and its own air: the question is the page's hinge and stands alone.
+    .BenBothWin__question {
+        margin-top: 5vh;
+        padding-bottom: 10vh;
+        width: 100%;
+    }
+
+    // ------------------------------------------------------------ 05: answer
+    .BenBothWin__answer {
+        display: grid;
+        grid-template-columns: 6vw 1fr 1fr 6vw;
+        grid-template-rows: 1px auto 1px auto;
+        // r1 top rule | r2 the two sides | r3 closing rule | r4 verdict
+    }
+
+    // horizontal: draws first, left to right — the line has to arrive before
+    // the divider that hangs from its midpoint can drop.
+    .BenBothWin__rule--answerTop {
+        grid-column: 2 / 4;
+        grid-row: 1;
+        width: 100%;
+        height: 1px;
+        transform-origin: left center;
+
+        @include lineSweep(x, -0.6s);
+    }
+
+    // vertical: hangs from the top rule at the column boundary — 50% of the
+    // 1fr/1fr content span — and separates the two truths.
+    .BenBothWin__rule--answerDivider {
+        grid-column: 3;
+        grid-row: 2;
+        justify-self: start;
+        width: 1px;
+        height: 100%;
+        transform-origin: center top;
+
+        @include lineSweep(y, -1.4s);
+    }
+
+    .BenBothWin__side {
+        padding: 8vh 4vw 9vh 0;
+
+        p {
+            margin: 0;
+            max-width: 30rem;
+            font-family: "Switzer-Light", sans-serif;
+            font-weight: 300;
+            font-size: clamp(1.05rem, 1.35vw, 1.5rem);
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.78);
+        }
+    }
+
+    .BenBothWin__side--them {
+        grid-column: 2;
+        grid-row: 2;
+    }
+
+    .BenBothWin__side--you {
+        grid-column: 3;
+        grid-row: 2;
+        padding: 8vh 0 9vh 4vw;
+    }
+
+    // horizontal: grows OUTWARD from the divider's foot — the junction causes
+    // it — and closes both columns with one line.
+    .BenBothWin__rule--answerClose {
+        grid-column: 2 / 4;
+        grid-row: 3;
+        width: 100%;
+        height: 1px;
+        transform-origin: 50% center;
+
+        @include lineSweep(x, -2.2s);
+    }
+
+    // The verdict sits on that rule, centred under the junction: it belongs
+    // to both columns at once, which is the claim it makes.
+    .BenBothWin__both {
+        grid-column: 2 / 4;
+        grid-row: 4;
+        margin: 0;
+        padding: 5vh 0 0;
+        text-align: center;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: clamp(1.1rem, 1.6vw, 1.7rem);
+        line-height: 1.4;
+    }
+
+    // -------------------------------------------------------------- 06: join
+    .BenBothWin__join {
+        display: grid;
+        grid-template-columns: 6vw 1fr 1fr 6vw;
+        grid-template-rows: 16vh 1px auto 1px auto;
+        // r1 connector air | r2 top rule | r3 head | r4 mid rule | r5 paths
+        padding-bottom: 16vh;
+    }
+
+    // vertical: the axis of the answer's divider carried on downwards — the
+    // handoff. Same x (the column boundary), drawn top to bottom first.
+    .BenBothWin__rule--connector {
+        grid-column: 3;
+        grid-row: 1;
+        justify-self: start;
+        width: 1px;
+        height: 100%;
+        transform-origin: center top;
+
+        @include lineSweep(y, -0.3s);
+    }
+
+    // horizontal: grows outward from the point the connector lands on — 50%.
+    .BenBothWin__rule--joinTop {
+        grid-column: 2 / 4;
+        grid-row: 2;
+        width: 100%;
+        height: 1px;
+        transform-origin: 50% center;
+
+        @include lineSweep(x, -1.1s);
+    }
+
+    // The statement holds the left column; the right stays air. Open, not a
+    // banner — the same asymmetry FirstTime leans on.
+    .BenBothWin__joinHead {
+        grid-column: 2;
+        grid-row: 3;
+        padding: 8vh 4vw 9vh 0;
+
+        h2 {
+            margin: 2.8vh 0 0;
+            font-family: "Switzer-Light", sans-serif;
+            font-weight: 300;
+            text-transform: uppercase;
+            font-size: clamp(1.7rem, 2.7vw, 3.1rem);
+            line-height: 1.18;
+            letter-spacing: 0.03em;
+        }
+    }
+
+    // horizontal: in reading order, left to right — and it must exist before
+    // the join divider can hang from its midpoint.
+    .BenBothWin__rule--joinMid {
+        grid-column: 2 / 4;
+        grid-row: 4;
+        width: 100%;
+        height: 1px;
+        transform-origin: left center;
+
+        @include lineSweep(x, -1.9s);
+    }
+
+    // vertical: hangs from the mid rule at the shared 50% boundary and keeps
+    // the two ways in apart.
+    .BenBothWin__rule--joinDivider {
+        grid-column: 3;
+        grid-row: 5;
+        justify-self: start;
+        width: 1px;
+        height: 100%;
+        transform-origin: center top;
+
+        @include lineSweep(y, -2.7s);
+    }
+
+    .BenBothWin__path {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 8vh 4vw 2vh 0;
+
+        p {
+            margin: 0 0 4vh;
+            max-width: 26rem;
+            font-family: "Switzer-Light", sans-serif;
+            font-weight: 300;
+            font-size: clamp(1.05rem, 1.35vw, 1.5rem);
+            line-height: 1.55;
+            color: rgba(255, 255, 255, 0.78);
+        }
+
+        .moreLink {
+            font-family: "Switzer-Light", sans-serif;
+            font-weight: 300;
+            font-size: clamp(0.9rem, 1vw, 1.1rem);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.85);
+        }
+    }
+
+    // The fork and either answer stand in the same band of the grid — one
+    // spans the two content columns and lays the paths back out inside itself,
+    // so choosing swaps WHAT is in the band, never where the band is.
+    .BenBothWin__fork,
+    .BenBothWin__reply {
+        grid-column: 2 / 4;
+        grid-row: 5;
+    }
+
+    // Two tiles trading one row — the offer page's stat-tile clothing with the
+    // navbar wall's physics. They share an edge the way the count tiles do:
+    // each carries its own hairline and the middle pair sits on one line.
+    .BenBothWin__fork {
+        display: flex;
+        align-items: stretch;
+        margin-top: 8vh;
+    }
+
+    .BenBothWin__forkCard {
+        appearance: none;
+        min-width: 0;
+        // 62vh is the shape; the floor and the cap are what keep it a tile on a
+        // short laptop and stop it becoming a room on a tall desktop.
+        min-height: clamp(19rem, 62vh, 42rem);
+        padding: clamp(2rem, 3vw, 3.4rem);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background-color: rgba(2, 14, 21, 0.35);
+        color: var(--wText);
+        cursor: pointer;
+        text-align: center;
+        transition: border-color 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+            background-color 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+
+        & + & {
+            margin-left: -1px;
+        }
+
+        &:focus-visible {
+            border-color: rgba(255, 255, 255, 0.42);
+            background-color: rgba(2, 14, 21, 0.55);
+            z-index: 1;
+        }
+
+        // Hover only where a pointer can leave again. A tap raises
+        // pointerenter and, on iOS, no pointerleave — an ungated :hover lights
+        // the tile and keeps it lit for the rest of the visit.
+        @include fine-pointer {
+            &:hover {
+                border-color: rgba(255, 255, 255, 0.42);
+                background-color: rgba(2, 14, 21, 0.55);
+                z-index: 1;
+            }
+        }
+
+        // The touch equivalent, and the only one: held for exactly as long as
+        // the finger is down, so the tile answers the hand without latching.
+        @include touch {
+            &:active {
+                border-color: rgba(255, 255, 255, 0.42);
+                background-color: rgba(2, 14, 21, 0.6);
+            }
+        }
+    }
+
+    // Number, heading and sentence grow together out of the middle — the
+    // squares' own gesture.
+    .BenBothWin__forkCard__body {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.2rem;
+        transform-origin: center center;
+        will-change: transform;
+    }
+
+    .BenBothWin__forkCard__q {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.9rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--hColor);
+    }
+
+    .BenBothWin__forkCard__big {
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(2.4rem, 4.4vw, 5.4rem);
+        line-height: 1.04;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .BenBothWin__forkCard__cap {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.82rem, 0.95vw, 1.05rem);
+        letter-spacing: 0.26em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+    }
+
+    // Printed only where the custom cursor is not: on a fine pointer the ring
+    // already carries "Vybrat", and two of them would be one too many.
+    .BenBothWin__forkCard__tap {
+        display: none;
+        margin-top: 0.6rem;
+        padding: 0.55rem 1.4rem;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.74rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.75);
+
+        @include touch {
+            display: inline-block;
+        }
+    }
+
+    .BenBothWin__path--new {
+        padding: 8vh 0 2vh 4vw;
+    }
+
+    // ── the answers ─────────────────────────────────────────────────────
+    // "reply", not "answer" — 05's two-truths grid already owns
+    // `__answer`, and a panel that inherited its 1px rule-rows collapsed the
+    // docked block into one of them.
+    .BenBothWin__reply {
+        position: relative;
+        padding: 10vh 0 2vh;
+    }
+
+    // The join's divider, carried on into whichever answer opened.
+    .BenBothWin__rule--replyDrop {
+        position: absolute;
+        top: 0;
+        left: 50%;
+        width: 1px;
+        height: 8vh;
+        transform-origin: center top;
+        background-color: rgba(255, 255, 255, 0.18);
+    }
+
+    // The switch — QnA's gesture in this section's clothing: two caps words
+    // sharing one hairline base, the active one lit with a small accent square
+    // and a drawn underline; no pill, no fill.
+    .BenBothWin__switch {
+        display: flex;
+        justify-content: center;
+        gap: 3.5rem;
+        margin: 1vh 0 6vh;
+        padding-bottom: 1.1rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .BenBothWin__switch__opt {
+        position: relative;
+        appearance: none;
+        border: 0;
+        background: none;
+        // The box grows UPWARD to the 44px a thumb needs, because the drawn
+        // accent is this button's bottom edge and padding under the word would
+        // leave the underline floating away from it.
+        padding: 1rem 0 0.7rem;
+        min-height: 44px;
+        cursor: pointer;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.86rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.42);
+        transition: color 0.35s ease;
+
+        &::before {
+            content: "";
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            margin-right: 0.8em;
+            vertical-align: 1px;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
+            transition: background-color 0.35s ease, border-color 0.35s ease;
+        }
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background-color: var(--hColor);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        @include fine-pointer {
+            &:hover {
+                color: rgba(255, 255, 255, 0.75);
+            }
+        }
+
+        &.is-on {
+            color: var(--wText);
+
+            &::before {
+                border-color: var(--hColor);
+                background-color: var(--hColor);
+            }
+
+            &::after {
+                transform: scaleX(1);
+            }
+        }
+    }
+
+    // The compact picker: the classic CTA's list-and-detail, re-dressed — the
+    // list on the section's hairlines with a square tick, the chosen advisor's
+    // name and line on the right at the answer's own scale.
+    // Split at the section's own centre, so the spine between the columns is
+    // the same line the connector and the reply's drop travel — one axis from
+    // the heading down through the choice into the answer.
+    .BenBothWin__mini {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        align-items: start;
+        text-align: left;
+    }
+
+    .BenBothWin__mini__spine {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 1vh;
+        width: 1px;
+        transform-origin: center top;
+        background-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .BenBothWin__mini__node {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        width: 7px;
+        height: 7px;
+        translate: -50% -50%;
+        border: 1px solid var(--hColor);
+        background-color: rgba(3, 13, 19, 0.95);
+    }
+
+    // The list's own ceiling — the rows hang from it the way the join's rules
+    // hang from theirs.
+    .BenBothWin__mini__topline {
+        position: absolute;
+        left: 0;
+        right: 52%;
+        top: 0;
+        height: 1px;
+        transform-origin: left center;
+        background-color: rgba(255, 255, 255, 0.14);
+    }
+
+    .BenBothWin__mini__list {
+        list-style: none;
+        margin: 0;
+        padding: 1vh 4vw 0 0;
+    }
+
+    // The list is capped and scrolls only where a wheel can reach it. On touch
+    // the cap turned a roster of ten into a 200px window on three of them, with
+    // the scrollbar hidden and nothing to say the rest were there — and a
+    // hidden scroller inside a page is the last thing a thumb should meet. Off
+    // a pointer the names simply run on and the chosen advisor follows them.
+    @include fine-pointer {
+        .BenBothWin__mini__list {
+            max-height: 52vh;
+            overflow-y: auto;
+            scrollbar-width: none;
+
+            &::-webkit-scrollbar { display: none; }
+        }
+    }
+
+    .BenBothWin__mini__row {
+        appearance: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.1rem;
+        width: 100%;
+        padding: 1.25rem 0.2rem;
+        border: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+        background: none;
+        cursor: pointer;
+        text-align: left;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(1.15rem, 1.45vw, 1.7rem);
+        color: rgba(255, 255, 255, 0.6);
+        transition: color 0.3s ease;
+
+        @include fine-pointer {
+            &:hover { color: rgba(255, 255, 255, 0.85); }
+        }
+
+        &.is-on { color: var(--wText); }
+    }
+
+    // The indicator, on the row's far side: an outline square that the active
+    // row fills — the switch above speaks the same mark.
+    .BenBothWin__mini__sq {
+        flex: none;
+        width: 9px;
+        height: 9px;
+        border: 1px solid rgba(255, 255, 255, 0.35);
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+    }
+
+    // Hover-follow selection is the whole gesture of this list on a mouse, and
+    // exactly the thing that latches under a thumb — index.jsx gates the state
+    // change on the same query this gates the paint on.
+    @include fine-pointer {
+        .BenBothWin__mini__row:hover .BenBothWin__mini__sq {
+            border-color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    .BenBothWin__mini__row.is-on .BenBothWin__mini__sq {
+        border-color: var(--hColor);
+        background-color: var(--hColor);
+    }
+
+    .BenBothWin__mini__who {
+        padding: 1.6vh 0 0 4vw;
+    }
+
+    .BenBothWin__mini__who--lone {
+        grid-column: 1 / -1;
+        text-align: center;
+    }
+
+    // The cutout-on-white the classic CTA shows, at this answer's scale.
+    .BenBothWin__mini__photo {
+        position: relative;
+        width: min(21vw, 20rem);
+        aspect-ratio: 4 / 5;
+        margin-bottom: 3vh;
+        background-color: #fff;
+        overflow: hidden;
+    }
+
+    .BenBothWin__mini__eyebrow {
+        margin: 0 0 1rem;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.74rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--hColor);
+    }
+
+    .BenBothWin__mini__name {
+        margin: 0 0 2.2vh;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(1.8rem, 2.8vw, 3.4rem);
+        line-height: 1.05;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+    }
+
+    .BenBothWin__mini__note {
+        margin: 2.4vh 0 0;
+        max-width: 40ch;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.9rem, 1vw, 1.1rem);
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .BenBothWin__back {
+        appearance: none;
+        border: 0;
+        background: none;
+        padding: 0 0 0.4rem;
+        margin-bottom: 3vh;
+        cursor: pointer;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.55);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.25);
+        transition: color 0.3s ease, border-color 0.3s ease;
+
+        &:focus-visible {
+            color: var(--wText);
+            border-color: var(--hColor);
+        }
+
+        @include fine-pointer {
+            &:hover {
+                color: var(--wText);
+                border-color: var(--hColor);
+            }
+        }
+    }
+
+
+    .BenBothWin__reply__note {
+        margin: 0 0 3vh;
+        max-width: 44ch;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.95rem, 1.1vw, 1.25rem);
+        line-height: 1.6;
+        color: rgba(255, 255, 255, 0.66);
+    }
+
+    .BenBothWin__reply__phone {
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(2rem, 3.6vw, 4.2rem);
+        letter-spacing: 0.04em;
+        font-variant-numeric: tabular-nums;
+        color: var(--hColor);
+        text-decoration: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-bottom: 0.4rem;
+        transition: border-color 0.3s ease;
+
+        &:focus-visible {
+            border-color: var(--hColor);
+        }
+
+        @include fine-pointer {
+            &:hover {
+                border-color: var(--hColor);
+            }
+        }
+
+        // A tel: link is the one thing on this panel a thumb will actually aim
+        // at, so it gets a box rather than a line box.
+        @include touch {
+            display: inline-block;
+            min-height: 44px;
+            padding-bottom: 0.6rem;
+        }
+    }
+
+    .BenBothWin__reply__hours {
+        margin: 2vh 0 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: 0.72rem;
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    // The homepage's advisor block, docked full-bleed. Left at its own 100vh:
+    // its columns are laid out against that height, and paring it collapsed
+    // the band and let the next section bleed through. The drawn axis above is
+    // the adaptation; the block itself arrives whole.
+    .BenBothWin__ctaDock {
+        margin: 0 -6vw;
+    }
+
+    // ---------------------------------------------------------------- mobile
+    @include below-px(900) {
+        .BenBothWin__doubt {
+            padding: 14vh 8vw 0;
+        }
+
+        .BenBothWin__question {
+            margin-top: 4vh;
+            padding-bottom: 8vh;
+        }
+
+        // The columns stack; the vertical dividers have no junction to hang
+        // from any more, so they go (the way FirstTime drops its rules on
+        // mobile) and the horizontals span the single column instead.
+        .BenBothWin__answer {
+            grid-template-columns: 8vw 1fr 8vw;
+            grid-template-rows: 1px auto auto 1px auto;
+            // r1 rule | r2 them | r3 you | r4 rule | r5 verdict
+        }
+
+        .BenBothWin__rule--answerTop {
+            grid-column: 2;
+        }
+
+        .BenBothWin__rule--answerDivider {
+            display: none;
+        }
+
+        .BenBothWin__side--them {
+            grid-column: 2;
+            grid-row: 2;
+            padding: 6vh 0 4vh;
+        }
+
+        .BenBothWin__side--you {
+            grid-column: 2;
+            grid-row: 3;
+            padding: 0 0 7vh;
+        }
+
+        .BenBothWin__rule--answerClose {
+            grid-column: 2;
+            grid-row: 4;
+            transform-origin: left center;
+        }
+
+        .BenBothWin__both {
+            grid-column: 2;
+            grid-row: 5;
+            text-align: left;
+            padding: 4vh 0 0;
+        }
+
+        .BenBothWin__join {
+            grid-template-columns: 8vw 1fr 8vw;
+            grid-template-rows: 10vh 1px auto 1px auto auto;
+            // r1 connector | r2 rule | r3 head | r4 rule | r5 client | r6 new
+            padding-bottom: 12vh;
+        }
+
+        .BenBothWin__rule--connector {
+            grid-column: 2;
+            justify-self: center;
+        }
+
+        .BenBothWin__rule--joinTop {
+            grid-column: 2;
+            transform-origin: center;
+        }
+
+        .BenBothWin__joinHead {
+            grid-column: 2;
+            padding: 6vh 0 7vh;
+        }
+
+        .BenBothWin__rule--joinMid {
+            grid-column: 2;
+        }
+
+        .BenBothWin__rule--joinDivider {
+            display: none;
+        }
+
+        .BenBothWin__fork,
+        .BenBothWin__reply {
+            grid-column: 2;
+            grid-row: 5;
+        }
+
+        .BenBothWin__fork {
+            flex-direction: column;
+        }
+
+        .BenBothWin__forkCard {
+            // Two of these stand one above the other now, so the pair is the
+            // measure: 44vh each is a screen and a half on a tall tablet and a
+            // sliver on a short landscape window.
+            min-height: clamp(13rem, 44vh, 26rem);
+
+            & + & {
+                margin-left: 0;
+                margin-top: -1px;
+            }
+        }
+
+        .BenBothWin__ctaDock {
+            margin: 0 -8vw;
+        }
+
+        .BenBothWin__mini {
+            grid-template-columns: 1fr;
+            gap: 5vh;
+        }
+
+        // One column on a phone: no boundary for the spine to sit on.
+        .BenBothWin__mini__spine,
+        .BenBothWin__mini__node {
+            display: none;
+        }
+
+        .BenBothWin__mini__topline {
+            right: 0;
+        }
+
+        .BenBothWin__mini__list {
+            padding-right: 0;
+        }
+
+        .BenBothWin__mini__who {
+            padding-left: 0;
+        }
+
+        .BenBothWin__mini__photo {
+            width: min(60vw, 18rem);
+        }
+
+        .BenBothWin__switch {
+            gap: 2rem;
+        }
+
+        // Two caps words with 0.28em between every letter do not both fit
+        // across a phone, and a wrapped label leaves its square stranded on
+        // the line above. Tightened until each stands on one line.
+        @include below-px(560) {
+            .BenBothWin__switch {
+                gap: 1.4rem;
+            }
+
+            .BenBothWin__switch__opt {
+                font-size: 0.72rem;
+                letter-spacing: 0.16em;
+                white-space: nowrap;
+            }
+        }
+
+        .BenBothWin__path--client {
+            padding: 6vh 0 3vh;
+        }
+
+        .BenBothWin__path--new {
+            padding: 3vh 0 0;
+        }
+
+        // A phone held sideways at 844x390 is under 900px wide, so it is
+        // stacked with everything else here — but the fork is a QUESTION with
+        // two answers, and stacking puts one answer per screen on a 390px-tall
+        // viewport. `phl` is min-width 800 AND max-height 520, which is that
+        // phone and no tablet. (A 932x430 phone is already past the 900px stop
+        // and keeps the two-up row on its own.) The pair goes side by side,
+        // short.
+        @include phl-h {
+            .BenBothWin__fork {
+                flex-direction: row;
+                margin-top: 5vh;
+            }
+
+            .BenBothWin__forkCard {
+                min-height: clamp(10rem, 58vh, 14rem);
+
+                & + & {
+                    margin-top: 0;
+                    margin-left: -1px;
+                }
+            }
+
+            .BenBothWin__forkCard__big {
+                font-size: clamp(1.6rem, 4vw, 2.6rem);
+            }
+        }
+    }
+
+    // Calm, not killed: the section still draws itself in — one settle per
+    // rule, which is a curtain and not a loop — and every control still
+    // answers a hand at its own 0.3–0.45s. Only the light that runs the
+    // hairlines forever goes out, the way every other section puts it out.
+    @include reduced-motion {
+        .BenBothWin__rule::after {
+            animation: none;
+            background-image: none;
+            filter: none;
+        }
+    }
+}
+
+// The enrolment, standing alone below the reviews. The connector still draws
+// in from its own top edge — now out of the reviews' belt rather than the
+// answer's junction — and the block keeps its air without the question's
+// stage above it.
+.BenBothWin--enroll {
+    padding-top: 4vh;
+    padding-bottom: 14vh;
+}

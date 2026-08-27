@@ -5,6 +5,8 @@ export const people = [
         reviews: '25',
         moto: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
         src: '/assets/portraits/business/11.webp',
+        // The casual counterpart, shown when the pointer rests on this name.
+        srcAlt: '/assets/portraits/casual/11.webp',
         alt: 'person1',
         tel: '+420777111222', 
     },
@@ -14,6 +16,8 @@ export const people = [
         reviews: '20',
         moto: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
         src: '/assets/portraits/business/17.webp',
+        // The casual counterpart, shown when the pointer rests on this name.
+        srcAlt: '/assets/portraits/casual/17.webp',
         alt: 'person2',
         tel: '+420777111222', 
     },
@@ -32,6 +36,8 @@ export const people = [
         reviews: '20',
         moto: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
         src: '/assets/portraits/business/6.webp',
+        // The casual counterpart, shown when the pointer rests on this name.
+        srcAlt: '/assets/portraits/casual/6.webp',
         alt: 'person3',
         tel: '+420777111222', 
     },
@@ -41,6 +47,8 @@ export const people = [
         reviews: '18',
         moto: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit,',
         src: '/assets/portraits/business/12.webp',
+        // The casual counterpart, shown when the pointer rests on this name.
+        srcAlt: '/assets/portraits/casual/12.webp',
         alt: 'person4',
         tel: '+420777111222', 
     },

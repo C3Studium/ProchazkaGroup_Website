@@ -1,0 +1,334 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+// Studio design system.
+//
+// Named `.module.scss` on purpose. `scripts/sync-styles.js` globs every stylesheet
+// under `src/` and concatenates the non-module ones into the site's public global
+// sheet; a partial called `_tokens.scss` would therefore ship the admin's CSS to
+// every visitor. The `.module` suffix puts it on the CSS-Modules side of the
+// check at sync-styles.js:62. It emits no CSS by itself — only Sass variables and
+// mixins. The custom properties they feed are declared once, in Studio.module.scss.
+//
+// ---------------------------------------------------------------------------
+// The three rules this system runs on
+//
+// 1. ONE ACCENT. Brass, and it means "attention" — nothing else. Approve is not
+//    green, reject is not red, published is not green. Those meanings are carried
+//    by weight, position and restraint, because a screen where every control is
+//    filled with a signal colour has no signal left. The one exception is error:
+//    a failure has to be unmistakable, so it gets the second hue and it appears
+//    only on failure or on destructive intent, never at rest.
+//
+// 2. STRUCTURE FROM RULES AND SPACE. There are no cards. Regions are separated by
+//    hairlines and by whitespace, and they run to the edge of the canvas.
+//
+// 3. A REAL SCALE. Sizes accelerate — tight at the bottom where the UI is dense,
+//    wide at the top where the eye needs a landmark. Nothing is "about 14px".
+// ---------------------------------------------------------------------------
+
+// -------------------------------------------------------------- surfaces --
+// Warm-neutral graphite rather than the blue-black every dark admin ships with.
+// There is one content ground; elevation exists only for things that genuinely
+// float above it (modal, toast, the bulk bar).
+$bg: #101011;
+$rail: #0a0a0b;
+$sunken: #08080a;
+$raised: #1a1a1d;
+$overlay: rgba(6, 6, 7, 0.74);
+
+// Hairlines carry the whole structure. Warm white so they sit in the same family
+// as the ink instead of reading blue against it.
+$line: rgba(255, 252, 247, 0.09);
+$line-soft: rgba(255, 252, 247, 0.055);
+$line-strong: rgba(255, 252, 247, 0.17);
+
+// Ink. Deliberately brighter than the previous palette across the board — this
+// is a tool someone reads in for hours, not a hero section. ink-2 is the body
+// colour and clears 10:1 on the ground; ink-4 is decorative only and is never
+// the sole carrier of meaning.
+$ink: #f4f2ef;
+$ink-2: #c6c3bd;
+$ink-3: #918d87;
+$ink-4: #66625d;
+
+// The solid, achromatic primary. The most important action on a screen is the
+// brightest thing on it, which needs no hue at all.
+$solid: #f4f2ef;
+$solid-hover: #ffffff;
+$on-solid: #101011;
+
+// Brass. Attention: the queue count, the focused row, focus rings, links, and
+// the states that used to be a separate "warning" yellow.
+$accent: #d8a657;
+$accent-soft: rgba(216, 166, 87, 0.13);
+$accent-line: rgba(216, 166, 87, 0.44);
+$on-accent: #171104;
+
+// Brick. Errors and destructive intent only — it is never a resting fill.
+$danger: #de7466;
+$danger-soft: rgba(222, 116, 102, 0.12);
+$danger-line: rgba(222, 116, 102, 0.42);
+
+// ------------------------------------------------------------------ type --
+$font: "Switzer-Variable", "Switzer-Regular", system-ui, -apple-system, sans-serif;
+$mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+// Fixed density: an admin is read at one distance and should not fluidly scale.
+// The jumps widen as they climb — 1.12 between the UI sizes, 1.4 and 1.57 at the
+// top — which is what puts an editorial hierarchy on a screen of small text.
+$text-micro: 10px; // eyebrow, small caps only
+$text-tiny: 11px;
+$text-small: 12.5px;
+$text-body: 14px; // every control, every list row
+$text-lead: 16px; // prose meant to be read — the review queue lives here
+$text-section: 20px;
+$text-title: 28px;
+$text-display: 48px;
+
+$w-light: 300;
+$w-book: 400;
+$w-medium: 500;
+$w-strong: 600;
+
+// Optical tracking. Large text needs negative tracking to stop looking loose;
+// small caps need a lot of positive. Skipping this is the clearest tell that a
+// type scale was picked from a list rather than set.
+$track-display: -0.028em;
+$track-title: -0.021em;
+$track-section: -0.014em;
+$track-body: 0;
+$track-caps: 0.13em;
+
+// ----------------------------------------------------------------- space --
+// One 4px scale. Every padding, gap and margin in the Studio is a step on it.
+$s1: 4px;
+$s2: 8px;
+$s3: 12px;
+$s4: 16px;
+$s5: 20px;
+$s6: 24px;
+$s8: 32px;
+$s10: 40px;
+$s12: 48px;
+$s16: 64px;
+
+// The page gutter is a token because every screen has to share one left edge —
+// header, toolbar, rows and empty states all line up on it.
+$gutter: 32px;
+$gutter-sm: 20px;
+
+// --------------------------------------------------------------- metrics --
+$radius: 3px;
+$radius-lg: 6px;
+$sidebar: 240px;
+$row: 52px;
+
+// Motion. Quiet and quick: this is a tool, not a showreel. Nothing animates
+// position except things that genuinely arrive (bulk bar, toast, modal).
+$fast: 110ms;
+$mid: 170ms;
+$ease: cubic-bezier(0.22, 0.7, 0.3, 1);
+
+// ---------------------------------------------------------------- mixins --
+
+/// A column header, a field label above a control, a section eyebrow. Small caps
+/// carry hierarchy at this density better than another size step would.
+@mixin eyebrow {
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-ink-3);
+}
+
+@mixin display {
+  font-size: var(--st-text-display);
+  font-weight: var(--st-w-light);
+  line-height: 1.04;
+  letter-spacing: var(--st-track-display);
+  color: var(--st-ink);
+}
+
+@mixin title {
+  font-size: var(--st-text-title);
+  font-weight: var(--st-w-book);
+  line-height: 1.15;
+  letter-spacing: var(--st-track-title);
+  color: var(--st-ink);
+}
+
+@mixin section-title {
+  font-size: var(--st-text-section);
+  font-weight: var(--st-w-book);
+  line-height: 1.25;
+  letter-spacing: var(--st-track-section);
+  color: var(--st-ink);
+}
+
+/// Focus for anything that draws its own border — fields, search, selects. The
+/// ring lands inside the control's own edge.
+@mixin focus-ring {
+  outline: none;
+  border-color: var(--st-accent-line);
+  box-shadow: 0 0 0 3px var(--st-accent-soft);
+}
+
+/// Focus for anything that does not — buttons, tiles, rows, links. Offset so it
+/// reads on a hairline background, and never inherits the element's radius
+/// badly because `outline` follows the border box.
+@mixin focus-outline($offset: 2px) {
+  outline: 2px solid var(--st-accent);
+  outline-offset: $offset;
+}
+
+/// Every text-entry control in the Studio, so a text field, a number field and a
+/// select cannot drift apart visually. All six states are decided here once.
+@mixin control {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  line-height: 1.5;
+  color: var(--st-ink);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    border-color var(--st-fast) var(--st-ease),
+    box-shadow var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+  appearance: none;
+
+  &::placeholder {
+    color: var(--st-ink-4);
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--st-line-strong);
+  }
+
+  &:focus {
+    @include focus-ring;
+  }
+
+  &:disabled {
+    color: var(--st-ink-3);
+    cursor: not-allowed;
+    background: transparent;
+    border-color: var(--st-line-soft);
+  }
+}
+
+@mixin scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 252, 247, 0.14) transparent;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 252, 247, 0.13);
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 252, 247, 0.24);
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin clamp-lines($count) {
+  display: -webkit-box;
+  -webkit-line-clamp: $count;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/// Emitted once, on the Studio root. Every other stylesheet reads `var(--st-*)`,
+/// so the Sass variables above stay the single source and the two cannot drift.
+@mixin declare {
+  --st-font: #{$font};
+  --st-mono: #{$mono};
+
+  --st-bg: #{$bg};
+  --st-rail: #{$rail};
+  --st-sunken: #{$sunken};
+  --st-raised: #{$raised};
+  --st-overlay: #{$overlay};
+
+  --st-line: #{$line};
+  --st-line-soft: #{$line-soft};
+  --st-line-strong: #{$line-strong};
+
+  --st-ink: #{$ink};
+  --st-ink-2: #{$ink-2};
+  --st-ink-3: #{$ink-3};
+  --st-ink-4: #{$ink-4};
+
+  --st-solid: #{$solid};
+  --st-solid-hover: #{$solid-hover};
+  --st-on-solid: #{$on-solid};
+
+  --st-accent: #{$accent};
+  --st-accent-soft: #{$accent-soft};
+  --st-accent-line: #{$accent-line};
+  --st-on-accent: #{$on-accent};
+
+  --st-danger: #{$danger};
+  --st-danger-soft: #{$danger-soft};
+  --st-danger-line: #{$danger-line};
+
+  --st-text-micro: #{$text-micro};
+  --st-text-tiny: #{$text-tiny};
+  --st-text-small: #{$text-small};
+  --st-text-body: #{$text-body};
+  --st-text-lead: #{$text-lead};
+  --st-text-section: #{$text-section};
+  --st-text-title: #{$text-title};
+  --st-text-display: #{$text-display};
+
+  --st-w-light: #{$w-light};
+  --st-w-book: #{$w-book};
+  --st-w-medium: #{$w-medium};
+  --st-w-strong: #{$w-strong};
+
+  --st-track-display: #{$track-display};
+  --st-track-title: #{$track-title};
+  --st-track-section: #{$track-section};
+  --st-track-caps: #{$track-caps};
+
+  --st-s1: #{$s1};
+  --st-s2: #{$s2};
+  --st-s3: #{$s3};
+  --st-s4: #{$s4};
+  --st-s5: #{$s5};
+  --st-s6: #{$s6};
+  --st-s8: #{$s8};
+  --st-s10: #{$s10};
+  --st-s12: #{$s12};
+  --st-s16: #{$s16};
+  --st-gutter: #{$gutter};
+
+  --st-radius: #{$radius};
+  --st-radius-lg: #{$radius-lg};
+  --st-sidebar: #{$sidebar};
+  --st-row: #{$row};
+
+  --st-fast: #{$fast};
+  --st-mid: #{$mid};
+  --st-ease: #{$ease};
+}

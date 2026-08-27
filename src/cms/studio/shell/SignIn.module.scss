@@ -1,0 +1,173 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* The gate is a single column standing on the ground, not a card floating over
+   it. A bordered, shadowed panel is the most template-looking thing a sign-in
+   screen can do, and there is nothing behind it here for a card to sit on.
+
+   Instead the screen borrows the workspace's own geometry: a band the width of
+   the navigation rail, a hairline where the rail's edge will be, and the form
+   set on exactly the gutter every screen inside uses. Signing in and arriving
+   therefore share a left edge — the app does not jump when you get in. */
+.gate {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: var(--st-s12) var(--st-gutter) var(--st-s16);
+  padding-left: calc(var(--st-sidebar) + var(--st-gutter));
+  background: linear-gradient(
+    90deg,
+    var(--st-rail) 0 var(--st-sidebar),
+    var(--st-bg) var(--st-sidebar)
+  );
+
+  &::before {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--st-sidebar);
+    width: 1px;
+    content: "";
+    background: var(--st-line);
+  }
+}
+
+.panel {
+  width: 100%;
+  max-width: 340px;
+}
+
+.brand {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  padding-bottom: var(--st-s6);
+  margin-bottom: var(--st-s8);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-radius: var(--st-radius);
+}
+
+.title {
+  @include t.title;
+
+  margin: 0;
+}
+
+.subtitle {
+  margin: var(--st-s1) 0 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s5);
+}
+
+.input {
+  @include t.control;
+
+  height: 42px;
+}
+
+/* The reveal toggle sits inside the field's own border rather than beside it,
+   so the password field stays the same width as the address field above it. The
+   right padding is the button's width plus the gutter it needs. */
+.secret {
+  position: relative;
+
+  .input {
+    padding-right: 40px;
+  }
+}
+
+.revealButton {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
+}
+
+/* One message for the whole form. It sits where a third field would be, so it
+   pushes the button down rather than shifting the fields the eye is on. */
+.failure {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-danger);
+  background: var(--st-danger-soft);
+  border: 1px solid var(--st-danger-line);
+  border-radius: var(--st-radius);
+
+  svg {
+    flex: none;
+    margin-top: 1px;
+  }
+}
+
+.submit {
+  width: 100%;
+}
+
+.note {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.55;
+  color: var(--st-ink-4);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+  }
+}
+
+.footnote {
+  position: absolute;
+  bottom: var(--st-s8);
+  left: calc(var(--st-sidebar) + var(--st-gutter));
+  margin: 0;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-ink-4);
+}
+
+/* Below the width where a rail would be worth its space, the gate is simply a
+   centred column — the geometry it was echoing is not on screen either. */
+@media (max-width: 900px) {
+  .gate {
+    align-items: center;
+    padding: var(--st-s12) var(--st-s5) var(--st-s16);
+    background: var(--st-bg);
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .footnote {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}

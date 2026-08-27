@@ -1,0 +1,680 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* The preview host.
+
+   Same situation as PreviewPanel had and the Studio still has: this mounts on a
+   public page, under the site's global stylesheet, so it declares the Studio's
+   tokens for itself and resets the box model for its own subtree. It is the same
+   token set, not a second one — every colour, size and duration below is a
+   `var(--st-*)` fed from src/cms/studio/styles/_tokens.module.scss.
+
+   `.module.scss` is not a preference. scripts/sync-styles.js globs every
+   stylesheet under src/ and concatenates the non-module ones into the site's
+   public sheet; named `preview.scss`, this file would ship the admin's CSS to
+   every visitor. */
+
+.host {
+  @include t.declare;
+
+  position: fixed;
+  inset: 0;
+  /* Above the site's own stacking — the navbar tops out at 165 and the cursor at
+     155 — and level with the Studio's overlay, which never coexists with this. */
+  z-index: 2147483000;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  overflow: hidden;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  font-synthesis-weight: none;
+  line-height: 1.45;
+  color: var(--st-ink);
+  background: var(--st-bg);
+  -webkit-font-smoothing: antialiased;
+
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+
+  :where(button, input, select, textarea) {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+  }
+
+  :where(button) {
+    cursor: pointer;
+    background: none;
+    border: 0;
+  }
+
+  :where(a) {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  :where(a, button, select, [tabindex]):focus-visible {
+    @include t.focus-outline;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* The only rules emitted outside the subtree, and they exist because `_app.js`
+   wraps every page in a marketing navbar, a footer, a cursor and a WebGL canvas,
+   and that file is not this build's to edit.
+
+   Hidden rather than covered, and this is the load-bearing part of the whole
+   feature: `display: none` on the shader is what takes its IntersectionObserver
+   out of intersection, which drops react-three-fiber to `frameloop: "demand"` and
+   leaves the outer WebGL context allocated but idle. The context inside the
+   iframe is then the only one rendering — which is the answer to the objection in
+   SPEC.md that an iframe would mean two.
+
+   Anchored on `:has(.host)` rather than written as bare `:global` rules: CSS
+   Modules requires every selector to carry a local class, and this way they
+   switch themselves off the moment the host unmounts. Scroll locking is done from
+   JS instead, since it must hold in a browser without `:has()`. */
+body:has(.host) :global(.neural-tunnel--page),
+body:has(.host) :global(.cursorGrid--page),
+body:has(.host) :global(.navbar__container),
+body:has(.host) :global(.SiteFooter),
+body:has(.host) :global(.cursor) {
+  display: none !important;
+}
+
+/* And one more, for the same reason and in the same place: the overlay portals
+   its media library into *this* document (see @/cms/edit/overlay/Overlay), on a
+   layer numbered for the framed page's document, where nothing competes with it.
+   Here it competes with `.host` above, which is opaque and higher — measured
+   before this rule existed, `elementFromPoint` at the dialog's own centre
+   answered the iframe, so the library was drawn and painted over. The z-index it
+   has to clear is declared here, so the correction is declared here too rather
+   than in a module that would have to guess at the number. */
+/* Matched on the attribute's PRESENCE, never on its value. The value used to be
+   "media" and became "popup" when the one popup grew a body per kind — this
+   selector stopped matching, every popup opened a thousand below the Studio's
+   own root, and clicking an image looked like it did nothing at all. The same
+   rule in Studio.module.scss carried the same bug and was found by measurement,
+   not by reading. A layering rule must not depend on a name that describes the
+   contents. */
+body:has(.host) :global([data-cms-overlay]) {
+  z-index: 2147483100;
+}
+
+/* Suppressed until the stored device has been read, so the frame does not open at
+   the default size and jump to the remembered one a tick later.
+
+   Hung on the stage rather than on `.host`, because `/studio/edit` reuses the
+   stage and the frame inside it but has no host — it lives inside the Studio's
+   shell, which owns the viewport already. Same flag, same moment, one rule. */
+.stage[data-ready="false"] .frame {
+  visibility: hidden;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------- the bar --- */
+
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--st-s2) var(--st-s3);
+  align-items: center;
+  padding: var(--st-s3) var(--st-s5);
+  background: var(--st-rail);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.group {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+}
+
+.groupIcon {
+  color: var(--st-ink-4);
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  background: var(--st-line);
+}
+
+.spacer {
+  flex: 1;
+  min-width: var(--st-s2);
+}
+
+.exit {
+  display: inline-flex;
+  gap: var(--st-s2);
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--st-s3);
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink-2);
+  white-space: nowrap;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.06);
+  }
+}
+
+.select {
+  @include t.control;
+
+  width: auto;
+  max-width: 260px;
+  padding: 5px var(--st-s3);
+  font-size: var(--st-text-small);
+  background: var(--st-sunken);
+}
+
+/* Tabular figures: these two numbers change together and are read as a pair, so
+   the second one must not slide sideways when the first gains a digit. */
+.size,
+.zoom,
+.side {
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-2);
+  white-space: nowrap;
+}
+
+.size {
+  min-width: 82px;
+}
+
+.times {
+  color: var(--st-ink-4);
+}
+
+.turned {
+  font-family: var(--st-font);
+  font-size: var(--st-text-micro);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-ink-4);
+}
+
+.sides {
+  display: inline-flex;
+  gap: var(--st-s1);
+  align-items: center;
+}
+
+.side {
+  @include t.control;
+
+  width: 62px;
+  padding: 4px var(--st-s2);
+  text-align: center;
+
+  /* The spinners are 20px of chrome on a 62px control and the value is committed
+     on blur anyway, so they would fire a reflow of a real document per click. */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  appearance: textfield;
+}
+
+.zoom {
+  min-width: 48px;
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+  text-align: center;
+}
+
+.icon {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  color: var(--st-ink-2);
+  border: 1px solid transparent;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.07);
+  }
+
+  &:disabled {
+    color: var(--st-ink-4);
+    cursor: not-allowed;
+  }
+}
+
+.chip {
+  display: inline-flex;
+  gap: var(--st-s2);
+  align-items: center;
+  height: 30px;
+  padding: 0 var(--st-s3);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  white-space: nowrap;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    border-color: var(--st-line-strong);
+  }
+}
+
+/* Achromatic, like the sidebar's active row: "this control is on" is a state, not
+   an alert, and the accent means attention and nothing else. */
+.chipOn {
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+  border-color: var(--st-solid);
+
+  &:hover {
+    color: var(--st-on-solid);
+    background: var(--st-solid-hover);
+  }
+}
+
+.modes {
+  display: flex;
+  gap: 1px;
+  padding: 1px;
+  background: var(--st-line-soft);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+.mode {
+  padding: 5px var(--st-s3);
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink-3);
+  white-space: nowrap;
+  background: var(--st-rail);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    background: var(--st-raised);
+  }
+}
+
+.modeOn {
+  color: var(--st-on-solid);
+  background: var(--st-solid);
+
+  &:hover {
+    color: var(--st-on-solid);
+    background: var(--st-solid-hover);
+  }
+}
+
+.stamp {
+  min-width: 60px;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+  text-align: right;
+}
+
+/* -------------------------------------------------------------- the body --- */
+
+.main {
+  display: grid;
+  grid-template-columns: var(--st-sidebar) minmax(0, 1fr);
+  min-height: 0;
+}
+
+.rail {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--st-rail);
+  border-right: 1px solid var(--st-line);
+}
+
+.railScroll {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.section {
+  padding: var(--st-s4) var(--st-s4);
+
+  & + & {
+    border-top: 1px solid var(--st-line-soft);
+  }
+}
+
+.label {
+  @include t.eyebrow;
+
+  display: block;
+  margin-bottom: var(--st-s3);
+}
+
+.labelPath {
+  font-family: var(--st-mono);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--st-ink-4);
+}
+
+.pages {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  width: 100%;
+  padding: 6px var(--st-s2);
+  text-align: left;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.05);
+  }
+}
+
+.pageOn {
+  background: rgba(255, 252, 247, 0.08);
+
+  .pageLabel {
+    color: var(--st-ink);
+  }
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.1);
+  }
+}
+
+.pageLabel {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+}
+
+.pagePath {
+  @include t.truncate;
+
+  font-family: var(--st-mono);
+  font-size: var(--st-text-micro);
+  color: var(--st-ink-4);
+}
+
+/* Not `.group` — the bar has one of those, and two rules of the same name in one
+   module are one rule. */
+.pageGroup {
+  margin-top: var(--st-s2);
+}
+
+.summary {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: 6px var(--st-s2);
+  cursor: pointer;
+  border-radius: var(--st-radius);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &::marker,
+  &::-webkit-details-marker {
+    display: none;
+    content: "";
+  }
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.05);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(-2px);
+  }
+}
+
+.summaryMark {
+  flex: none;
+  color: var(--st-ink-4);
+  transition: transform var(--st-fast) var(--st-ease);
+
+  .pageGroup[open] & {
+    transform: rotate(90deg);
+  }
+}
+
+.groupPath {
+  @include t.truncate;
+
+  flex: 1;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-3);
+}
+
+.groupCount {
+  font-size: var(--st-text-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+}
+
+.note {
+  margin: var(--st-s3) 0 0;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-ink-3);
+}
+
+/* ------------------------------------------------------------ the source --- */
+
+.source {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  padding: var(--st-s2);
+  border-radius: var(--st-radius);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.05);
+  }
+}
+
+.sourceIcon,
+.sourceGo {
+  flex: none;
+  color: var(--st-ink-4);
+}
+
+.sourceText {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.sourceTitle {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+}
+
+.sourceHint {
+  font-size: var(--st-text-micro);
+  color: var(--st-ink-4);
+}
+
+/* ------------------------------------------------------------ the counts --- */
+
+.stats {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.stat {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 4px 0;
+
+  & + & {
+    border-top: 1px solid var(--st-line-soft);
+  }
+}
+
+.statLabel {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* Not an error colour. Zero is a legitimate answer here — see the component. */
+.statValue {
+  margin: 0;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.statZero {
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-4);
+}
+
+.statUnit {
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-4);
+}
+
+.warn {
+  display: flex;
+  gap: var(--st-s2);
+  margin: var(--st-s3) 0 0;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-accent);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+  }
+}
+
+/* ------------------------------------------------------------- the stage --- */
+
+.stage {
+  @include t.scrollbar;
+
+  display: grid;
+  /* `safe` is the whole reason this is not plain `center`. A centred grid item
+     that is larger than its container overflows equally in both directions, and
+     the half that goes past the start edge cannot be scrolled to — at 1920 wide
+     and 100% zoom the left third of the page would be unreachable. `safe` falls
+     back to start alignment exactly when that would happen. */
+  place-content: safe center;
+  min-width: 0;
+  min-height: 0;
+  padding: var(--st-s5);
+  overflow: auto;
+  /* Sunken rather than the content ground, so the frame reads as a thing sitting
+     in a space rather than as the page continuing past its own edge. */
+  background: var(--st-sunken);
+}
+
+/* Sized to the *painted* result — the device's dimensions times the zoom. The
+   iframe inside is transformed, and a transform paints outside the flow: an
+   unscaled parent would keep reserving 1920×1080 for a frame drawn at half that
+   and the stage would scroll to whitespace. */
+.frame {
+  position: relative;
+  flex: none;
+  background: #fff;
+  border: 1px solid var(--st-line-strong);
+  box-shadow: 0 24px 60px -20px rgba(0, 0, 0, 0.8);
+  transition: opacity var(--st-fast) var(--st-ease);
+}
+
+.frameDoc {
+  display: block;
+  border: 0;
+  /* Shares an origin with the wrapper above. Centred, the frame would drift out
+     of its own box by half the difference at every zoom that is not 100%. */
+  transform-origin: 0 0;
+}
+
+/* --------------------------------------------------------------- narrow ---- */
+
+/* The rail is the first thing to go: the frame is the tool and the navigator is
+   how you change what is in it, so on a small screen the bar's page name and the
+   browser's own back button are enough to keep working. */
+@media (max-width: 900px) {
+  .main {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .rail {
+    display: none;
+  }
+
+  .stage {
+    padding: var(--st-s3);
+  }
+}

@@ -1,0 +1,156 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+.loading {
+  display: grid;
+  flex: 1;
+  place-items: center;
+  color: var(--st-ink-4);
+}
+
+/* Unsaved work is exactly what the accent is for: something wants your
+   attention before you navigate away. */
+.dirtyMark {
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-accent);
+}
+
+/* Archived state, stated once at the top of the screen. Brass rather than
+   brick: being in the archive is a fact about the record, not a failure, and
+   the accent is the Studio's one "pay attention to this" colour. Full-bleed on
+   the gutter so it reads as a property of the screen rather than of a field. */
+.archivedNote {
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  padding: var(--st-s3) var(--st-gutter);
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  background: var(--st-accent-soft);
+  border-bottom: 1px solid var(--st-line);
+  box-shadow: inset 2px 0 0 var(--st-accent);
+
+  svg {
+    flex: none;
+    color: var(--st-accent);
+  }
+}
+
+/* ----------------------------------------------------------------- tabs -- */
+
+.tabs {
+  display: flex;
+  flex: none;
+  gap: var(--st-s5);
+  padding: 0 var(--st-gutter);
+  overflow-x: auto;
+  border-bottom: 1px solid var(--st-line);
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tab {
+  position: relative;
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  height: 44px;
+  padding: 0 1px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-3);
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  &::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    content: "";
+    background: transparent;
+    transition: background var(--st-fast) var(--st-ease);
+  }
+
+  &:hover {
+    color: var(--st-ink-2);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(-4px);
+  }
+}
+
+/* An underline rather than a filled pill: the tab strip sits directly on the
+   form and a filled tab would read as a second toolbar. */
+.tabActive {
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+
+  &::after {
+    background: var(--st-ink);
+  }
+}
+
+/* The error count on an unopened tab is the only way an editor finds out a
+   hidden field is blocking their publish, so this is one of the few places a
+   hue is doing real work. */
+.tabError {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--st-w-medium);
+  color: var(--st-danger);
+}
+
+/* ----------------------------------------------------------------- form -- */
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--st-s8) var(--st-s6);
+  align-content: start;
+  max-width: 760px;
+  padding: var(--st-s8) var(--st-gutter) var(--st-s16);
+
+  /* Full-width is the default; `ui.width: "half"` opts a field into one column. */
+  > * {
+    grid-column: 1 / -1;
+  }
+}
+
+.summary {
+  display: flex;
+  grid-column: 1 / -1;
+  gap: var(--st-s3);
+  align-items: center;
+  padding: var(--st-s3) var(--st-s4);
+  font-size: var(--st-text-body);
+  color: var(--st-danger);
+  background: var(--st-danger-soft);
+  border-left: 2px solid var(--st-danger);
+
+  svg {
+    flex: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .tabs {
+    padding: 0 var(--st-s5);
+  }
+
+  .form {
+    padding: var(--st-s6) var(--st-s5) var(--st-s16);
+  }
+}

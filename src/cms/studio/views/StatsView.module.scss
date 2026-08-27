@@ -1,0 +1,191 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../styles/tokens.module" as t;
+
+/* The panel itself is unconstrained so the tile row can use the width it is
+   given — a row of measuring instruments reads better wide. Everything below it
+   is prose or a two-column table, so those cap themselves at a reading measure
+   instead. */
+.panel {
+  max-width: none;
+}
+
+.loading {
+  display: grid;
+  place-items: center;
+  padding: var(--st-s16);
+  color: var(--st-ink-4);
+}
+
+/* Tiles share hairlines rather than each carrying a border, so a row of four
+   reads as one instrument instead of four cards. */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  margin-bottom: var(--st-s12);
+  border-top: 1px solid var(--st-line);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  padding: var(--st-s5) var(--st-s6);
+  border-left: 1px solid var(--st-line);
+
+  &:first-child {
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+.tileGhost .tileValue {
+  color: var(--st-ink-4);
+}
+
+.tileLabel {
+  @include t.eyebrow;
+}
+
+/* Proportional figures on purpose — a standalone value at this size looks loose
+   in tabular ones. `tabular-nums` is reserved for the breakdown columns below,
+   which do have to align. */
+.tileValue {
+  display: flex;
+  gap: var(--st-s1);
+  align-items: baseline;
+  font-size: var(--st-text-title);
+  font-weight: var(--st-w-light);
+  line-height: 1.15;
+  letter-spacing: var(--st-track-title);
+  color: var(--st-ink);
+}
+
+.tileUnit {
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-4);
+}
+
+.tileFoot {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  min-height: 16px;
+}
+
+.tileHint {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* Direction is carried by the chevron, not by red-versus-green. Up is not always
+   good in analytics, and a delta that is only a colour is unreadable to anyone
+   who cannot separate the two hues. */
+.deltaUp,
+.deltaDown {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-2);
+}
+
+.deltaDown {
+  color: var(--st-ink-3);
+}
+
+.breakdown {
+  max-width: 940px;
+  margin-bottom: var(--st-s10);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+
+  tr {
+    border-bottom: 1px solid var(--st-line-soft);
+  }
+
+  td {
+    padding: 10px 0;
+    font-size: var(--st-text-body);
+  }
+}
+
+.cellLabel {
+  @include t.truncate;
+
+  max-width: 0;
+  color: var(--st-ink-2);
+}
+
+.cellValue {
+  width: 96px;
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink);
+  text-align: right;
+}
+
+/* ------------------------------------------------------------ not wired -- */
+
+/* The unwired state is a checklist, so it is set as one: left-aligned on the
+   page gutter, ordered, and readable at prose width. It used to be centred,
+   which made a set of implementation notes look like an error page. */
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s4);
+  max-width: 68ch;
+  padding: 0;
+  margin: 0 0 var(--st-s6);
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: var(--st-s3);
+    align-items: flex-start;
+    font-size: var(--st-text-body);
+    line-height: 1.65;
+    color: var(--st-ink-2);
+  }
+
+  code {
+    font-family: var(--st-mono);
+    font-size: 12.5px;
+    color: var(--st-ink);
+  }
+}
+
+.stepIndex {
+  flex: none;
+  width: 16px;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+}
+
+.note {
+  max-width: 68ch;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.65;
+  color: var(--st-ink-4);
+
+  code {
+    font-family: var(--st-mono);
+    color: var(--st-ink-3);
+  }
+}
+
+@media (max-width: 900px) {
+  .tile {
+    padding: var(--st-s4) var(--st-s5);
+
+    &:first-child {
+      padding-left: 0;
+    }
+  }
+}

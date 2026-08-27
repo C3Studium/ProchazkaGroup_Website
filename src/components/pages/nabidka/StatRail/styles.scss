@@ -1,0 +1,759 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// The stacked composition's gate.
+//
+// Not below(sm). A phone in landscape is 844 × 390 and matches below(sm) on
+// width alone, and the stacked composition asks for three bands of a count
+// each — the bar's clearance plus a figure and its line, 148px, three times —
+// which does not fit in 390 and never did: the third band, the one with 1/10
+// in it, was off the bottom of the screen. A short wide viewport reads the
+// wide composition instead, which is the shape it is.
+//
+// 520px is the house's own line between a phone in landscape and a tablet; see
+// phs/phl in _breakpoints.scss. isStacked() in index.jsx answers exactly this
+// query and the two must be changed together — the geometry and the type that
+// sits in it are one decision made in two files.
+@mixin stacked {
+    @media (max-width: 899.98px) and (min-height: 520.02px) {
+        @content;
+    }
+}
+
+// The statistics, as one instrument rather than three slides. The ground
+// changes underneath; the fraction arrives once and stays for the whole
+// section, and only its numerator turns. See index.jsx for the beats.
+.StatRail {
+    position: relative;
+    // Above the hero, which it covers.
+    z-index: 2;
+    // 100vh of overlap plus one screen for each beat of the arc: the hero's
+    // own frame, the two cuts, each count's turn at being largest, the fold and
+    // the hand-off. Cramming those into three screens made every one of them
+    // hurry.
+    // Longer, because the counts are what the section is for and they were
+    // getting less scroll than the moves between them. See BEATS in index.jsx.
+    //
+    // 620 of these screens are the arc — the question, the grid, the three
+    // counts, the close — and the rest belong to the offer's five steps in the
+    // rectangle the close leaves open. ARC + OFFER in index.jsx says the
+    // same thing; this is the one number that has to agree with it.
+    height: 870vh;
+    // Pulled up over the hero's last screen so that this pins at the moment
+    // the hero stops travelling. Without it the two hand over across a full
+    // screen of scroll with both photographs on screen, sliding past each
+    // other — which is the one thing the hero's whole reveal was avoiding.
+    margin-top: -100vh;
+
+    .StatRail__viewport {
+        position: sticky;
+        top: 0;
+        width: 100%;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    // The shader, as a bitmap. Captured from the live canvas so the two are the
+    // same picture — see stillOut in index.jsx for why the section uncovers
+    // this instead of the real thing.
+    .StatRail__still {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        background-color: #020E15;
+        background-image: url("/assets/backgrounds/tunnel_still.webp");
+        background-size: cover;
+        background-position: center;
+        pointer-events: none;
+    }
+
+    // Everything the photographs are. Fading this is the whole of the change
+    // of ground at the end of the section — the shader in _app is behind it and
+    // nothing else in here is opaque.
+    .StatRail__ground {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+    }
+
+    // --- cells ------------------------------------------------------------
+
+    // A full-viewport layer with a clip over it. The clip is the cell: a small
+    // cell shows less of the photograph rather than a squashed copy of it, so
+    // the layout never crops the picture and no frame touches the layout
+    // thread — only compositing.
+    .StatRail__cell {
+        position: absolute;
+        inset: 0;
+        // Above the rectangle, so the tiles stay legible over whatever grows
+        // in it.
+        z-index: 2;
+        will-change: clip-path;
+    }
+
+    // Oversized by the drift, so a drifting picture never walks off its own
+    // edge. The first cell is the exception: it drifts nowhere, because it is
+    // the frame the hero parts on and any other crop puts the seam back.
+    // Carries the close: the layer scales into its tile so the picture shrinks
+    // with the cell instead of the cell becoming a peephole onto a full one.
+    .StatRail__cell__shrink {
+        position: absolute;
+        inset: 0;
+    }
+
+    // Static per cell — it is framing, not motion, and it must not sit on the
+    // same element as the drift.
+    .StatRail__cell__frame {
+        position: absolute;
+        inset: 0;
+    }
+
+    .StatRail__cell__photo {
+        position: absolute;
+        top: -5%;
+        left: 0;
+        width: 100%;
+        height: 110%;
+        will-change: transform;
+
+        &.is-fixed {
+            top: 0;
+            height: 100%;
+        }
+    }
+
+    // The box a count ends in. The photograph has gone by the time this is
+    // visible; what is left is the site's own hairline round nothing.
+    .StatRail__cell__box {
+        position: absolute;
+        inset: 0;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        background-color: rgba(2, 14, 21, 0.55);
+        pointer-events: none;
+    }
+
+    // The count, once its cell is a box. Placed against the box's own edges,
+    // which the component hands over as percentages of the screen.
+    .StatRail__cell__mark {
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5vh;
+        margin: 0;
+        padding: 0.8vh 0.7vw;
+        pointer-events: none;
+
+        .StatRail__cell__mark__n {
+            font-family: "Switzer-Light", sans-serif;
+            font-weight: 300;
+            font-size: clamp(0.86rem, 1.08vw, 1.2rem);
+            line-height: 1;
+            color: var(--wText);
+            font-variant-numeric: tabular-nums;
+
+            span {
+                opacity: 0.6;
+            }
+        }
+
+        // What the count counts. On a wide screen the tile it would stand in
+        // is 78px across — narrower than the shortest of the three lines — so
+        // there the sentence comes out of the box under the pointer instead
+        // and this stays out of the way. A phone's band is a third of the
+        // screen and has room for it, which is the whole reason the phone
+        // gets a band rather than the cluster.
+        .StatRail__cell__mark__short {
+            display: none;
+            font-family: "Switzer-Light", sans-serif;
+            font-size: clamp(0.54rem, 0.66vw, 0.72rem);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.6);
+        }
+    }
+
+    // The sentence the box opens for.
+    .StatRail__cell__mark__full {
+        max-width: 30ch;
+        margin-top: 1vh;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.66rem, 0.8vw, 0.88rem);
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.7);
+    }
+
+    // The pointer's target: exactly the box, and nothing while there is no box.
+    .StatRail__cell__hit {
+        position: absolute;
+        z-index: 2;
+        cursor: default;
+    }
+
+    .StatRail__cell__scrim {
+        position: absolute;
+        inset: 0;
+        background-color: #000;
+        pointer-events: none;
+    }
+
+    // Ground for the copy, laid in from the side the copy is on rather than up
+    // from the floor — the copy is at the middle of its cell now, and a
+    // bottom-up gradient was darkening the one part of the picture nothing was
+    // written over.
+    .StatRail__cell__wash {
+        position: absolute;
+        pointer-events: none;
+    }
+
+    .StatRail__cell__wash--left {
+        background-image: linear-gradient(
+            to right,
+            rgba(0, 0, 0, 0.66) 0%,
+            rgba(0, 0, 0, 0.36) 34%,
+            rgba(0, 0, 0, 0) 68%
+        );
+    }
+
+    .StatRail__cell__wash--right {
+        background-image: linear-gradient(
+            to left,
+            rgba(0, 0, 0, 0.66) 0%,
+            rgba(0, 0, 0, 0.36) 34%,
+            rgba(0, 0, 0, 0) 68%
+        );
+    }
+
+    // Everything that is not the cell being read steps back. Black rather than
+    // a blur or a desaturate: those cost a filter on a full-screen layer every
+    // frame, and this says the same thing.
+    .StatRail__cell__recede {
+        position: absolute;
+        inset: 0;
+        background-color: #000;
+        pointer-events: none;
+    }
+
+    // Hung off its cell's inner edge, at the cell's own middle height. The box
+    // is positioned against the screen and cut to the cell, which is exactly
+    // right — it belongs to whichever cell contains it.
+    .StatRail__cell__copy {
+        position: absolute;
+        display: flex;
+        padding: 0 clamp(1.4rem, 2.4vw, 2.6rem);
+        pointer-events: none;
+    }
+
+    .StatRail__cell__copy--left {
+        justify-content: flex-start;
+        // Scaled by its cell's share of the screen, from the edge it hangs on.
+        transform-origin: left center;
+    }
+
+    .StatRail__cell__copy--right {
+        justify-content: flex-end;
+        transform-origin: right center;
+    }
+
+    // The lines keep a shared left edge whichever side the block is on, so the
+    // text is read the way text is read even when the block is pushed right.
+    .StatRail__cell__block {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    // The set is a sequence and these say so. Small, always on, in all three
+    // cells — the reader can see there are three beats and which one this is
+    // before reading a word of it.
+    .StatRail__ordinal {
+        display: flex;
+        align-items: center;
+        gap: 0.6em;
+        margin: 0 0 0.5em;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.6rem, 0.7vw, 0.76rem);
+        // Tighter than the site's other eyebrows: at 0.32em a two-digit number
+        // stops reading as a number and starts reading as "0  1".
+        letter-spacing: 0.16em;
+        color: rgba(255, 255, 255, 0.62);
+
+        .StatRail__ordinal__tick {
+            display: block;
+            width: clamp(16px, 2vw, 34px);
+            height: 1px;
+            // Drawn out from its own start rather than scaled from the middle.
+            transform-origin: left center;
+            background-color: var(--hColor);
+        }
+    }
+
+    .StatRail__figure {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        // The largest cell's size. Every other cell scales this down by its own
+        // share of the screen — see figureScale in index.jsx — so the type
+        // states the proportion at the same time as the number does.
+        // Was clamp(3.4rem, 8.4vw, 9.6rem) — eight times the caption beside
+        // it. At that ratio the only thing anyone saw was three big numbers
+        // with no idea what they counted. The figure is still the loudest
+        // thing in the block, but it and the sentence now read as one object.
+        font-size: clamp(3.1rem, 6.8vw, 7.8rem);
+        line-height: 0.94;
+        color: var(--wText);
+        // 8, 3 and 1 sit at three different widths otherwise, and the figures
+        // would not line up down the right-hand column.
+        font-variant-numeric: tabular-nums;
+        text-shadow: 0 2px 40px rgba(0, 0, 0, 0.5);
+
+        .StatRail__figure__of {
+            opacity: 0.7;
+        }
+    }
+
+    .StatRail__caption {
+        margin: 0;
+        transform-origin: left top;
+        max-width: 22ch;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(1.12rem, 1.8vw, 2rem);
+        line-height: 1.32;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.86);
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    // The sentence and the tile's two words, one on top of the other. Both are
+    // in the same grid cell, so the box is the taller of the two at every
+    // moment and the swap costs the block no height.
+    .StatRail__cell__line {
+        display: grid;
+        justify-items: start;
+        // Both boxes are the height of the taller one otherwise, which puts a
+        // two-word line in the middle of a four-line box.
+        align-items: start;
+
+        > * {
+            grid-area: 1 / 1;
+        }
+    }
+
+    // The caption's little sister. Same size and same counter-scale, because
+    // it is the same line of the block — it only says less, which is all a
+    // tile has room for.
+    .StatRail__short {
+        margin: 0;
+        transform-origin: left top;
+        // A tile is 207px across at this width and the block inside it is
+        // scaled down; a wrap here would put the second word outside the
+        // photograph.
+        white-space: nowrap;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(1.12rem, 1.8vw, 2rem);
+        line-height: 1.32;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.86);
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    // What the number means, on the cell being read and nowhere else. Sentence
+    // case against the caption's uppercase, because it is a voice rather than
+    // a label.
+    .StatRail__note {
+        margin: 0.7em 0 0;
+        max-width: 34ch;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.94rem, 1.18vw, 1.28rem);
+        line-height: 1.45;
+        color: rgba(255, 255, 255, 0.72);
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    // The hairlines the cells are cut on.
+    .StatRail__cut {
+        position: absolute;
+        z-index: 6;
+        pointer-events: none;
+
+        .StatRail__cut__line {
+            position: absolute;
+            inset: 0;
+            display: block;
+            background-color: rgba(255, 255, 255, 0.24);
+        }
+    }
+
+    .StatRail__cut--y {
+        top: 0;
+        bottom: 0;
+        width: 1px;
+
+        .StatRail__cut__line {
+            width: 1px;
+            @include lineSweep(y, 0s);
+        }
+    }
+
+    .StatRail__cut--x {
+        right: 0;
+        height: 1px;
+
+        // The short one under the last tile sets its own ends.
+        &.StatRail__cut--under {
+            right: auto;
+        }
+
+        .StatRail__cut__line {
+            height: 1px;
+            @include lineSweep(x, 0s);
+        }
+    }
+
+    // --- the rectangle the tiles leave open ------------------------------
+
+    .StatRail__rest {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        will-change: clip-path;
+    }
+
+    // The closing statement, centred in whatever the rectangle is at the time.
+    // It was hung off the frame's corner while the rectangle was a corner; it
+    // is read on its way across now, and a travelling line reads from the
+    // middle.
+    // Dead centre of the screen — not of the rectangle it is clipped to. It is
+    // the sentence the whole section has been arguing towards and it is the
+    // last thing before the offer, so it is set at the size of a title rather
+    // than of a caption.
+    .StatRail__close {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: min(1180px, 80vw);
+        transform: translate(-50%, -50%);
+        // The block is centred on the screen; the words inside it are not
+        // centred on the block. A statement of four lines set ragged both
+        // sides is a poster, and this is the page still talking.
+        text-align: left;
+    }
+
+    .StatRail__close__eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 0.9rem;
+        margin: 0 0 1.6vh;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.6rem, 0.72vw, 0.78rem);
+        letter-spacing: 0.3em;
+        text-transform: uppercase;
+        color: var(--hColor);
+
+        .StatRail__close__tick {
+            display: block;
+            width: clamp(18px, 2.2vw, 38px);
+            height: 1px;
+            background-color: currentColor;
+        }
+    }
+
+    .StatRail__close__lead {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(1.9rem, 4.4vw, 5.4rem);
+        line-height: 1.2;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--wText);
+        text-shadow: 0 2px 34px rgba(0, 0, 0, 0.55);
+    }
+
+    .StatRail__close__rule {
+        display: block;
+        width: 26%;
+        height: 1px;
+        margin: 3vh 0 2.4vh;
+        transform-origin: left center;
+        background-color: rgba(255, 255, 255, 0.22);
+    }
+
+    // The answer, under the rule and in the section's quieter voice — the same
+    // pairing the note under each count is set in.
+    .StatRail__close__body {
+        margin: 0;
+        max-width: 44ch;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(1rem, 1.5vw, 1.7rem);
+        line-height: 1.5;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.74);
+        text-shadow: 0 2px 20px rgba(0, 0, 0, 0.6);
+    }
+
+    // --- the question -----------------------------------------------------
+
+    // Hung off a rule at the left rather than centred over the picture. A
+    // question centred on a full-bleed photograph is a caption; hung off a
+    // line it is the page speaking.
+    .StatRail__head {
+        position: absolute;
+        left: 7vw;
+        top: 0;
+        bottom: 0;
+        width: min(58ch, 54vw);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        z-index: 6;
+        pointer-events: none;
+    }
+
+    // The rule, drawn down from its own top as the question arrives.
+    .StatRail__head__rule {
+        position: absolute;
+        left: clamp(-3.2rem, -2.6vw, -2rem);
+        top: 14vh;
+        bottom: 14vh;
+        width: 1px;
+        transform-origin: top center;
+        background-color: rgba(255, 255, 255, 0.22);
+    }
+
+    // A scale marked down it. Nothing to read — the only graphic on the page
+    // that reads as measurement, which is what the section is.
+    .StatRail__head__ticks {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: clamp(7px, 0.7vw, 11px);
+        background-image: repeating-linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.3) 0 1px,
+            transparent 1px 34px
+        );
+    }
+
+    // The mark that travels down the scale as the question is written.
+    .StatRail__head__reader {
+        position: absolute;
+        left: clamp(-3.2rem, -2.6vw, -2rem);
+        width: clamp(13px, 1.3vw, 20px);
+        height: 1px;
+        background-color: var(--hColor);
+        box-shadow: 0 0 10px rgba(75, 218, 220, 0.5);
+    }
+
+    .StatRail__head__body {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: clamp(1.4rem, 2.4vw, 2.4rem);
+    }
+
+    .StatRail__head__label {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.62rem, 0.74vw, 0.8rem);
+        letter-spacing: 0.32em;
+        text-transform: uppercase;
+        color: var(--hColor);
+    }
+
+    .StatRail__head__title {
+        margin: 0;
+        font-family: "Switzer-Light", sans-serif;
+        font-weight: 300;
+        font-size: clamp(1.7rem, 3.3vw, 3.7rem);
+        line-height: 1.2;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        color: var(--wText);
+        text-shadow: 0 2px 30px rgba(0, 0, 0, 0.55);
+    }
+
+    // Drawn out under the question as it finishes, and carrying on past it.
+    .StatRail__head__underline {
+        display: block;
+        width: 118%;
+        max-width: 84vw;
+        height: 1px;
+        margin-top: 0.2em;
+        transform-origin: left center;
+        background-image: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.32) 0%,
+            rgba(255, 255, 255, 0.32) 58%,
+            rgba(255, 255, 255, 0) 100%
+        );
+    }
+
+    // Whole words, so a line never breaks inside one.
+    .written__word {
+        display: inline-block;
+        white-space: nowrap;
+
+        &:not(:last-child)::after {
+            content: " ";
+            white-space: pre;
+        }
+    }
+
+    // --- narrow ---------------------------------------------------------
+
+    // One column below the tablet stop; the cells stack and the geometry
+    // switches with them — see NARROW_A / NARROW_B in index.jsx. The two have
+    // to move together, so the breakpoint is 900 in both places.
+    @include stacked {
+        // A phone's rectangle is the full width of the screen, so the block
+        // takes it. At 44vw the statement came out four lines tall in a box
+        // that has 424px of height for everything.
+        .StatRail__close {
+            max-width: 86vw;
+        }
+
+        .StatRail__close__lead {
+            font-size: clamp(1.35rem, 6.4vw, 2rem);
+        }
+
+        .StatRail__close__body {
+            max-width: none;
+            font-size: clamp(0.82rem, 3.6vw, 1rem);
+        }
+
+        .StatRail__close__rule {
+            margin: 2.4vh 0 2vh;
+        }
+
+        // The rule hangs to the left of the block, and at 7vw of a 390px screen
+        // that put it five pixels off the edge. The block moves right to make
+        // room for it rather than the rule moving under the text.
+        .StatRail__head {
+            left: 13vw;
+            width: 80vw;
+        }
+
+        .StatRail__head__rule {
+            left: -2rem;
+            top: 10vh;
+            bottom: 10vh;
+        }
+
+        .StatRail__cell__copy {
+            // Same reason as the wide layout: the site's bottom-left widget
+            // sits exactly where the last cell's caption wants to be.
+            padding: 0 6vw 3.2rem;
+            gap: 0.35rem;
+        }
+
+        .StatRail__figure {
+            font-size: clamp(3rem, 15vw, 5.2rem);
+        }
+
+        .StatRail__caption,
+        .StatRail__short {
+            max-width: none;
+            font-size: clamp(0.72rem, 3.2vw, 0.92rem);
+        }
+
+        .StatRail__note {
+            max-width: none;
+            margin-top: 0.5em;
+            font-size: clamp(0.76rem, 3.4vw, 0.96rem);
+        }
+
+        // The three counts, once the offer is running: one band under the bar
+        // cut in three, rather than the wide screen's cluster of tiles. Each
+        // third is 130px, which is room for the figure and the two words that
+        // say what it counts — see countBandAt in index.jsx.
+        // Nested exactly as deep as the rule it is overriding — the base
+        // sits inside .StatRail__cell__mark, and a media query wins nothing
+        // on its own.
+        .StatRail__cell__mark {
+            gap: 0.3rem;
+            padding: 0.6rem 0.75rem;
+
+            .StatRail__cell__mark__n {
+                font-size: clamp(0.95rem, 4.2vw, 1.1rem);
+            }
+
+            .StatRail__cell__mark__short {
+                display: block;
+                font-size: clamp(0.52rem, 2.4vw, 0.62rem);
+                line-height: 1.35;
+                letter-spacing: 0.1em;
+            }
+        }
+    }
+
+    // --- short: a phone held sideways ------------------------------------
+    //
+    // The wide composition on 390 pixels of height. Nothing moves; everything
+    // is set smaller, because a section whose whole content is a question,
+    // three counts and a statement has to fit each of them on a screen with a
+    // hundred-pixel bar across the top of it.
+    //
+    // Height alone, matching modeFor() in index.jsx. phs-h would do the same
+    // job on everything down to 480px wide and then stop, and a 430px-wide
+    // phone in landscape is exactly the case this is for.
+    @media (max-height: 520px) {
+        .StatRail__head__title {
+            font-size: clamp(1.3rem, 2.6vw, 1.8rem);
+        }
+
+        .StatRail__head__body {
+            gap: clamp(0.7rem, 1.4vw, 1.1rem);
+        }
+
+        .StatRail__head__rule {
+            top: 9vh;
+            bottom: 9vh;
+        }
+
+        .StatRail__figure {
+            font-size: clamp(2rem, 5vw, 3.4rem);
+        }
+
+        .StatRail__caption,
+        .StatRail__short {
+            font-size: clamp(0.8rem, 1.5vw, 1.1rem);
+        }
+
+        .StatRail__note {
+            font-size: clamp(0.72rem, 1.05vw, 0.92rem);
+        }
+
+        .StatRail__close__lead {
+            font-size: clamp(1.3rem, 3vw, 2.3rem);
+        }
+
+        .StatRail__close__body {
+            font-size: clamp(0.8rem, 1.15vw, 1.1rem);
+        }
+
+        .StatRail__close__rule {
+            margin: 1.8vh 0 1.6vh;
+        }
+    }
+
+    // The tiles the counts end as open under a pointer and toggle under a
+    // finger — see the hit target in index.jsx. Either way the box has to look
+    // like something that answers, which on a fine pointer it does by growing
+    // and on touch it cannot until it is touched.
+    @include touch {
+        .StatRail__cell__hit {
+            cursor: pointer;
+        }
+    }
+
+    @include reduced-motion {
+        .StatRail__cut__line::after {
+            animation: none;
+        }
+    }
+}

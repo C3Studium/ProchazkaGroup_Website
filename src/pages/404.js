@@ -1,7 +1,5 @@
 "use client";
-// import Navbar from "@/components/common/navbar";
-// import Cursor from "@/components/common/navbar/cursor";
-// import Intro404 from "@/components/pages/notFound/404";
+import NotFound404 from "@/components/pages/notFound/404";
 import Head from "next/head";
 
 
@@ -54,7 +52,7 @@ export default function Page404() {
                 </script>
             </Head>
             <main key="404">
-                {/* <Intro404 /> */}
+                <NotFound404 />
             </main>
         </>
     )
