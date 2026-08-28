@@ -4,6 +4,7 @@ import { animate, cubicBezier, motion, useInView, useMotionValue, useScroll, use
 import { RiPhoneLine, RiMailLine, RiFacebookLine, RiInstagramLine } from "@remixicon/react";
 import { ARRIVE_TO } from "@/components/pages/aboutUs/aboutStack";
 import { FALLBACK_ROSTER, dial } from "@/constants/roster";
+import { usePhone } from "@/helpers/usePhone";
 import { editable, editableDoc, editableLink, isEditMode } from "@/cms/edit";
 
 // The heading comes from the CMS (siteCopy "o-nas.colleagues" — see
@@ -54,6 +55,43 @@ const fromCms = (person) => ({
     docId: person.docId,
 });
 
+// ── the phone, held upright ──
+//
+// Ten names in a column and the person they select a screen below them is not a
+// roster on a phone, it is a table of contents with the contents somewhere else:
+// measured at 390×844, the list ran 4049→4727 and the panel it drives began at
+// 4761, so a name and the face it belongs to could not be on the screen at once.
+//
+// So on a phone this takes the shape the navigation's own roster now has — see
+// src/components/common/navbar/body/advisors, where it was worked out. Ten 3:4
+// miniatures, five across, and the one that is chosen fills the panel underneath
+// at a size worth looking at. It is the same ten people; they should not meet
+// two designs for them on one site.
+//
+// Which phone that is — and the bound behind it — lives in @/helpers/usePhone,
+// alongside the argument for 600 and for reading orientation as well as width.
+// It is the twin of this stylesheet's own phone block, and the pair has to
+// agree: the stylesheet lays the tiles out and the hook decides what a tile IS.
+// Disagreeing, they produce either a sheet of faces with a name-list's markup in
+// it or a panel downstairs that nothing names.
+//
+// Read without `eager`, so it starts false and is corrected after mount — the
+// shape this file already uses for `isTouch` below and for the same reason: this
+// section is server-rendered, so the first client render has to agree with
+// markup written where there is no viewport to measure. The ten thumbnails are
+// therefore never asked for on anything that is not a phone.
+
+// The miniature a tile shows, through the same optimiser and at the same width
+// and quality the navigation's roster asks for — so the URLs are identical and a
+// phone that has opened the menu draws this sheet with no request at all.
+//
+// A portrait that is not a local path is left alone: `/_next/image` refuses a
+// host that is not in `remotePatterns`, and one unoptimised request is a better
+// answer than a tile with no face in it. The roster only ever draws the local
+// fallback; this section can be handed a portrait from the CMS.
+const thumb = (src) =>
+    (src && src.startsWith("/") ? `/_next/image?url=${encodeURIComponent(src)}&w=384&q=60` : src);
+
 // One row. Own component so each can carry its own rule and its own slice of
 // the detail pass — hooks cannot be called from inside a map.
 // One row's arrival. It used to be tied to the section's scroll pass, which
@@ -86,7 +124,7 @@ const ROW_RULE = {
 // `person` and `index` come out of one memoised array that only changes when the
 // roster does, so the memo holds as long as `onSelect` does, which is what the
 // `useCallback` in the section below is for.
-const NameRow = memo(function NameRow({ person, index, active, onSelect }) {
+const NameRow = memo(function NameRow({ person, index, active, phone, onSelect }) {
     // Bound here rather than upstream. A `() => setSelected(i)` written into the
     // map would be a new function on every render of the section, which is
     // precisely the prop a memo cannot survive — the rows would all re-render
@@ -125,7 +163,25 @@ const NameRow = memo(function NameRow({ person, index, active, onSelect }) {
                 onFocus={select}
                 onClick={select}
                 aria-pressed={active}
+                // On a phone the tile is a face and two digits; the name it
+                // stands for has moved downstairs into the panel, so the control
+                // has to say who it is some other way. Off a phone the name is
+                // right there in the button and a label would only repeat it.
+                aria-label={phone ? person.name : undefined}
             >
+                {/* The miniature. A background rather than an <Image> because it
+                    is then the very URL the navigation's roster asks for and the
+                    browser has usually already decoded it — and because off a
+                    phone this element is not rendered at all, which is what
+                    keeps ten thumbnails off every other screen. A hidden <img>
+                    would still be fetched. */}
+                {phone && (
+                    <span
+                        className="Colleagues__face"
+                        aria-hidden="true"
+                        style={{ backgroundImage: `url(${thumb(person.src)})` }}
+                    />
+                )}
                 <span className="Colleagues__name__index">{person.index}</span>
                 <span className="Colleagues__name__who">{person.name}</span>
             </motion.button>
@@ -216,6 +272,12 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
     useEffect(() => {
         setIsTouch(window.matchMedia("(hover: none)").matches);
     }, []);
+
+    // Whether the list is a list or a contact sheet — see the note above the
+    // PHONE constant. It is a separate question from `isTouch`: a tablet is
+    // touched and keeps the list, and a phone is a phone whether or not the
+    // browser will admit to a coarse pointer.
+    const phone = usePhone();
 
     // Which portrait of the selected person is showing. Only some of them have
     // a second one (see people.js); for the rest this stays on the first, and
@@ -364,10 +426,14 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                 person={entry}
                 index={index}
                 active={index === selected}
+                phone={phone}
                 onSelect={select}
             />
         )),
-        [roster, selected, select],
+        // `phone` is in here for the reason spelled out on NameRow: it goes
+        // false → true one render after mount, and rebuilding these elements is
+        // the only thing that carries the change through the memo.
+        [roster, selected, select, phone],
     );
 
     return (
@@ -482,6 +548,15 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                         <span className="Colleagues__counter">
                             <em>{person.index}</em> / {String(roster.length).padStart(2, "0")}
                         </span>
+                        {/* Whose face this is. Everywhere else the list is
+                            standing beside this panel and the name is already on
+                            the screen, twice the size of anything a caption
+                            would be — saying it again under the picture would be
+                            labelling something the reader is looking at the
+                            label for. On a phone the list is a sheet of faces
+                            with two digits on them, so this is the only place
+                            anybody is named at all. */}
+                        {phone && <span className="Colleagues__who">{person.name}</span>}
                         <p className="Colleagues__moto">{person.moto}</p>
                     </motion.div>
 

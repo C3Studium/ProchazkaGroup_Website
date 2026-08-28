@@ -429,8 +429,14 @@
         &::before {
             content: "";
             display: inline-block;
-            width: 6px;
-            height: 6px;
+            // The mark in rem — 6px while the root is 16, growing with it
+            // above 1921. It is set INSIDE a line of caps (see the margin and
+            // the vertical-align under it), so it is type-scale and not
+            // hairline-scale: held at 6px it would sit beside letters half
+            // again as tall on a 2K screen. The border stays a hairline —
+            // that is the one part of this that is not a measure.
+            width: 0.375rem;
+            height: 0.375rem;
             margin-right: 0.8em;
             vertical-align: 1px;
             border: 1px solid rgba(255, 255, 255, 0.35);
@@ -499,8 +505,13 @@
         position: absolute;
         left: 50%;
         top: 0;
-        width: 7px;
-        height: 7px;
+        // In rem with the switch's square and the list's: the three marks are
+        // one family, and a family that scales apart above 1921 stops being
+        // one. Judgement call — this is the one of the three that sits on the
+        // rule network rather than in a line of type, and could have been
+        // argued to stay hairline-sized with the rules it joins.
+        width: 0.4375rem;
+        height: 0.4375rem;
         translate: -50% -50%;
         border: 1px solid var(--hColor);
         background-color: rgba(3, 13, 19, 0.95);
@@ -568,8 +579,10 @@
     // row fills — the switch above speaks the same mark.
     .BenBothWin__mini__sq {
         flex: none;
-        width: 9px;
-        height: 9px;
+        // In rem with the section's other two marks. This one is read against
+        // the row it closes, which is 1.7rem of type and grows with the root.
+        width: 0.5625rem;
+        height: 0.5625rem;
         border: 1px solid rgba(255, 255, 255, 0.35);
         transition: background-color 0.3s ease, border-color 0.3s ease;
     }
@@ -908,6 +921,402 @@
 
             .BenBothWin__forkCard__big {
                 font-size: clamp(1.6rem, 4vw, 2.6rem);
+            }
+        }
+
+        // ── the client's answer, on a phone held upright ─────────────────
+        //
+        // "Mám poradce" opened a list of ten names with the advisor it chose a
+        // screen below it. Measured at 320×568: rows of 53px, so 530 of list,
+        // inside a branch 1031 tall — a name and the face it belongs to could
+        // never be on the screen at once. A table of contents with the contents
+        // somewhere else.
+        //
+        // So here the list becomes the sheet the roster already is twice over:
+        // navbar/body/advisors, where it was worked out, and aboutUs/Colleagues,
+        // where it was put on a page section rather than in a modal. Ten 3:4
+        // miniatures five across, desaturated at rest and at full colour when
+        // chosen, and the chosen one's record underneath at a size worth looking
+        // at. Same ten people, third presentation; they should not meet three
+        // designs for them on one site.
+        //
+        // What is carried over: the five-across count and its arithmetic, the
+        // 3:4 tile, the lattice drawn on the tiles rather than between them, the
+        // hold-back-then-colour, the ordinal over a scrim along the bottom
+        // edge, and the record as a portrait with the words on its floor.
+        //
+        // What is deliberately not: this branch has no form in it. There the
+        // number was one of four ways to reach somebody and had to be a framed
+        // line that did not shout down a submit; here the whole screen is choose
+        // your person, then ring them — the note says exactly that — so the call
+        // IS the submit and is drawn with the weight of one. And the sheet keeps
+        // this section's own ceiling rule above it, because a drawn hairline
+        // that things hang from is the grammar of the page it is on.
+        //
+        // Portrait AND under 600px, both bounds meant: `phl-h` above owns the
+        // same phone on its side and would collide with nearly every rule in
+        // here, and portrait alone is also every tablet ever made. 600 is the
+        // bound this pass settled on and the one @/helpers/usePhone reads — the
+        // two cannot disagree about what a phone is. Last in the mobile block on
+        // purpose: every rule below 900 that this replaces is above it, and at
+        // equal specificity source order is the tiebreak.
+        @include v(xs) {
+            @include below-px(600) {
+                // The sheet and the record are one object now — the last row of
+                // tiles draws the hairline where they meet, and 5vh of page
+                // between them would read as that rule having come loose from
+                // what it divides.
+                .BenBothWin__mini {
+                    gap: 0;
+                }
+
+                // Five across, and the count is the whole geometry: ten people,
+                // so five is the only count in a usable range that leaves no
+                // half-empty last row — four ends on a row of two, three on a
+                // row of one. It holds at every width rather than reflowing, so
+                // a tile is 54×72 at 320, 66×87 at 390 and 72×96 at 430: the
+                // smallest of them still clear of the 44px a finger needs, and
+                // the whole roster two rows deep.
+                .BenBothWin__mini__list {
+                    display: grid;
+                    grid-template-columns: repeat(5, minmax(0, 1fr));
+                    // The tiles carry their own hairlines; a gap would put a
+                    // channel of page between two faces instead of the line
+                    // where they meet.
+                    gap: 0;
+                    padding: 0;
+                    // Clear of the topline the sheet hangs from, and no more:
+                    // the rule is the ceiling, not a border with air under it.
+                    margin-top: 2vh;
+                }
+
+                // The <li> and not a class of its own: this list has only ever
+                // had one kind of child, and a class that exists for one media
+                // query is a word in the markup that means nothing anywhere
+                // else.
+                .BenBothWin__mini__list > li {
+                    position: relative;
+                    // 3:4 because a portrait is, and because a row of them has
+                    // to read as a sheet of faces rather than as a strip of
+                    // them. The height comes from the width and nothing else.
+                    aspect-ratio: 3 / 4;
+
+                    // Where two tiles meet, drawn on the tile rather than
+                    // between them, so there is never a gap to close or a line
+                    // drawn twice. The same hairline the rows used to carry
+                    // under each name, turned into a lattice.
+                    &::before,
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        z-index: 2;
+                        background-color: rgba(255, 255, 255, 0.12);
+                        pointer-events: none;
+                    }
+
+                    &::after { top: 0; bottom: 0; right: 0; width: 1px; }
+                    &::before { left: 0; right: 0; bottom: 0; height: 1px; }
+
+                    // The fifth column's right-hand rule would be the sheet's
+                    // outer edge, and this lattice has no outer edge — only the
+                    // lines where two tiles meet. The last row keeps its bottom
+                    // one: that is the seam between the sheet and the record.
+                    &:nth-child(5n)::after { display: none; }
+                }
+
+                .BenBothWin__mini__row {
+                    // The tile IS the button — the whole 3:4 of it, so there is
+                    // no margin around a target a thumb has to find.
+                    position: absolute;
+                    inset: 0;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    align-items: flex-start;
+                    gap: 0;
+                    // Most of a 54px tile at 320, and only two digits in it.
+                    padding: 0.3rem 0.35rem;
+                    // The row's own rule is the lattice above now.
+                    border-bottom: 0;
+                    overflow: hidden;
+
+                    // The scrim, so the two digits stay legible: these portraits
+                    // are cut out against white and the number lies on the
+                    // bottom of one. The roster's gradient at the roster's
+                    // strength, kept down where the number is rather than laid
+                    // across the face. Absolutely positioned, which is what
+                    // keeps a pseudo-element out of the flex line the tile is.
+                    &::before {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        z-index: 1;
+                        pointer-events: none;
+                        background-image: linear-gradient(
+                            to top,
+                            rgba(3, 13, 19, 0.9) 0%,
+                            rgba(3, 13, 19, 0.34) 46%,
+                            rgba(3, 13, 19, 0) 78%
+                        );
+                    }
+                }
+
+                // The miniature. Held back and desaturated at rest so the sheet
+                // reads as one material rather than as ten photographs at ten
+                // exposures, and the chosen one comes to full colour — which is
+                // the whole of how a tile says it is the one showing below.
+                .BenBothWin__mini__face {
+                    position: absolute;
+                    inset: 0;
+                    z-index: 0;
+                    background-position: center 20%;
+                    background-size: cover;
+                    opacity: 0.68;
+                    filter: grayscale(1) contrast(0.95);
+                    transition: opacity 0.45s ease, filter 0.45s ease;
+                }
+
+                .BenBothWin__mini__row.is-on .BenBothWin__mini__face {
+                    opacity: 1;
+                    filter: none;
+                }
+
+                // Two digits along the bottom edge, above the scrim they lie on.
+                // The accent when chosen, because the accent is what this
+                // section marks a choice with — the switch's square and the
+                // record's eyebrow are the same colour saying the same thing.
+                .BenBothWin__mini__ord {
+                    position: relative;
+                    z-index: 2;
+                    font-size: 0.62rem;
+                    letter-spacing: 0.1em;
+                    font-variant-numeric: tabular-nums;
+                    color: rgba(255, 255, 255, 0.6);
+                    transition: color 0.3s ease;
+                }
+
+                .BenBothWin__mini__row.is-on .BenBothWin__mini__ord {
+                    color: var(--hColor);
+                }
+
+                // index.jsx renders neither the name nor its square on a phone,
+                // so this is belt and braces — the matchMedia read and the media
+                // query can disagree for the frame a rotation takes, and a
+                // stylesheet that only works when the markup agrees with it is a
+                // stylesheet with a bug waiting in it.
+                .BenBothWin__mini__sq {
+                    display: none;
+                }
+
+                // ── the one that is chosen ──
+                //
+                // The record was a portrait in a white box with four things set
+                // under it. Here the portrait IS the record and the words lie on
+                // its floor, which is what the roster does with the block being
+                // reached for and what /o-nas does with its own panel. At 390
+                // that is a picture 328 across where it was 234, and it is the
+                // one large thing on the screen.
+                //
+                // From the width and not from the viewport: 4:5 of the content
+                // column is the same shape on all three phones, it is the crop
+                // the cutout was already made to, and it does not need a cap and
+                // a floor in svh to survive a short screen.
+                //
+                // It does need one floor. The record is four things tall —
+                // eyebrow, name, note, button — and that stack is a fixed ~170px
+                // whatever the screen, so on the narrowest phone the ratio alone
+                // gave a 336px panel with half of it under type. 24rem is what
+                // keeps the words to the bottom two fifths at 320 as well; above
+                // it the ratio is taller than the floor and governs on its own.
+                //
+                // Not the lone fallback — it has no portrait to be one, and an
+                // empty 4:5 box with a scrim on it is a hole.
+                .BenBothWin__mini__who:not(.BenBothWin__mini__who--lone) {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: flex-end;
+                    // Stated, and it is load-bearing rather than tidy: with the
+                    // width left to `auto` the floor below wins on height and
+                    // the ratio then runs BACKWARDS out of it, sizing the box to
+                    // 4/5 of 24rem — 307px inside a 269px column, which the
+                    // engine answers by widening the whole page's layout
+                    // viewport. Definite width, and the ratio only ever decides
+                    // the height.
+                    width: 100%;
+                    aspect-ratio: 4 / 5;
+                    min-height: 24rem;
+                    padding: 1.1rem 1.1rem 1.15rem;
+                    overflow: hidden;
+
+                    // The words lie on a photograph, and these are cut out
+                    // against white — so without this the accent eyebrow is
+                    // cyan on paper. The roster's gradient, carried up the panel
+                    // rather than held to its bottom third: this record is
+                    // taller than the roster's by a note and a button, and the
+                    // scrim has to be under the top of the stack, not under the
+                    // last line of it. Measured against where the eyebrow
+                    // actually lands — 55% down at 320, 58% at 390, 61% at 430 —
+                    // so the stop at 44% is the one doing the work. Above 80% it
+                    // is gone, which is where every one of these faces is.
+                    &::after {
+                        content: "";
+                        position: absolute;
+                        inset: 0;
+                        z-index: 0;
+                        pointer-events: none;
+                        background-image: linear-gradient(
+                            to top,
+                            rgba(3, 13, 19, 0.96) 0%,
+                            rgba(3, 13, 19, 0.93) 30%,
+                            rgba(3, 13, 19, 0.84) 44%,
+                            rgba(3, 13, 19, 0.5) 60%,
+                            rgba(3, 13, 19, 0.14) 80%,
+                            rgba(3, 13, 19, 0) 100%
+                        );
+                    }
+
+                    // Undoes the thumbnail's sizing wholesale: the box is the
+                    // panel now, and a width or a ratio of its own would only
+                    // fight it. The white ground stays — the portraits are
+                    // cutouts and that white is what they are cut out on.
+                    .BenBothWin__mini__photo {
+                        position: absolute;
+                        inset: 0;
+                        z-index: 0;
+                        width: auto;
+                        margin: 0;
+                        aspect-ratio: auto;
+                    }
+
+                    // Over the scrim, and in the order the panel reads bottom
+                    // up: which advisor, who, what to do, and then the doing.
+                    // `order` and not a second subtree in index.jsx, because it
+                    // is the same four things rearranged.
+                    .BenBothWin__mini__eyebrow,
+                    .BenBothWin__mini__name,
+                    .BenBothWin__mini__note,
+                    .BenBothWin__mini__call {
+                        position: relative;
+                        z-index: 1;
+                    }
+
+                    .BenBothWin__mini__note { order: 1; }
+                    .BenBothWin__mini__call { order: 2; }
+                }
+
+                .BenBothWin__mini__eyebrow {
+                    margin: 0 0 0.3rem;
+                    font-size: 0.66rem;
+                    letter-spacing: 0.26em;
+                }
+
+                // At the size of the thing being looked at. It is the one fact
+                // the sheet upstairs no longer states — a tile is a face and two
+                // digits — so this is the only place anybody is named at all.
+                // Held down at 320, where a name taking a third line is the
+                // difference between a record that fits and one that does not.
+                .BenBothWin__mini__name {
+                    margin: 0 0 0.5rem;
+                    font-size: clamp(1.25rem, 5.6vw, 1.8rem);
+                }
+
+                // Fixed copy, not the CMS's, so it is two lines at every width
+                // this covers and needs no clamp to stop it growing a third.
+                .BenBothWin__mini__note {
+                    margin: 0 0 0.9rem;
+                    max-width: 34ch;
+                    font-size: 0.82rem;
+                    line-height: 1.5;
+                    color: rgba(255, 255, 255, 0.72);
+                }
+
+                // ── the call ──
+                //
+                // The one thing on this screen anybody taps on purpose, and the
+                // only thing it asks for. It gets the full width of the record,
+                // 52px of height — comfortably over the 44px floor, because it
+                // is the end of the journey and not one target among several —
+                // and the accent BEHIND it rather than around it.
+                //
+                // The roster frames its number instead and is right to: that one
+                // sits in a menu with four other ways out of it, where a filled
+                // bar would be the loudest thing in a navigation panel. Same
+                // target, different weight, because it has a different job.
+                //
+                // Laid out like the row it replaces — the label on the left, the
+                // number hard right, the same `space-between` the ten names and
+                // their marks used to keep.
+                .BenBothWin__mini__call {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 0.55rem;
+                    width: 100%;
+                    min-height: 52px;
+                    padding: 0 0.75rem;
+                    background-color: var(--hColor);
+                    color: var(--bText);
+                    // It was a line of type with a rule under it; a bar does not
+                    // want a second one along its foot.
+                    border-bottom: 0;
+                    // The base sets this at 4rem for a wide screen, where the
+                    // number is the display type of the panel. Here the panel's
+                    // display type is the name.
+                    font-size: 1rem;
+
+                    &:focus-visible {
+                        outline: 2px solid var(--wText);
+                        outline-offset: 2px;
+                        border-color: transparent;
+                    }
+                }
+
+                // Both halves scale with the screen, and they have to. A number
+                // written the way the office's is — "+420 776 157 476", spaces
+                // and all, because that is how a telephone number is written and
+                // the CMS holds whatever an editor typed — is sixteen
+                // characters. At 320 the bar has 210px of usable width; set at
+                // one size the pair measured 209.6 and the last digits were
+                // being cut. Held down by vw they come to 197.
+                .BenBothWin__mini__call__do {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.4rem;
+                    // The label is the half that gives way: it says what the bar
+                    // does, and the bar is already the accent under a telephone
+                    // icon saying the same thing.
+                    flex: 0 1 auto;
+                    min-width: 0;
+                    font-size: clamp(0.6rem, 2.6vw, 0.7rem);
+                    letter-spacing: 0.16em;
+                    text-transform: uppercase;
+                    white-space: nowrap;
+
+                    svg { flex: none; }
+                }
+
+                .BenBothWin__mini__call__no {
+                    // The number does not: it is the thing being dialled, and a
+                    // dialling code with a character missing is worse than no
+                    // number at all.
+                    flex: none;
+                    font-size: clamp(0.82rem, 3.4vw, 1rem);
+                    letter-spacing: 0.03em;
+                    font-variant-numeric: tabular-nums;
+                    // Digits do not wrap; a number broken across two lines in a
+                    // 52px bar is not a number.
+                    white-space: nowrap;
+                }
+
+                // The fallback with nobody published gets the same button — with
+                // no roster this IS the answer, so it cannot be the one place on
+                // a phone where the number goes back to being a line of type.
+                // Its own two lines stay centred; the bar is full width under
+                // them.
+                .BenBothWin__mini__who--lone {
+                    .BenBothWin__mini__call { margin-top: 1vh; }
+                    .BenBothWin__reply__hours { margin-top: 1.6vh; }
+                }
             }
         }
     }

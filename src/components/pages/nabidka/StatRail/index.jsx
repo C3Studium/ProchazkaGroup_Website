@@ -19,6 +19,7 @@ import SplitText from "@/components/common/ui/SplitText";
 // one way only, so there is no cycle.
 import OfferStrip, { useCoarsePointer } from "@/components/pages/nabidka/OfferStrip";
 import { coverGround } from "@/components/common/ui/pageGround";
+import { rootRamp } from "@/helpers/checkViewport";
 
 // The three photographs the design was drawn on, all of which were already in
 // the repository under names that do not describe them: the wallet is
@@ -783,7 +784,16 @@ function Letter({ letter, at, total, progress, from, to }) {
 //
 // Measured, not guessed: the bar is 82.8px on a desktop and 78 on a phone,
 // and this is that plus air.
-const clearOf = (vw) => (vw < 900 ? 92 : 100);
+//
+// ...on a screen where a rem is 16px. The bar is drawn in rem — 1.5rem of
+// padding either side of a 1.3rem word — and past 1921 across the root font
+// size ramps, so out there the bar is nearer 110 tall and a hundred flat pixels
+// of clearance puts "8/10" back through the wordmark it was moved out of.
+//
+// rootRamp is that growth — see helpers/checkViewport, which is where the one
+// copy of it lives. It is 1 at 1920 and below, so the numbers above are still
+// exactly the numbers they were measured as.
+const clearOf = (vw) => (vw < 900 ? 92 : 100) * rootRamp(vw);
 
 // The square, as a share of the width. Read on a wide screen only — a phone
 // does not end on a square at all any more; see geomFor.
@@ -1320,7 +1330,12 @@ function Cell({
     //     right-hung  tileRight - (pad + block)·k
     //   and both want to be at tileLeft + TILE_PAD.
     const kClose = narrow ? 0.38 : 0.2;
-    const TILE_PAD = narrow ? 14 : 20;
+    // The tile is a share of the screen and the block inside it is measured off
+    // the DOM, so both grow above 1920 on their own. This inset is the one
+    // number in the sum that is written down rather than read, and left flat it
+    // would be the block sitting closer to the tile's edge the wider the screen
+    // got. See ROOT.
+    const TILE_PAD = (narrow ? 14 : 20) * rootRamp(view.w);
     const tileW = ((100 - final[1] - final[3]) / 100) * view.w;
     const xClose =
         inner === "right"

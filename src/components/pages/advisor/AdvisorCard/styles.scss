@@ -28,7 +28,16 @@
 .AdvCard__card {
     position: relative;
     width: 100%;
-    max-width: 440px;
+    // The same 440px, written so it can move. Everything inside this card — the
+    // name, the motto, the form's labels and fields, and every clamp that spaces
+    // them — is in rem, so above 1920 all of it grows with the root. Held at a
+    // fixed 440px the card would have had a third more type poured into the
+    // column it always had: the name wrapping where it used to fit, the two
+    // counts beside it dropping onto a line of their own, the plate below
+    // closing in on its fields. It is a phone-shaped object on purpose (see the
+    // note at the top of this file) and this is what keeps it that shape at a
+    // root size it was not written for, rather than silting up at the old one.
+    max-width: 27.5rem;
     display: flex;
     flex-direction: column;
 }

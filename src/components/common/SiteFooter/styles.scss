@@ -58,10 +58,16 @@
         font-size: clamp(0.9rem, 1.05vw, 1.2rem);
         white-space: nowrap;
 
+        // The arms are in rem: they are the drawing round the label and have to
+        // stay the size of it, and the label is set in rem. The 1.5px strokes
+        // below are the house's hairline weight and stay px at every width —
+        // grown they would only go soft. So does the hover travel further down:
+        // that is three pixels of nudge off a resting position, which is motion
+        // and reads the same however many pixels the monitor has.
         .corner {
             position: absolute;
-            width: 9px;
-            height: 9px;
+            width: 0.5625rem;
+            height: 0.5625rem;
             border: 0 solid currentColor;
             transition: transform 0.3s ease;
         }
@@ -275,21 +281,6 @@
             }
         }
 
-        // On a phone the authored break lands mid-phrase and strands one word
-        // on its own line; let the headline wrap on its own instead. The break
-        // is real markup from the CMS, so it is silenced, not removed — and
-        // because it was also the only separator between the two line-spans,
-        // the span that follows it puts an ordinary space back where it stood.
-        @include below-px(560px) {
-            .SiteFooter__claim h2 br {
-                display: none;
-            }
-
-            .SiteFooter__claim h2 > span + span::before {
-                content: " ";
-            }
-        }
-
         .SiteFooter__contact {
             align-items: flex-start;
             text-align: left;
@@ -306,6 +297,169 @@
         .SiteFooter__legal {
             flex-direction: column;
             gap: 1vh;
+        }
+
+        // ---- phone, portrait ----
+        //
+        // Bound at 560 and not at the 820 this sits inside, because what
+        // follows takes copy off the page and 820 is wide enough to be a
+        // tablet stood upright — an iPad Mini is 744 across, and a tablet is
+        // meant to read exactly what a laptop reads. The nearest thing on the
+        // far side is a phone turned landscape at 568, so the number has open
+        // ground on both sides. This stop already existed here, holding the
+        // one rule that unpicked the headline's authored break; the headline
+        // is gone below and that rule went with it.
+        @include below-px(560px) {
+            // One rail through the contact block. The map mark's ring sets it,
+            // and everything the block points at starts where the ring ends —
+            // the street beside it, and the number and the e-mail above. Two
+            // values indented by two different amounts read as two accidents;
+            // indented by the same one they read as a column.
+            --footer-mark: 2.75rem;
+            --footer-mark-gap: 0.9rem;
+
+            // The claim is out. Stacked, it was three lines of 24px uppercase
+            // standing over a patička that on a phone is the five things
+            // underneath it — and the call to action immediately below says
+            // the same sentence in the imperative, with the button to act on
+            // it beside it. Hidden rather than dropped from the markup: both
+            // lines are CMS copy carrying an editable annotation, and the
+            // Studio edits at desk widths, where they are still on the page.
+            //
+            // Its rule goes with it. A hairline between nothing and the call
+            // to action separates nothing; the one below the button stays, and
+            // is now the single break between what the patička says and what
+            // it lists.
+            .SiteFooter__claim h2,
+            .SiteFooter__claim h2 + .SiteFooter__claim__divider {
+                display: none;
+            }
+
+            // "Kde nás najdete" is out and the pin stays: the mark is the whole
+            // of what the heading said. It moves beside the address rather than
+            // standing above it — a circled pin alone on a line is a hole where
+            // a heading used to be, and against a street it is the label for
+            // it. The two are siblings rather than one block, so the column
+            // that pairs them has to come from their parent, which is why the
+            // contact stack is a grid here and a column everywhere else.
+            .SiteFooter__contact__where h3 {
+                display: none;
+            }
+
+            .SiteFooter__contact {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                justify-items: start;
+                row-gap: 1.25rem;
+                column-gap: var(--footer-mark-gap);
+
+                // Everything takes the full width except the pair that share a
+                // line, and the address centres on the mark beside it.
+                > * {
+                    grid-column: 1 / -1;
+                }
+
+                .SiteFooter__contact__where {
+                    grid-column: 1;
+                }
+
+                .SiteFooter__contact__address {
+                    grid-column: 2;
+                    align-self: center;
+                }
+            }
+
+            // The ring was 3.4rem because it stood beside 1.9rem of heading.
+            // What it stands beside now is one line of address, and at the old
+            // size it outweighed the thing it is pointing at.
+            .SiteFooter__contact .SiteFooter__contact__where .pin {
+                width: var(--footer-mark);
+                height: var(--footer-mark);
+            }
+
+            // "Kontakt | 8-16" was centred against a block two links tall and
+            // came to rest exactly in the space between them, so it read as
+            // something wedged between the number and the address rather than
+            // as the heading for both. It goes above the pair.
+            //
+            // The space it fell into is not a spacing mistake and does not go
+            // anywhere: on touch each of those links takes a real 2.75rem so a
+            // finger has 44px to land on, and two of those stacked put 25px
+            // between the two lines of type whatever else is done. Under a
+            // heading that is the inside of a short list; in the middle of one
+            // it was a hole. The links keep the indent they had, on the rail
+            // the address below them uses, so the label and the map mark make
+            // a left column and the things they name make a right one.
+            .SiteFooter__contact .SiteFooter__contact__row {
+                flex-direction: column;
+                align-items: flex-start;
+
+                // The first link's own 44px already opens 16px under the
+                // heading, which is the whole of the space this needs.
+                gap: 0;
+
+                .details {
+                    padding-left: calc(var(--footer-mark) + var(--footer-mark-gap));
+
+                    // Set to the address's size rather than the clamp's floor.
+                    // These two and the street are the three things on the
+                    // rail, and one column of values reads as a column when it
+                    // is one size — and 11px is small for the two entries on
+                    // this patička that are meant to be tapped.
+                    font-size: 0.8rem;
+                }
+            }
+
+            // One measure of air around every hairline in the patička, so the
+            // rules read as one system rather than as two blocks that happen to
+            // both use rules — the claim spaced its at 2.5vh and the contact
+            // spaced its at 1.4vh, which was invisible while a headline stood
+            // between them and is not now.
+            //
+            // In rem from here down. The rest of this stylesheet is in vh,
+            // which is the right unit for a panel measured against the window;
+            // it is the wrong one for the space between two lines of type on a
+            // phone, where the window itself changes height every time the
+            // browser's own bar slides away.
+            .SiteFooter__claim,
+            .SiteFooter__top {
+                gap: 1.25rem;
+            }
+
+            // The three movements — what it says, whose it is, its small print
+            // — keep more than the rules inside them do.
+            .SiteFooter__inner {
+                gap: 2.25rem;
+
+                // 3vh is 17px on the shortest screen we target, and the bottom
+                // of a phone is where the browser's own furniture and the home
+                // indicator sit. The last line of the page should not be in
+                // among them.
+                padding-bottom: 2.25rem;
+            }
+
+            // The two legal lines were the last thing here still sized by a
+            // desktop clamp: 0.72vw is under 3px at these widths, so both of
+            // them landed on the clamp's 0.6rem floor — a floor written to stop
+            // a 2K screen running away with the small print, never a size
+            // anyone picked to be read at arm's length. The 1vh between them is
+            // 5.7px at 568 tall, which at that size is not a gap so much as the
+            // absence of one, and the pair reads as a single smudge in the
+            // corner. Their own size, and a gap that does not depend on how
+            // tall the window happens to be.
+            //
+            // 0.7rem is where the ceiling is, and 320 sets it: the longer of
+            // the two lines measures 267px at that size against the 282px the
+            // narrowest screen leaves between its margins, and at 0.75rem it is
+            // 286px and wraps, which strands "udělena" on a line by itself. It
+            // is also exactly the size the tel and the e-mail are set at here,
+            // so the small print is quiet without being a different system.
+            .SiteFooter__legal {
+                margin-top: 0;
+                gap: 0.4rem;
+                font-size: 0.7rem;
+                line-height: 1.45;
+            }
         }
     }
 

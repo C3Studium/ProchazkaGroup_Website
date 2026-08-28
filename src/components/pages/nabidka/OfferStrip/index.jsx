@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
 
 import { CURTAIN } from "@/components/common/ui/entrance";
+import { rootRamp } from "@/helpers/checkViewport";
 import EuropeMap from "./EuropeMap";
 import { MAP } from "./europe";
 
@@ -164,15 +165,12 @@ const SECTIONS = [
             blocks: [{ kind: "map", x: 0.03, y: 0.52, w: 0.94, h: 0.6 }],
         },
         blocks: [
-            // Smaller than it was, and its left edge is negative on purpose: it
-            // reaches back into the slot before it and butts against the wall
-            // of squares that ends there, so the two sections are one run of
-            // boxes rather than two islands with a gap between them.
-            // Below the words and off to the right, so the slot reads as a
-            // diagonal rather than as a heading with a picture under it. The
-            // width is the height times the map's own proportions: the box
-            // hugs the map, because a wider one is a box with air in it.
-            { kind: "map", x: 0.3, y: 0.36, w: 0.56, h: 0.62 },
+            // No fractions: this one is the ground rather than a box on it. It
+            // takes the whole slot and the whole height of the screen and fades
+            // out at all four edges, and the heading stands on it — which is
+            // why the words are given the z-index and the pointer here, and the
+            // map neither. See mapBox and EuropeMap--ground.
+            { kind: "map", bleed: true },
         ],
     },
 ];
@@ -232,7 +230,13 @@ const MAP_RATIO = MAP.w / MAP.h;
 // the screen. So the slot is bounded rather than proportioned — it starts below
 // the bar and stops above the rule, and takes the tuned eight tenths whenever
 // they fit between the two, which on anything laptop-sized and taller they do.
-const BAR = (vw) => (vw < 900 ? 92 : 100);
+//
+// Both of the pixel figures below are measurements of things drawn in rem — the
+// site bar's padding, and the type hanging under the foot rule — and past 1921
+// across the root font size ramps, so both of those things get a third bigger
+// and these numbers stop describing them. rootRamp is that growth; it is 1 at
+// 1920 and below, so neither figure moves on any screen this was drawn for.
+const BAR = (vw) => (vw < 900 ? 92 : 100) * rootRamp(vw);
 // Where the foot rule runs, and where the slot above it has to stop. Higher on
 // a short screen: the names hang UNDER the rule, and at 0.965 of 390px there
 // are thirteen pixels below it to hang them in.
@@ -241,9 +245,9 @@ const BAR = (vw) => (vw < 900 ? 92 : 100);
 // needs 28. So the rule is also held a fixed distance up from the foot, and the
 // slot above it stops short of wherever it ends up.
 const RULE = (mode) => (mode === "short" ? 0.925 : 0.965);
-const STOP = (mode) => (mode === "short" ? 26 : 34);
+const STOP = (mode, vw) => (mode === "short" ? 26 : 34) * rootRamp(vw);
 const ruleOf = (view, mode) =>
-    Math.min(view.h * RULE(mode), view.h - STOP(mode));
+    Math.min(view.h * RULE(mode), view.h - STOP(mode, view.w));
 
 /** Every section's slot, in pixels, given the viewport. */
 const slotsOf = (view, mode) => {
@@ -287,6 +291,7 @@ export default function OfferStrip({ ride, view, mode = "wide", coarse = false }
                         ride={ride}
                         coarse={coarse}
                         mode={mode}
+                        view={view}
                         at={arrivalOf(slots[index].x, start, distance, view.w)}
                     />
                 ))}
@@ -342,8 +347,17 @@ const place = (block, slot) => {
 // the date printed inside Slovenia is four pixels tall.
 const CAPTION_H = 36;
 
-const mapBox = (block, slot, reserve) => {
-    const box = place(block, slot);
+// A bleeding map is not one of the section's boxes at all — it is the ground the
+// section stands on. It takes the slot's whole width and the screen's whole
+// height, over the top of the bar and down through the foot rule, and the
+// stylesheet fades all four of its edges out rather than letting it end at one.
+// That is also what carries it across into the sections either side of it: this
+// is a band that travels sideways, and a map that stopped at a line would be a
+// picture sliding past rather than ground the band is laid on.
+const mapBox = (block, slot, reserve, view) => {
+    const box = block.bleed
+        ? { left: slot.x, top: 0, width: slot.w, height: view.h }
+        : place(block, slot);
     const height = Math.min(box.height - reserve, box.width / MAP_RATIO);
     return { box: { ...box, height: height + reserve }, mapW: height * MAP_RATIO };
 };
@@ -532,7 +546,7 @@ function Square({ block, lines, originX, originY, open, coarse, onReach, onLeave
     );
 }
 
-function Section({ section, slot, ride, at, coarse, mode }) {
+function Section({ section, slot, ride, at, coarse, mode, view }) {
     const from = at;
     const enter = useTransform(ride, [from, from + STEP * 0.8], [0, 1]);
     const lift = useTransform(ride, [from, from + STEP * 0.8], [26, 0]);
@@ -591,6 +605,7 @@ function Section({ section, slot, ride, at, coarse, mode }) {
                         ride={ride}
                         coarse={coarse}
                         mode={mode}
+                        view={view}
                     />
                 ))
             )}
@@ -614,7 +629,7 @@ function Stop({ section, slot, top, ride, at }) {
     );
 }
 
-function Block({ block, slot, section, at, ride, coarse, mode }) {
+function Block({ block, slot, section, at, ride, coarse, mode, view }) {
     const enter = useTransform(ride, [at, at + STEP * 0.75], [0, 1]);
     const lift = useTransform(ride, [at, at + STEP * 0.75], [34, 0]);
     const grown = useTransform(ride, [at, at + STEP * 0.8], [0.86, 1]);
@@ -653,10 +668,10 @@ function Block({ block, slot, section, at, ride, coarse, mode }) {
         // Arrives the way the squares do — scaled into itself, not raised —
         // because it is one of the boxes and not a picture beside them.
         const stacked = mode === "stacked";
-        const { box, mapW } = mapBox(block, slot, stacked ? CAPTION_H : 0);
+        const { box, mapW } = mapBox(block, slot, stacked ? CAPTION_H : 0, view);
         return (
             <motion.div
-                className="OfferStrip__box OfferStrip__map"
+                className={`OfferStrip__box OfferStrip__map${block.bleed ? " OfferStrip__map--ground" : ""}`}
                 style={{ ...box, opacity: enter, scale: grown }}
             >
                 {/* The map is told how many pixels wide it is going to be.
@@ -672,6 +687,7 @@ function Block({ block, slot, section, at, ride, coarse, mode }) {
                     width={mapW}
                     caption={stacked}
                     coarse={coarse}
+                    ground={!!block.bleed}
                 />
             </motion.div>
         );

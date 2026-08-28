@@ -25,10 +25,19 @@
     font-size: 1rem;
     letter-spacing: 0.1em;
 
+    // The arms are a measure of the frame and move in rem: 0.5625rem is the 9px
+    // they always were up to 1920, and above it they grow with the label they
+    // bracket (see globals.scss). Left in px they would not — the word inside is
+    // rem and gets a third bigger on a 2560 monitor, and four nine-pixel ticks
+    // around type that size read as a frame that has come loose from it.
+    //
+    // The border weights below stay in px. They are the page's hairline, the
+    // same one every rule on the site is drawn at, and a hairline is one pixel
+    // on every screen — grown to 1.33 it is a smudge, not a line.
     .corner {
         position: absolute;
-        width: 9px;
-        height: 9px;
+        width: 0.5625rem;
+        height: 0.5625rem;
         border: 0 solid var(--wText);
         transition: transform 0.3s ease;
     }
@@ -74,6 +83,13 @@
     // every button a touch reader has ever pressed stays spread behind them.
     // The same gesture gets it as a press instead, which ends when the finger
     // lifts.
+    //
+    // These travels stay in px while the arms above went to rem, and on purpose:
+    // the arms are the drawing and have to keep their proportion to the label,
+    // but this is motion, and how far a thing moves on hover is not a function
+    // of how many pixels the monitor has. Three pixels of open is three pixels
+    // of open — plainly legible against a nine- or a twelve-pixel arm, and a
+    // gesture scaled up with the panel would only read as a bigger flinch.
     @include fine-pointer {
         &:hover:not(:disabled) {
             .corner--tl { transform: translate(-3px, -3px); }

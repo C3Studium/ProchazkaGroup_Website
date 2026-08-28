@@ -10,7 +10,35 @@ export const bpH = {
   lg: 1400,
   xl: 1500,
   huge: 1730,
+  xxl: 1921,
 };
+
+/**
+ * The root font-size ramp, as a plain number.
+ *
+ * The site is written in rem and clamp(), and above 1921 across the root font
+ * size grows with the screen so the whole design scales to a 2K monitor rather
+ * than sitting at its 1920 size in the middle of one. The rule that does it
+ * lives in styles/globals.scss:
+ *
+ *     font-size: clamp(16px, 0.8333vw, 21.5px)
+ *
+ * This is that rule as a factor — what a rem is at a given width, over what a
+ * rem is below the stop. Components that measure the page in real pixels need
+ * it, because those pixels are almost always a measurement of something drawn
+ * in rem: the height of the site bar, the clearance under it, the size of a
+ * card whose type has just grown a third inside it. Left flat, they describe a
+ * page that is no longer there.
+ *
+ * Exactly 1 at 1920 and at every width below it, so nothing that multiplies by
+ * this changes on any screen the site was drawn for. It stops where the clamp
+ * stops, a little past 2560 — beyond that is a panel nobody has looked at, and
+ * holding is more honest than extrapolating.
+ *
+ * It has to stay in step with globals.scss. There is no way to read a CSS
+ * clamp back out as a number, so this is a copy, and it is the only one.
+ */
+export const rootRamp = (vw) => Math.min(21.5, Math.max(16, vw * 0.008333)) / 16;
 
 // Portrait breakpoints (min-width)
 export const bpV = {
@@ -21,7 +49,7 @@ export const bpV = {
   lg: 1000,
 };
 
-const orderH = ["xxs", "xs", "sm", "smt", "md", "mdt", "lg", "xl", "huge"];
+const orderH = ["xxs", "xs", "sm", "smt", "md", "mdt", "lg", "xl", "huge", "xxl"];
 const orderV = ["xs", "sm", "s", "md", "lg"];
 
 const isClient = typeof window !== "undefined";

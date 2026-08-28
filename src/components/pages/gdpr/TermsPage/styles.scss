@@ -92,7 +92,10 @@ $stack-h: 560px;
 .TermsPage__rule {
     position: relative;
     display: block;
-    width: min(38vw, 560px);
+    // 35rem is the 560px this cap has always been below 1921. The rule is cut
+    // to the three-line title above it and the title grows above 1920; held at
+    // 560px it would stop a third short of the head it belongs to.
+    width: min(38vw, 35rem);
     height: 1px;
     margin: clamp(1.4rem, 3.2vh, 2.6rem) 0 clamp(1.1rem, 2.4vh, 2rem);
     transform-origin: left center;
@@ -113,7 +116,12 @@ $stack-h: 560px;
 
 .TermsPage__layout {
     display: grid;
-    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
+    // 13.75rem and 18.75rem are the 220px and 300px this sidebar has always
+    // been below 1921. Both ends in rem: the track exists to hold nine section
+    // titles set in rem, and above 1920 those grow — a 300px cap that did not
+    // would wrap the longest of them onto a second line at exactly the width
+    // where there is more room than the page knows what to do with.
+    grid-template-columns: minmax(13.75rem, 18.75rem) minmax(0, 1fr);
     column-gap: clamp(3rem, 6vw, 7rem);
     margin-top: clamp(3.5rem, 14vh, 9rem);
 }
@@ -208,8 +216,12 @@ $stack-h: 560px;
 
 .TermsPage__index__square {
     flex: none;
-    width: 7px;
-    height: 7px;
+    // 0.4375rem is the 7px it has always been. The square is a glyph in a row
+    // of type — it is already offset by 0.32em to sit on that row's baseline —
+    // so it takes the row's scale and grows with it above 1920. Its 1px border
+    // stays a hairline, which is what keeps the mark an outline and not a blob.
+    width: 0.4375rem;
+    height: 0.4375rem;
     margin-top: 0.32em;
     border: 1px solid rgba(255, 255, 255, 0.28);
     background-color: transparent;
@@ -318,6 +330,14 @@ $spine-gap-stacked: clamp(1.2rem, 5vw, 2.2rem);
     color: rgba(255, 255, 255, 0.5);
 }
 
+// The legal text, and the one measure on this page that must NOT be allowed to
+// grow into the room a 2560 monitor has. It is not allowed to, and no `xxl-h`
+// block is needed to stop it: `ch` is the element's own zero, so 66ch is
+// sixty-six characters at any root size. The type gets a third larger above
+// 1920 and the column gets a third wider with it — the line still breaks after
+// the same word, which is the whole of what a measure is for. Had this been
+// written in px or rem it would have needed capping here; in `ch` the cap is
+// already stated, and stated in the unit that means it.
 .TermsPage__body {
     margin: 0;
     max-width: 66ch;

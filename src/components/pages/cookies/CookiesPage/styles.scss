@@ -59,7 +59,10 @@
 .CookiesContent__rule {
     position: relative;
     display: block;
-    width: min(34vw, 520px);
+    // 32.5rem is the 520px this cap has always been below 1921. The rule is cut
+    // to the title above it, and the title grows above 1920 — held at 520px the
+    // line would end a third of the way short of the word it underlines.
+    width: min(34vw, 32.5rem);
     height: 1px;
     margin: clamp(1.1rem, 3.4vh, 2.4rem) 0 clamp(0.9rem, 2.6vh, 1.8rem);
     transform-origin: left center;
@@ -89,7 +92,11 @@
 // it a column rather than a floating list.
 .CookiesContent__index {
     flex: 0 0 auto;
-    width: clamp(200px, 18vw, 280px);
+    // 12.5rem and 17.5rem are the 200px and 280px this column has always been
+    // below 1921. Both ends in rem, because the column is only ever as wide as
+    // the entries in it: those are set in rem and grow above 1920, so a cap
+    // frozen at 280px would start wrapping section titles that fit at 1920.
+    width: clamp(12.5rem, 18vw, 17.5rem);
     position: sticky;
     top: 14vh;
 
@@ -172,8 +179,11 @@
 // The active mark: a small accent square, the only filled shape on the page.
 .CookiesContent__index__mark {
     flex: none;
-    width: 6px;
-    height: 6px;
+    // 0.375rem is the 6px it has always been. A filled square, not a hairline —
+    // it is a glyph in a row of type and it belongs to the row's scale, so it
+    // grows with the entry it marks rather than shrinking against it.
+    width: 0.375rem;
+    height: 0.375rem;
     align-self: center;
     background-color: var(--hColor);
     opacity: 0;
@@ -244,6 +254,13 @@
         text-transform: uppercase;
     }
 
+    // The measure needs no cap above 1920 and must not be given one. `ch` is
+    // the element's own zero, so 68ch is sixty-eight characters at every root
+    // size there is: the type gets a third larger on a 2560 monitor and the
+    // column gets a third wider with it, and the line still breaks after the
+    // same word. A cap in px or rem would have had to be held back by an
+    // `xxl-h` block — this one is already saying the only thing such a block
+    // could say, which is "a line of this is sixty-eight characters long".
     p {
         margin: 0;
         max-width: 68ch;

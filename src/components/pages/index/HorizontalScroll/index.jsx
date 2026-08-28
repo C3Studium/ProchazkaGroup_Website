@@ -20,6 +20,7 @@ import SplitText from "@/components/common/ui/SplitText";
 import FirstTime from "@/components/pages/index/FirstTime";
 import { CONTACT_TRIGGER } from "@/components/common/ContactModal/open";
 import { editable, editableLink, editableSet } from "@/cms/edit";
+import { rootRamp } from "@/helpers/checkViewport";
 
 // The copy and the photographs of all three panels come from the CMS (siteCopy
 // "index.first-time", "index.clients", "index.clients.karta-*" and "index.join"
@@ -103,7 +104,31 @@ function useDeckLayout() {
                 // and lost its back card off the right edge.
                 next = { width: 400, height: 320, cardDistance: 48, verticalDistance: 56 };
             } else {
-                next = DECK_DESKTOP;
+                // Above 1920 the rest of the page grows with the screen — the
+                // root font ramp in globals.scss lifts every rem by the same
+                // factor the monitor gained. The deck cannot ride that: CardSwap
+                // is handed numbers, not CSS, so left alone it sits at its 1920
+                // size in the middle of a 2560 panel, a 500px card marooned in a
+                // band whose heading, copy and rules have all grown a third.
+                // rootRamp is that same growth as a number — see
+                // helpers/checkViewport, which holds the one copy of it. It is
+                // exactly 1 at 1920 and below, so nothing here moves on any
+                // screen the site was drawn for.
+                //
+                // All four numbers take the same factor. cardDistance and
+                // verticalDistance are the fan's spacing and CardSwap derives
+                // its z offsets from them, so scaling the card without them
+                // would open the fan wider relative to a card that had not
+                // changed. CardSwap's perspective moved to rem for this (see
+                // its styles.scss): the foreshortening is the ratio of the deck
+                // to the lens, and both halves have to move together.
+                const grow = rootRamp(w);
+                next = {
+                    width: Math.round(DECK_DESKTOP.width * grow),
+                    height: Math.round(DECK_DESKTOP.height * grow),
+                    cardDistance: Math.round(DECK_DESKTOP.cardDistance * grow),
+                    verticalDistance: Math.round(DECK_DESKTOP.verticalDistance * grow),
+                };
             }
 
             setLayout((prev) =>

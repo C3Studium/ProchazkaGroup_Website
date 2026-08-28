@@ -156,8 +156,10 @@
     position: absolute;
     z-index: 2;
     left: 6vw;
-    width: 7px;
-    height: 7px;
+    // The same square the seams land on, and in rem for the same reason: it is
+    // a mark the page makes rather than a hairline. See Seam/styles.scss.
+    width: 0.4375rem;
+    height: 0.4375rem;
     translate: -50% -50%;
     border: 1px solid var(--hColor);
     background-color: rgba(2, 14, 21, 0.9);
@@ -200,7 +202,13 @@
 .RevDrift__view {
     position: absolute;
     inset: 0;
-    perspective: 1300px;
+    // In rem, with every other length in this scene — the column width and the
+    // gutter below, the card's raise, and the plane's own push back in
+    // index.jsx. Perspective is a distance from the eye to the wall: leave it
+    // in px while the wall in front of it grows by a third and the wall is not
+    // the same wall bigger, it is the same wall seen from closer up, which
+    // means more distortion at its edges than it was drawn with.
+    perspective: 81.25rem;
     perspective-origin: 50% 50%;
 }
 
@@ -220,8 +228,12 @@
 
 .RevDrift__col {
     position: relative;
-    width: clamp(230px, 20vw, 330px);
-    padding: 0 11px;
+    // 20vw is past 330px from about 1650 up, so above 1920 this clamp is on its
+    // ceiling: in px the columns would hold their 1920 width while the words
+    // inside them grew with the root, and the card heights the component sets
+    // are read off the same scale — see `unit` in index.jsx.
+    width: clamp(14.375rem, 20vw, 20.625rem);
+    padding: 0 0.6875rem;
     transform-style: preserve-3d;
 }
 
@@ -250,7 +262,10 @@
 
 .RevDrift__card__face {
     position: absolute;
-    inset: 0 0 var(--rd-gap, 22px);
+    // The component sets --rd-gap in real pixels off the same scale the card
+    // heights come from; the fallback is that number in rem so a face rendered
+    // before the effect runs is short by the same amount at every width.
+    inset: 0 0 var(--rd-gap, 1.375rem);
     display: flex;
     flex-direction: column;
     padding: 1.6rem 1.5rem 1.3rem;
@@ -267,7 +282,7 @@
 .RevDrift__card.is-active .RevDrift__card__face {
     opacity: 1;
     border-color: rgba(255, 255, 255, 0.34);
-    transform: translateZ(70px);
+    transform: translateZ(4.375rem);
 }
 
 // Where there is no cursor there is no resting state and a raised one — there
@@ -283,13 +298,13 @@
 
 .RevDrift__marks {
     position: absolute;
-    inset: 8px;
+    inset: 0.5rem;
     pointer-events: none;
 
     i {
         position: absolute;
-        width: 5px;
-        height: 5px;
+        width: 0.3125rem;
+        height: 0.3125rem;
         border: 0 solid rgba(255, 255, 255, 0.4);
     }
 

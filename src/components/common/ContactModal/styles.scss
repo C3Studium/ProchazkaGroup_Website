@@ -25,7 +25,12 @@
     position: relative;
     display: flex;
     width: 100%;
-    max-width: 1040px;
+    // 65rem is the same 1040px it has always been up to 1920 and grows with the
+    // root past it. As a px cap the sheet held still while the screen did not:
+    // on a 2552 monitor a dialog drawn to be a little over half the window was
+    // down to two fifths of it, with the form's two columns squeezed into a
+    // measure the type had outgrown.
+    max-width: 65rem;
     max-height: 82vh;
     border: 1px solid rgba(255, 255, 255, 0.22);
     background-color: rgba(2, 14, 21, 0.96);
@@ -94,17 +99,22 @@
     padding: 4vh 2vw;
     border: 1px solid rgba(255, 255, 255, 0.16);
 
+    // Arm and standoff both in rem, and they have to move together: the marks
+    // are hung a fixed distance outside the form's own border, so if the arm
+    // grew and the offset did not the four of them would creep back onto the
+    // rule they are supposed to be sitting off. The 1px strokes stay px —
+    // hairlines are one pixel on every screen.
     .corner {
         position: absolute;
-        width: 11px;
-        height: 11px;
+        width: 0.6875rem;
+        height: 0.6875rem;
         border: 0 solid rgba(255, 255, 255, 0.5);
     }
 
-    .corner--tl { top: -6px; left: -6px; border-top-width: 1px; border-left-width: 1px; }
-    .corner--tr { top: -6px; right: -6px; border-top-width: 1px; border-right-width: 1px; }
-    .corner--bl { bottom: -6px; left: -6px; border-bottom-width: 1px; border-left-width: 1px; }
-    .corner--br { bottom: -6px; right: -6px; border-bottom-width: 1px; border-right-width: 1px; }
+    .corner--tl { top: -0.375rem; left: -0.375rem; border-top-width: 1px; border-left-width: 1px; }
+    .corner--tr { top: -0.375rem; right: -0.375rem; border-top-width: 1px; border-right-width: 1px; }
+    .corner--bl { bottom: -0.375rem; left: -0.375rem; border-bottom-width: 1px; border-left-width: 1px; }
+    .corner--br { bottom: -0.375rem; right: -0.375rem; border-bottom-width: 1px; border-right-width: 1px; }
 
     label { display: block; margin-bottom: 2.4vh; }
 
@@ -120,12 +130,23 @@
 
     // The browser's own chrome removed: a rounded, shaded input is the one thing
     // in here that would not be drawn in hairlines.
-    input {
+    //
+    // The message box is the same field, only taller — the same hairline under
+    // it, the same type in it — which is why it is set here beside the inputs
+    // and not given a look of its own. A bordered, shaded panel is what a
+    // textarea wants to be by default and is the one shape this sheet does not
+    // draw.
+    input,
+    textarea {
         appearance: none;
+        display: block;
         width: 100%;
         padding: 1.1vh 0;
         border: 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.26);
+        // Not inherited from the border shorthand above, and iOS rounds a
+        // textarea's corners on its own.
+        border-radius: 0;
         background: none;
         color: var(--wText);
         font-family: "Switzer-Light", sans-serif;
@@ -134,6 +155,20 @@
         transition: border-color 0.35s ease;
 
         &:focus { border-bottom-color: rgba(255, 255, 255, 0.8); }
+    }
+
+    // The one thing the box does not share with the fields above it: a height,
+    // and no handle to change it by. The grab tab is a shaded triangle the
+    // browser draws in the corner, and a reader who dragged it would be
+    // stretching the box past the form's own border.
+    textarea {
+        resize: none;
+        line-height: 1.5;
+        // Three lines and the room they need, so the box reads as somewhere to
+        // write a paragraph rather than a fourth one-line field that happens to
+        // wrap. `rows` alone is a count of lines the browser sizes from its own
+        // default leading and not from ours.
+        min-height: 5.25rem;
     }
 
     .telRow {
@@ -284,14 +319,63 @@
     &:hover { color: var(--wText); border-bottom-color: var(--wText); }
 }
 
+// The two addresses at the foot of the form — a phone's whole right-hand half.
+//
+// Unscoped on purpose. This element only exists once the markup has decided it
+// is on a phone (MQ_PHONE in index.jsx), so a media query around it would
+// restate a branch that has already happened, and get to disagree with it.
+//
+// No rule and no "nebo rovnou" over them: the send is already the end of a
+// sentence drawn as a line, and a second hairline 28px under it would read as
+// the form having two bottoms. The air is the separation.
+.ContactModal__reach {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    // 1.25rem, and it is a tap target rather than a taste: the boxes below are
+    // 27px tall and the finger's is 44, so anything under about 17px here would
+    // have the two invisible boxes overlapping and the wrong address ringing.
+    gap: 1.25rem;
+    margin-top: 1.75rem;
+
+    // These two are the last thing on the sheet and the only thing on it a
+    // thumb reaches for without first typing, so they get the 44px everything
+    // else here gets — spread from the middle the way CornerButton does it.
+    //
+    // Which is why the padding can come back down. The touch block pads these
+    // to size, and the padding is what the underline hangs off, so at 0.55rem
+    // the rule ends up nine pixels under the address and stops reading as its
+    // underline. With the box carrying the target the rule can sit where it
+    // sits everywhere else on the site.
+    .ContactModal__link {
+        position: relative;
+        margin-top: 0;
+        padding: 0.25rem 0 0.3rem;
+
+        &::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: max(100%, 44px);
+            height: max(100%, 44px);
+        }
+    }
+}
+
 // Two strokes, not a glyph.
 .ContactModal__close {
     position: absolute;
     top: 2.4vh;
     right: 1.6vw;
     z-index: 3;
-    width: 34px;
-    height: 34px;
+    // In rem so the only way out of the sheet keeps its size against the sheet:
+    // the box grows past 1920 and a ✕ pinned at 34px would shrink into its own
+    // corner. The touch block at the foot of the file still takes it to a flat
+    // 44px — that is a thumb, and a thumb is the same size on every monitor.
+    width: 2.125rem;
+    height: 2.125rem;
     padding: 0;
     border: 0;
     // The sheet's own colour, not "none": the ✕ no longer scrolls away, so on
@@ -315,6 +399,10 @@
 }
 
 // ---- narrow ------------------------------------------------------------
+// One column, from 900 down. Everything it says about the person's half applies
+// between 900 and 750 only — a small tablet, a narrowed window — because below
+// 750 the phone block after this one takes over and that half is not in the
+// document at all.
 @include below-px(900) {
     .ContactModal__wrap { padding: 6vh 4vw; }
 
@@ -342,6 +430,117 @@
     .ContactModal__form { padding: 4vh 6vw; }
 }
 
+// ---- phone -------------------------------------------------------------
+// The sheet, on a phone, is the form.
+//
+// Her half is not laid out here and not hidden here — it is not built, because
+// the markup reads the same 749.98px stop this block compiles to (MQ_PHONE in
+// index.jsx). What survives of it is the two addresses, which come down to the
+// foot of the form; `.ContactModal__reach` above dresses them.
+//
+// The photograph was costing the first 200px of every phone screen and the form
+// it introduced started three quarters of the way down — measured at 390×844,
+// the first field's top was 534px into a 743px sheet. With it gone the form has
+// the top of the sheet, and the rest of this block is what that leaves to
+// settle: the claim's measure, the rhythm between fields, and the send.
+//
+// Placed BEFORE the two landscape blocks that follow, not after. At 568×320
+// this and `phs-h` both match, and `phs-h` has already made the decisions a
+// viewport 320px tall needs — a 20px top padding where this one spends 56 on
+// clearing a ✕ that is beside the eyebrow anyway, and a sheet measured against
+// the height rather than the width. Those have to win, so they come last.
+@include below(xs) {
+    // Nearly the whole screen, and the reason is the send button.
+    //
+    // The sheet was a centred card: 6vh of wrap padding at each end took 101px
+    // out of a 390 and 112 out of a 430, and 34vw of nested gutter — the wrap's
+    // 4vw, the column's 7vw, the form's 6vw — left a 320 with 207px of input
+    // inside a 320px screen. A form is not a card; it is the thing the reader
+    // opened the sheet to fill in, and every pixel spent framing it is a pixel
+    // of it below the fold. 10px of inset all round still reads as a sheet over
+    // the page, still gives the ✕ its corner, and at 390 and 430 it is the
+    // difference between a form that scrolls and one that is simply all there.
+    //
+    // `max-height: 100%` rather than another vh: the wrap is fixed to inset 0,
+    // so 100% of it is the layout viewport as the browser currently reports it.
+    // On Android the keyboard shortens that and the sheet re-lays out above it;
+    // 100vh would have gone on measuring the screen the keyboard is covering.
+    //
+    // Which needs the row spelled out. The wrap is a bare `display: grid` and
+    // its one implicit row is `auto`, so the track grows to whatever the sheet
+    // holds and `100%` of it is the content — measured at 320: the track went
+    // to 727px, the sheet took all of it, `.ContactModal__scroll` came out with
+    // scrollHeight === clientHeight and stopped being a scroller at all, with
+    // the send button 159px below the bottom of the screen. `minmax(0, 1fr)`
+    // pins the track to the wrap instead, which is what the percentage was
+    // always supposed to mean.
+    .ContactModal__wrap {
+        padding: 0.625rem;
+        grid-template-rows: minmax(0, 1fr);
+    }
+    .ContactModal { max-height: 100%; }
+
+    // Flat, and matching the 10px `phs-h` already uses. In vw and vh the ✕ sat
+    // at a different corner on each of the three phones, and the column below
+    // has to clear it — a top padding that has to be right three times is a top
+    // padding that is right once.
+    .ContactModal__close { top: 0.625rem; right: 0.625rem; }
+
+    // Row 1, with nothing above it. The narrow block put the form second so it
+    // would fall under the photograph; there is no photograph.
+    .ContactModal__formCol {
+        grid-row: 1;
+        // 3.5rem clears the ✕ by 2px: 0.625rem down plus the 44px the touch
+        // block gives it.
+        padding: 3.5rem 1.25rem 2.25rem;
+    }
+
+    // 28ch is a measure for a column standing beside a photograph. Here the
+    // column IS the sheet: the cap holds the claim to 245px inside 335 at 430,
+    // leaving a third of the width empty beside it, and costs it a whole line
+    // at 320.
+    .ContactModal__claim {
+        margin: 0.9rem 0 1.6rem;
+        max-width: none;
+    }
+
+    .ContactModal__form {
+        padding: 1.5rem 1rem;
+
+        // The rhythm in rem, not vh. The sheet is taller than the screen and
+        // scrolls inside itself, so a vh gap in here is not a fraction of what
+        // the reader can see — it is a number the window happens to pick, and
+        // it picked 7.7px between two fields on a 568 and 22px on a 932 for the
+        // same five fields. One number, on every phone.
+        label { margin-bottom: 1.25rem; }
+        .label { margin-bottom: 0.5rem; }
+        .timeRow { margin-bottom: 1.25rem; }
+        .gdpr { margin: 0 0 1.5rem; }
+
+        // A line shorter than the desktop's three. The sheet is already taller
+        // than the phone and scrolls inside itself, and the box only has to
+        // read as a box — what is typed into it goes on scrolling inside once
+        // it is full either way, so the height it starts at is bought with
+        // pixels of the send button.
+        textarea { min-height: 4rem; }
+    }
+
+    // The send, where the line it is drawn as runs out of room. At 320 the
+    // button is 194px inside a form 228px wide and the rule was computing to
+    // exactly 0 — an animated hairline with no width, and the button past the
+    // padding it was meant to sit inside. Given a floor it cannot go under, the
+    // row breaks instead: the rule takes the whole of the first line and the
+    // send sits at the head of the next. It is the same sentence, wrapped. From
+    // about 333px across nothing wraps and the line is the line, so this is the
+    // 320 and nothing else.
+    .ContactModal__send {
+        flex-wrap: wrap;
+        gap: 0.9rem;
+    }
+
+    .ContactModal__send__rule { flex: 1 1 2rem; min-width: 2rem; }
+}
+
 // ---- phone landscape ---------------------------------------------------
 // ≤520px tall there is no half of the screen to give the photograph: the form
 // leads, everything compacts, and the sheet scrolls inside itself instead of
@@ -363,9 +562,19 @@
         padding: 2vh 7vw 4vh;
     }
 
-    .ContactModal__claim { margin: 1.4vh 0 2.6vh; }
+    // The cap the phone block above lifts, put back. There it buys the claim a
+    // line on a column 300px wide; here the column is 430 across and the line
+    // runs the width of the sheet, straight at the ✕ pinned in the corner —
+    // measured at 568×320 it stops 13px short of it, which is the string's luck
+    // and not the layout's doing.
+    .ContactModal__claim { margin: 1.4vh 0 2.6vh; max-width: 28ch; }
     .ContactModal__photo { max-height: 60vh; }
     .ContactModal__close { top: 10px; right: 10px; }
+    // No height for the box here. `lt-h` below is `max-height: 800px` and this
+    // is `max-height: 520px`, so every screen this block describes matches that
+    // one too and it is written later — a value set here would be overwritten
+    // by the laptop's on the very phones it was meant for. The one shortened
+    // height lives there and covers both.
 }
 
 // From 800px wide there is room to lay the halves beside each other again —
@@ -398,6 +607,14 @@
     .ContactModal__person { padding: 3.6vh 3vw; }
     .ContactModal__claim { margin: 1.6vh 0 2.8vh; }
     .ContactModal__form { padding: 3vh 2vw; }
+    // Same trade as the paddings above it: a laptop 720px tall showing the
+    // whole sheet is worth a line of the box.
+    //
+    // `max-height: 800px` catches more than a laptop — a phone in landscape and
+    // a 667-tall phone in portrait are both under it — which is why the two
+    // blocks above leave the height to this one rather than each setting their
+    // own for this one to overwrite.
+    .ContactModal__form textarea { min-height: 4rem; }
 }
 
 // ---- touch -------------------------------------------------------------
@@ -408,6 +625,15 @@
     .ContactModal__form {
         input {
             min-height: 44px;
+            padding: 0.3rem 0;
+            font-size: 1rem;
+        }
+
+        // The 16px, without the 44px: the box is already several times a
+        // thumb tall, and `min-height` here would be read as the height the
+        // stops above set it to rather than a floor under them — this block
+        // is last in the file and would win at every one of them.
+        textarea {
             padding: 0.3rem 0;
             font-size: 1rem;
         }

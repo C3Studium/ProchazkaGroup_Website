@@ -163,14 +163,21 @@
             position: absolute;
             // Sat just outside the aperture edge, so the marks read as
             // registration on the picture rather than as a border touching it.
-            inset: -10px;
+            // In rem, because what this sets is the distance between the marks
+            // and a picture that is a third bigger above 1920 — ten flat pixels
+            // out there reads as marks resting on the plate.
+            inset: -0.625rem;
         }
     }
 
     .OfferHero__mark {
         position: absolute;
-        width: clamp(14px, 1.4vw, 22px);
-        height: clamp(14px, 1.4vw, 22px);
+        // The ends of this clamp in rem rather than px. 1.4vw is already past
+        // 22px at 1920, so from there up the mark is pinned to its ceiling —
+        // and a ceiling in px would hold it at its 1920 size on a plate that
+        // has grown. The borders below stay hairlines whatever the width.
+        width: clamp(0.875rem, 1.4vw, 1.375rem);
+        height: clamp(0.875rem, 1.4vw, 1.375rem);
         border: 0 solid rgba(255, 255, 255, 0.55);
 
         &--tl {
@@ -214,10 +221,15 @@
         // This translate is the centring and nothing else may be written to
         // this element's transform. framer moves the box inside instead.
         transform: translate(-50%, -50%);
-        // Sized in px against the heading's own scale, not in ch against the
-        // root font — at 58ch the box was 535px wide under 51px type, which
-        // broke the line four times and left "ČR" alone on the last one.
-        width: min(1040px, 84vw);
+        // Sized against the heading's own scale, not in ch against the root
+        // font — at 58ch the box was 535px wide under 51px type, which broke
+        // the line four times and left "ČR" alone on the last one.
+        //
+        // 65rem is that same 1040px. In rem rather than px because above 1920
+        // the heading is sitting on its own rem ceiling and grows with the
+        // root: a box held at 1040 flat pixels would be the 1920 measure under
+        // 68px type, which is those four broken lines again by another route.
+        width: min(65rem, 84vw);
         z-index: 4;
         pointer-events: none;
     }
@@ -243,7 +255,7 @@
 
         .OfferHero__handoff__tick {
             display: block;
-            width: clamp(20px, 2.4vw, 40px);
+            width: clamp(1.25rem, 2.4vw, 2.5rem);
             height: 1px;
             background-color: var(--hColor);
         }
@@ -301,7 +313,7 @@
 
         .OfferHero__eyebrow__tick {
             display: block;
-            width: clamp(24px, 3vw, 52px);
+            width: clamp(1.5rem, 3vw, 3.25rem);
             height: 1px;
             background-color: var(--hColor);
         }

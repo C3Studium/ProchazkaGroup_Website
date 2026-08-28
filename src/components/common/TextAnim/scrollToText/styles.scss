@@ -22,7 +22,16 @@
     // is showing the gap rather than the glyph: the text is uppercase, so
     // nothing descends into the two pixels being given up. One was not enough —
     // the drift is per letter index, so the worst case sets the number.
-    height: calc(1em - 2px);
+    //
+    // In rem, not px: 0.125rem is exactly the 2px it was at every width up to
+    // 1920, and above that it grows with the root (see globals.scss) — which is
+    // what the em it is being subtracted from does too. The trim is a guard band
+    // cut out of the letter cell, so it only does its job while it stays a fixed
+    // share of that cell; left at 2px against a cell a third taller it is a
+    // third less guard than the worst case was measured against. It costs
+    // nothing to give: the type is uppercase and there is roughly twice this
+    // much empty cell under the baseline at any size.
+    height: calc(1em - 0.125rem);
     overflow: hidden;
     display: flex;
     flex-direction: row;

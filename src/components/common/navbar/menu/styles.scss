@@ -109,11 +109,16 @@
         // the cross is drawn rather than switched. Hovering the closed button
         // draws them toward each other: the first millimetre of the same
         // journey, which is how the wall's boxes promise their growth too.
+        // The box the two lines live in, given in rem so the mark grows with
+        // the word beside it. Above 1920 the root ramps and the type in the bar
+        // comes up a third; a mark left at a literal 20px would sit next to it
+        // as the one thing in the bar that did not, which is exactly how a
+        // control reads as an afterthought.
         .navbar__cut {
             position: relative;
             flex-shrink: 0;
-            width: 20px;
-            height: 11px;
+            width: 1.25rem;
+            height: 0.6875rem;
 
             // Centre-anchored (left 50% + the -50% in every transform) so the
             // width change below grows the line out of its own middle, and
@@ -131,15 +136,19 @@
                     width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
             }
 
-            span:first-child { transform: translate(-50%, -3px) rotate(0deg); }
+            // In rem for the same reason the box is: this is how far apart the
+            // two lines lie, which is part of the drawing rather than a nudge,
+            // and a mark that widened while its two lines stayed six pixels
+            // apart would simply flatten as the screen grew.
+            span:first-child { transform: translate(-50%, -0.1875rem) rotate(0deg); }
             span:last-child {
-                transform: translate(-50%, 3px) rotate(0deg);
+                transform: translate(-50%, 0.1875rem) rotate(0deg);
                 transition-delay: 0.05s;
             }
         }
 
-        &:hover:not([aria-expanded="true"]) .navbar__cut span:first-child { transform: translate(-50%, -1.5px) rotate(0deg); }
-        &:hover:not([aria-expanded="true"]) .navbar__cut span:last-child { transform: translate(-50%, 1.5px) rotate(0deg); }
+        &:hover:not([aria-expanded="true"]) .navbar__cut span:first-child { transform: translate(-50%, -0.09375rem) rotate(0deg); }
+        &:hover:not([aria-expanded="true"]) .navbar__cut span:last-child { transform: translate(-50%, 0.09375rem) rotate(0deg); }
 
         // Crossed, the lines also LENGTHEN — the same expand the word does:
         // a rotated 20px line only spans 14, so the growth keeps the X at the
@@ -176,6 +185,178 @@
                 @include font(SCTA);
                 overflow: hidden;
             }
+        }
+
+        // ── the narrowest phones ──
+        //
+        // The word beside the mark goes, and it is the word rather than the
+        // wordmark, because the mark already says it: two hairlines that cross
+        // are what MENU and CLOSE mean, in twenty pixels instead of a hundred.
+        //
+        // Measured, not guessed. The wordmark is 229px at its own tracking and
+        // the button with CLOSE in it another 105; against the 3vw margins the
+        // page sets, the two stop fitting at about 365 across and are already
+        // touching at 375. 380 is the site's own v(sm) stop and the first round
+        // number clear of that. It is why "CLO…" runs off the right edge of a
+        // 320 screen today, and why 390 and 430 keep the word.
+        //
+        // Taken out of FLOW rather than out of the document, and the difference
+        // is only half a reason now. The button carries its own aria-label —
+        // it has to, because ScrollToText's letter columns put the whole
+        // alphabet in the accessibility tree and the name was never the word
+        // (see index.jsx) — so the name survives either way. What clipping
+        // keeps that display:none would not is the WORD itself, still there,
+        // still spinning between MENU and CLOSE on the same clock as the mark:
+        // one element that stops being drawn rather than a second element that
+        // only exists on small screens.
+        //
+        // Last in the block on purpose. Everything it overrides — the word's
+        // own box, and the pseudo the touch stop sizes — is declared above it
+        // at exactly this specificity, so source order is the whole of what
+        // makes it win.
+        @include below-px(380) {
+            .navbar__text {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                margin: 0;
+                overflow: hidden;
+                white-space: nowrap;
+                clip-path: inset(50%);
+            }
+
+            // With no word to widen it the button is the mark alone, 20 by 11,
+            // so the 44px a finger needs now has to come entirely from the
+            // pseudo — and it needs more of it down than the -12px a wider
+            // screen gets, because that value was sized against a button with a
+            // line of caps standing in it.
+            &::after {
+                content: "";
+                position: absolute;
+                inset: -16.5px -12px;
+            }
+        }
+    }
+}
+
+
+// The mark, set in from the right by what the logo is set in from the left.
+//
+// The bar's 3vw gutter puts the BUTTON at the same inset as the wordmark, which
+// looks like symmetry until you measure what actually paints: the corner marks
+// are drawn ten pixels outside the button's own box, so on a 320 screen the
+// wordmark stood ten pixels off the left edge and the marks sat hard against the
+// right one. The two ends of the bar were not the same distance in, and the mark
+// read as having slid off the screen rather than as sitting in the corner.
+//
+// So the button gives back exactly that overhang. What lands on the gutter is
+// then the outermost thing the eye can see on each side — the wordmark's first
+// letter and the mark's outer corner — which is the symmetry that was meant.
+//
+// Ten pixels flat rather than a share of the width: it is the corner marks'
+// own offset, and that does not change with the screen.
+@include v(xs) {
+    @include below-px(600) {
+        // Three equal thirds are for the bar that has three words in it. On a
+        // phone the third slot — "Spojit se" — is not rendered, so the middle
+        // column ended in the middle of the screen with an empty third beside
+        // it, and the menu sat wherever the leftover happened to put it. Worse,
+        // `1fr` is `minmax(auto, 1fr)` and that auto floor is content-sized, so
+        // the track was also being pushed about by its own contents: "Close" is
+        // wider than "Menu", and at 390 that slid the mark ten pixels sideways
+        // on opening the panel.
+        //
+        // The wordmark takes what is left, the menu takes exactly its own width,
+        // and the empty third takes nothing — so the boundary the menu is pinned
+        // to is the bar's own right edge, at every width and in both states.
+        .navbar__container {
+            grid-template-columns: minmax(0, 1fr) auto auto;
+        }
+
+        // At the originals' depth, like everything else in this block: the rule
+        // upstairs sets `padding: 0` from inside `.navbar__container`, so a
+        // padding written out here would lose to it in silence.
+        .navbar__container .navbar__menu {
+            // Room round the mark. The corner marks are drawn off the button's
+            // own box, so until now they closed on the mark itself with nothing
+            // between — this is what puts a frame round it rather than a border
+            // on it.
+            padding: 0.625rem;
+            // Pinned to the end of its column rather than centred in it.
+            //
+            // Centred, the button's right edge is a function of how wide the
+            // button happens to be — so it moved when the padding was added, and
+            // it moved again between "Menu" and "Close", which are not the same
+            // width. The mark drifted 14px sideways on opening the panel. Pinned,
+            // the right edge is fixed and the word grows to the left of it, which
+            // is what a mark in the corner of a bar is supposed to do.
+            justify-self: end;
+            // What is left over: the corner marks are drawn ten pixels outside
+            // the button, so ten of margin puts THEM on the same gutter the
+            // wordmark's first letter sits on at the other end of the bar.
+            margin-right: 0.625rem;
+        }
+
+        // And taller. Eleven pixels of mark is what a bar reads at arm's length
+        // beside a word; with the word gone on a narrow phone the mark is the
+        // whole control, and eleven pixels of it in a forty-four pixel target is
+        // a hit area with almost nothing drawn in it.
+        //
+        // Height only — the box keeps its width, because the width is what the
+        // corner marks are positioned against and those are now set to the same
+        // inset as the wordmark on the other end of the bar. Growing it sideways
+        // would spend that.
+        //
+        // The three numbers move together or the drawing comes apart: the box,
+        // how far apart the two lines lie at rest, and how far they close on
+        // hover. Each is the same multiple of what it was.
+        //
+        // Written at the depth the originals are written at. They live inside
+        // `.navbar__container .navbar__menu`, and a rule out here that restates
+        // one of their declarations loses on specificity without saying so —
+        // which is exactly what happened on the first attempt: the margin above
+        // applied, because nothing else sets it, and every height and transform
+        // silently did not.
+        .navbar__container .navbar__menu .navbar__cut {
+            height: 1rem;
+
+            span:first-child { transform: translate(-50%, -0.28125rem) rotate(0deg); }
+            span:last-child { transform: translate(-50%, 0.28125rem) rotate(0deg); }
+        }
+
+        .navbar__container .navbar__menu:hover:not([aria-expanded="true"]) .navbar__cut {
+            span:first-child { transform: translate(-50%, -0.14rem) rotate(0deg); }
+            span:last-child { transform: translate(-50%, 0.14rem) rotate(0deg); }
+        }
+
+        // The cross grows with it. A line at 45° spans only 0.707 of its own
+        // length, so the cross is drawn by lengthening the lines rather than by
+        // any height — 150% of a 20px line crosses at 21px against the 18 it
+        // did. They overflow the box by a pixel either side, which is what they
+        // already did at 130%, and they are absolutely positioned, so nothing
+        // in the bar moves.
+        .navbar__container .navbar__menu[aria-expanded="true"] .navbar__cut {
+            span:first-child { width: 150%; }
+            span:last-child { width: 150%; }
+        }
+    }
+}
+
+// The tap target, restated because everything it was derived from moved.
+//
+// 44px is the floor and this pseudo is the whole of it. It used to be a bare
+// 20×11 mark plus 16.5 above and 12 either side, which came to exactly 44 square.
+// The mark is 16 tall now and the button carries 10 of padding all round, so the
+// box under the pseudo is 40×36 — and the old insets would have quietly made the
+// target 64, half again over the floor and taller than the row it sits in.
+//
+// Written as what is left to find rather than as two numbers: 4 above and below
+// and 2 either side is 44 in both directions, and if the padding changes again
+// this comment is where to look.
+@include v(xs) {
+    @include below-px(380) {
+        .navbar__container .navbar__menu::after {
+            inset: -4px -2px;
         }
     }
 }

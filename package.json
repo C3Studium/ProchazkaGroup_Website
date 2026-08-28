@@ -6,7 +6,7 @@
   "scripts": {
     "sync:styles": "node scripts/sync-styles.js",
     "watch:styles": "chokidar \"src\" -i \"src/styles/system/**\" -i \"src/styles/globals.scss\" -i \"src/styles/_generated-styles.scss\" -i \"**/node_modules/**\" -i \"**/.next/**\" -c \"node scripts/sync-styles.js --event {event} --path '{path}'\"",
-    "dev": "pnpm run sync:styles && concurrently \"pnpm run watch:styles\" \"node scripts/run-next-with-storefront-env.js dev -p 3690\"",
+    "dev": "pnpm run sync:styles && concurrently \"pnpm run watch:styles\" \"node scripts/run-next-with-storefront-env.js dev -p 3000\"",
     "build": "pnpm run sync:styles && node scripts/run-next-with-storefront-env.js build",
     "start": "node scripts/run-next-with-storefront-env.js start --hostname 0.0.0.0",
     "build:next": "node scripts/run-next-with-storefront-env.js build",

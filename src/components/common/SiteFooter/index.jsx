@@ -96,6 +96,15 @@ const CONTACT = group(0.16);
 // inside one, so no annotated element holds a break. The spans are bare and
 // inline and no rule in this stylesheet selects on `span`.
 //
+// Two of the blocks below are not on the page at all on a phone: the claim's
+// headline, and the "Kde nás najdete" that stands over the map pin. Both are
+// taken out in styles.scss rather than here, because what decides it is a
+// width and this component cannot ask about one without `App.getInitialProps`
+// and the loss of static rendering that comes with it. The copy still ships
+// and still carries its annotation, and the Studio edits at desk widths, where
+// it is on the page. The 560px block at the foot of the stylesheet says what
+// goes and why.
+//
 // The `items.N.label` paths below are positions in the block's list, and the
 // names for those positions are FOOTER_LINES in @/cms/server/site/footer. They
 // are spelled as literals here because that module is server-only and this

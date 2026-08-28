@@ -112,17 +112,21 @@ html[data-preload="1"] {
     pointer-events: none;
 }
 
+// Arm and inset in rem, and they move together — the mark is set a fixed way in
+// from its box's corner, so growing one without the other would slide the four
+// of them around inside a box that is itself a percentage of the screen. The
+// borders stay 1px: the whole curtain is drawn in the page's hairline.
 .PGLoad__mark {
     position: absolute;
-    width: 9px;
-    height: 9px;
+    width: 0.5625rem;
+    height: 0.5625rem;
     pointer-events: none;
 }
 
-.PGLoad__mark--tl { top: 6px; left: 6px; border-top: 1px solid rgba(255, 255, 255, 0.75); border-left: 1px solid rgba(255, 255, 255, 0.75); }
-.PGLoad__mark--tr { top: 6px; right: 6px; border-top: 1px solid rgba(255, 255, 255, 0.75); border-right: 1px solid rgba(255, 255, 255, 0.75); }
-.PGLoad__mark--br { bottom: 6px; right: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.75); border-right: 1px solid rgba(255, 255, 255, 0.75); }
-.PGLoad__mark--bl { bottom: 6px; left: 6px; border-bottom: 1px solid rgba(255, 255, 255, 0.75); border-left: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--tl { top: 0.375rem; left: 0.375rem; border-top: 1px solid rgba(255, 255, 255, 0.75); border-left: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--tr { top: 0.375rem; right: 0.375rem; border-top: 1px solid rgba(255, 255, 255, 0.75); border-right: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--br { bottom: 0.375rem; right: 0.375rem; border-bottom: 1px solid rgba(255, 255, 255, 0.75); border-right: 1px solid rgba(255, 255, 255, 0.75); }
+.PGLoad__mark--bl { bottom: 0.375rem; left: 0.375rem; border-bottom: 1px solid rgba(255, 255, 255, 0.75); border-left: 1px solid rgba(255, 255, 255, 0.75); }
 
 // ── the wordmark ────────────────────────────────────────────────────────
 //
@@ -182,12 +186,16 @@ html[data-preload="1"] {
     font-variant-numeric: tabular-nums;
 }
 
+// The bar runs the width of the screen, so its weight is the only thing that
+// says how heavy it is. In rem it stays that weight relative to the counter
+// beside it; at a flat 10px under a 2560 monitor's oversized name it was a
+// thread. The two narrow queries below keep their 8px — those are a phone.
 .PGLoad__bar {
     position: absolute;
     left: 0;
     right: 0;
     bottom: 0;
-    height: 10px;
+    height: 0.625rem;
     z-index: 3;
     background-color: rgba(255, 255, 255, 0.08);
     overflow: hidden;

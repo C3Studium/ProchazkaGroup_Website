@@ -131,10 +131,16 @@
                     font-size: clamp(0.85rem, 0.95vw, 1.05rem);
                 }
 
+                // The control the row is: it answers the name across from it,
+                // so it is sized against that name rather than against the
+                // screen. 0.9375rem is the 15px it always was up to 1920 and
+                // grows with the roster's type past it. The ring's weight
+                // stays in px — it is the same hairline the row's own bottom
+                // border is drawn at, and the two have to match.
                 .radio {
                     flex-shrink: 0;
-                    width: 15px;
-                    height: 15px;
+                    width: 0.9375rem;
+                    height: 0.9375rem;
                     border-radius: 50%;
                     border: 1.5px solid rgba(255, 255, 255, 0.6);
                 }
@@ -168,6 +174,17 @@
                     height: 3.9rem;
                     border: 1px solid rgba(255, 255, 255, 0.6);
                     border-radius: 50%;
+
+                    // The circle around it is rem and grows on a wide screen;
+                    // the icon inside arrives from react-icons with a number
+                    // for a size, which is a pixel and does not. Left alone
+                    // the mark drifts to the middle of a ring that has opened
+                    // up around it. 1.375rem is the 22px the call site asks
+                    // for, at every width up to 1920.
+                    svg {
+                        width: 1.375rem;
+                        height: 1.375rem;
+                    }
                 }
             }
 
@@ -238,11 +255,16 @@
             padding: 2.5vh 2.5vw;
 
             // corner brackets lift the form out of the dark background,
-            // using the same line language as the buttons
+            // using the same line language as the buttons — so they take the
+            // same measure the buttons do: 1rem is the 16px they always were
+            // up to 1920, and past it they grow with the box they bracket and
+            // the fields inside it. Four fixed ticks on a form a third larger
+            // read as a frame that has come loose from its corners. The border
+            // weights stay in px: hairline is hairline at any width.
             > .corner {
                 position: absolute;
-                width: 16px;
-                height: 16px;
+                width: 1rem;
+                height: 1rem;
                 border: 0 solid rgba(255, 255, 255, 0.6);
             }
 
@@ -420,6 +442,16 @@
                 display: inline-flex;
                 align-items: center;
                 gap: 0.4rem;
+
+                // Each of these is a count with its own mark beside it, set on
+                // one line — so the mark is sized against the number, not
+                // against the screen. react-icons hands it over as a pixel
+                // number; 1.25rem is that same 20px up to 1920 and keeps step
+                // with the count past it.
+                svg {
+                    width: 1.25rem;
+                    height: 1.25rem;
+                }
             }
         }
 
@@ -444,6 +476,19 @@
             text-transform: none;
             padding: 0.8rem 1.4rem;
         }
+    }
+
+    // ---- the two parts only a phone ever sees ----
+    //
+    // The picker that stands in for the roster, and the mark that stands in for
+    // the printed number. Both are in the markup at every width, and both are
+    // off here — a default of none rather than a switch inside the phone block
+    // at the foot of this file, so nothing wider than a phone can reach them by
+    // a route this file did not think of: a print stylesheet, a stop added
+    // later, or the second page that docks this whole section full-bleed.
+    .ChooseAdvisor__pick,
+    .ChooseAdvisor__iconCall {
+        display: none;
     }
 
     // ---- structural lines ----
@@ -654,6 +699,281 @@
 
         .ChooseAdvisor__line {
             display: none;
+        }
+    }
+
+    // ---- phone, portrait ----
+    //
+    // Everything above that says `below-px(820)` is shared with a tablet held
+    // upright, which matches that stop on width alone and has half a screen
+    // more height to spend. This is the part that is only ever a phone:
+    // portrait, and under the 600px stop the site already treats as the floor
+    // of tablet territory — the empty band between the widest phone we target
+    // at 430 across and the narrowest tablet at 768. It is the same bound the
+    // bar, the navigation panel and the advisor roster took in this pass, and
+    // the pair is meant: portrait alone is also every tablet ever made, and
+    // `phl-h` below owns this same phone on its side.
+    //
+    // Before the landscape block on purpose, so a phone turned over goes on
+    // getting the map written for it rather than this one.
+    //
+    // What was wrong: stacking three desktop columns gave 2271px of scrolling
+    // at 390, and the first screenful of it was ten radio rows — a roster you
+    // page past to reach the thing you came for. Under it came the office
+    // address, its map pin and its opening hours, none of which anyone reads on
+    // a phone in the middle of a form, and only then the pitch, the form and
+    // the face.
+    //
+    // So the parts are put in the order somebody actually uses them — the
+    // pitch, the choice, who they are calling, the form — and the three that
+    // were carrying a wide screen's furniture are dropped. Measured after:
+    // 1006px at 320, 1184 at 390, 1263 at 430, against 2271 at 390 before.
+    //
+    // The order is done with `order` on the section's own grid, not by moving
+    // anything in the markup: the claim and the form live in one column and the
+    // profile has to come between them, so the middle column spends this stop
+    // as `display: contents` and hands its two children straight to the
+    // section. That is safe here because the column div is an ORCHESTRATOR and
+    // nothing else — its `group()` variant carries a stagger and no visual
+    // property at all (see ui/entrance), so there is no box being animated for
+    // `contents` to take away. Its padding does go, and the two children carry
+    // their own below.
+    //
+    // The structural lines need nothing here: they are drawn in vh against a
+    // 100vh canvas this section gave up at 820, and the 820 stop already puts
+    // them out.
+    @include v(xs) {
+        @include below-px(600) {
+            // The whole left column goes, in one move: the roster it exists for
+            // is now the picker, "Kde nás najdete" and its pin were the thing
+            // the reader asked to lose, and the hours-and-number line under
+            // them is what is left of an office block whose other half has just
+            // been removed. That number is also no longer the only way to dial
+            // — the mark beside the portrait is — so what stayed would have
+            // been a duplicate action under a heading that had gone. Nothing is
+            // actually lost: the footer of this same page prints "Kde nás
+            // najdete", the same street address, "Kontakt | 8-16" and a number
+            // (see common/SiteFooter) — so the office block is one scroll
+            // further down, where somebody looking for an office looks.
+            .ChooseAdvisor__left {
+                display: none;
+            }
+
+            // Not a column any more, a pass-through: see the note above.
+            .ChooseAdvisor__formCol {
+                display: contents;
+            }
+
+            // The reading order, once the middle column has dissolved. Written
+            // on all four rather than leaving any at the initial 0, so the
+            // sequence is stated in one place instead of being half implied by
+            // the markup.
+            .ChooseAdvisor__formCol .ChooseAdvisor__claim {
+                order: 1;
+                // The pitch stays, and it goes first. It is the only sentence
+                // in the section that says why the form below is worth filling
+                // in — without it a phone gets a picker, a face and eleven
+                // fields with no reason attached — and at three lines it costs
+                // about a tenth of what the page now is. Set a step smaller
+                // than the shared size and led tighter, because at 320 the
+                // original ran the full width in near-body-sized caps and read
+                // as a paragraph rather than as a claim.
+                padding: 6vh 6vw 0;
+                font-size: clamp(1.05rem, 4.6vw, 1.35rem);
+                line-height: 1.4;
+            }
+
+            .ChooseAdvisor__pick {
+                order: 2;
+                display: block;
+                padding: 3.6vh 6vw 0;
+            }
+
+            .ChooseAdvisor__profile {
+                order: 3;
+            }
+
+            .ChooseAdvisor__formCol .ChooseAdvisor__form {
+                order: 4;
+                // The 6vw the middle column used to hold is now the form's own,
+                // and the bottom margin is the section's floor: the profile
+                // used to end the stack and pay for it out of its padding.
+                margin: 5vh 6vw 6vh;
+            }
+
+            // ---- the picker ----
+            .ChooseAdvisor__pick {
+                .ChooseAdvisor__pick__label {
+                    display: block;
+                    text-transform: uppercase;
+                    font-size: 0.7rem;
+                    letter-spacing: 0.1em;
+                    opacity: 0.85;
+                    margin-bottom: 0.9vh;
+                }
+
+                .ChooseAdvisor__pick__field {
+                    position: relative;
+                    display: block;
+                }
+
+                .ChooseAdvisor__pick__select {
+                    // A field on this page is a line with words over it. The
+                    // browser's own control is a rounded grey box with a system
+                    // font and a chevron of its own, so all of that comes off —
+                    // the same strip the form does to its inputs, restated here
+                    // because this control lives outside the form's box.
+                    appearance: none;
+                    -webkit-appearance: none;
+                    width: 100%;
+                    // The finger's floor. 16px is also the size under which iOS
+                    // zooms the page to focus a control, and a zoom the reader
+                    // did not ask for leaves them scrolled sideways on a page
+                    // that has no sideways.
+                    min-height: 44px;
+                    background: transparent;
+                    border: none;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+                    border-radius: 0;
+                    box-shadow: none;
+                    color: var(--wText);
+                    font-family: "Poppins", sans-serif;
+                    font-weight: 200;
+                    font-size: max(16px, 1rem);
+                    letter-spacing: 0.01em;
+                    // room on the right for the chevron drawn over it
+                    padding: 0.45rem 2rem 0.45rem 0.2rem;
+                    outline: none;
+
+                    &:focus {
+                        border-bottom-color: var(--hColor);
+                    }
+
+                    // The list that opens is drawn by the platform. iOS spins
+                    // its own wheel and ignores everything here; Android and a
+                    // desktop browser inherit from the control, which on this
+                    // page is white type on nothing at all. Stated, so the
+                    // names are legible in the popup wherever it comes from.
+                    option {
+                        color: #0b1220;
+                        background-color: #ffffff;
+                    }
+                }
+
+                .ChooseAdvisor__pick__chevron {
+                    position: absolute;
+                    right: 0.2rem;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    opacity: 0.75;
+                    // it is the control's mark, not a second target beside it
+                    pointer-events: none;
+                }
+            }
+
+            // ---- the card: face and the call side by side, then the name,
+            //      then the counts ----
+            .ChooseAdvisor__profile {
+                display: grid;
+                // The picture is a fixed square now rather than a share of the
+                // row, so it sizes itself and the call takes the rest — which is
+                // what lets the button grow into the room the smaller picture
+                // gave up instead of staying the width of its own glyph.
+                grid-template-columns: auto minmax(0, 1fr);
+                // r1 the picture and the call abreast | r2 the name across |
+                // r3 the counts across, under the name.
+                grid-template-rows: auto auto auto;
+                align-items: start;
+                column-gap: 4vw;
+                padding: 4vh 6vw 0;
+
+                .ChooseAdvisor__photo {
+                    grid-column: 1;
+                    grid-row: 1;
+                    align-self: start;
+                    // A square thumbnail, 150 at the ceiling. It was half the
+                    // card's width and a third of its height; at that size the
+                    // face was the section and the two things beside it read as
+                    // captions. 40vw is what keeps it proportionate on a 320
+                    // screen, where a flat 150 is nearly half the width.
+                    //
+                    // Square rather than the portrait it was: the crop is the
+                    // base rule's top-centre, so what a square takes is the head
+                    // and shoulders, which is the part of a portrait a thumbnail
+                    // is for.
+                    width: min(150px, 40vw);
+                    height: min(150px, 40vw);
+                }
+
+                .ChooseAdvisor__iconCall {
+                    // back on, as the display cornerButton gives it
+                    display: inline-flex;
+                    grid-column: 2;
+                    grid-row: 1;
+                    // Centred in its own track and against the picture beside
+                    // it, so the two read as a pair rather than as a button
+                    // parked at one corner of a photograph.
+                    align-self: center;
+                    justify-self: center;
+                    justify-content: center;
+                    // Square, and half the picture it stands next to. It was
+                    // 3.5rem against a picture twice this tall, where it was the
+                    // smaller of two things in a busy column; now it is one of
+                    // exactly two things in the row and it is the only one that
+                    // does anything, so it carries its own weight.
+                    width: 4.5rem;
+                    height: 4.5rem;
+                    padding: 0;
+                    color: var(--hColor2);
+
+                    // The corner marks are drawn on the button's own box and
+                    // the mark inside it arrives from react-icons with a pixel
+                    // number for a size — so on a box this much bigger than a
+                    // word, the 22px glyph sat in the middle of four ticks with
+                    // nothing between them and it. Sized against the box it is
+                    // bracketed by, the way the map pin is sized against its
+                    // ring.
+                    svg {
+                        width: 2.1rem;
+                        height: 2.1rem;
+                    }
+                }
+
+                // Under the name, across the card. They were stacked in the
+                // button's own column because that column was only as wide as
+                // the button; a full-width row takes them back to the side-by-
+                // side pair they are everywhere else on the site, and it puts
+                // them where they belong — a claim about the person whose name
+                // is directly above them.
+                .ChooseAdvisor__social {
+                    grid-column: 1 / -1;
+                    grid-row: 3;
+                    align-self: start;
+                    flex-direction: row;
+                    align-items: center;
+                    gap: 1.4rem;
+                    margin-top: 1.2vh;
+                    font-size: 0.95rem;
+                }
+
+                .ChooseAdvisor__name {
+                    grid-column: 1 / -1;
+                    grid-row: 2;
+                    margin-top: 2.4vh;
+                    // the desktop 2.1rem floor sets a long surname wider than
+                    // 320 can hold
+                    font-size: clamp(1.6rem, 8vw, 2.3rem);
+                }
+
+                // The mark above is the call now. These two are the same action
+                // spelled out — the label and the digits — and printing them
+                // under the name would put a second telephone number between it
+                // and the form the user asked to have follow it.
+                .ChooseAdvisor__callText,
+                .ChooseAdvisor__phone {
+                    display: none;
+                }
+            }
         }
     }
 

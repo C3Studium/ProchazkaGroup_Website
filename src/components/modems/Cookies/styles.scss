@@ -91,7 +91,12 @@
 
     display: flex;
     flex-direction: column;
-    width: min(100%, 940px);
+    // 58.75rem is the same 940px up to 1920 and grows with the root past it.
+    // The cap is what sets the width on any desktop, so left in px the sheet
+    // held still on a 2552 monitor while its own type came up a third — the
+    // switch column and the copy beside it running out of measure inside a box
+    // that had quietly become a third of the screen.
+    width: min(100%, 58.75rem);
 
     // Never taller than the room it has. The cap is the whole reason the close
     // and the save cannot be scrolled away.
@@ -287,11 +292,16 @@
     }
 }
 
+// The track, the knob and its travel are one piece of geometry and are given in
+// rem together — the knob is inset by an amount that has to stay the same on
+// both sides of it, so any one of the four left in px would land the switch off
+// centre at the other end of its own throw. They are the identical 46/24/16/3
+// up to 1920. The 1px border stays a border.
 .CookiesModem__track {
     flex: none;
     position: relative;
-    width: 46px;
-    height: 24px;
+    width: 2.875rem;
+    height: 1.5rem;
     border: 1px solid rgba(255, 255, 255, 0.26);
     background-color: rgba(255, 255, 255, 0.04);
     transition: border-color 0.3s ease, background-color 0.3s ease;
@@ -299,10 +309,10 @@
 
 .CookiesModem__knob {
     position: absolute;
-    top: 3px;
-    left: 3px;
-    width: 16px;
-    height: 16px;
+    top: 0.1875rem;
+    left: 0.1875rem;
+    width: 1rem;
+    height: 1rem;
     background-color: rgba(255, 255, 255, 0.55);
     transition: transform 0.3s cubic-bezier(0.76, 0, 0.24, 1),
                 background-color 0.3s ease;
@@ -314,7 +324,13 @@
 
     .CookiesModem__knob {
         background-color: var(--hColor);
-        transform: translateX(22px);
+        // The throw is what is left of the track once the knob and its two
+        // insets are taken out of it, and the calc says exactly that rather
+        // than restating the arithmetic as a number: 1.5rem is the track minus
+        // the knob minus both insets, and the 2px is its two borders, which do
+        // not scale and so have to come off the travel by hand. It is the same
+        // 22px it has always been at a 16px root.
+        transform: translateX(calc(1.5rem - 2px));
     }
 }
 

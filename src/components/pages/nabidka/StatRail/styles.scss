@@ -279,7 +279,7 @@
 
         .StatRail__ordinal__tick {
             display: block;
-            width: clamp(16px, 2vw, 34px);
+            width: clamp(1rem, 2vw, 2.125rem);
             height: 1px;
             // Drawn out from its own start rather than scaled from the middle.
             transform-origin: left center;
@@ -433,7 +433,11 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: min(1180px, 80vw);
+        // 73.75rem is the 1180px this was. In rem because the lead inside it is
+        // at its own rem ceiling from about 1920 up and grows with the root
+        // from there: a box frozen at 1180 flat pixels would be breaking a
+        // 112px line over a measure drawn for an 84px one.
+        width: min(73.75rem, 80vw);
         transform: translate(-50%, -50%);
         // The block is centred on the screen; the words inside it are not
         // centred on the block. A statement of four lines set ragged both
@@ -454,7 +458,7 @@
 
         .StatRail__close__tick {
             display: block;
-            width: clamp(18px, 2.2vw, 38px);
+            width: clamp(1.125rem, 2.2vw, 2.375rem);
             height: 1px;
             background-color: currentColor;
         }
@@ -531,11 +535,15 @@
         left: 0;
         top: 0;
         bottom: 0;
-        width: clamp(7px, 0.7vw, 11px);
+        // The mark's length and the pitch it repeats at, both in rem: this is a
+        // drawing of a scale, and a scale whose marks keep their pixel size and
+        // spacing while the rule beside them grows is a denser scale rather
+        // than the same one. The mark's own thickness is the 1px and stays.
+        width: clamp(0.4375rem, 0.7vw, 0.6875rem);
         background-image: repeating-linear-gradient(
             to bottom,
             rgba(255, 255, 255, 0.3) 0 1px,
-            transparent 1px 34px
+            transparent 1px 2.125rem
         );
     }
 
@@ -543,7 +551,7 @@
     .StatRail__head__reader {
         position: absolute;
         left: clamp(-3.2rem, -2.6vw, -2rem);
-        width: clamp(13px, 1.3vw, 20px);
+        width: clamp(0.8125rem, 1.3vw, 1.25rem);
         height: 1px;
         background-color: var(--hColor);
         box-shadow: 0 0 10px rgba(75, 218, 220, 0.5);

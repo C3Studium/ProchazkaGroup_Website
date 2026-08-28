@@ -147,6 +147,14 @@
             svg {
                 flex: none;
                 opacity: 0.85;
+                // The icon arrives from @remixicon with `size={20}` written
+                // into its width and height attributes, and an attribute is a
+                // px number nothing can grow. Restated here as a length: the
+                // same 20px while the root is 16, and following the label's
+                // own type above 1921. Held at 20px beside a 23px line it
+                // would read as a bullet rather than as the mark it is.
+                width: 1.25rem;
+                height: 1.25rem;
             }
         }
     }

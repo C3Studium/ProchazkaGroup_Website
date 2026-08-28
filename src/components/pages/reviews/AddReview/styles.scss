@@ -35,19 +35,30 @@
     pointer-events: auto;
     transition: border-color 0.35s ease, background-color 0.35s ease;
 
+    // The arms and their stand-off are a measure of the frame and move in rem,
+    // the same way the shared CornerButton's do: 0.8125rem and 0.3125rem are
+    // the 13px and 5px they have always been up to 1920, and above it they grow
+    // with the label they bracket. Four thirteen-pixel ticks around a word a
+    // third larger read as a frame that has come loose from it.
+    //
+    // The border weights stay in px. They are the page's hairline, and a
+    // hairline is one pixel on every screen — at 1.33 it is a smudge.
     .corner {
         position: absolute;
-        width: 13px;
-        height: 13px;
+        width: 0.8125rem;
+        height: 0.8125rem;
         border: 0 solid rgba(255, 255, 255, 0.75);
     }
 
-    .corner--tl { top: -5px; left: -5px; border-top-width: 1px; border-left-width: 1px; }
-    .corner--tr { top: -5px; right: -5px; border-top-width: 1px; border-right-width: 1px; }
-    .corner--bl { bottom: -5px; left: -5px; border-bottom-width: 1px; border-left-width: 1px; }
-    .corner--br { bottom: -5px; right: -5px; border-bottom-width: 1px; border-right-width: 1px; }
+    .corner--tl { top: -0.3125rem; left: -0.3125rem; border-top-width: 1px; border-left-width: 1px; }
+    .corner--tr { top: -0.3125rem; right: -0.3125rem; border-top-width: 1px; border-right-width: 1px; }
+    .corner--bl { bottom: -0.3125rem; left: -0.3125rem; border-bottom-width: 1px; border-left-width: 1px; }
+    .corner--br { bottom: -0.3125rem; right: -0.3125rem; border-bottom-width: 1px; border-right-width: 1px; }
 
-    svg { width: 18px; height: 18px; }
+    // The arrow beside the word, in the word's own currency: 1.125rem is the
+    // 18px it was, and an icon that stays put while its label grows is the one
+    // thing on the plate that would look wrong.
+    svg { width: 1.125rem; height: 1.125rem; }
 
     // Hover is a pointer's answer and nothing else. On a touchscreen it is
     // applied on tap and then left applied, so the plate a reader last pressed
@@ -178,16 +189,22 @@
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
 
-    // Room for the send plate's corner marks, which sit 5px outside its box.
-    padding: 6px 6px 0;
-    margin: 0 -6px;
+    // Room for the send plate's corner marks, which stand 0.3125rem outside its
+    // box. In the same unit as the thing it is making room for, or the two come
+    // apart above 1920 and the scroller clips the marks it was written for.
+    padding: 0.375rem 0.375rem 0;
+    margin: 0 -0.375rem;
 }
 
 // Two strokes, not a glyph.
 .AddRev__close {
     position: relative;
-    width: 34px;
-    height: 34px;
+    // 2.125rem and 1.25rem are the 34px and 20px they have always been up to
+    // 1920. The close sits in a head row opposite an eyebrow that grows, and a
+    // mark that stayed 34px there would drift out of line with it — the row is
+    // centred on the taller of the two. The stroke's own 1px stays a hairline.
+    width: 2.125rem;
+    height: 2.125rem;
     flex: 0 0 auto;
     padding: 0;
     border: 0;
@@ -198,7 +215,7 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 20px;
+        width: 1.25rem;
         height: 1px;
         background-color: rgba(255, 255, 255, 0.7);
 

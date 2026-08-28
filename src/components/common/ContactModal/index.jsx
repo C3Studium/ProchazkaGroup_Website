@@ -37,6 +37,10 @@ const FALLBACK = {
         "více",
         "Poslat zprávu",
         "Nebo rovnou",
+        // Last in the list and fifth on the sheet: the positions are stored
+        // copy, so a new label joins the end of them whatever it reads beside.
+        // CONTACT_LINES says the same thing from the other side.
+        "Zpráva",
     ],
 };
 
@@ -61,22 +65,57 @@ const Req = () => <em className="ContactModal__req" aria-hidden="true">*</em>;
 // form on the left, the person who will read it on the right. No advisor list —
 // this is the general way in, and choosing a particular advisor is what
 // /o-nas and the CTA are for.
+//
+// On a phone there is only the form. Her half stacked above it there, and a
+// photograph the reader cannot act on took the whole of the first screen — so
+// below 750px the portrait, her name and her role are not built at all and her
+// two addresses come down to the foot of the form, which is where a reader who
+// would rather ring than type goes looking anyway.
 // Everything the Tab key is allowed to reach. `[href]` rather than `a` because
 // an anchor without one is not a stop, and the negated `[tabindex="-1"]` because
 // an element taken out of the order by hand means it.
 const FOCUSABLE =
     'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
+// Where the sheet stops being two halves and becomes a form.
+//
+// The same stop BenefitReviews spells MQ_PHONE and the one `below(xs)` in the
+// stylesheet compiles to, so the markup and the CSS cannot disagree about what
+// a phone is: 749.98 clears the widest phone we target (430) and stays under
+// the narrowest tablet (768), which is the whole of the point — a tablet keeps
+// the sheet it has.
+//
+// Width alone, with no orientation clause. On Android the soft keyboard
+// shortens the layout viewport, and a 320-wide screen with a keyboard up
+// reports itself as landscape; a branch on that would tear half the sheet out
+// from under someone who had done nothing but tap into a field.
+const MQ_PHONE = "(max-width: 749.98px)";
+
 export default function ContactModal({ open, onClose, assistant, copy }) {
     const [mounted, setMounted] = useState(false);
+    // Whether this is a phone, decided before the sheet paints anything.
+    //
+    // Nothing in here is ever server-rendered — `mounted` gates the portal, so
+    // the first render is null on every device — which is why matchMedia can be
+    // read beside it with no hydration mismatch to answer for. Both land in the
+    // same commit, so the first markup the sheet paints already knows, and her
+    // half is never mounted on a phone, not even for a frame.
+    const [phone, setPhone] = useState(false);
     const closeRef = useRef(null);
     const wrapRef = useRef(null);
     const backdropRef = useRef(null);
     const [values, setValues] = useState({
-        name: "", email: "", phone: "", timeFrom: "", timeTo: "",
+        name: "", email: "", phone: "", timeFrom: "", timeTo: "", message: "",
     });
 
-    useEffect(() => setMounted(true), []);
+    useEffect(() => {
+        const mq = window.matchMedia(MQ_PHONE);
+        const read = () => setPhone(mq.matches);
+        read();
+        setMounted(true);
+        mq.addEventListener("change", read);
+        return () => mq.removeEventListener("change", read);
+    }, []);
 
     // Where the keyboard is while the sheet is up.
     //
@@ -212,6 +251,31 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
 
     if (!mounted) return null;
 
+    // Her two addresses, written once and placed twice — the foot of her half
+    // on a wide sheet, the foot of the form on a phone. Two copies of these
+    // anchors would be two places for an href or a marker class to drift, and
+    // they are the one part of her column that survives the phone.
+    //
+    // mailto: and tel: leave the site, so both carry the marker. Neither is
+    // annotated separately: they are two fields of the one `assistant` row that
+    // whichever container holds them already opens, and a second offer on top
+    // of it would be two ways to change the same address.
+    const hasReach = Boolean(assistant?.email || assistant?.phone);
+    const reach = (
+        <>
+            {assistant?.email && (
+                <a href={`mailto:${assistant.email}`} className={`ContactModal__link ${EXTERNAL_CLASS}`} data-cursor="frame">
+                    {assistant.email}
+                </a>
+            )}
+            {assistant?.phone && (
+                <a href={`tel:${assistant.phone.replace(/\s+/g, "")}`} className={`ContactModal__link ${EXTERNAL_CLASS}`} data-cursor="frame">
+                    {assistant.phone}
+                </a>
+            )}
+        </>
+    );
+
     return createPortal(
         <AnimatePresence>
             {open && (
@@ -252,7 +316,21 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                 absolute children of a scroller travel with
                                 its content, and on a phone that took the only
                                 way out off the screen. */}
-                            <div className="ContactModal__scroll">
+                            {/* `data-lenis-prevent`, and on a phone it is the
+                                difference between a form you can send and one
+                                you cannot. The page's scroll is stopped while
+                                the sheet is up, but a stopped lenis still takes
+                                the wheel and the touch drag off the window and
+                                hands this element nothing. Measured at 320×568,
+                                where the sheet has 282px to give and the send
+                                button starts below the fold: with the attribute
+                                six thumb-drags take `scrollTop` to 282 and the
+                                button is under the finger; with it removed and
+                                nothing else changed, the same six leave it at
+                                0 and there is no way to reach the button at
+                                all. Same reason RevSheet carries it — that
+                                comment is the other half of this one. */}
+                            <div className="ContactModal__scroll" data-lenis-prevent>
 
                             {/* --- left: the form -------------------------- */}
                             <div className="ContactModal__formCol">
@@ -336,6 +414,46 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                         </div>
                                     </div>
 
+                                    {/* What the sheet was opened to say, and the
+                                        last thing asked for: the four lines above
+                                        are who you are and when to ring, and a
+                                        box the reader writes into belongs after
+                                        the boxes they only fill in.
+
+                                        Not required, and no <Req /> beside it,
+                                        because the send is a callback request —
+                                        `onSubmit` asks for a name, an address and
+                                        a number, and someone who leaves this
+                                        blank is asking to be rung, not failing to
+                                        fill in a form.
+
+                                        The label alone carries the annotation: a
+                                        textarea's value is not a text node, so
+                                        there is nothing in the box for an in-place
+                                        editor to put a caret in. Same reading the
+                                        QNA form's message box made. */}
+                                    {/* No class of its own: the row is a label
+                                        and a field, which is what the three at
+                                        the top of the form are, and it wants
+                                        the same rhythm they already have.
+                                        `.telRow` and `.timeRow` are named
+                                        because they hold something extra. */}
+                                    <label>
+                                        <span
+                                            {...editable(copy?.docId, "items.11.label", "text")}
+                                            className="label"
+                                        >
+                                            {labelAt(copy, 11)}
+                                        </span>
+                                        <textarea
+                                            name="message"
+                                            rows={3}
+                                            value={values.message}
+                                            onChange={set("message")}
+                                            data-cursor="frame"
+                                        />
+                                    </label>
+
                                     <p className="gdpr">
                                         <span {...editable(copy?.docId, "items.7.label", "text")}>{labelAt(copy, 7)}</span>{" "}
                                         {/* Words only: /ochrana-soukromi is a path
@@ -372,6 +490,22 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                         </button>
                                     </div>
                                 </form>
+
+                                {/* On a phone this is all that is left of her
+                                    half, and it belongs under the form rather
+                                    than over it: the sheet was opened to write,
+                                    and these are the two ways to reach her that
+                                    are not writing. The document annotation
+                                    comes with them so an editor still has the
+                                    one way into her row. */}
+                                {phone && hasReach && (
+                                    <div
+                                        {...editableDoc(assistant?.id, "assistant")}
+                                        className="ContactModal__reach"
+                                    >
+                                        {reach}
+                                    </div>
+                                )}
                             </div>
 
                             {/* --- right: who reads it --------------------- */}
@@ -381,6 +515,18 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                 wants from clicking any of them is the form they
                                 already know. `id` reaches here only in draft mode
                                 — see `provenance` in @/cms/server/site/content. */}
+                            {/* Not rendered on a phone rather than hidden there.
+                                The photograph is a GridDistortion, which is a
+                                WebGL canvas: it already declines to take a
+                                context where there is no pointer to answer, but
+                                it still lays out its fallback layer, and that
+                                fallback is a `fill` <Image> — a display:none
+                                column would go on fetching a portrait nobody on
+                                that screen can see. Not building the subtree is
+                                also the only form of this that holds for a touch
+                                device which reports a pointer anyway (a tablet
+                                with a mouse, a phone with one attached). */}
+                            {!phone && (
                             <div
                                 {...editableDoc(assistant?.id, "assistant")}
                                 className="ContactModal__person"
@@ -411,7 +557,7 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
 
                                 <span className="ContactModal__rule" aria-hidden="true" />
 
-                                {(assistant?.email || assistant?.phone) && (
+                                {hasReach && (
                                     <span
                                         {...editable(copy?.docId, "items.10.label", "text")}
                                         className="ContactModal__or"
@@ -419,23 +565,9 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                         {labelAt(copy, 10)}
                                     </span>
                                 )}
-                                {/* mailto: and tel: leave the site, so both
-                                    carry the marker. Neither is annotated
-                                    separately: they are two fields of the one
-                                    `assistant` row the whole column already
-                                    opens, and a second offer on top of it would
-                                    be two ways to change the same address. */}
-                                {assistant?.email && (
-                                    <a href={`mailto:${assistant.email}`} className={`ContactModal__link ${EXTERNAL_CLASS}`} data-cursor="frame">
-                                        {assistant.email}
-                                    </a>
-                                )}
-                                {assistant?.phone && (
-                                    <a href={`tel:${assistant.phone.replace(/\s+/g, "")}`} className={`ContactModal__link ${EXTERNAL_CLASS}`} data-cursor="frame">
-                                        {assistant.phone}
-                                    </a>
-                                )}
+                                {reach}
                             </div>
+                            )}
 
                             <span className="ContactModal__seam" aria-hidden="true" />
                             </div>

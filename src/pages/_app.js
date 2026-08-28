@@ -1,5 +1,6 @@
 import "@/styles/globals.scss";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
 import Lenis from "lenis";
 import { LoadProvider } from "@/context/LoadProvider";
@@ -37,6 +38,18 @@ import SiteFooter from "@/components/common/SiteFooter";
 
 export default function App({ Component, pageProps }) {
   useEditArming();
+  const { pathname } = useRouter();
+
+  // Which surface this is, for the one rule that has to tell them apart.
+  //
+  // globals.scss grows the root font size on screens past 1920 so the whole
+  // public site scales to a 2K monitor. rem is root-relative and there is only
+  // one root, so that would take the Studio with it — a dense admin laid out in
+  // px, and explicitly outside this pass. This is what holds it back.
+  useEffect(() => {
+    const studio = pathname.startsWith("/studio");
+    document.documentElement.toggleAttribute("data-studio", studio);
+  }, [pathname]);
 
   useEffect(() => {
     // Initialize Lenis for smooth scrolling

@@ -29,9 +29,14 @@
     // padding does, and the gap a link is drawn across. Written in vh they drift
     // apart the first time one of them is edited, and on a short viewport they
     // all collapse together — hence clamp rather than a bare vh.
-    --wall-top: clamp(20px, 4vh, 60px);
-    --wall-foot: clamp(90px, 20vh, 260px);
-    --wall-gap: clamp(70px, 14vh, 190px);
+    //
+    // The ends in rem rather than px, so the ceilings move with the screen: on
+    // a 2K monitor 20vh is 270 against a cap of 260 and 14vh is 189 against
+    // 190, which is exactly where a flat cap starts deciding the rhythm of the
+    // section instead of guarding it.
+    --wall-top: clamp(1.25rem, 4vh, 3.75rem);
+    --wall-foot: clamp(5.625rem, 20vh, 16.25rem);
+    --wall-gap: clamp(4.375rem, 14vh, 11.875rem);
 
     position: relative;
     z-index: 3;
@@ -125,8 +130,11 @@
 
 .OfferWall__rail__tick {
     position: absolute;
-    left: -3px;
-    width: 7px;
+    // Length in rem, thickness in px. How far the tick reaches either side of
+    // the rail is a measure and grows with the page; how thick it is drawn is a
+    // hairline and does not.
+    left: -0.1875rem;
+    width: 0.4375rem;
     height: 1px;
     background-color: rgba(255, 255, 255, 0.3);
 }
@@ -193,7 +201,7 @@
     display: block;
     width: 100%;
     height: 1px;
-    margin: clamp(14px, 3vh, 40px) 0 clamp(12px, 2.4vh, 32px);
+    margin: clamp(0.875rem, 3vh, 2.5rem) 0 clamp(0.75rem, 2.4vh, 2rem);
     transform-origin: left center;
     background-color: rgba(255, 255, 255, 0.22);
 
@@ -218,14 +226,17 @@
 
 .OfferWall__marks {
     position: absolute;
-    inset: 12px;
+    // Both in rem: the inset is how far the registration sits inside a block
+    // that is a third bigger above 1920, and the arms are the drawing. Only the
+    // border widths below are hairlines.
+    inset: 0.75rem;
     z-index: 3;
     pointer-events: none;
 
     i {
         position: absolute;
-        width: 6px;
-        height: 6px;
+        width: 0.375rem;
+        height: 0.375rem;
         border: 0 solid rgba(255, 255, 255, 0.4);
     }
 
@@ -268,8 +279,11 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
-    gap: clamp(8px, 1.8vh, 22px);
-    padding: clamp(22px, 6vh, 74px) clamp(20px, 4vw, 78px);
+    // Every one of these ceilings is reached on a 2K screen — 6vh is 81 against
+    // 74, 4vw is 102 against 78 — so in px the room around the words is the one
+    // thing that would not grow with the block it is measured into.
+    gap: clamp(0.5rem, 1.8vh, 1.375rem);
+    padding: clamp(1.375rem, 6vh, 4.625rem) clamp(1.25rem, 4vw, 4.875rem);
 
     .OfferWall__block.is-end & {
         align-items: flex-end;

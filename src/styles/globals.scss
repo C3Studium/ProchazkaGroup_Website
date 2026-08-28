@@ -5,6 +5,41 @@
 @use "./generated-styles";
 // STYLE-SYSTEM ENTRY END
 @use "./system/colors";
+@use "./system/shortcuts" as sh;
+
+// ── screens above 1920 ─────────────────────────────────────────────────
+//
+// The site is written in clamp(): a floor in rem, a middle in vw, a ceiling in
+// rem. Between a phone and a 1920 laptop the vw term is what is live and the
+// page grows with the screen, which is the whole point of writing it that way.
+// Past about 1920 every one of those clamps reaches its ceiling within a few
+// dozen pixels and the page simply stops — a 2560 monitor gets a 1920 design
+// with three hundred pixels of margin either side. Measured on the homepage at
+// 2552: not one heading, label or line of body copy was a pixel bigger than at
+// 1920.
+//
+// The ceilings are rem, and rem is 16px at every width because nothing ever set
+// a root size. So there is one number that moves all of them at once, and this
+// is it. 0.8333vw is 16px at 1920, which is what makes 1921 the stop: the ramp
+// starts exactly where it already was and there is no jump across the boundary.
+// At 2552 it is 21.3px, and 21.3/16 is 1.33 — the same 1.33 as 2552/1920. So
+// every ceiling lifts by exactly as much as the screen did, the vw term stays
+// live the whole way, and 2K gets the design it would have had if it had been
+// drawn at 2K.
+//
+// It stops at 21.5px, which is a little past 2560. Beyond that is a 4K panel or
+// an ultrawide, and neither was asked for here or looked at; holding is the
+// honest thing to do at a width nobody has checked.
+//
+// Not the Studio. That is a dense admin tool laid out in px against a fixed
+// scale, it was deliberately left out of this pass, and rem is root-relative —
+// there is no way to grow the site's root without growing the Studio's too. So
+// the attribute _app.js puts on the document is what keeps it out.
+:root:not([data-studio]) {
+  @include sh.h(xxl) {
+    font-size: clamp(16px, 0.8333vw, 21.5px);
+  }
+}
 
 @import url("../../public/Fonts/synonym/css/synonym.css");
 @import url("../../public/Fonts/switzer/css/switzer.css");

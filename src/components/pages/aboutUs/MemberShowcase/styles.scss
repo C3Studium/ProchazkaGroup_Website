@@ -249,7 +249,13 @@
         left: 0;
         display: grid;
         place-items: center;
-        width: clamp(74px, 6.6vw, 104px);
+        // The bounds are rem rather than px so the ceiling moves with the root
+        // above 1920. 6.6vw passes 104px at around 1576, so on any wide screen
+        // this clamp is already sitting on its ceiling — left in px the disc
+        // would be the one object in the section a 2K screen does not make
+        // bigger, while the card it rests on, the room it flies through and the
+        // seats it lands in are all measured in vw and vh. Identical below 1921.
+        width: clamp(4.625rem, 6.6vw, 6.5rem);
         aspect-ratio: 1;
         // A shade heavier than a hairline: for most of the journey the disc is
         // laid over far enough to project as a sliver, and at a hairline's
@@ -410,6 +416,49 @@
         .MemberShow__line--edge,
         .MemberShow__scrim {
             display: none;
+        }
+    }
+
+    // ---- the phone, held upright: the squeeze is called off ----
+    //
+    // The viewport carries an inline `clip-path` from index.jsx — the squeeze,
+    // closing from both edges onto the seam Colleagues' two halves meet on, so
+    // that the strip of showcase still showing shrinks to nothing at the moment
+    // they touch. It is one event seen from two sides, and it only means
+    // anything while this section is pinned and that one is arriving over it.
+    //
+    // Stacked, none of that exists. There is no pin, no seam and no arrival —
+    // but the clip was still running, on this section's own scroll, and it
+    // closes over the whole of it. Measured at 390×844 before this rule: the
+    // section's box is 869→3873, the clip begins at 2837 (SQUEEZE_FROM, 0.911
+    // of 2160px of measurable scroll) and is shut by about 2980, and
+    // `elementFromPoint` at the middle of the screen returns nothing at all
+    // from there to the end of the box. That is 893px — more than a whole
+    // screen — of gradient with the third panel cut away behind it, and it is
+    // the empty background the reader was crossing before "Naši kolegové"
+    // arrived.
+    //
+    // Nothing else was at fault, and it is worth writing down because the
+    // arrangement at the top of this file invites the opposite conclusion: the
+    // 665vh/-410vh gearing is already off on a phone (see the block above), the
+    // three pairs tile the box exactly — 869, 1862, 2881, each about 1000 tall,
+    // 3004 in all — and Colleagues starts at 3874, one pixel after this section
+    // ends. There was never a gap between the two sections. There was a screen
+    // of section with its contents clipped away.
+    //
+    // `!important` because it is overriding an inline style, and because it has
+    // to hold on the first frame as well: `stacked` is answered from an effect,
+    // so for one render the clip is written by the desktop branch.
+    //
+    // Portrait AND under 600px, which is the bound the rest of this phone pass
+    // settled on. A phone on its side and a tablet in portrait are stacked too
+    // and have the same fault; they are deliberately left as they are, because
+    // this pass may not change what anything but a phone renders.
+    @include v(xs) {
+        @include below-px(600) {
+            .MemberShow__viewport {
+                clip-path: none !important;
+            }
         }
     }
 }

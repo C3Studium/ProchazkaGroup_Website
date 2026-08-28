@@ -4,21 +4,40 @@
     position: absolute;
     // Almost on the word: enough to clear the letterforms, not enough to read
     // as a box drawn around them.
-    inset: -3px -5px;
+    //
+    // In rem, which is the same 3px and 5px it has always been at every width up
+    // to 1920 and grows past it (see globals.scss). The clearance is measured
+    // against the word, and the word is set in rem: held at three and five
+    // pixels while the type got a third bigger, the marks would end up sitting
+    // on the letterforms they were spaced off.
+    inset: -0.1875rem -0.3125rem;
     pointer-events: none;
 }
 
 // Same shape and weight as the ones on the buttons, so the page has one
 // vocabulary for "this can be used" rather than two.
+//
+// The arms follow the frame for the same reason it moved: this is the drawing,
+// and five pixels of tick around a 2560 monitor's type is a frame you have to
+// look for. The 1px borders below do not follow — that is the page's hairline
+// and it is one pixel everywhere, at every width.
 .cornerMarks__mark {
     position: absolute;
-    width: 5px;
-    height: 5px;
+    width: 0.3125rem;
+    height: 0.3125rem;
     border: 0 solid var(--wText);
     opacity: 0;
     // Waiting outside, where they came from and where they go back to. The
     // cursor's own marks close inwards the same way; a set that opened outwards
     // instead would read as a different gesture in the same place.
+    //
+    // The four offsets below are in rem rather than px, unlike the hover travel
+    // on CornerButton, and the difference is what the number is. There the arms
+    // are already on screen and three pixels is a nudge off a resting position,
+    // which is motion and does not care how many pixels the panel has. Here the
+    // distance is exactly one arm — the marks wait one mark-width outside the
+    // corner they will land on — so it is geometry, and it has to keep step with
+    // the arm above or they start their approach from inside themselves.
     transition:
         transform 0.36s cubic-bezier(0.22, 1, 0.36, 1),
         opacity 0.24s ease;
@@ -29,7 +48,7 @@
     left: 0;
     border-top-width: 1px;
     border-left-width: 1px;
-    transform: translate(-5px, -5px);
+    transform: translate(-0.3125rem, -0.3125rem);
 }
 
 .cornerMarks__mark--tr {
@@ -37,7 +56,7 @@
     right: 0;
     border-top-width: 1px;
     border-right-width: 1px;
-    transform: translate(5px, -5px);
+    transform: translate(0.3125rem, -0.3125rem);
     transition-delay: 0.03s;
 }
 
@@ -46,7 +65,7 @@
     left: 0;
     border-bottom-width: 1px;
     border-left-width: 1px;
-    transform: translate(-5px, 5px);
+    transform: translate(-0.3125rem, 0.3125rem);
     transition-delay: 0.06s;
 }
 
@@ -55,7 +74,7 @@
     right: 0;
     border-bottom-width: 1px;
     border-right-width: 1px;
-    transform: translate(5px, 5px);
+    transform: translate(0.3125rem, 0.3125rem);
     transition-delay: 0.09s;
 }
 

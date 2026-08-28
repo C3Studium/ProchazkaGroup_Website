@@ -85,6 +85,12 @@ export const CONTACT_LINES = Object.freeze({
     consentMore: 8,
     submit: 9,
     orDirectly: 10,
+    // Appended, not slotted in where it reads on the sheet — which is between
+    // the preferred hour and the consent line. These are positions in an array
+    // an editor has already filled in: giving the message the index it looks
+    // like it deserves would have moved the four labels after it down by one
+    // and left the consent line printed on the submit button.
+    message: 11,
 })
 
 /**

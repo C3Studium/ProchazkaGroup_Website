@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import Arrow from "@/components/common/ui/Arrow";
 import { toast } from "sonner";
@@ -21,12 +22,19 @@ export default function AddReview({ consultants = [] }) {
     // Calm, not killed: the sheet still fades, it just stops travelling.
     const calm = useReducedMotion();
     const [busy, setBusy] = useState(false);
+    // The portal's gate. `document.body` does not exist while this renders on
+    // the server, so the overlay is mounted on the client's first commit and
+    // never server-rendered — the same shape ReviewWall uses for the review
+    // sheet a few lines down the page.
+    const [mounted, setMounted] = useState(false);
     const [form, setForm] = useState({
         customerName: "",
         consultantName: "",
         message: "",
         website: "",
     });
+
+    useEffect(() => setMounted(true), []);
 
     useEffect(() => {
         if (!open) return;
@@ -83,6 +91,24 @@ export default function AddReview({ consultants = [] }) {
                 </button>
             </div>
 
+            {/* Out of the wall and onto the document.
+
+                Both layers below are `position: fixed`, and fixed means "the
+                viewport" only while no ancestor is transformed. `<main>` IS
+                transformed — the preloader and PageVeil scale it and hand it
+                `will-change: transform` for the length of a run — and an
+                ancestor with either of those becomes the containing block for
+                every fixed descendant. Measured on /recenze at 1920×1080,
+                scrolled 1200px down, with a transform on `<main>`: the sheet
+                came out at y=-1200 with the card at y=-1007, and the backdrop
+                sized itself to the whole document (1920×3270) instead of the
+                screen. The sheet is laid out against the page rather than the
+                window, so it lands wherever the reader is not.
+
+                A portal takes it out of that ancestry altogether, which is what
+                ReviewSheet on this same page and the ContactModal already do.
+                Nothing about the sheet's own CSS changes. */}
+            {mounted && createPortal(
             <AnimatePresence>
                 {open && (
                     <>
@@ -140,8 +166,19 @@ export default function AddReview({ consultants = [] }) {
 
                             {/* The scroll lives here rather than on the card,
                                 so the head stays put and the page behind
-                                cannot be dragged through it. */}
-                            <div className="AddRev__scroll">
+                                cannot be dragged through it.
+
+                                `data-lenis-prevent` because the page's scroll
+                                is stopped while the sheet is up and a stopped
+                                lenis still takes the wheel and the touch drag
+                                off the window without handing this element
+                                anything. It only matters where the card is
+                                taller than the window and clamps — a short
+                                laptop, a phone in landscape — but that is
+                                exactly where the send button is the part below
+                                the fold. Same attribute, same reason, as
+                                ContactModal and RevSheet. */}
+                            <div className="AddRev__scroll" data-lenis-prevent>
                                 <label className="AddRev__field">
                                     <span>Vaše jméno <em>*</em></span>
                                     <input type="text" value={form.customerName} onChange={set("customerName")} data-cursor="frame" />
@@ -196,7 +233,9 @@ export default function AddReview({ consultants = [] }) {
                         </motion.form>
                     </>
                 )}
-            </AnimatePresence>
+            </AnimatePresence>,
+            document.body,
+            )}
         </>
     );
 }

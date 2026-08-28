@@ -23,6 +23,16 @@ import { usePathname } from "next/navigation";
 export default function Menu({ menu, setMenu, onContact }) {
     const pathname = usePathname();
 
+    // The word on the button and the name it answers to, stated once so the two
+    // cannot drift. The name has to be stated at all because ScrollToText draws
+    // the word out of one column per letter and every column carries the whole
+    // forty-three-letter alphabet behind an overflow — visible to the eye as
+    // four letters, and to the accessibility tree as "A Á B C Č D Ď E…". Left to
+    // its contents this button announces itself as the alphabet at every width;
+    // measured. Below 380 across there is no visible word at all (see
+    // styles.scss) and this is the only name it has.
+    const word = menu ? "Close" : "Menu";
+
     return (
         <div className="navbar__container">
             <ButtonLink textRotate="Procházka Group" href="/" />
@@ -34,6 +44,7 @@ export default function Menu({ menu, setMenu, onContact }) {
                 data-marks
                 aria-expanded={menu}
                 aria-controls="navPanel"
+                aria-label={word}
                 onClick={() => setMenu(!menu)}
             >
                 <CornerMarks />
@@ -45,7 +56,7 @@ export default function Menu({ menu, setMenu, onContact }) {
 
                 <div className="navbar__text">
                     <div className="navbar__text__content">
-                        <ScrollToText text={menu ? "Close" : "Menu"} duration={0.5} />
+                        <ScrollToText text={word} duration={0.5} />
                     </div>
                 </div>
             </button>

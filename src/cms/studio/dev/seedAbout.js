@@ -307,6 +307,11 @@ export const seedAboutCopy = [
                 line('Poslat zprávu'),
                 // 10  the line over her own address and telephone
                 line('Nebo rovnou'),
+                // 11  the message box, which reads on the sheet between the
+                //     preferred hour and the consent line and sits here at the
+                //     end of the list — these are stored positions and the ten
+                //     above them were filled in before it existed.
+                line('Zpráva'),
             ],
         },
     },

@@ -16,6 +16,15 @@ $h: (
   xl:  1500px,
   huge: 1730px,
 
+  // Above a 1920-wide screen: a 2560×1440 monitor, which lands at about
+  // 2552×1351 once the browser has taken its chrome. Not another layout — the
+  // same one, bigger. Everything below this stop was written against a screen
+  // 1920 across and simply stopped growing there, because the ceiling of every
+  // clamp() on the site is a rem and a rem was 16px at every width. The ramp in
+  // globals.scss is what moves those ceilings; this is the stop it moves them
+  // at. 1921 rather than 1920 so a 1920 screen keeps exactly what it had.
+  xxl: 1921px,
+
   // Phone, landscape. Smallest target 568×320, largest 932×430.
   phs: 480px,
   phl: 800px,

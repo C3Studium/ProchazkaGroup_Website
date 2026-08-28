@@ -5,7 +5,7 @@ import { useMemo, useRef, useState } from "react";
 import { motion, useTransform } from "framer-motion";
 import { ENTERS, PHOTO, RISE, group } from "@/components/common/ui/entrance";
 import { toast } from "sonner";
-import { RiMapPinLine, RiThumbUpLine, RiChat3Line, RiArrowDownSLine } from "@remixicon/react";
+import { RiMapPinLine, RiThumbUpLine, RiChat3Line, RiArrowDownSLine, RiPhoneLine } from "@remixicon/react";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { EXTERNAL_CLASS } from "@/components/common/ui/externalLink";
 import { editable, editableDoc, editableLink } from "@/cms/edit";
@@ -250,6 +250,42 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                 </motion.div>
             </motion.div>
 
+            {/* The same choice as the roster above, as the one control a phone
+                renders as a proper picker — the OS wheel, over ten names, in
+                one tap instead of a screen of scrolling. It writes the same
+                index, so the photograph, the name, the counts and the number
+                answer a change here exactly as they answer a tap on a row.
+
+                Both controls are in the markup at every width and the
+                stylesheet decides which is on. Nothing about that is worked
+                out at runtime, so the section that ships is the section that
+                renders — no second paint, no flash of the wrong one — and a
+                `display: none` control is out of the accessibility tree as
+                well as off the screen, so a reader is never offered the roster
+                twice.
+
+                A native <select> rather than a listbox of our own: it is the
+                only control that hands a phone its own picker, and the roles,
+                the focus trapping and the type-ahead a hand-rolled one owes
+                are all things this gets from the platform for nothing. */}
+            <motion.label className="ChooseAdvisor__pick" variants={RISE}>
+                <span className="ChooseAdvisor__pick__label">Zvolit poradce</span>
+                <span className="ChooseAdvisor__pick__field">
+                    <select
+                        className="ChooseAdvisor__pick__select"
+                        value={selected}
+                        onChange={(event) => setSelected(Number(event.target.value))}
+                    >
+                        {advisors.map((advisor, index) => (
+                            <option key={advisor.slug || index} value={index}>
+                                {advisor.name}
+                            </option>
+                        ))}
+                    </select>
+                    <RiArrowDownSLine className="ChooseAdvisor__pick__chevron" size={20} aria-hidden="true" />
+                </span>
+            </motion.label>
+
             {/* Middle column — contact form (the conversion action, center stage) */}
             <motion.div className="ChooseAdvisor__formCol" variants={MIDDLE}>
                 <motion.p {...editable(docId, "items.4.label", "text")} className="ChooseAdvisor__claim" variants={RISE}>
@@ -358,14 +394,45 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                             alt={active.portrait?.alt || active.name || ""}
                             fill={true}
                             quality={90}
-                            // matches styles.scss: full column width when the
-                            // section stacks (≤820), 38vw beside the name in
-                            // phone landscape, 26vw in the desktop grid
-                            sizes="(max-width: 820px) 88vw, (max-height: 520px) 38vw, 26vw"
+                            // matches styles.scss, in the order the rules
+                            // themselves stack: half a card beside the call on
+                            // a phone held upright (≤600 portrait), full column
+                            // width when the section merely stacks (≤820), 38vw
+                            // beside the name in phone landscape, 26vw in the
+                            // desktop grid. On the phone it is a square thumb of
+                            // `min(150px, 40vw)`: 40vw is the honest figure at
+                            // 320 and slightly generous above it, where the 150
+                            // ceiling binds — and a picture asked for slightly
+                            // large is a few kilobytes, one asked for small is
+                            // blurred.
+                            sizes="(max-width: 600px) and (orientation: portrait) 40vw, (max-width: 820px) 88vw, (max-height: 520px) 38vw, 26vw"
                             style={{ objectFit: "cover", objectPosition: "top center" }}
                         />
                     </GridDistortion>
                 </motion.div>
+                {/* Phone only: the number as a target beside the face rather
+                    than as a line of type under it. A second element and not
+                    the link at the foot of this column restyled, because what
+                    changes is the CONTENT — a mark where the digits were — and
+                    no rule can swap a text node for an SVG.
+
+                    It dials what that link dials, off the same fallback, so
+                    the two cannot point at different numbers. The words it
+                    does not print it says instead: with no text inside it,
+                    `aria-label` is the only name it has, and it states the
+                    number so a reader hears what it is about to call. */}
+                <motion.a
+                    href={telHref(active.phone || OFFICE_PHONE)}
+                    className={`cornerButton ${EXTERNAL_CLASS} ChooseAdvisor__iconCall`}
+                    aria-label={`Zavolat na ${active.phone || OFFICE_PHONE}`}
+                    variants={RISE}
+                >
+                    <span className="corner corner--tl" />
+                    <span className="corner corner--tr" />
+                    <span className="corner corner--bl" />
+                    <span className="corner corner--br" />
+                    <RiPhoneLine size={22} aria-hidden="true" />
+                </motion.a>
                 <motion.h3 className="ChooseAdvisor__name" variants={RISE}>
                     {active.firstName}<br />{active.lastName}
                     <span {...editable(docId, "items.6.label", "text")} className="city">{text.city}</span>

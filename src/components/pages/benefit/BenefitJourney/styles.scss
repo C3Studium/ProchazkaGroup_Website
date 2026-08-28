@@ -50,7 +50,13 @@
 .BenefitJourney__rule {
     position: relative;
     display: block;
-    width: min(34vw, 520px);
+    // The cap in rem rather than px, so it goes on being a share of the screen
+    // above 1920. 32.5rem is 520px at every width this section was drawn for
+    // and grows with the root past 1921. It was the one measure in here that
+    // froze — the head is vw and ch throughout — so on a 2552 screen a rule
+    // held at 520px read as a stub under a title half again as wide as the one
+    // it was drawn against.
+    width: min(34vw, 32.5rem);
     height: 1px;
     margin: 3vh 0 2.4vh;
     transform-origin: left center;

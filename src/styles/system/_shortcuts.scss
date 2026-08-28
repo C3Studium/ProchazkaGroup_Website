@@ -31,6 +31,12 @@
 @mixin lg-h   { @include h(lg)   { @content; } }
 @mixin xl-h   { @include h(xl)   { @content; } }
 @mixin huge-h { @include h(huge) { @content; } }
+// Above 1920 across — see _breakpoints.scss. Most things need nothing here: the
+// ramp in globals.scss grows every rem on the page, so type and any measure
+// written in rem already scales. This stop is for what the ramp cannot reach —
+// a length in px, a grid that should take another column, a max-width that
+// leaves half the screen empty once there is more of it.
+@mixin xxl-h  { @include h(xxl)  { @content; } }
 
 // Device-qualified landscape stops (height-constrained; see _breakpoints.scss)
 @mixin phs-h  { @include h(phs)  { @content; } }  // phone landscape, from 568×320

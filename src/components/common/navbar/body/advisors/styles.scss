@@ -19,14 +19,26 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     z-index: 2;
     display: flex;
     min-height: 0;
-    // Room for the lead to grow into without leaning on the panel's frame.
-    padding: 14px;
+    // Room for the lead to grow into without leaning on the panel's frame. In
+    // rem so the clearance keeps step with the panel around it — the roster's
+    // box grows past 1920 and a fixed 14px would read as a wall pushed against
+    // the frame rather than set inside it.
+    padding: 0.875rem;
     gap: 0;
 
     @include below-px(900) {
         flex-direction: column;
         overflow-y: auto;
     }
+}
+
+// The wall's own wrapper, and on every screen but a phone in portrait it is not
+// there at all. `display: contents` generates no box, so the lead and the rows
+// stay the flex children of .navAdv they have always been and the composition
+// above is untouched. On a phone it becomes the box the tiles are gridded into
+// — see the block near the bottom of this file.
+.navAdv__wall {
+    display: contents;
 }
 
 .navAdv__lead {
@@ -194,9 +206,11 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     .is-open & { color: var(--bgPrimary, #BBB788); }
 }
 
+// Its twin in the bento — the length is a size and follows the type, the 1px is
+// the page's hairline and does not.
 .navAdv__tick {
     display: block;
-    width: 14px;
+    width: 0.875rem;
     height: 1px;
     background-color: currentColor;
     transform: scaleX(0.3);
@@ -257,6 +271,426 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
         opacity: 1;
 
         > span { clip-path: inset(0 0 0 0); }
+    }
+}
+
+// ── the phone, held upright ──
+//
+// The wall does not survive a phone, and the version this replaces did not
+// pretend otherwise so much as give up quietly: every block took 42% of a
+// wrapped row and 220px of height, which is 1389px of roster inside a panel 466
+// tall at 320. Five sixths of it was under the fold, and the only way to read a
+// name was to scroll past the face — a roster you cannot see is not a roster.
+//
+// So here it is a contact sheet with one advisor drawn out of it. The tiles are
+// miniatures, the face and its number and nothing else, and the one that is
+// chosen resolves underneath them at a size worth looking at, with the name, the
+// motto and the telephone number. See index.jsx for why underneath.
+//
+// Portrait AND under 600px, both bounds meant: `phs-h` at the foot of this file
+// owns the same phone on its side and would collide with every rule in here,
+// and portrait on its own is also every tablet ever made.
+//
+// 600 rather than the 750 this was first written to, because the roster does not
+// live in a box of its own — it lives in the navigation panel, and the panel
+// switches to its phone layout at 600 (see navbar/body/styles.scss). Left at 750
+// the two disagreed across a 150px band, where a small tablet in portrait got
+// this grid of thumbnails inside a panel still laid out as a tablet. 600 is also
+// the site's own `$v md` stop, and it sits in the empty gap between the widest
+// phone we target, 430, and the narrowest tablet in portrait, 768.
+@include v(xs) {
+    @include below-px(600) {
+        .navAdv {
+            flex-direction: column;
+            // Edge to edge. The panel is 92vw of the screen and that is already
+            // the margin; 14px more inside it takes 28 off a 294px row, which at
+            // this size is a whole tile.
+            padding: 0;
+            // The sheet does its own scrolling if it ever needs to. Here this is
+            // the sideways guard — nothing may run off the frame at 320.
+            overflow: hidden;
+
+            // ── how tall the roster is ──
+            //
+            // The panel hosting this takes the height it is given, and on a
+            // phone it is now given a tall one. But it can also be sized by what
+            // is in it, and then the roster IS the height of the modal and
+            // asking the panel to be taller does nothing on its own — there has
+            // to be something in it wanting the room. This is that floor, for
+            // that case. Ten faces and one record want about 320px of height at
+            // 320 and about 425 at 430, which left the modal a card floating in
+            // the middle of a screen.
+            //
+            // 56 and not more, and the number comes out of the smallest phone
+            // rather than out of taste: at 320×568 the panel tops out at 82vh
+            // (466) and its rail takes 104 of that, so about 360 is everything
+            // the roster can have before the modal starts scrolling — and 56svh
+            // is 318, which leaves the rail room to grow by a third and still
+            // fit. Anything above this the panel offers is welcome; see the
+            // record's own block for where it goes.
+            min-height: 56svh;
+        }
+
+        // Five across, and the count is the whole geometry.
+        //
+        // Ten advisors, so five is the only count in a usable range that leaves
+        // no half-empty last row: four ends on a row of two, three on a row of
+        // one. It holds at every width rather than reflowing between them — a
+        // tile is 59×79 at 320, 72×96 at 390 and 79×106 at 430, so the smallest
+        // of them is a third clear of the 44px a finger needs and the whole
+        // roster is two rows, 158px at 320. Which is what leaves room for the
+        // panel underneath to be worth arriving at.
+        .navAdv__wall {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            // Only what the tiles need, and it is what gives way first if a
+            // longer roster ever arrives from the CMS. The panel below must
+            // never be the thing that gets pushed off the bottom.
+            flex: 0 1 auto;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            // A tile draws its own right-hand hairline, and the last column's
+            // would land exactly on the panel's own right rule — two hairlines
+            // in the same pixel read as one bright edge against three ordinary
+            // ones. One pixel wider than the box it sits in, and .navAdv above
+            // clips it away.
+            margin-right: -1px;
+        }
+
+        // The three boxes the wall is built out of stop being boxes, so their
+        // cells arrive in the grid above as one run of ten — the lead first,
+        // then the rows in order. The flex-grow index.jsx animates on them comes
+        // along and is simply inert: a grid item has no flex line to take a
+        // share of, which is the same reason the cells' own shares stop
+        // mattering here.
+        .navAdv__lead,
+        .navAdv__rest,
+        .navAdv__row {
+            display: contents;
+        }
+
+        .navAdv__cell {
+            // 3:4 because a portrait is, and because a row of them has to read
+            // as a sheet of faces rather than as a strip of them.
+            aspect-ratio: 3 / 4;
+            // Undoes the 220px the wrapped-pairs layout needed. The tile's
+            // height comes from its width now and from nothing else.
+            min-height: 0;
+        }
+
+        .navAdv__cell__link {
+            // It is a <button> here — see index.jsx — so it arrives carrying a
+            // browser's own idea of what a button looks like.
+            appearance: none;
+            border: 0;
+            background: none;
+            font: inherit;
+            text-align: left;
+            cursor: pointer;
+            // 0.9rem by 1rem is most of a 59px tile.
+            padding: 0.35rem 0.4rem;
+        }
+
+        // Belt and braces. index.jsx does not render either of these on a phone,
+        // but the media query and the matchMedia read can disagree for a frame
+        // across a rotation, and a stylesheet that only works when the markup
+        // agrees with it is a stylesheet with a bug waiting in it.
+        .navAdv__cell .navAdv__shot,
+        .navAdv__cell .navAdv__foot { display: none; }
+
+        // The tile IS the miniature now, so the face comes up out of the 0.2 it
+        // rests at on a wall where a second copy unfolds over it. Still
+        // desaturated, for the reason it always was — ten photographs at ten
+        // exposures is not a sheet — and the chosen one comes to full colour,
+        // which is the whole of how a tile says it is the one showing below.
+        .navAdv__ghost {
+            opacity: 0.68;
+            filter: grayscale(1) contrast(0.95);
+
+            .is-open & {
+                opacity: 1;
+                filter: none;
+            }
+        }
+
+        // Only two digits lie on the picture now, and only along its bottom
+        // edge, so the scrim comes off the face and stays where they are.
+        .navAdv__scrim {
+            background-image: linear-gradient(
+                to top,
+                rgba(3, 13, 19, 0.9) 0%,
+                rgba(3, 13, 19, 0.34) 46%,
+                rgba(3, 13, 19, 0) 78%
+            );
+            opacity: 0.5;
+
+            .is-open & { opacity: 0.32; }
+        }
+
+        // Down at the bottom of the tile where the scrim is, and without its
+        // rule: 14px of tick beside two digits is half the width of a tile.
+        .navAdv__ord {
+            margin: auto 0 0;
+            gap: 0;
+            font-size: 0.62rem;
+            color: rgba(255, 255, 255, 0.55);
+
+            .navAdv__tick { display: none; }
+            .is-open & { color: var(--bgPrimary, #BBB788); }
+        }
+
+        // ── the one that is chosen ──
+        .navAdv__now {
+            display: flex;
+            flex-direction: column;
+            // Everything the sheet did not take, and never less than its own
+            // height: the sheet gives way first, because it is the part that can
+            // scroll and this is the part that has to survive.
+            //
+            // A picture cannot spend all of it — past about 210px tall a 3:4
+            // portrait is wider than the name beside it — so on a tall phone
+            // there is height left over whatever this panel does with it. Left
+            // to `space-between` up in .navAdv it piled into one 183px gap
+            // between the faces and the name, which reads as a hole rather than
+            // as a panel. Centred here it is split above and below the record,
+            // on this box's own ground, and the same emptiness reads as room.
+            flex: 1 0 auto;
+            justify-content: center;
+            min-height: 0;
+            // Faint, and it is what turns that room into structure: the bottom
+            // of the sheet stops being where the tiles ran out and becomes where
+            // this begins. No rule along the top to say so — the last row of
+            // tiles already draws one along its own bottom, and a second in the
+            // same pixel reads heavier than every other hairline in the panel.
+            background-color: rgba(255, 255, 255, 0.028);
+            padding: 0.85rem 0.9rem 1rem;
+            // No rule along the top: the last row of tiles already draws one
+            // along its own bottom, and a second in the same pixel would read
+            // heavier than every other hairline in the panel.
+        }
+
+        .navAdv__now__in {
+            display: flex;
+            // Along the bottom, so the number and the foot of the picture make
+            // one line. It is also the lowest the number can be put without
+            // taking room off anything, and low is the whole argument for this
+            // panel being down here.
+            align-items: flex-end;
+            gap: 0.85rem;
+        }
+
+        // The same file the tile overhead is showing — 384 wide through the
+        // optimiser, which is three times a 124px box and one request serving
+        // both. A background and not an <Image> so that on every screen where
+        // this panel is not rendered there is nothing to fetch.
+        .navAdv__now__shot {
+            flex: none;
+            // Sized from its height and not its width, which is the opposite of
+            // the tiles and is the point: the room a taller modal has is
+            // vertical — it is everything the sheet of faces did not take — so
+            // the enlargement has to be able to spend it. The width follows out
+            // of the ratio. Floored at 112 for a phone too short to spare any,
+            // and capped at 224 — which is the tallest 3:4 portrait that still
+            // fits the width limit below on the widest phone we target, so the
+            // two caps meet there instead of one cropping what the other
+            // allowed.
+            height: clamp(112px, 24svh, 224px);
+            width: auto;
+            // 46 and not 42: at 390 the cap was landing before the ratio did,
+            // so the portrait came out 139 wide against a height of 203 — a
+            // crop, not a 3:4 picture. At 46% the width the ratio asks for fits
+            // at all three widths and the shape survives.
+            max-width: 46%;
+            aspect-ratio: 3 / 4;
+            // index.jsx hands over two sources and this picks the small one; the
+            // block at the foot of this file picks the other. Naming it here
+            // rather than writing the url inline is what keeps the file the other
+            // layout wants from being fetched on a phone that never shows it.
+            background-image: var(--shot);
+            background-position: center 20%;
+            background-size: cover;
+            // It came out of a wall of rectangles with hairlines between them.
+            box-shadow: inset 0 0 0 1px $rule;
+        }
+
+        .navAdv__now__text {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .navAdv__now__ord {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            @include font(XSBody);
+            letter-spacing: 0.14em;
+            font-variant-numeric: tabular-nums;
+            color: var(--bgPrimary, #BBB788);
+
+            // Out to its full length. Up in the wall that is what the tick does
+            // for the block being reached for, and this is that block.
+            .navAdv__tick { transform: none; }
+        }
+
+        .navAdv__now__name {
+            margin-top: 0.15rem;
+            font-family: "Poppins", "Helvetica", system-ui, sans-serif;
+            font-weight: 200;
+            letter-spacing: 0.02em;
+            line-height: 1.12;
+            // Held down at 320, where a two-line name is the difference between
+            // a panel that fits and one that scrolls.
+            font-size: clamp(1.05rem, 5vw, 1.35rem);
+            color: var(--wText);
+        }
+
+        .navAdv__now__moto {
+            margin-top: 0.3rem;
+            @include font(XSBody);
+            line-height: 1.45;
+            color: rgba(255, 255, 255, 0.72);
+            // Two lines and then it stops. These come from the CMS, where
+            // nobody is counting characters, and the third line is the one that
+            // pushes the number off a 568px screen.
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        // The one thing in the whole component anybody taps on purpose, so it is
+        // the one thing drawn as a target rather than as a line of type: 44px
+        // tall, its own frame, at the bottom of the panel at the bottom of the
+        // sheet.
+        .navAdv__now__tel {
+            display: inline-flex;
+            align-self: flex-start;
+            align-items: center;
+            gap: 0.45rem;
+            margin-top: 0.55rem;
+            min-height: 44px;
+            padding: 0 0.9rem;
+            @include font(XSBody);
+            letter-spacing: 0.06em;
+            text-decoration: none;
+            color: var(--bgPrimary, #BBB788);
+            border: 1px solid rgba(187, 183, 136, 0.4);
+
+            &:focus-visible {
+                outline: 1px solid var(--bgPrimary, #BBB788);
+                outline-offset: 2px;
+            }
+        }
+
+        // ── a tall phone: the record stops having a picture and becomes one ──
+        //
+        // The panel is deliberately tall here, and a card cannot spend that. A
+        // 3:4 portrait beside a name is bounded by the WIDTH it has to share —
+        // at 430 it tops out around 224px tall against a region 503 deep — so
+        // every version of "make the card bigger" left the same hole, once at
+        // 125px above the record and 130 below it. Growing the tiles instead is
+        // no answer either: five 3:4 columns are decided by the width, and ten
+        // people is two rows of them whatever the height.
+        //
+        // So the picture takes the panel. This is not a new idea — it is what
+        // the wall upstairs already does with the block being reached for, which
+        // is a portrait at full strength with the name, the motto and the number
+        // over a scrim along its bottom. Here that block is the whole width of
+        // the sheet and everything the tiles left, so the enlargement finally
+        // reads as one: 396 by 503 at 430, against 168 by 224 before.
+        //
+        // On HEIGHT and not on width, because height is what the problem is made
+        // of. 700 keeps 320x568 exactly as it was — 200px of region there is a
+        // card and nothing else — and catches the two sizes that hollowed, 844
+        // and 932. A 375x667 phone stays a card too, which is right: its region
+        // is barely taller than the card is.
+        @media (min-height: 700px) {
+            .navAdv__now {
+                // The picture is the ground now, so the faint one this had for
+                // marking the region out of the panel has nothing left to do.
+                padding: 0;
+                background-color: transparent;
+            }
+
+            .navAdv__now__in {
+                position: relative;
+                // Everything the sheet did not take, which is the whole point.
+                flex: 1 1 auto;
+                min-height: 0;
+                // The record sits on the floor of the picture.
+                align-items: flex-end;
+                overflow: hidden;
+            }
+
+            .navAdv__now__shot {
+                position: absolute;
+                inset: 0;
+                // Undoes the card's sizing wholesale: the box is the panel now,
+                // and a ratio or a width cap would only fight it.
+                width: auto;
+                height: auto;
+                max-width: none;
+                aspect-ratio: auto;
+                box-shadow: none;
+                // The larger of the two sources — see index.jsx.
+                background-image: var(--shot-lg);
+                // A shade higher than the card's crop: the box is much taller
+                // here, and 20% of it lands under the chin.
+                background-position: center 16%;
+
+                // The name and the number lie on a photograph, and these are
+                // shot against white. Same gradient the wall's own scrim uses,
+                // for the same reason and at the strength that block needs when
+                // it is open rather than at rest.
+                &::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    background-image: linear-gradient(
+                        to top,
+                        rgba(3, 13, 19, 0.95) 0%,
+                        rgba(3, 13, 19, 0.78) 24%,
+                        rgba(3, 13, 19, 0.28) 54%,
+                        rgba(3, 13, 19, 0.04) 100%
+                    );
+                }
+            }
+
+            .navAdv__now__text {
+                position: relative;
+                z-index: 1;
+                width: 100%;
+                padding: 1.15rem 1.15rem 1.25rem;
+            }
+
+            // Room to be the size the panel now is. The wall gives its open
+            // block 1.6rem; this one is the only thing on the screen at its
+            // scale, so it takes a little more.
+            .navAdv__now__name {
+                margin-top: 0.25rem;
+                font-size: clamp(1.5rem, 6.5vw, 1.9rem);
+            }
+
+            // Three lines here. The two-line clamp was the smallest phone's
+            // budget, and this one has the room.
+            .navAdv__now__moto {
+                margin-top: 0.4rem;
+                -webkit-line-clamp: 3;
+                max-width: 34ch;
+            }
+
+            .navAdv__now__tel {
+                margin-top: 0.9rem;
+                min-height: 48px;
+                // The picture behind it is white at the top and dark here, so
+                // the frame needs its own ground to stay a frame.
+                background-color: rgba(3, 13, 19, 0.45);
+                border-color: rgba(187, 183, 136, 0.55);
+            }
+        }
     }
 }
 

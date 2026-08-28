@@ -166,8 +166,16 @@
 
         .AboutHero__mark__icon {
             flex: none;
-            width: 32px;
-            height: 32px;
+            // In rem so it keeps step with the label beside it. That label is a
+            // clamp with a rem ceiling, so above 1920 it grows with the root,
+            // and an icon frozen at 32px would be left as a bullet point next to
+            // a line of type a third larger than it was drawn against. A rem is
+            // 16px at every width up to 1920, so this is the same 32px it was.
+            //
+            // The CSS is what sizes these, not the `size` prop in index.jsx —
+            // width/height here already beat the attribute react-icons writes.
+            width: 2rem;
+            height: 2rem;
             opacity: 0.85;
         }
 

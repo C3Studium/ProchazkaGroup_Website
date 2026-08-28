@@ -3,7 +3,17 @@
 // changed here is only how a card looks.
 .card-swap-container {
     position: relative;
-    perspective: 900px;
+    // The lens distance, and the one number here that is a length. 56.25rem is
+    // the 900px it has always been at every width up to 1920, and past that it
+    // grows with the root (see globals.scss), because it is only ever meaningful
+    // against the deck. The caller hands CardSwap the card size and the spacing
+    // as plain numbers (see HorizontalScroll) and the z offsets are derived from
+    // them, so how hard the deck is foreshortened is the ratio of those to this
+    // — not either one alone. Keep the lens at 900 while the deck is cut larger
+    // for a 2560 monitor and the same three cards come back visibly more
+    // distorted than they were at 1920, which is precisely what this pass exists
+    // to avoid. The two have to move together; this is this file's half.
+    perspective: 56.25rem;
     overflow: visible;
     transform-style: preserve-3d;
 }

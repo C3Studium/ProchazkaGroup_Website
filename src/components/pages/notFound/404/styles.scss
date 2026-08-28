@@ -68,7 +68,14 @@
     align-items: center;
     justify-content: center;
     line-height: 0.82;
-    perspective: 1100px;
+    // 68.75rem is the 1100px it has always been up to 1920. A perspective is a
+    // distance in the same space as the thing it is looking at, and the numeral
+    // is set in rem: above 1920 the figure gets a third larger, and a camera
+    // left standing at 1100px would be a third closer to it — the lean the
+    // springs drive would foreshorten harder at 2K than it does at 1920 for no
+    // reason but the unit. The two travel together, so the drawing is the same
+    // drawing at every size.
+    perspective: 68.75rem;
     pointer-events: none;
 }
 
@@ -101,7 +108,13 @@
     pointer-events: none;
     // The one shadow line, unmistakably BEHIND the face: a step back in z and
     // off on the diagonal, painted under the solid by order as well as depth.
-    transform: translate3d(1.7vw, -2.2vh, -90px);
+    //
+    // The z step is 5.625rem — the 90px it has always been up to 1920 — for the
+    // same reason as the perspective above: the step back and the distance it
+    // is measured against have to be in one unit, or the echo sits at a
+    // different depth on a 2560 monitor than it does at 1920. The diagonal is
+    // already in vw/vh and grows on its own.
+    transform: translate3d(1.7vw, -2.2vh, -5.625rem);
 }
 
 

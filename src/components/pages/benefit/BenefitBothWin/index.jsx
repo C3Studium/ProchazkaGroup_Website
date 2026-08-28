@@ -3,9 +3,11 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { RiPhoneLine } from "@remixicon/react";
 import TextPressure from "@/components/common/ui/TextPressure";
 import { CURTAIN, ENTERS } from "@/components/common/ui/entrance";
 import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
+import { usePhone } from "@/helpers/usePhone";
 
 // 05 — the doubt, and 06 — how to get in. Two movements of one section, built
 // from the grammars this site already speaks rather than from panels:
@@ -164,6 +166,72 @@ const FORK_SPRING = { type: "spring", stiffness: 150, damping: 26, restDelta: 0.
 const FORK_GROW = 1.35;
 const FORK_FLOOR = 0.72;
 
+/** `+420 776 157 476` -> `+420776157476`, which is what a tel: href wants. */
+const telHref = (phone) => `tel:${String(phone || "").replace(/[^\d+]/g, "")}`;
+
+// ── the client's answer, on a phone held upright ──
+//
+// Ten names in a column with the advisor they choose a screen below them is a
+// table of contents with the contents somewhere else: measured at 320×568, rows
+// of 53px make 530 of list inside a branch 1031 tall, so a name and the face it
+// belongs to could never be on the screen at once.
+//
+// So on a phone this branch takes the shape the roster already has twice — in
+// navbar/body/advisors, where it was worked out, and in pages/aboutUs/Colleagues,
+// where it was applied to a page section rather than to a modal. Ten 3:4
+// miniatures five across, held back and desaturated at rest, the chosen one at
+// full colour, and that person's record underneath at a size worth looking at.
+// It is the same ten people; they should not meet three designs for them on one
+// site. See styles.scss for the geometry and for what is deliberately different.
+//
+// The miniature goes through the same optimiser at the same width and quality as
+// the other two, so the URL is identical and a phone that has opened the menu or
+// read /o-nas draws this sheet with nothing to fetch. A portrait that is not a
+// local path is left alone: `/_next/image` refuses a host that is not in
+// `remotePatterns`, and one unoptimised request is a better answer than a tile
+// with no face in it — these come from the CMS, where the path is an editor's.
+const thumb = (src) =>
+    (src && src.startsWith("/") ? `/_next/image?url=${encodeURIComponent(src)}&w=384&q=60` : src);
+
+/**
+ * The number, as the thing to do.
+ *
+ * Off a phone it is what it has always been — the line of type this answer sets
+ * at 4rem, which is a target a mouse has no trouble with. On a phone it is a
+ * button: there is no form in this branch, the whole screen is "choose your
+ * person, then ring them", and the note under it says exactly that. So the call
+ * is not a distraction from a submit here, it is the submit, and it is drawn
+ * with the weight of one.
+ *
+ * No `aria-label`. The roster labels its own telephone "Zavolat: <jméno>"
+ * because there the target is an icon with no words in it; here the button says
+ * "Zavolat" and then reads the number out, and a label would replace both with
+ * less. Who it rings is the <h3> directly above it, inside the same panel.
+ */
+function CallLink({ phone, tel }) {
+    const number = tel || OFFICE_PHONE;
+
+    return (
+        <a
+            className={`BenBothWin__reply__phone${phone ? " BenBothWin__mini__call" : ""}`}
+            href={telHref(number)}
+            data-cursor="frame"
+        >
+            {phone ? (
+                <>
+                    <span className="BenBothWin__mini__call__do">
+                        <RiPhoneLine size={17} aria-hidden="true" />
+                        Zavolat
+                    </span>
+                    <span className="BenBothWin__mini__call__no">{number}</span>
+                </>
+            ) : (
+                number
+            )}
+        </a>
+    );
+}
+
 export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorFormCopy = {} }) {
     // The two cards are a QUESTION now. Answering one replaces them with the
     // thing that actually helps that person: a client gets the phone line and
@@ -179,6 +247,13 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
     // made explicit (and the only way in for touch and keyboard).
     const [pick, setPick] = useState(0);
     const canHover = useMedia(FINE);
+    // Whether the client's answer is drawn as a sheet of faces rather than as a
+    // list of names — see the note above `thumb`. Without `eager`, because this
+    // section is server-rendered: the first client render has to agree with
+    // markup written where there was no viewport to measure. Nothing is lost by
+    // it, either, since the branch it decides is behind a tap on the fork and
+    // the effect has run long before anybody gets there.
+    const phone = usePhone();
     // Which card is being reached for: the hovered one takes room, the other
     // gives exactly that up — the navbar wall two members wide.
     const [reach, setReach] = useState(-1);
@@ -372,6 +447,17 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                     />
                                     {(consultants.length ? consultants : null) ? (
                                         <>
+                                            {/* The same list either way — ten
+                                                options in a listbox — and only
+                                                what an option SHOWS changes. On
+                                                a phone it is a miniature with
+                                                its ordinal on it and the name
+                                                has moved into the record below,
+                                                so the control has to say who it
+                                                is some other way; everywhere
+                                                else the name is the whole of
+                                                what the row is and a label would
+                                                only repeat it. */}
                                             <ul className="BenBothWin__mini__list" role="listbox" aria-label="Váš poradce">
                                                 {consultants.map((c, i) => (
                                                     <li key={c.slug || c.name || i}>
@@ -379,13 +465,38 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                             type="button"
                                                             role="option"
                                                             aria-selected={pick === i}
+                                                            aria-label={phone ? c.name : undefined}
                                                             className={`BenBothWin__mini__row${pick === i ? " is-on" : ""}`}
                                                             onClick={() => setPick(i)}
                                                             onPointerEnter={() => canHover && setPick(i)}
                                                             data-cursor="frame"
                                                         >
-                                                            {c.name}
-                                                            <span className="BenBothWin__mini__sq" aria-hidden="true" />
+                                                            {/* A background and not an
+                                                                <Image>, so it is the very
+                                                                URL the navigation's roster
+                                                                and /o-nas ask for — and so
+                                                                that on every screen where
+                                                                the sheet is not drawn there
+                                                                is nothing to fetch. A hidden
+                                                                <img> would still be ten
+                                                                requests. */}
+                                                            {phone ? (
+                                                                <>
+                                                                    <span
+                                                                        className="BenBothWin__mini__face"
+                                                                        aria-hidden="true"
+                                                                        style={{ backgroundImage: `url(${thumb(c.portrait?.src)})` }}
+                                                                    />
+                                                                    <span className="BenBothWin__mini__ord" aria-hidden="true">
+                                                                        {String(i + 1).padStart(2, "0")}
+                                                                    </span>
+                                                                </>
+                                                            ) : (
+                                                                <>
+                                                                    {c.name}
+                                                                    <span className="BenBothWin__mini__sq" aria-hidden="true" />
+                                                                </>
+                                                            )}
                                                         </button>
                                                     </li>
                                                 ))}
@@ -403,7 +514,16 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                                 || consultants[Math.min(pick, consultants.length - 1)].name
                                                                 || ""}
                                                             fill
-                                                            sizes="(max-width: 900px) 60vw, 22vw"
+                                                            // The phone condition first, and it is
+                                                            // the phone's alone: this box stops
+                                                            // being a thumbnail beside a name there
+                                                            // and becomes the whole record, 84vw of
+                                                            // the screen. The two behind it are
+                                                            // untouched, and a landscape phone —
+                                                            // which is under 900 on width and keeps
+                                                            // the old composition — still reads the
+                                                            // 60vw it always did.
+                                                            sizes="(max-width: 600px) and (orientation: portrait) 86vw, (max-width: 900px) 60vw, 22vw"
                                                             style={{ objectFit: "cover", objectPosition: "top center" }}
                                                         />
                                                     </div>
@@ -412,13 +532,18 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                 <h3 className="BenBothWin__mini__name">
                                                     {consultants[Math.min(pick, consultants.length - 1)]?.name}
                                                 </h3>
-                                                <a
-                                                    className="BenBothWin__reply__phone"
-                                                    href={`tel:${(consultants[Math.min(pick, consultants.length - 1)]?.phone || OFFICE_PHONE).replace(/[^\d+]/g, "")}`}
-                                                    data-cursor="frame"
-                                                >
-                                                    {consultants[Math.min(pick, consultants.length - 1)]?.phone || OFFICE_PHONE}
-                                                </a>
+                                                {/* Source order is the wide screen's: the number
+                                                    reads as the answer to the name and the note
+                                                    closes the panel. On a phone the record lies on
+                                                    the portrait and the button is the floor of it,
+                                                    so the note goes above — done with `order` in
+                                                    the stylesheet rather than with a second
+                                                    subtree, because it is the same four things in
+                                                    a different arrangement. */}
+                                                <CallLink
+                                                    phone={phone}
+                                                    tel={consultants[Math.min(pick, consultants.length - 1)]?.phone}
+                                                />
                                                 <p className="BenBothWin__mini__note">
                                                     Řekněte si o vstup na příští schůzce — nebo
                                                     zavolejte rovnou.
@@ -434,13 +559,11 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                 Řekněte si o vstup na příští schůzce. A jestli
                                                 nechcete čekat:
                                             </p>
-                                            <a
-                                                className="BenBothWin__reply__phone"
-                                                href={`tel:${OFFICE_PHONE.replace(/[^\d+]/g, "")}`}
-                                                data-cursor="frame"
-                                            >
-                                                {OFFICE_PHONE}
-                                            </a>
+                                            {/* The same button, and it has to be: with nobody
+                                                published this IS the answer, so it cannot be the
+                                                one place on a phone where the number goes back to
+                                                being a line of type. */}
+                                            <CallLink phone={phone} tel={OFFICE_PHONE} />
                                             <p className="BenBothWin__reply__hours">Po–Pá, 8–16</p>
                                         </div>
                                     )}

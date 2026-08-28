@@ -53,7 +53,10 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 // stays where it is; this is not hanging off it any more.
 // One radius, used by the box and by the line that stops short of its corners.
 .navPanel {
-    --panel-radius: clamp(14px, 1.4vw, 22px);
+    // The ceiling in rem, so the corner keeps its radius relative to the box it
+    // rounds once the root ramps past 1920 — 22px on a panel half as wide again
+    // is a corner that has quietly become a square one.
+    --panel-radius: clamp(0.875rem, 1.4vw, 1.375rem);
     position: fixed;
     top: 50%;
     left: 50%;
@@ -61,8 +64,17 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     // Both are written inline by index.jsx, which animates between the menu's
     // size and the roster's. These are what a phone gets and the fallback if
     // that inline style is ever absent.
-    width: min(84vw, 1360px);
-    height: min(70vh, 760px);
+    //
+    // The caps are in rem — 85rem and 47.5rem are the same 1360px and 760px at
+    // every width up to 1920, and grow with the root above it. As literal px
+    // they were the wrong half of the min() on a 2560 monitor: the vw term goes
+    // on rising and the cap does not, so the panel stopped at 1360 across a
+    // 2552 screen — a menu that had been seven tenths of the window became half
+    // of it, floating in the middle with three hundred pixels of tinted
+    // photograph either side. The caps are what decides the size here, so they
+    // are what has to move.
+    width: min(84vw, 85rem);
+    height: min(70vh, 47.5rem);
     z-index: 150;
 
     @include below-px(820) {
@@ -298,9 +310,11 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     .is-open & { color: var(--bgPrimary, #BBB788); }
 }
 
+// The tick is a length of hairline, so only its length is a size: the 1px is
+// the page's own rule and stays one pixel at every width.
 .navPanel__tick {
     display: block;
-    width: 14px;
+    width: 0.875rem;
     height: 1px;
     background-color: currentColor;
     transform: scaleX(0.3);
@@ -491,6 +505,116 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 @include reduced-motion {
     .navPanel__rule::after,
     .navPanel__cut::after { opacity: 0.55; }
+}
+
+// ── phone, portrait ──
+//
+// Everything above this point that says `below-px(820)` is shared with a tablet
+// held upright, which matches that stop on width alone and has half a screen
+// more height to spend than a phone does. This is the part that is only ever a
+// phone: portrait, and narrower than the 600px v(md) stop the site already
+// treats as the bottom of tablet territory — which sits in the empty band
+// between the widest phone we target at 430 across and the narrowest tablet at
+// 768. Before the landscape block on purpose, so a phone on its side goes on
+// getting the map written for it.
+//
+// What was wrong at 320×568: the panel wanted 580px of content inside a 466px
+// ceiling, so it became a scrolling box whose whole rail — the clock, the
+// links, the mark — sat below its own fold with nothing to say it was there.
+// And it was short while the screen around it was empty, because a panel
+// centred in the window spends half its clearance UNDER a bar that is fixed at
+// z-index 160 and paints over it: at 320 the top edge came up within three
+// pixels of the wordmark while fifty pixels of veil sat unused along the foot.
+@include v(xs) {
+    @include below-px(600) {
+        // So it hangs under the bar and takes what is actually there, which is
+        // the same move the landscape block below makes and for the same
+        // reason. It is worth about ninety pixels at 390 and a hundred and
+        // thirty at 430 — where the room for the last row of boxes comes from —
+        // and at 320 it is what stops the panel and the wordmark sharing three
+        // pixels of screen.
+        .navPanel {
+            // 5.25rem clears the bar's own 78 with air under it. The height is
+            // STATED rather than left to the content, because the point is to
+            // fill: the frame hands the bento everything left over after the
+            // rail, so the boxes take the screen instead of the veil taking it.
+            // The 4svh that is left at the foot is what keeps this a panel over
+            // the page rather than a second page.
+            //
+            // svh, not vh, and on a phone that is not a detail: `vh` is the
+            // LARGE viewport — the height the page has once the address bar has
+            // scrolled away — so a box sized in vh is taller than the screen
+            // for exactly as long as that bar is up, which is the whole time a
+            // menu is open.
+            //
+            // !important for the same reason the landscape block needs it:
+            // index.jsx animates this inline between the menu's size and the
+            // roster's, and at this width there is nothing between the two
+            // worth animating. It is also what makes the roster this tall.
+            top: 5.25rem;
+            translate: -50% 0;
+            height: calc(96svh - 5.25rem) !important;
+            max-height: none;
+        }
+
+        // The label's two-line reservation is buying nothing at this stop. It
+        // exists because the desktop grid RESIZES under the pointer and a label
+        // that re-wrapped mid-move would drag everything in its box with it; on
+        // a phone the tracks are the stylesheet's own fixed 2×4 map and nothing
+        // moves them, so there is no wrap to protect against. The labels sit
+        // down onto their own bottom padding instead, which is where
+        // bottom-aligned words belong — and the row it was reserving is the
+        // eighteen pixels the 320 bento was over by.
+        .navPanel__label { min-height: 0; }
+
+        // Three stacked centred rows were a fifth of the whole panel, and the
+        // third of them was the clock and the mark taking a line each to say
+        // nine words between them. Flex rather than the stacked grid above,
+        // which is what the landscape rail already uses: the two marks go back
+        // to the ends of one line, the way the wide rail has always had them,
+        // and the links take the full width underneath. Nothing is dropped and
+        // the rail is a whole row shorter.
+        //
+        // `order` rather than a reordered DOM, because the DOM order is the
+        // reading order every other shape of this rail wants: time, links,
+        // mark.
+        .navPanel__rail {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 0.4rem;
+            // Was 6vw, an indent nothing else in the panel has — the boxes
+            // above run to the panel's own edge — and at 320 it was worth a
+            // whole extra line of links.
+            padding: 0.75rem 4vw 0.9rem;
+        }
+
+        .navPanel__rail__time { text-align: left; }
+
+        .navPanel__rail__links {
+            order: 1;
+            flex: 0 0 100%;
+        }
+
+        .navPanel__rail__mark { text-align: right; }
+
+        // ── a short phone ──
+        //
+        // 568 tall is the smallest screen we target and the only one where the
+        // box has to be argued down to fit: four rows and a rail into 460 is 96
+        // pixels a row, and the box was drawn with 1.1rem of padding on every
+        // side — a third of a 96px box, and enough to push the ordinal out of
+        // the top of the one box that also carries a note. 700 is the cutoff
+        // because the next screen up is 844 and has the room to spare.
+        @media (max-height: 700px) {
+            .navPanel__box__link {
+                padding: 0.55rem 0.85rem;
+                gap: 0.3rem;
+            }
+
+            .navPanel__rail { padding: 0.55rem 4vw 0.65rem; }
+        }
+    }
 }
 
 // ── phone, landscape ──

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
+import { rootRamp } from "@/helpers/checkViewport";
 
 // What people said, as a wall that will not hold still.
 //
@@ -35,6 +36,17 @@ const sizeOf = (message) => {
 // How much faster or slower than the others a column runs. Off the golden
 // ratio so no two are alike and the pattern never comes back round.
 const rateOf = (index, variance) => 1 + variance * (((index * 0.6180339887 + 0.35) % 1) * 2 - 1);
+
+// The heights above are in real pixels, and everything they hold is in rem —
+// the column they are drawn in, the tag, the quotation, the name under it. Past
+// 1921 across the root font size ramps and all of that gets up to a third
+// bigger; the card does not, and a card the size it was for 1920 with 1920's
+// text set a third larger inside it is a card with its last line cut off,
+// because the face hides its overflow.
+//
+// rootRamp is that growth — see helpers/checkViewport, which is where the one
+// copy of it lives. It is 1 at 1920 and below, where nothing about this wall
+// moves.
 
 const GAP = 22;
 // Pixels a second. It was 26, which on a card two hundred tall is eight seconds
@@ -97,7 +109,10 @@ export default function ReviewDrift({ reviews = [] }) {
             // column, most of it inside the mask, and a wall that reads as
             // empty. The card shrinks rather than the wall growing — a taller
             // wall would only be more scrolling past the same two cards.
-            setUnit(h < 560 ? 0.56 : w < 620 ? 0.76 : 1);
+            //
+            // ...and the other way at the top end, where the card has to grow
+            // to hold type that already has. See ROOT.
+            setUnit((h < 560 ? 0.56 : w < 620 ? 0.76 : 1) * rootRamp(w));
         };
         read();
         window.addEventListener("resize", read);
@@ -209,7 +224,12 @@ export default function ReviewDrift({ reviews = [] }) {
                 plane.current.style.transform =
                     `translate(-50%, -50%) scale(1.2) ` +
                     `rotateX(${13 + leant.current.y}deg) rotateY(${-13 + leant.current.x}deg) ` +
-                    `translateZ(-110px)`;
+                    // In rem, with the perspective it is seen under and the
+                    // raise an active card takes — see styles.scss. How far
+                    // back the plane stands is part of the same scene and has
+                    // to grow with it, or the wall is pushed proportionally
+                    // less far away on a screen where it is bigger.
+                    `translateZ(-6.875rem)`;
             }
 
             for (let c = 0; c < tracks.current.length; c += 1) {

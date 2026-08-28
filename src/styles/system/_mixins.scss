@@ -1,3 +1,4 @@
+@use "sass:math";
 @use "sass:map";
 @use "./breakpoints" as bp;
 
@@ -11,6 +12,7 @@ $layer-h: (
   lg: bp-lg,
   xl: bp-xl,
   huge: bp-huge,
+  xxl: bp-xxl,
 
   // Device-qualified stops. Last in the cascade so they win over the width-only stop they
   // overlap — a phone in landscape matches `sm` on width alone.
@@ -162,7 +164,20 @@ $layer-v: (
 /// `@media (max-width: N)` across unchanged. below(sm) means "narrower than the sm stop";
 /// below-px(900) means "900px or narrower", exactly as the original rule read.
 @mixin below-px($w) {
-  @media (max-width: #{$w}) {
+  // Both forms are in use — `below-px(900)` and `below-px(560px)` — and the bare
+  // number used to interpolate straight through as `(max-width: 900)`, which is
+  // not a valid media query and matches nothing at all. Every unitless call site
+  // on the site has only ever worked because the CSS pipeline normalises it on
+  // the way out; compile this file with plain `sass` and the broken form is what
+  // comes out. So the unit is added here, where it can be added once, and a
+  // caller that already wrote one is passed through untouched.
+  $q: $w;
+
+  @if math.is-unitless($w) {
+    $q: $w * 1px;
+  }
+
+  @media (max-width: $q) {
     @content;
   }
 }

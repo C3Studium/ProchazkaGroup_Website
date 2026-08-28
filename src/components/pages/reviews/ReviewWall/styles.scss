@@ -48,7 +48,12 @@
     grid-template-columns: repeat(4, 1fr);
     grid-auto-rows: 11vh;
     grid-auto-flow: dense;
-    gap: 22px;
+    // The gutter in rem: 1.375rem is the 22px it has always been up to 1920,
+    // and above that it grows with the reviews it separates (see globals.scss).
+    // Left in px it would not — on a 2560 monitor the type inside a cell is a
+    // third larger and a 22px gutter between cards that size stops reading as
+    // air between them and starts reading as a seam.
+    gap: 1.375rem;
 }
 
 .RevWall__cell {
@@ -263,7 +268,11 @@
 
 .RevSheet {
     position: relative;
-    width: min(52vw, 780px);
+    // 48.75rem is the 780px this cap has always been below 1921. It belongs in
+    // rem because it is a measure for the review inside it and nothing else:
+    // the text grows a third on a 2560 monitor, and a cap that did not would
+    // hold the same sentence to a third fewer words per line.
+    width: min(52vw, 48.75rem);
     padding: 5vh 3vw;
     border: 1px solid rgba(255, 255, 255, 0.24);
     background-color: rgba(2, 14, 21, 0.96);
@@ -333,8 +342,11 @@
 
 .RevSheet__close {
     position: relative;
-    width: 32px;
-    height: 32px;
+    // 2rem is the 32px it has always been up to 1920. The cross inside is drawn
+    // in per cent of this box, so sizing the box in rem is all it takes for the
+    // whole mark to keep pace with the tag it sits opposite in the head row.
+    width: 2rem;
+    height: 2rem;
     padding: 0;
     border: 0;
     background: none;

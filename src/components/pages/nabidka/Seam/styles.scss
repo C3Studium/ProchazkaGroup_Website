@@ -18,7 +18,13 @@
     // the next needs more room than that to read as a journey rather than a
     // kink. The floor is what a phone in landscape gets; the ceiling stops a
     // tall desktop window from opening a hole between two sections.
-    height: clamp(70px, calc(var(--seam-tall, 18) * 1vh), calc(var(--seam-tall, 18) * 11px));
+    //
+    // 0.6875rem is the 11px the ceiling was. In rem because on a 2K screen the
+    // vh term overtakes a flat ceiling — 16vh of 1351 is 216 against a cap of
+    // 176 — and the seam would be the one thing on the page that got shorter
+    // relative to the sections it joins. The floor stays in px: it is a phone's
+    // floor, and rem there would only raise it on screens it never applies to.
+    height: clamp(70px, calc(var(--seam-tall, 18) * 1vh), calc(var(--seam-tall, 18) * 0.6875rem));
 }
 
 .Seam__svg {
@@ -64,8 +70,10 @@
     // Where the path actually lands: the svg is inset by the padding on both
     // sides, so `to` is a share of what is left, not of the whole box.
     left: calc(var(--seam-pad) + var(--seam-to, 0.5) * (100% - 2 * var(--seam-pad)));
-    width: 7px;
-    height: 7px;
+    // The square the line lands on, in rem — it is a mark the page makes, not a
+    // hairline, and the 1px border it is drawn with is the part that stays.
+    width: 0.4375rem;
+    height: 0.4375rem;
     translate: -50% 50%;
     border: 1px solid var(--hColor);
     background-color: rgba(2, 14, 21, 0.9);

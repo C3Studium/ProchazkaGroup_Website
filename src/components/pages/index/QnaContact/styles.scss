@@ -146,10 +146,17 @@
             opacity: 0.5;
             transition: opacity 0.3s ease, color 0.3s ease;
 
+            // The brackets are the switch's whole selected state — they are
+            // what says which of the two the section is showing — so they are
+            // a measure of the label they snap around and move with it.
+            // 0.5rem is the 8px they always were up to 1920. The travels below
+            // stay in px: how far a bracket opens is a gesture, not a size,
+            // and the same three pixels read on any monitor (CornerButton
+            // makes the same split for the same reason).
             .corner {
                 position: absolute;
-                width: 8px;
-                height: 8px;
+                width: 0.5rem;
+                height: 0.5rem;
                 border: 0 solid currentColor;
                 opacity: 0;
                 transition: opacity 0.3s ease, transform 0.3s ease;
@@ -324,10 +331,16 @@
                     opacity: 0.85;
                     transition: opacity 0.25s ease, color 0.25s ease;
 
+                    // 0.4375rem is the 7px these have always been up to 1920,
+                    // and past it they keep the topic's own proportion — a
+                    // chip whose word has grown a third with four ticks that
+                    // have not is a chip with the frame drawn for a smaller
+                    // word still on it. Border weights and hover travels stay
+                    // in px, as everywhere else on the page.
                     .corner {
                         position: absolute;
-                        width: 7px;
-                        height: 7px;
+                        width: 0.4375rem;
+                        height: 0.4375rem;
                         border: 0 solid currentColor;
                         transition: transform 0.25s ease;
                     }
@@ -409,10 +422,15 @@
                 text-transform: uppercase;
                 letter-spacing: 0.08em;
 
+                // Same measure as the switch above it, for the same reason:
+                // 0.5rem is the 8px up to 1920 and grows with the word the
+                // brackets frame. This is the section's one send button and
+                // it is drawn in nothing but four ticks — they cannot be the
+                // one part of it that stays at its 1920 size.
                 .corner {
                     position: absolute;
-                    width: 8px;
-                    height: 8px;
+                    width: 0.5rem;
+                    height: 0.5rem;
                     border: 0 solid currentColor;
                     transition: transform 0.25s ease;
                 }

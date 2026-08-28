@@ -245,9 +245,19 @@ const cellIn = {
 // roster is not opening something else — it is this box growing and its contents
 // being changed, which is what makes BACK a word in the rail rather than a
 // dismissal.
+//
+// The caps are in rem, and they are the numbers that actually decide the size
+// on a wide screen: past about 1620 across the vw term overtakes them and the
+// min() stops being a safety rail and starts being the width. Written as px
+// they froze — a 2560 monitor got the same 1360-wide menu a 1920 one did, two
+// thirds of the way to a panel adrift in the middle of the screen. rem grows
+// with the root ramp above 1920 (see styles/globals.scss) and is the identical
+// 1360/760/1720/980 at every width below it, so the proportions the panel was
+// drawn with survive the bigger screen instead of being spent on margin.
+// The stylesheet's own fallback says the same thing and the two have to agree.
 const SIZE = {
-    menu: { width: 'min(84vw, 1360px)', height: 'min(70vh, 760px)' },
-    advisors: { width: 'min(92vw, 1720px)', height: 'min(86vh, 980px)' },
+    menu: { width: 'min(84vw, 85rem)', height: 'min(70vh, 47.5rem)' },
+    advisors: { width: 'min(92vw, 107.5rem)', height: 'min(86vh, 61.25rem)' },
 };
 
 // The box resizes on the house springs — the width leads, the height trails it
@@ -302,10 +312,22 @@ const useMedia = (query) => {
 // map and squeezes the whole bento into half the panel.
 const COMPACT = '(max-width: 820px), (max-height: 520px)';
 
-// No hover to drive the wall with. Tap becomes the activation: the first tap
-// on a box opens it, the second follows it. `hover: none` rather than
-// `pointer: coarse` alone — a laptop with a touchscreen still has the hover.
+// No hover to drive the wall with, so the tap has to be both the reach and the
+// choice. `hover: none` rather than `pointer: coarse` alone — a laptop with a
+// touchscreen still has the hover.
 const TOUCH = '(hover: none)';
+
+// A phone, as against anything else with a touchscreen. The distinction earns
+// its own query because the two-step below is right on one and wrong on the
+// other, and `hover: none` cannot tell them apart.
+//
+// 600 is the site's own v(md) stop — the width at which a portrait layout
+// starts being read as a tablet — and it sits in the empty band between the
+// widest phone we target (430 across) and the narrowest tablet in portrait
+// (768). The second clause is the same phone held sideways: nothing wider than
+// a phone in landscape is shorter than 520px, which is already how the
+// stylesheet tells those two apart.
+const PHONE = '(hover: none) and (max-width: 600px), (hover: none) and (max-height: 520px)';
 
 // The office is in Písek and the clock in the rail says so. Read on the client
 // only: the server has no idea what time it is, and a time rendered into the
@@ -333,6 +355,7 @@ export default function NavbarBody({ setMenu, onSheet }) {
     const time = useOfficeClock();
     const calm = useReducedMotion();
     const touch = useMedia(TOUCH);
+    const phone = useMedia(PHONE);
     const compact = useMedia(COMPACT);
 
     // The menu opens on the page you are on, so the ground behind it is already
@@ -508,22 +531,38 @@ export default function NavbarBody({ setMenu, onSheet }) {
                             // go somewhere. Same box, and the element says which
                             // it is rather than looking like a link and not
                             // being one.
-                            // On touch the hover has no way to happen, so the
-                            // tap is the reach: the first tap on a closed box
-                            // opens it — photograph, note — and only a tap on
-                            // the box that is already open goes through.
                             //
-                            // A closed page box on touch is a <button>, not a
-                            // dimmed Link. PageVeil intercepts every internal
-                            // <a> click in the CAPTURE phase, before any
-                            // handler here could preventDefault — so the first
-                            // tap on an <a> would start the page transition no
-                            // matter what this component decided. As a button
-                            // the tap belongs to this panel; the box becomes
-                            // the real Link the moment it is open, and the
-                            // second tap leaves through the veil exactly like
-                            // a desktop click.
-                            const closedOnTouch = touch && !open;
+                            // On a TABLET the tap is the reach, because there is
+                            // no hover to open a box with: the first tap on a
+                            // closed box opens it — photograph, note — and only
+                            // a tap on the box that is already open goes
+                            // through. A tablet has the screen to make that
+                            // worth having.
+                            //
+                            // On a PHONE the same two steps are a toll. A box
+                            // the size of a thumbnail has very little to preview
+                            // with, and charging two taps for every destination
+                            // spends exactly what a menu is meant to save. So a
+                            // phone gets no intermediate state at all: every box
+                            // is what it looks like, one tap leaves or opens the
+                            // sheet, and the only box showing its photograph is
+                            // the page you are already on — `hovered` is never
+                            // set here, so `shown` stays on `here`, which is the
+                            // one preview nobody had to ask for.
+                            //
+                            // A closed page box on a tablet is a <button>, not a
+                            // dimmed Link, and that is not a style choice.
+                            // PageVeil intercepts every internal <a> click in
+                            // the CAPTURE phase, before any handler here could
+                            // preventDefault — so the first tap on an <a> would
+                            // start the page transition no matter what this
+                            // component decided. As a button the tap belongs to
+                            // this panel; the box becomes the real Link the
+                            // moment it is open, and the second tap leaves
+                            // through the veil exactly like a desktop click.
+                            // On a phone the box is that Link from the start,
+                            // which is precisely why one tap now leaves.
+                            const closedOnTouch = touch && !phone && !open;
                             const Inner = item.modal || closedOnTouch ? 'button' : Link;
 
                             const activate = (e) => {
@@ -583,10 +622,13 @@ export default function NavbarBody({ setMenu, onSheet }) {
                                         // Focus preview is a keyboard thing. On
                                         // touch a tap fires focus BEFORE click,
                                         // so an unguarded focus would open the
-                                        // box mid-tap and the click would land
-                                        // on the already-open state — acting on
-                                        // the first tap, which is exactly what
-                                        // the touch model exists to prevent.
+                                        // box mid-tap: on a tablet the click
+                                        // would then land on the already-open
+                                        // state — acting on the first tap, which
+                                        // is exactly what its two-step exists to
+                                        // prevent — and on a phone it would put
+                                        // a photograph on screen for the two
+                                        // frames before the page leaves.
                                         onFocus={() => { if (!touch) setHovered(index); }}
                                     >
                                         {/* Mounted, not conditional: eight

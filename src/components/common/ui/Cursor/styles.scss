@@ -21,6 +21,18 @@
 // A fixed 28px box carried at the pointer. Nothing inside it ever resizes; the
 // corners only travel the few pixels between where they wait and where they
 // close, which is the whole interaction.
+//
+// Every length that draws the mark stays in px, and this is the one place on
+// the site where that is the right answer rather than an oversight. The ramp in
+// globals.scss grows the root above 1920 so the page keeps its proportion to a
+// wider screen — but this thing's proportion is not to the screen. It is drawn
+// around the system pointer, and the system pointer is a fixed physical object:
+// the OS hands out the same arrow on a 2560 monitor as on a 1920 one, because
+// the two are about the same number of pixels per inch and only one of them is
+// wider. A 28px frame grown to 37 would no longer sit on the arrow it is
+// framing, and a 6px dot grown to 8 would be visibly larger than the pointer it
+// stands in for. The corner marks that frame a *word* do grow, and should — see
+// ui/CornerMarks — because a word is part of the page and this is not.
 .cursor__mark {
     position: absolute;
     width: 28px;
@@ -100,6 +112,13 @@
 // Words beside the marks, and only when the target asks for them by name. Set
 // outside the 28px box so the marks keep their size — the label is a note the
 // cursor is carrying, not part of it.
+//
+// Which is also why this one size is left in rem while everything above it is
+// pinned in px: being a note rather than part of the apparatus, it is type on
+// the page and grows with the page's type above 1920. Ten pixels of letter on a
+// 2560 monitor is a word you lean in for. Nothing moves to accommodate it — the
+// 26px below only has to clear the mark box, which is not going anywhere, and
+// the gap after it is in em and follows the word.
 .cursor__label {
     position: absolute;
     top: 50%;

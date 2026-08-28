@@ -9,9 +9,10 @@ import { CONTEXT_PATHS, MAP, MARKETS } from "./europe";
 // The map.
 //
 // No mapping library: the outlines are Natural Earth's, public domain,
-// projected once by scripts/make-europe.mjs and shipped as eighteen kilobytes
-// of SVG path. A map that is looked at rather than panned does not need d3-geo,
-// topojson and a tile source.
+// projected once by scripts/make-europe.mjs and shipped as thirty kilobytes of
+// SVG path — the whole continent, not only the sixteen countries we are in. A
+// map that is looked at rather than panned does not need d3-geo, topojson and a
+// tile source.
 //
 // ── how a country grows ────────────────────────────────────────────────
 //
@@ -47,7 +48,14 @@ const FALLOFF = 165;
 // What the flag and its date need inside the country, in map units. A country
 // grows by whatever it is short of that — and never by less than a fifth,
 // because a country that does not visibly move has not answered the pointer.
-const NEEDS = { w: 150, h: 116 };
+//
+// Roughly five flags across and five deep, which is what it was against the old
+// frame too. It is written in map units and the map now holds the whole
+// continent rather than our own sixteen countries, so the same numbers would
+// have been asking a country to grow to a size the flag no longer needs — and
+// every small one would have sat pinned to the ceiling below. Czechia opens at
+// 1.5, which is what it opened at before any of this.
+const NEEDS = { w: 73, h: 57 };
 const scaleFor = ([w, h]) =>
     Math.min(3.2, Math.max(1.22, NEEDS.w / w, NEEDS.h / h));
 
@@ -59,10 +67,18 @@ const scaleFor = ([w, h]) =>
 // Held in proportion, everything else follows for free: what a country has to
 // grow to hold its own flag and date is the same fraction of the map at every
 // size, so the scale that opens it needs no adjusting at all.
-const FLAG_OF = 26 / 850;
-const flagFor = (width) => Math.round(Math.min(26, Math.max(10, width * FLAG_OF)));
+//
+// The number that matters is not how big a flag is but how much of a country it
+// covers. On the frame this map started life with, twenty-six pixels of flag sat
+// on a hundred and eighteen of Czechia; a frame that now runs from Iceland to
+// the Urals holds the same share at twelve, and the map being drawn at the
+// height of the screen puts that back at around twenty-four real pixels. The
+// ceiling is only there to stop a very tall screen printing a postage stamp on
+// Slovenia — it is not the size, the share is.
+const FLAG_OF = 12 / 850;
+const flagFor = (width) => Math.round(Math.min(34, Math.max(10, width * FLAG_OF)));
 
-export default function EuropeMap({ ride, at, step, width = 850, caption = false, coarse = false }) {
+export default function EuropeMap({ ride, at, step, width = 850, caption = false, coarse = false, ground = false }) {
     const [held, setHeld] = useState(-1);
     const flagW = flagFor(width);
 
@@ -78,7 +94,10 @@ export default function EuropeMap({ ride, at, step, width = 850, caption = false
     const market = held >= 0 ? MARKETS[held] : null;
 
     return (
-        <div className={`EuropeMap${caption ? " EuropeMap--read" : ""}`}>
+        // Ground rather than picture: it is the size of the screen and it has no
+        // edge, because the stylesheet fades all four of them out. See
+        // EuropeMap--ground.
+        <div className={`EuropeMap${caption ? " EuropeMap--read" : ""}${ground ? " EuropeMap--ground" : ""}`}>
             {/* Its own proportions, from the projection: the flags are placed
                 in percentages of this box, so it has to be exactly the map's
                 shape or every flag lands off its country. */}

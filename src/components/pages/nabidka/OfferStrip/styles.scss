@@ -70,6 +70,10 @@
 .OfferStrip__words {
     position: absolute;
     pointer-events: none;
+    // Over the map, which in the history section is the ground the whole slot
+    // stands on. It carries no pointer of its own, so the countries underneath
+    // still answer through it.
+    z-index: 2;
 }
 
 .OfferStrip__n {
@@ -302,13 +306,17 @@
 
     // The same dot the reviews run along their rules on the home page: a core
     // and a soft field around it, in the accent.
+    // In rem rather than the eight pixels it was, so it keeps its size against
+    // the name beside it: past 1921 the root grows and that name grows with it,
+    // and a dot that stayed at eight would shrink relative to everything it sits
+    // among. Identical below 1921, where the root is sixteen.
     .OfferStrip__stop__dot {
         position: absolute;
-        top: -4px;
+        top: -0.25rem;
         left: 0;
-        width: 8px;
-        height: 8px;
-        margin-left: -4px;
+        width: 0.5rem;
+        height: 0.5rem;
+        margin-left: -0.25rem;
         border-radius: 50%;
         background-color: var(--hColor);
         box-shadow: 0 0 12px rgba(75, 218, 220, 0.55);
@@ -341,6 +349,25 @@
         background-color: transparent;
     }
 
+    // The map as the section's ground rather than as a box in it: the size of
+    // the screen, with the heading standing on top of it.
+    &--ground {
+        // Under the words. The header is written before the blocks, so without
+        // this the ground paints over the heading it is the ground for.
+        z-index: 0;
+        // And the countries are the target, not the box. At this size the box
+        // is the whole section, and a transparent div that size answers for
+        // every pointer crossing it — the Atlantic included. The countries take
+        // the pointer back themselves; see EuropeMap__market.
+        pointer-events: none;
+
+        // The generic box lifts to 4 on hover, which would throw the whole
+        // continent over the heading the moment anybody reached for Poland.
+        &:hover {
+            z-index: 0;
+        }
+    }
+
     // The box is not the target — the countries in it are.
     @include touch {
         cursor: default;
@@ -357,6 +384,38 @@
     justify-content: center;
     width: 100%;
     height: 100%;
+}
+
+// The map as ground: nearly the whole screen, and with no edge anywhere on it.
+//
+// Reaching the sides is the point of it, and a continent that stops at a
+// vertical line is a picture with a border rather than the floor the section
+// stands on. So both sides are faded out — which is also what hands the map over
+// to the sections either side as the band travels past them, instead of sliding
+// a rectangle across the screen.
+//
+// Both gradients on the MAP rather than on the box it sits in, and intersected.
+// Whichever of the two the box binds on, the other one leaves air: the map is
+// the height of a 16:9 screen and narrower than it, and on a squarer one it is
+// the width and shorter. A fade measured against the box misses the map's own
+// edge on whichever side that is and leaves it cut off square there — so both
+// are measured against the map, and where the box is bigger there is simply
+// nothing in that strip to fade.
+//
+// Where the fades stop is not a taste: the flags stand between 28% and 64% of
+// the map across and 56% and 86% of it down, and every one of them has to be at
+// full weight. Greece is what decides the bottom.
+.EuropeMap--ground .EuropeMap__frame {
+    $sides: linear-gradient(90deg, transparent 0%, #000 13%, #000 87%, transparent 100%);
+    $ends: linear-gradient(180deg, transparent 0%, #000 9%, #000 94%, transparent 100%);
+
+    -webkit-mask-image: $sides, $ends;
+    mask-image: $sides, $ends;
+    // source-in is what WebKit called intersect before it called it intersect.
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
 }
 
 // With a line of type under it, the box is a column: the map takes what is

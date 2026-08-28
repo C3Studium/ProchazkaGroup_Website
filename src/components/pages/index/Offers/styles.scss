@@ -163,6 +163,14 @@
             margin-top: 0.3rem;
             color: var(--wText);
             opacity: 0.9;
+            // The icon arrives from react-icons with its size as a number, and
+            // a number there is a pixel at every width. Everything it sits
+            // beside — the copy, the gap, the rules framing the block — grows
+            // on a 2560 monitor, so a mark left at 26px stops being the
+            // paragraph's bullet and becomes a speck next to it. 1.625rem is
+            // that same 26px on every screen the section was drawn for.
+            width: 1.625rem;
+            height: 1.625rem;
         }
 
         p {
