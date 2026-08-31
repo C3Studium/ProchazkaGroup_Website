@@ -529,25 +529,42 @@
         background-color: rgba(255, 255, 255, 0.14);
     }
 
+    // The roster runs as long as the roster is, and the screen is what stops
+    // it. Ten names are 667px, which fits a laptop; twenty-five would be 1668
+    // and would run off the bottom of any of them, and the number of advisors
+    // is the CMS's to change without anybody looking at this file again.
+    //
+    // This used to be a 52vh cap behind `fine-pointer`, and it was wrong twice
+    // over. Measured at 1250×677 before this:
+    //
+    //   with a mouse   the list was capped at 352px with 315px — four of the
+    //                  ten — below the fold, and the wheel over it moved the
+    //                  list by 0 and the PAGE by 480. Lenis takes the wheel
+    //                  unless an element asks for it, so the four were not
+    //                  merely hidden, they were unreachable. The old note here
+    //                  said it "scrolls only where a wheel can reach it"; the
+    //                  wheel could not reach it.
+    //   without one    a touchscreen laptop, or anything emulating a phone,
+    //                  answers `hover: none` and got no cap at all: the list
+    //                  stood 667px in a 677px window, the first name behind the
+    //                  fixed navbar and the last below the bottom edge.
+    //
+    // 95vh, so the cap binds only when the roster genuinely does not fit —
+    // which is the difference that matters. At ten people nothing scrolls on
+    // any laptop; the scrollbar appears when, and only when, there is something
+    // it is needed for. `data-lenis-prevent` is on the <ul> in index.jsx and is
+    // what makes the wheel and the thumb land here instead of on the page.
     .BenBothWin__mini__list {
         list-style: none;
         margin: 0;
         padding: 1vh 4vw 0 0;
-    }
-
-    // The list is capped and scrolls only where a wheel can reach it. On touch
-    // the cap turned a roster of ten into a 200px window on three of them, with
-    // the scrollbar hidden and nothing to say the rest were there — and a
-    // hidden scroller inside a page is the last thing a thumb should meet. Off
-    // a pointer the names simply run on and the chosen advisor follows them.
-    @include fine-pointer {
-        .BenBothWin__mini__list {
-            max-height: 52vh;
-            overflow-y: auto;
-            scrollbar-width: none;
-
-            &::-webkit-scrollbar { display: none; }
-        }
+        max-height: 95vh;
+        overflow-y: auto;
+        // Reaching the end of the names must not hand the rest of the gesture
+        // to the page underneath.
+        overscroll-behavior: contain;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
     }
 
     .BenBothWin__mini__row {
@@ -573,6 +590,29 @@
         }
 
         &.is-on { color: var(--wText); }
+    }
+
+    // ---- the small laptop ----
+    //
+    // The 95vh ceiling above is a backstop, not a layout. On a 1258×677 the
+    // roster reached it with ten names — 66px a row, 667px in all — so the
+    // choice filled the whole window and then scrolled anyway. A ceiling that
+    // the ordinary case sits on is not a ceiling; it is the height.
+    //
+    // So the rows get denser first and the ceiling goes back to being the thing
+    // that only happens when the roster is genuinely too long. 0.7rem of
+    // padding puts a row at 48px — still over the 44px a finger needs, on a
+    // screen that mostly has a trackpad — and ten of them at 480, which is
+    // about seven tenths of the shortest screen this stop covers.
+    //
+    // The portrait beside them gets the same treatment for the same reason, in
+    // its own block further down — it has to be written AFTER the rule it
+    // overrides, and that rule is below this one. Same specificity, so source
+    // order is the whole of it.
+    @include lt-h {
+        .BenBothWin__mini__row {
+            padding: 0.7rem 0.2rem;
+        }
     }
 
     // The indicator, on the row's far side: an outline square that the active
@@ -618,6 +658,24 @@
         margin-bottom: 3vh;
         background-color: #fff;
         overflow: hidden;
+    }
+
+    // The other half of the small-laptop block above, and it is here rather
+    // than up there because it has to come after the rule it overrides: both
+    // are one class deep, so nothing but source order separates them. Written
+    // beside the rows, it lost silently and the portrait stayed 320px tall on a
+    // 660 screen with the row padding correctly halved above it.
+    //
+    // The picture is sized off the WIDTH — `min(21vw, 20rem)` — and width is not
+    // what is short on these screens. It is the taller of the two columns here,
+    // so it is what the whole answer's height comes to: 553 of a 660 at 1220.
+    // The 34vh term makes it answer the axis that is actually running out, and
+    // it only wins on the screens where it should.
+    @include lt-h {
+        .BenBothWin__mini__photo {
+            width: min(21vw, 20rem, 34vh);
+            margin-bottom: 2vh;
+        }
     }
 
     .BenBothWin__mini__eyebrow {
@@ -732,6 +790,20 @@
     // the adaptation; the block itself arrives whole.
     .BenBothWin__ctaDock {
         margin: 0 -6vw;
+    }
+
+    // ---- the two parts only a phone on its side ever sees ----
+    //
+    // The picker that stands in for the ten-row roster, and the mark that stands
+    // in for the printed number. Both are in the markup at every width, and both
+    // are off here — a default of none rather than a switch inside the landscape
+    // block at the foot of this file, so nothing but that one stop can reach them
+    // by a route this file did not think of: a print stylesheet, or a breakpoint
+    // added later. The same arrangement index/ChooseAdvisor makes for its own
+    // pair, and for the same reason.
+    .BenBothWin__mini__pick,
+    .BenBothWin__mini__iconCall {
+        display: none;
     }
 
     // ---------------------------------------------------------------- mobile
@@ -980,6 +1052,14 @@
                 .BenBothWin__mini__list {
                     display: grid;
                     grid-template-columns: repeat(5, minmax(0, 1fr));
+                    // Not a scroller here. This is a sheet of faces two rows
+                    // deep that belongs to the page's own scroll, and the cap
+                    // above is for a column of names. `overflow-y: auto` alone
+                    // would also compute `overflow-x` to `auto`, so a single
+                    // rounded pixel across five 1fr tracks would hang a
+                    // horizontal scrollbar under the faces.
+                    max-height: none;
+                    overflow: visible;
                     // The tiles carry their own hairlines; a gap would put a
                     // channel of page between two faces instead of the line
                     // where they meet.
@@ -1318,6 +1398,345 @@
                     .BenBothWin__reply__hours { margin-top: 1.6vh; }
                 }
             }
+        }
+    }
+
+    // ── the client's answer, on a tablet held upright ────────────────────
+    //
+    // Portrait past 600 and up to 900: the 768×1024, the 818×1174 and the
+    // 820×1180. `v(md)` starts at the site's own bound for what a phone is
+    // (`$v md` in styles/system/_breakpoints.scss, and PHONE in
+    // @/helpers/usePhone reads the same number), so both phone compositions —
+    // the sheet of faces upright, the native picker on its side — are outside
+    // this and neither is touched.
+    //
+    // Outside it by ONE PIXEL less than it looks, which is why the width is
+    // written as a closed range rather than as `below-px(900)` alone. `v(md)`
+    // is min-width 600 and the phone stop is `below-px(600)`, which is
+    // INCLUSIVE — the mixin's own note says so, and PHONE reads `max-width:
+    // 600px` to agree with it. A viewport of exactly 600 CSS px in portrait is
+    // therefore BOTH, and this block, being the later of the two, would take
+    // it. Not a theoretical width: 600dp is Android's own tablet bound and a
+    // 600×1024 portrait is a real screen. Measured at 600×900 with the floor
+    // left off: usePhone still answered true so the markup was the phone's —
+    // ten 3:4 faces — while the layout was this one, folding that sheet into a
+    // 252px half column with the record's portrait stretched over the other.
+    // A composition belonging to neither stop. 600.02 and not 601 because that
+    // is this system's own idiom for "just past a stop": `below()` in
+    // styles/system/_mixins.scss subtracts the same 0.02px so that a min and a
+    // max written on one number never both match.
+    //
+    // AFTER the 900 block on purpose. Every rule this undoes is one class deep
+    // in there and so is every rule in here, so specificity separates nothing
+    // and source order is the whole of it. Written beside them, this block
+    // would compile and do nothing — which is precisely how the portrait cap
+    // on `__photo` was lost earlier in this file, and the note above it says
+    // so.
+    //
+    // What the 900 block does to this branch is stack the roster and the record
+    // into one column, and that column was drawn for a phone. Measured here
+    // before this block: 1336px tall at 768×1024, 1359 at 818×1174, 1360 at
+    // 820×1180 — 130vh, 116vh, 115vh. So the list that chooses an advisor and
+    // the face it chooses are never on the screen together, and the telephone
+    // number is most of a second screen below the name it belongs to. A table
+    // of contents with the contents somewhere else, which is the same complaint
+    // the sheet of faces answers for a phone.
+    //
+    // The answer here is the one the laptop already has and needs no second
+    // invention: the roster on the left, the chosen advisor's portrait and
+    // record on the right, either side of the section's own axis. So this block
+    // puts the base composition back — the split, the spine, the gutters, the
+    // thumbnail — and then makes the roster smaller, because at the base's size
+    // it is not carrying its half.
+    @include v(md) {
+        @include between-px(600.02px, 900px) {
+            // The base's split. 1fr 1fr and not a narrower left column: the
+            // spine sits at 50% and so does the connector that drops onto it
+            // out of the join above (`justify-self: center`, in the single
+            // content column the 900 block gives it), and a roster given 40%
+            // would carry the axis off the line the whole section falls down.
+            //
+            // minmax(0, …) rather than the base's bare `1fr`, which is
+            // minmax(auto, 1fr) and will grow a track past the container to fit
+            // something that does not shrink. The record holds one such thing:
+            // the number is 2rem at every width in this range — the clamp's
+            // floor, since 3.6vw is under it below 889 — and 256px of digits in
+            // the 228px column the narrowest screen in this range leaves would
+            // otherwise widen the grid and hang the page off its right edge.
+            //
+            // A column is 0.38 of the width once the join's 8vw margins and the
+            // 4vw gutter are off it, so the number stops needing more than its
+            // own column at 675 and everything this stop is actually drawn for
+            // — 768 and up — has room to spare. Under that it crosses the
+            // column by at most 28px, which is inside the 48 of page margin
+            // beside it: measured at 601×900, the widest that overflow ever
+            // gets, the document is still exactly 601 across.
+            .BenBothWin__mini {
+                grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+                // The gutter is the two 4vw paddings restored below, as it is
+                // on a laptop. The 5vh the 900 block sets is the air between a
+                // stacked list and the record under it; as a column gap it is
+                // 59px of nothing at 1180, on top of the 66 the paddings
+                // already hold.
+                gap: 0;
+            }
+
+            // Two columns again, so the boundary between them is back and the
+            // spine and its node have a line to sit on.
+            .BenBothWin__mini__spine,
+            .BenBothWin__mini__node {
+                display: block;
+            }
+
+            // The ceiling belongs to the list, not to the whole width.
+            .BenBothWin__mini__topline {
+                right: 52%;
+            }
+
+            // The two gutters that hold the columns apart: the list stops short
+            // of the spine, the record starts clear of it.
+            .BenBothWin__mini__list {
+                padding-right: 4vw;
+            }
+
+            .BenBothWin__mini__who {
+                padding-left: 4vw;
+            }
+
+            // ---- the roster, smaller ----
+            //
+            // At the base's 1.25rem of padding a row measures 66px at all three
+            // sizes, so ten names are 660 and the roster alone is 64% of a
+            // 1024-tall screen — beside a record that needs 457 for a portrait,
+            // a name, a telephone number and a line of copy. A column of ten
+            // names down most of the screen, not paying for the room.
+            //
+            // The short-laptop block further up cuts the same row to 48px for
+            // the same reason and works the arithmetic out there; this is that
+            // judgement one stop over and the number survives the move. 0.7rem
+            // of padding either side of the 25px line the type's 1.15rem floor
+            // draws, plus the hairline under it, is 48px — Material's 48dp, and
+            // four over the 44 a finger needs, which matters more here than it
+            // does there because this screen has no trackpad on it at all. Ten
+            // rows are 480 instead of 660, and the roster comes out level with
+            // the record beside it rather than towering over it.
+            //
+            // The type itself stays at the clamp's 1.15rem floor, which is what
+            // it already computes to across this whole range. All ten names are
+            // under 151px wide (measured at 768×1024, longest "Michaela
+            // Marková") in a text column of 259, so setting it smaller buys no
+            // width that is short and spends legibility on a screen read at
+            // arm's length.
+            .BenBothWin__mini__row {
+                padding: 0.7rem 0.2rem;
+            }
+
+            // Back to the base's thumbnail. 60vw is a portrait that owns a
+            // phone-wide column — 288px of the 645 at 768 — and beside a
+            // half-width roster it would be the picture and nothing else. 21vw
+            // is 161px here and 172 at 820: half of its own column, the same
+            // proportion it holds on a laptop.
+            //
+            // No height term like the short laptop's `34vh`. That stop is short
+            // of height and this one is 1024 to 1180 tall, where 34vh is 348px
+            // against the 161 the width asks for and could never bind — a
+            // ceiling that cannot be reached is a number to keep in step for
+            // nothing.
+            .BenBothWin__mini__photo {
+                width: min(21vw, 20rem);
+            }
+        }
+    }
+
+    // ── the client's answer, on a phone held sideways ────────────────────
+    //
+    // Outside the 900 block, and that is the whole reason this stop is written
+    // rather than folded into the one above: `below-px(900)` is a WIDTH, and two
+    // of the three phones this has to serve are wider than it lying down. At 932
+    // the branch was still getting the desktop composition — the ten names in
+    // one half, the record in the other — and at 568 and 844 it was getting the
+    // stack written for a tablet held upright. Measured before: the list and the
+    // record end to end came to 1230px on a 320px-tall screen and 1240 on a 390,
+    // which is four screenfuls to reach one telephone number, and 664 at 932.
+    //
+    // `phs-h` and not `phl-h`. `phl` starts at 800, which is the 13 and the 15
+    // Pro Max and nothing else — the SE at 568, the 8 at 667 and the 12 mini at
+    // 780 are phones on their side too, and every one of them was falling
+    // through. `phs` is the same 480/520 landscape stop with all of them inside
+    // it, so the range is one layout instead of two. (The fork above still says
+    // `phl-h`; that is its own rule and its own decision, and this pass has not
+    // been asked to move it.) Written last in the file on purpose, so it wins
+    // its overlap with the 900 block at 568 and 844 on source order.
+    //
+    // What replaces the two compositions is the shape the homepage CTA already
+    // takes on this screen, because it is the same act — choose a person, ring
+    // them — and the same ten people:
+    //
+    //   the roster becomes the native picker, which is 44px instead of 663
+    //   the portrait STAYS, on the left, because unlike the CTA's this branch
+    //     has nothing else in it — no pitch, no form — and a record with no face
+    //     in it is a name and a number in the middle of an empty screen
+    //   the name goes under the picker, where it is the answer to it
+    //   the number becomes the mark, beside the portrait, exactly as it is
+    //     beside the portrait on a phone held upright
+    //
+    // Height is the scarce axis here, not width, so the one element with no
+    // upper bound of its own — the photograph — is sized against it: 40vh is
+    // 128px at 320 and 172 at 430, and the 9.5rem ceiling stops it growing past
+    // what the words beside it need.
+    @include phs-h {
+        // Three columns and not the two the wide screen splits at: the portrait
+        // and the mark beside it are a pair (the CTA's phone card, the same way
+        // round), and the words are the third thing rather than a second half.
+        // `auto auto 1fr` because the first two are exactly as wide as what is
+        // in them and every pixel left over belongs to the type.
+        .BenBothWin__mini {
+            // Held once, because the photograph's width is its height times the
+            // 4:5 it is cropped to and writing the expression twice is writing
+            // it wrong the first time either changes.
+            // Bigger than the 9.5rem it opened at. The block is the only thing
+            // on this screen once the fork has been answered, and it was using
+            // 152 of a 390-tall one — a portrait the size of a stamp with half
+            // the screen empty under it. 56vh is what the shortest phone can
+            // give (179 of 320, clear of the tabs above and the floor below),
+            // and the rem ceiling stops the tallest from spending everything on
+            // a face.
+            --minPhotoH: min(56vh, 13.5rem);
+
+            grid-template-columns: auto auto minmax(0, 1fr);
+            // The three rows the words make — the picker, the name, the note —
+            // and the last of them flexible, which is load-bearing rather than
+            // tidy. The photograph spans all three, and a grid hands a spanning
+            // item's surplus height to the intrinsic tracks it crosses: with
+            // three `auto` rows the whole of it landed in the FIRST one, which
+            // put 87px of nothing between the picker and the name it answers.
+            // A flexible track takes that surplus instead, so the three read as
+            // one stack and the room the face needs falls below them, where
+            // there is nothing to push apart.
+            grid-template-rows: auto auto minmax(0, 1fr);
+            align-items: start;
+            column-gap: 4vw;
+            // In rem, not vh. A vh gap here is 3px at 320 tall, and 3px under a
+            // field's own bottom rule is not a gap — measured, the name sat on
+            // the picker's underline. Held at a fixed 8px it stays a gap on the
+            // shortest screen and does not become a margin on the tallest.
+            row-gap: 0.5rem;
+        }
+
+        // Nothing is split down the middle any more, so there is no boundary for
+        // the spine to stand on; the ceiling rule stays and runs the full width,
+        // because a drawn hairline that things hang from is the grammar of the
+        // page this sits on.
+        .BenBothWin__mini__spine,
+        .BenBothWin__mini__node {
+            display: none;
+        }
+
+        .BenBothWin__mini__topline {
+            right: 0;
+        }
+
+        .BenBothWin__mini__list {
+            display: none;
+        }
+
+        // The picker, in the words' column, with the name directly under it.
+        .BenBothWin__mini__pick {
+            display: block;
+            grid-column: 3;
+            grid-row: 1;
+
+            @include pickField("BenBothWin__mini__pick");
+
+            // The mixin's 0.9vh is 7px on the tall screen it was written for and
+            // 2.9 on this one, which reads as a label that has fallen onto its
+            // field. Held in rem, where the gap does not shrink with the phone.
+            .BenBothWin__mini__pick__label {
+                margin-bottom: 0.4rem;
+            }
+
+            // The section is set in Switzer and the mixin is written for the
+            // CTA, which is set in Poppins. Only the face is restated: the
+            // 16px floor under it is the size below which iOS zooms the page to
+            // focus a control, and that is not a house-style decision.
+            .BenBothWin__mini__pick__label,
+            .BenBothWin__mini__pick__select {
+                font-family: "Switzer-Light", sans-serif;
+            }
+        }
+
+        // A pass-through, so the four things inside it can be placed on the
+        // grid above alongside the picker — the name has to sit under a control
+        // that is not its sibling. Safe here: at this stop the panel is not the
+        // full-bleed record the portrait block builds, so there is no box, no
+        // scrim and no padding for `contents` to take away. The fallback with
+        // nobody published is excluded by name; it is a centred panel of its own
+        // and has no picker to be arranged around.
+        .BenBothWin__mini__who:not(.BenBothWin__mini__who--lone) {
+            display: contents;
+
+            // The eyebrow said "Váš poradce" and so does the picker's label,
+            // two centimetres away and above the same name. The number as a
+            // line of type goes because the mark beside the portrait is the
+            // same call — one obvious way to ring somebody, not two.
+            .BenBothWin__mini__eyebrow,
+            .BenBothWin__reply__phone {
+                display: none;
+            }
+        }
+
+        .BenBothWin__mini__photo {
+            grid-column: 1;
+            // Spans the whole stack beside it, so the words set the rows and the
+            // face fills whatever they come to.
+            grid-row: 1 / -1;
+            width: calc(var(--minPhotoH) * 4 / 5);
+            height: var(--minPhotoH);
+            margin-bottom: 0;
+        }
+
+        // Beside the face, centred against it — the arrangement the CTA's phone
+        // card makes upright, which is where the reader has met it before.
+        //
+        // 2.75rem is 44px, the floor exactly. This is the only target in the
+        // branch besides the picker and it is the end of the journey, so it
+        // could have been argued bigger; it is not, because the column it stands
+        // in is the width of whatever is in it and a wider mark simply takes
+        // that width off the name.
+        .BenBothWin__mini__iconCall {
+            grid-column: 2;
+            grid-row: 1 / -1;
+            align-self: center;
+            color: var(--hColor);
+
+            // Bigger with the portrait it stands beside — the two are read as a
+            // pair, so one growing and the other holding at the 44px floor
+            // would make the mark look like a leftover. 44 is a MINIMUM for a
+            // finger, not a size, and this is the only thing on the screen that
+            // does anything.
+            @include callIcon(3.75rem, 1.9rem);
+        }
+
+        // At the size of the thing being answered: the picker above it is a
+        // 16px line of names, and the desktop 1.8rem floor sets a long surname
+        // onto a second line in a 287px track at 568.
+        .BenBothWin__mini__name {
+            grid-column: 3;
+            grid-row: 2;
+            margin: 0;
+            font-size: clamp(1.05rem, 3.2vw, 1.5rem);
+        }
+
+        // The one sentence that says what to do with any of this, so it stays —
+        // under the name, in the same column, at the size of a caption. `1fr`
+        // is not needed on the row: the photograph is what governs the height
+        // and the note is what fills the rest of the column beside it.
+        .BenBothWin__mini__note {
+            grid-column: 3;
+            grid-row: 3;
+            margin: 0.4rem 0 0;
+            font-size: 0.72rem;
+            line-height: 1.45;
         }
     }
 

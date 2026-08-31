@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { RiPhoneLine } from "@remixicon/react";
+import { RiArrowDownSLine, RiPhoneLine } from "@remixicon/react";
 import TextPressure from "@/components/common/ui/TextPressure";
 import { CURTAIN, ENTERS } from "@/components/common/ui/entrance";
 import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
@@ -246,6 +246,14 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
     // preview, the navbar roster's manner — and a click is the same choice
     // made explicit (and the only way in for touch and keyboard).
     const [pick, setPick] = useState(0);
+    // The chosen consultant, resolved once. The clamp is not optional: `pick` is
+    // an index into a list that a re-render can hand back shorter than the one
+    // that was tapped. Used by the two controls a phone on its side gets — the
+    // picker and the telephone mark — which both need the same person and would
+    // otherwise resolve them separately.
+    const chosen = consultants.length
+        ? consultants[Math.min(pick, consultants.length - 1)]
+        : null;
     const canHover = useMedia(FINE);
     // Whether the client's answer is drawn as a sheet of faces rather than as a
     // list of names — see the note above `thumb`. Without `eager`, because this
@@ -458,7 +466,28 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                 else the name is the whole of
                                                 what the row is and a label would
                                                 only repeat it. */}
-                                            <ul className="BenBothWin__mini__list" role="listbox" aria-label="Váš poradce">
+                                            {/* The page runs its own smooth
+                                                scrolling, and Lenis takes every
+                                                wheel and every drag unless an
+                                                element asks for it by name. The
+                                                list is capped at 95vh and
+                                                scrolls (see styles.scss), and
+                                                without this that scroll could
+                                                not be operated: measured at
+                                                1250×677, a wheel over the list
+                                                moved it 0px and the page 480.
+                                                NOT on a phone, where the same
+                                                <ul> is a two-row sheet of faces
+                                                that does not scroll — the
+                                                attribute there would take the
+                                                page's own scroll away from a
+                                                thumb resting on a portrait. */}
+                                            <ul
+                                                className="BenBothWin__mini__list"
+                                                role="listbox"
+                                                aria-label="Váš poradce"
+                                                {...(phone ? {} : { "data-lenis-prevent": "" })}
+                                            >
                                                 {consultants.map((c, i) => (
                                                     <li key={c.slug || c.name || i}>
                                                         <button
@@ -501,6 +530,66 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                     </li>
                                                 ))}
                                             </ul>
+                                            {/* The same ten people again, as
+                                                the one control a phone lying
+                                                down can afford: the OS wheel,
+                                                over ten names, in one tap. The
+                                                list above needs 663px of a
+                                                320px-tall screen; this needs 44,
+                                                and it is the choice the homepage
+                                                CTA already makes on the same
+                                                screen (see index/ChooseAdvisor)
+                                                — the same ten people should not
+                                                meet a fourth design for them.
+                                                Its look is the shared
+                                                `pickField`, in
+                                                styles/system/_controls.scss.
+
+                                                It writes the same `pick` the
+                                                rows write, so the portrait, the
+                                                name and the number answer a turn
+                                                of the wheel exactly as they
+                                                answer a tap on a row.
+
+                                                In the markup at every width and
+                                                switched by the stylesheet, the
+                                                way the CTA's is: nothing is
+                                                worked out at runtime, so there
+                                                is no second paint and no flash
+                                                of the wrong control — and a
+                                                `display: none` control is out of
+                                                the accessibility tree as well as
+                                                off the screen, so a reader is
+                                                never offered the roster twice.
+
+                                                A native <select> rather than a
+                                                listbox of our own: it is the only
+                                                control that hands a phone its own
+                                                picker, and the roles, the focus
+                                                trapping and the type-ahead a
+                                                hand-rolled one owes are all had
+                                                from the platform for nothing. */}
+                                            <label className="BenBothWin__mini__pick">
+                                                <span className="BenBothWin__mini__pick__label">Váš poradce</span>
+                                                <span className="BenBothWin__mini__pick__field">
+                                                    <select
+                                                        className="BenBothWin__mini__pick__select"
+                                                        value={Math.min(pick, consultants.length - 1)}
+                                                        onChange={(event) => setPick(Number(event.target.value))}
+                                                    >
+                                                        {consultants.map((c, i) => (
+                                                            <option key={c.slug || c.name || i} value={i}>
+                                                                {c.name}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                    <RiArrowDownSLine
+                                                        className="BenBothWin__mini__pick__chevron"
+                                                        size={20}
+                                                        aria-hidden="true"
+                                                    />
+                                                </span>
+                                            </label>
                                             <div className="BenBothWin__mini__who">
                                                 {/* The consultant's portrait, from the same
                                                     Studio record the classic CTA reads — the
@@ -528,6 +617,47 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                         />
                                                     </div>
                                                 ) : null}
+                                                {/* The call as a mark, beside
+                                                    the face — the CTA's
+                                                    `ChooseAdvisor__iconCall`
+                                                    doing the same job in this
+                                                    section's accent, off the
+                                                    shared `callIcon` in
+                                                    styles/system/_controls.scss.
+                                                    Only a phone on its side ever
+                                                    sees it: upright, the record
+                                                    below is a full-bleed portrait
+                                                    with a full-width bar on its
+                                                    floor and there is nothing for
+                                                    a second target to improve.
+
+                                                    A separate element and not
+                                                    CallLink restyled, for the
+                                                    reason the CTA gives: what
+                                                    changes is the CONTENT — a
+                                                    glyph where the digits were —
+                                                    and no rule can swap a text
+                                                    node for an SVG.
+
+                                                    Same fallback as CallLink, so
+                                                    the two can never point at
+                                                    different numbers, and an
+                                                    `aria-label` because it prints
+                                                    no words at all: it states the
+                                                    number, so a reader hears what
+                                                    is about to be rung. */}
+                                                <a
+                                                    href={telHref(chosen?.phone || OFFICE_PHONE)}
+                                                    className="cornerButton BenBothWin__mini__iconCall"
+                                                    aria-label={`Zavolat na ${chosen?.phone || OFFICE_PHONE}`}
+                                                    data-cursor="frame"
+                                                >
+                                                    <span className="corner corner--tl" />
+                                                    <span className="corner corner--tr" />
+                                                    <span className="corner corner--bl" />
+                                                    <span className="corner corner--br" />
+                                                    <RiPhoneLine size={22} aria-hidden="true" />
+                                                </a>
                                                 <p className="BenBothWin__mini__eyebrow">Váš poradce</p>
                                                 <h3 className="BenBothWin__mini__name">
                                                     {consultants[Math.min(pick, consultants.length - 1)]?.name}

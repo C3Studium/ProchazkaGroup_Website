@@ -1,6 +1,6 @@
 import Image from "next/image";
 import GridDistortion from "@/components/common/ui/GridDistortion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cubicBezier, motion, useMotionValue, useScroll, useSpring, useTransform } from "framer-motion";
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
@@ -10,16 +10,11 @@ import SplitText from "@/components/common/ui/SplitText";
 import Circles from "@/components/pages/aboutUs/MemberShowcase/Circles";
 import { editable, editableLink } from "@/cms/edit";
 import {
-    CARD_VW,
     GROW_TO,
-    PAIR_VW,
     SEAM_VW,
     SQUEEZE_FROM,
-    TRACK_VW,
-    growthAt,
-    heightAt,
-    progressAtTrackX,
-    trackXAt,
+    geometryFor,
+    useStackScale,
 } from "@/components/pages/aboutUs/aboutStack";
 
 // The geometry lives in ../aboutStack.js, not here. It stopped being this
@@ -121,8 +116,8 @@ const FIRST_WINDOW = GROW_TO * 0.9;
 // One WINDOW later each card is close to the middle of the screen, so all three
 // finish saying themselves as they arrive at centre and none is ever caught
 // still assembling itself while it is the thing being looked at.
-const revealStart = (index) =>
-    index === 0 ? 0.02 : progressAtTrackX(100 - PAIR_VW * index);
+const revealStart = (geo, index) =>
+    index === 0 ? 0.02 : geo.progressAtTrackX(100 - geo.PAIR_VW * index);
 
 const revealSpan = (index) => (index === 0 ? FIRST_WINDOW : WINDOW);
 
@@ -295,21 +290,36 @@ export default function MemberShowcase({ members: cmsMembers, footnote: cmsFootn
     // wired to it and the stacked page is a column of empty panels. So the
     // layout has to be known here too, not only in the stylesheet.
     //
-    // The height arm is for phones held sideways (and any window squashed that
-    // flat): an 844×390 phone clears the 820px width gate, but at 390px tall
-    // the card's column of copy is taller than the viewport it would be pinned
-    // to, and the discs' room — the leftover between the button and the
-    // footnote — collapses to nothing, which is a box six 74px discs cannot
-    // be put back inside. 520px is the same ceiling the phs/phl stops use:
-    // over the tallest landscape phone, well under the shortest tablet.
-    // MUST match the media list on the stacked block in styles.scss.
+    // A phone held SIDEWAYS is not in that set any more: it rides, like the
+    // desktop. It used to stack on a height arm, because at 390px tall the
+    // card's column of copy was taller than the viewport it would be pinned to
+    // and the discs' room — the leftover between the button and the footnote —
+    // collapsed to a box six 74px discs could not be put back inside. Both are
+    // now answered in the stylesheet's own phs-h block, which shrinks the column
+    // and the discs to that screen instead of giving up the ride on it. A
+    // landscape phone is a small laptop and reads like one.
+    //
+    // MUST match the media list on the stacked block in styles.scss and the two
+    // in AboutHero/styles.scss, which carries the reason: the hero and this
+    // section pin together or stack together, never one each. See that block
+    // for what the three arms are and why they are equal to the two they
+    // replace minus phs-h.
     //
     // Starts false and is corrected on mount: the server has no viewport to
     // measure, and rendering the desktop assumption on both sides is what keeps
     // the markup identical across hydration.
+    // How wide the ride is here — 1 everywhere, 2 on a tablet upright, where a
+    // 44vw card is 360px and the pair reads as a column beside a strip. The hook
+    // is in aboutStack because the hero and the discs read the same answer and
+    // three answers to one question is the seam coming apart. See geometryFor.
+    const scale = useStackScale();
+    const geo = useMemo(() => geometryFor(scale), [scale]);
+
     const [stacked, setStacked] = useState(false);
     useEffect(() => {
-        const query = window.matchMedia("(max-width: 820px), (max-height: 520px)");
+        const query = window.matchMedia(
+            "(max-width: 479px), (max-width: 599.98px) and (orientation: portrait), (max-width: 820px) and (min-height: 521px) and (orientation: landscape), (max-height: 520px) and (orientation: portrait)",
+        );
         const sync = () => setStacked(query.matches);
         sync();
         query.addEventListener("change", sync);
@@ -334,12 +344,12 @@ export default function MemberShowcase({ members: cmsMembers, footnote: cmsFootn
     // Read from the shared description rather than restated as a keyframe list.
     // The hero erases itself against this same function, so the two are not two
     // curves that have to be kept in agreement — they are one curve, used twice.
-    const x = useTransform(rideRaw, (p) => `${trackXAt(p).toFixed(3)}vw`);
+    const x = useTransform(rideRaw, (p) => `${geo.trackXAt(p).toFixed(3)}vw`);
 
     // The first card's box, opening out of the bottom-right corner. Only the
     // first pair grows; the rest are their full size from the moment they exist.
-    const growWidth = useTransform(rideRaw, (p) => `${(growthAt(p) * CARD_VW).toFixed(3)}vw`);
-    const growHeight = useTransform(rideRaw, (p) => `${(heightAt(p) * 100).toFixed(3)}vh`);
+    const growWidth = useTransform(rideRaw, (p) => `${(geo.growthAt(p) * geo.CARD_VW).toFixed(3)}vw`);
+    const growHeight = useTransform(rideRaw, (p) => `${(geo.heightAt(p) * 100).toFixed(3)}vh`);
 
     // The scrim comes up with the growth. It has to: this section's box starts
     // 200vh above where it is used, so at the top of the page its top edge is
@@ -382,7 +392,7 @@ export default function MemberShowcase({ members: cmsMembers, footnote: cmsFootn
                 <motion.div className="MemberShow__viewport" style={{ clipPath: squeeze }}>
                     <motion.div
                         className="MemberShow__track"
-                        style={{ x, width: `${TRACK_VW}vw` }}
+                        style={{ x, width: `${geo.TRACK_VW}vw` }}
                     >
                         {members.map((member, index) => (
                             <motion.div
@@ -394,7 +404,7 @@ export default function MemberShowcase({ members: cmsMembers, footnote: cmsFootn
                                     member={member}
                                     progress={stacked ? settled : ride}
                                     copyProgress={stacked ? settled : copyRide}
-                                    from={stacked ? 0 : revealStart(index)}
+                                    from={stacked ? 0 : revealStart(geo, index)}
                                     span={stacked ? 1 : revealSpan(index)}
                                     growth={
                                         stacked || index !== 0
@@ -430,10 +440,15 @@ export default function MemberShowcase({ members: cmsMembers, footnote: cmsFootn
                                             // The photograph is a 32vw column
                                             // in the ride and the full page
                                             // width whenever the layout stacks
-                                            // — both arms of the stacked
-                                            // query, or 34vw was what a phone
+                                            // — every arm of the stacked query,
+                                            // or 34vw was what a phone
                                             // downloaded for a 100vw picture.
-                                            sizes="(max-width: 820px) 100vw, (max-height: 520px) 100vw, 34vw"
+                                            // A phone on its side is no longer
+                                            // one of those arms: it rides, so
+                                            // it wants the column, and asking
+                                            // it for 100vw was three times the
+                                            // bytes for the same 182px box.
+                                            sizes="(max-width: 479px) 100vw, (max-width: 820px) and (min-height: 521px) 100vw, (max-height: 520px) and (orientation: portrait) 100vw, 34vw"
                                             style={{ objectFit: "cover", objectPosition: "center" }}
                                         />
                                     </GridDistortion>
@@ -451,6 +466,11 @@ export default function MemberShowcase({ members: cmsMembers, footnote: cmsFootn
                             labels={values}
                             markRefs={markRefs}
                             docId={extras?.docId}
+                            // The discs fly along this track, so they have to be
+                            // handed the same track. Their hops used to be
+                            // computed at module scope, which was fine while
+                            // there was one geometry and is not now.
+                            geo={geo}
                         />
                     </motion.div>
 

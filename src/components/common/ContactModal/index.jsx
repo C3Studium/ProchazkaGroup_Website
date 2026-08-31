@@ -5,6 +5,8 @@ import { createPortal } from "react-dom";
 import Image from "next/image";
 import { AnimatePresence, cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
+import DialPrefix from "@/components/common/ui/DialPrefix";
+import { DEFAULT_DIAL } from "@/constants/dialPrefixes";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import MoreLink from "@/components/common/ui/MoreLink";
 import Arrow from "@/components/common/ui/Arrow";
@@ -71,6 +73,12 @@ const Req = () => <em className="ContactModal__req" aria-hidden="true">*</em>;
 // below 750px the portrait, her name and her role are not built at all and her
 // two addresses come down to the foot of the form, which is where a reader who
 // would rather ring than type goes looking anyway.
+//
+// The same is true of a phone on its side, only more so: 320 to 432 pixels of
+// height, and the photograph was still being built there because the stop below
+// is a width and a phone in landscape is 844 or 949 across. Landscape gets the
+// form in two columns instead — who you are on the left, how to reach her and
+// what you want to say on the right — and no portrait at any of its sizes.
 // Everything the Tab key is allowed to reach. `[href]` rather than `a` because
 // an anchor without one is not a stop, and the negated `[tabindex="-1"]` because
 // an element taken out of the order by hand means it.
@@ -91,6 +99,25 @@ const FOCUSABLE =
 // from under someone who had done nothing but tap into a field.
 const MQ_PHONE = "(max-width: 749.98px)";
 
+// Where the sheet becomes two columns of form: a phone lying on its side.
+//
+// Spelled out rather than derived, and spelled to be the same query `phs-h`
+// compiles to (min-width 480 / max-height 520 / landscape) — the stylesheet
+// lays out two columns under exactly this condition and the markup has to have
+// removed her half under exactly the same one, or the sheet gets a column with
+// a photograph in it and a column with a message box, side by side.
+//
+// `phl-h` would have been the obvious reach and is wrong: it starts at 800px
+// wide, which is over the SE (568), the 8 (667) and the 12 mini (780) on their
+// sides — three phones we target, all of them landing back on the desktop
+// composition.
+//
+// The 480px floor is what keeps a portrait phone out of here, and it is the
+// same worry MQ_PHONE's missing orientation clause answers: Android's soft
+// keyboard shortens the layout viewport until a 390- or 430-wide screen reports
+// itself as landscape, and both are under 480.
+const MQ_LAND = "(min-width: 480px) and (max-height: 520px) and (orientation: landscape)";
+
 export default function ContactModal({ open, onClose, assistant, copy }) {
     const [mounted, setMounted] = useState(false);
     // Whether this is a phone, decided before the sheet paints anything.
@@ -101,20 +128,27 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
     // same commit, so the first markup the sheet paints already knows, and her
     // half is never mounted on a phone, not even for a frame.
     const [phone, setPhone] = useState(false);
+    // And whether it is on its side, read the same way and in the same commit.
+    const [land, setLand] = useState(false);
     const closeRef = useRef(null);
     const wrapRef = useRef(null);
     const backdropRef = useRef(null);
     const [values, setValues] = useState({
-        name: "", email: "", phone: "", timeFrom: "", timeTo: "", message: "",
+        name: "", email: "", phone: "", dial: DEFAULT_DIAL, timeFrom: "", timeTo: "", message: "",
     });
 
     useEffect(() => {
         const mq = window.matchMedia(MQ_PHONE);
-        const read = () => setPhone(mq.matches);
+        const mqLand = window.matchMedia(MQ_LAND);
+        const read = () => { setPhone(mq.matches); setLand(mqLand.matches); };
         read();
         setMounted(true);
         mq.addEventListener("change", read);
-        return () => mq.removeEventListener("change", read);
+        mqLand.addEventListener("change", read);
+        return () => {
+            mq.removeEventListener("change", read);
+            mqLand.removeEventListener("change", read);
+        };
     }, []);
 
     // Where the keyboard is while the sheet is up.
@@ -381,12 +415,17 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                             <Req />&nbsp;|
                                         </span>
                                         <div className="telRow">
-                                            <span
-                                                {...editable(copy?.docId, "items.3.label", "text")}
-                                                className="prefix"
-                                            >
-                                                {labelAt(copy, 3)}
-                                            </span>
+                                            {/* The editable copy that used to
+                                                sit here was the string "+420 |"
+                                                — a prefix nobody could change
+                                                and a rule drawn with a
+                                                character. Both are the
+                                                control's now. */}
+                                            <DialPrefix
+                                                value={values.dial}
+                                                onChange={set("dial")}
+                                                separator
+                                            />
                                             <input type="tel" name="phone" value={values.phone} onChange={set("phone")} data-cursor="frame" />
                                         </div>
                                     </label>
@@ -413,6 +452,37 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                             </label>
                                         </div>
                                     </div>
+
+                                    {/* The right-hand column, when there is one.
+                                        Everything in here is a block in the flow
+                                        exactly as it was — `.ContactModal__aside`
+                                        is `display: contents` everywhere except
+                                        a phone in landscape, so on a portrait
+                                        phone, a tablet and a desktop it does not
+                                        generate a box and the form lays out to
+                                        the pixel it laid out to before.
+                                        Landscape is where it becomes a column,
+                                        and it exists because the three things it
+                                        holds have to travel together: the two
+                                        addresses, the message box and the send. */}
+                                    <div className="ContactModal__aside">
+                                    {/* Her half, on its side, is these two lines
+                                        and they go at the top of the column —
+                                        which is what was asked for, and also the
+                                        only place they can go: below the send
+                                        they would be a third block under a
+                                        button that already ends the sentence. On
+                                        a portrait phone they stay at the foot of
+                                        the form, where the block after this one
+                                        puts them. */}
+                                    {land && hasReach && (
+                                        <div
+                                            {...editableDoc(assistant?.id, "assistant")}
+                                            className="ContactModal__reach"
+                                        >
+                                            {reach}
+                                        </div>
+                                    )}
 
                                     {/* What the sheet was opened to say, and the
                                         last thing asked for: the four lines above
@@ -489,6 +559,7 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                             <span className="cornerButton__arrow"><Arrow direction="upRight" /></span>
                                         </button>
                                     </div>
+                                    </div>
                                 </form>
 
                                 {/* On a phone this is all that is left of her
@@ -498,7 +569,12 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                     are not writing. The document annotation
                                     comes with them so an editor still has the
                                     one way into her row. */}
-                                {phone && hasReach && (
+                                {/* `!land` because landscape has already put
+                                    these two at the head of the right-hand
+                                    column: a 568-wide screen matches MQ_PHONE
+                                    as well, and without the clause her
+                                    addresses would be on the sheet twice. */}
+                                {phone && !land && hasReach && (
                                     <div
                                         {...editableDoc(assistant?.id, "assistant")}
                                         className="ContactModal__reach"
@@ -526,7 +602,14 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                 also the only form of this that holds for a touch
                                 device which reports a pointer anyway (a tablet
                                 with a mouse, a phone with one attached). */}
-                            {!phone && (
+                            {/* `!land` for the same reason and one more: a phone
+                                on its side is 844 or 949 across, which is over
+                                MQ_PHONE's 750, so this half was still being
+                                built — and a WebGL portrait was still being
+                                fetched — on the screens with the least room for
+                                it. Measured before this clause: 278×208 of
+                                photograph at 844×390, 312×234 at 949×432. */}
+                            {!phone && !land && (
                             <div
                                 {...editableDoc(assistant?.id, "assistant")}
                                 className="ContactModal__person"

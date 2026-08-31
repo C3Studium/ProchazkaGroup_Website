@@ -83,6 +83,38 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
         max-height: 82vh;
         overflow-y: auto;
     }
+
+    // ---- tablet, upright ----
+    //
+    // A height rather than the content's. Upright, this panel holds the advisor
+    // sheet — a grid of ten faces with the chosen one enlarged under them — and
+    // the enlargement is what the sheet is FOR. Left to size itself the panel
+    // came to 772px at 818×1174, of which the ten faces took 402 and the rail
+    // 90, and the portrait that is the point of the thing got what was left.
+    //
+    // 85vh is 998 there, and every pixel of the difference goes to that
+    // portrait, because the faces above it are sized by their own width and do
+    // not grow with the box.
+    //
+    // `!important` on both: the block above sets `height: auto !important` for
+    // the menu, and the height is also an inline style framer animates (see
+    // SIZE in index.jsx), which a plain declaration cannot reach.
+    // Narrower with it, and the two are one decision: the sheet inside is a row
+    // of five faces with the chosen one enlarged under them, and the enlargement
+    // is the width of that row. Taking the width off the PANEL rather than off
+    // the row is what keeps those two edges the same edge — inset the row
+    // instead and the record below it either follows the inset (two margins) or
+    // does not (a record wider than the faces it belongs to).
+    //
+    // 83vw against the 92 the panel takes elsewhere. At 818 that is 679 across,
+    // five tiles of 136.
+    @include v(md) {
+        @include below-px(900) {
+            width: 83vw !important;
+            height: 85vh !important;
+            max-height: 85vh;
+        }
+    }
 }
 
 // The line the box comes out of, and the box's own top edge once it is there.
@@ -186,15 +218,45 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
         grid-template-columns 0.52s $curtain,
         grid-template-rows 0.52s $curtain;
 
+    // Five rows, not four, and PARTNEŘI in the fifth.
+    //
+    // It used to be four with that box hidden, on the grounds that eight boxes
+    // will not go into a column anyone can reach and PARTNEŘI is the page
+    // furthest from why anyone opened the menu. The trade is real; what it was
+    // paid with is a page that then has no way in from the menu at all. A fifth
+    // row buys the same room by making each box shorter instead — 62vh over five
+    // rather than four, so a box goes from about 131px to 104 on an 844 screen,
+    // which is still a whole line of type over a photograph.
+    //
+    // Across both columns, because it is the last thing in the panel and a
+    // full-width block closes it the way NABÍDKA opens it.
+    //
+    // MUST match SPANS_COMPACT in index.jsx, which draws the cuts from these
+    // tracks — see the note there.
     @include below-px(820) {
         grid-template-columns: repeat(2, minmax(0, 1fr));
-        grid-template-rows: repeat(4, minmax(0, 1fr));
+        grid-template-rows: repeat(5, minmax(0, 1fr));
         grid-template-areas:
             "hlavni   kontakt"
             "nabidka  nabidka"
             "benefit  onas"
-            "poradci  recenze";
+            "poradci  recenze"
+            "partneri partneri";
         min-height: 62vh;
+    }
+
+    // The same five rows at 820–900 upright, which the block above cannot reach:
+    // it is bounded at 820 and a tablet runs to 900.
+    @include v(md) {
+        @include from-px(600) {
+            grid-template-rows: repeat(5, minmax(0, 1fr));
+            grid-template-areas:
+                "hlavni   kontakt"
+                "nabidka  nabidka"
+                "benefit  onas"
+                "poradci  recenze"
+                "partneri partneri";
+        }
     }
 }
 
@@ -203,12 +265,11 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     min-width: 0;
     min-height: 0;
 
-    // Eight boxes will not go into a column anyone can reach, and PARTNEŘI is
-    // the one a phone can spare — it is the page furthest from why anyone
-    // opened the menu. The homepage stays: it is the front door.
-    @include below-px(820) {
-        &[style*="partneri"] { display: none; }
-    }
+    // PARTNEŘI used to be hidden below 820 — the four-row map had seven seats
+    // and eight boxes. It has five rows now and the box is shown everywhere the
+    // panel is, which is what a menu is for: /nabidky had no other way in from
+    // it. Only a phone on its SIDE still drops it, further down this file, where
+    // the constraint is height rather than seats.
 }
 
 // The contact box is the one thing in the panel that does something rather than

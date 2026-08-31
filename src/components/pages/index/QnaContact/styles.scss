@@ -552,6 +552,60 @@
         }
     }
 
+    // ---- tablet, upright ----
+    //
+    // The heading and the line under it in one column, the photograph beside
+    // them — which is the desktop's arrangement with the three tracks folded
+    // into two, not a new layout.
+    //
+    // The block above gives this stop the phone's column, and there the
+    // photograph is a full-width band 22vh tall between the heading and the
+    // sentence: on an 818 screen that is 180px of section spent separating two
+    // things that belong together, and it pushes the tabs and the panel under
+    // them further down a component that is already the longest on the page.
+    // Beside the reading it costs nothing — the column it stands in was empty.
+    @include v(md) {
+        @include below-px(900) {
+            .QnaContact__head {
+                grid-template-columns: minmax(0, 1fr) auto;
+                // The second row takes the slack, and the sentence sits at the
+                // top of it. Written `auto auto`, the photograph's two-row span
+                // is taller than the heading and the sentence together, so the
+                // grid grew BOTH rows to reach it and put 77px of nothing
+                // between a heading and the line that belongs under it.
+                grid-template-rows: auto minmax(0, 1fr);
+                column-gap: 4vw;
+                row-gap: 1.5vh;
+                align-items: start;
+
+                h2 {
+                    grid-column: 1;
+                    grid-row: 1;
+                }
+
+                // Second row of the first column: under the heading, which is
+                // what it is a note on.
+                .QnaContact__head__text {
+                    grid-column: 1;
+                    grid-row: 2;
+                    margin: 0;
+                    text-align: left;
+                }
+
+                // Both rows of the second, so it stands against the pair rather
+                // than against either one of them.
+                .QnaContact__head__photo {
+                    grid-column: 2;
+                    grid-row: 1 / -1;
+                    align-self: start;
+                    width: 34vw;
+                    height: 22vh;
+                    margin-top: 0;
+                }
+            }
+        }
+    }
+
     // ---- phone landscape (wider than the stack point, but ~390px tall) ----
     // Width alone reads as a small desktop here, and the 100vh section with a
     // 40vh box clipped both panels. The section scrolls instead; the two-column

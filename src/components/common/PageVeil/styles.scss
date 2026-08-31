@@ -34,6 +34,27 @@ html[data-veil="1"] {
         pointer-events: none;
         will-change: clip-path, transform, opacity;
     }
+
+    // The patička is NOT part of the page — it is mounted once in _app, beside
+    // <Component>, because it belongs to no route. So the rule below that eases
+    // the old page out never reached it: it stayed at full opacity while the
+    // page it belongs under had gone, and the veil is transparent by design, so
+    // it sat there in plain sight for the length of every transition.
+    //
+    // Held for the WHOLE run, deliberately outside the `:not(...)` qualifier the
+    // page carries: the window that opens at the end is a hole cut in <main>,
+    // and the patička is not in it. It comes back on the shared transition
+    // below, once the attribute is dropped — which is the same way the navbar
+    // is taken out and brought back.
+    //
+    // Opacity only. This element's reveal is a `position: sticky` child inside
+    // a `clip-path` window, and a transform on the box around it would be a new
+    // containing block under the one thing on the site whose whole effect is
+    // where it sticks.
+    .SiteFooter {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 // The exit (and the covered ride): the old page eases down and away around

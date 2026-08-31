@@ -214,15 +214,13 @@ export default function PageVeil() {
         }
     }, [phase, job, winner, router, setGate]);
 
-    // Fresh page starts at its top — under the veil, never seen.
-    useEffect(() => {
-        const done = () => {
-            window.scrollTo(0, 0);
-            if (window.lenis) window.lenis.scrollTo(0, { immediate: true });
-        };
-        router.events.on("routeChangeComplete", done);
-        return () => router.events.off("routeChangeComplete", done);
-    }, [router.events]);
+    // A fresh page starting at its top — under the veil, never seen — used to be
+    // handled here, on this component's own routeChangeComplete. It is in _app
+    // now, on the same event, because it was only ever half the rule: a veil run
+    // is one of three ways to arrive at a page and the only one this component
+    // can see. A reload and a back step both restore an old offset and neither
+    // passes through here. Two handlers on one event, one of them a strict
+    // subset of the other, is worth having as one.
 
     // Label widths, re-measured when the run's cast can change (one layout
     // read per change, never per frame).

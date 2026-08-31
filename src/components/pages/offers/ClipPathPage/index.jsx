@@ -26,15 +26,35 @@ const clamp01 = (v) => Math.min(1, Math.max(0, v));
 // Viewport heights of scroll each chapter is given.
 const RUN = 115;
 
+// And the last chapter is held for this long after it finishes arriving.
+//
+// The sequence used to end inside itself. `lead` ran 0→3 across the whole of
+// the section's scroll, so the fourth chapter's window finished opening at
+// progress 1.0 — at which point the section stopped being sticky. There was a
+// sheet of the page's own ground fading up over the last 7% to cover the seam,
+// and measured at 1440×900 it began while the fourth chapter was 83% open and
+// was solid by 99%: the last of the four was never once on the screen, lit and
+// still. The other three each get a stretch of their own before the next climbs
+// over them.
+//
+// The sheet is gone and this is what replaced it. The chapters now finish at
+// 0.852 of the section, and the 60vh after that is the fourth one standing
+// open, in full, while the reader decides what to do about it. That is a better
+// ending than a fade to black for the one chapter carrying a link.
+const CLOSE_RUN = 60;
+
 // The one gate this page has, and the exact query styles.scss opens its
 // `stacked` block on — the two have to agree to the pixel, because every value
 // on this page is measured against a section that is 445vh tall in one layout
 // and as tall as its own contents in the other.
 //
-// Width alone cannot say it. A phone held sideways is 844x390 and squeezes
-// under 900 by luck; the next one along is 932x430 and does not, and it is
-// still a phone. The height clause is what actually names the case.
-const STACK_QUERY = "(max-width: 900px), (max-height: 520px)";
+// Nothing held upright is in it — phone, tablet or turned-sideways monitor.
+// They all pin and ride like a laptop; only a phone has the reading placed
+// differently. See the mixin in styles.scss for what the two arms are and what
+// they are what is left of.
+const STACK_QUERY =
+    "(max-width: 900px) and (min-height: 521px) and (orientation: landscape)," +
+    "(max-width: 479px) and (orientation: landscape)";
 
 // False on the server and on the first client paint, so the markup either side
 // of hydration is identical — matchMedia cannot be read while rendering. The
@@ -95,12 +115,11 @@ export default function Partners() {
     });
     // Softened, so a chapter keeps arriving for a beat after the wheel stops.
     const ride = useSpring(scrollYProgress, { stiffness: 110, damping: 30, mass: 0.5 });
-    const lead = useTransform(ride, (p) => p * last);
+    // Where the chapters are done, as a share of the section's own scroll. The
+    // rest of it is the hold — see CLOSE_RUN.
+    const rideSpan = (last * RUN) / (last * RUN + CLOSE_RUN);
 
-    // A full stop. Without it the fourth chapter simply stops being sticky and
-    // the footer is suddenly there; this lets the sequence go out into the
-    // page's own ground instead of being cut off mid-sentence.
-    const closing = useTransform(scrollYProgress, [0.93, 1], [0, 1]);
+    const lead = useTransform(ride, (p) => clamp01(p / rideSpan) * last);
 
     useMotionValueEvent(lead, "change", (v) => {
         const i = Math.min(last, Math.max(0, Math.round(v)));
@@ -115,7 +134,7 @@ export default function Partners() {
             // section is as tall as the four chapters it actually contains —
             // the stylesheet says so too, but stating it here keeps a 445vh
             // inline value off an element that is 3000px tall.
-            style={stacked ? undefined : { height: `${100 + last * RUN}vh` }}
+            style={stacked ? undefined : { height: `${100 + last * RUN + CLOSE_RUN}vh` }}
             initial={{ opacity: 0 }}
             animate={ground ? { opacity: 1 } : undefined}
             transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
@@ -151,17 +170,14 @@ export default function Partners() {
                         calm={calm}
                     />
                 ))}
-                {/* The full stop belongs to the pinned ride. Stacked it is a
-                    black sheet over the whole run of chapters, and because the
-                    section's own progress reaches 0.93 while the reader is
-                    still inside the last two, it painted them out entirely. */}
-                {!stacked && (
-                    <motion.span
-                        className="Partners__close"
-                        aria-hidden="true"
-                        style={{ opacity: closing }}
-                    />
-                )}
+                {/* The full stop used to be here: a sheet of the page's own
+                    ground over the whole stage, fading up to solid as the
+                    section ran out. It is gone. What it was for — not letting
+                    the sequence stop mid-sentence — is the tail of scroll below
+                    (CLOSE_RUN), and that does it by holding the last chapter
+                    rather than by painting it out. The fourth partner is the
+                    one thing on this page a reader might act on; ending on it
+                    means leaving it up. */}
             </div>
         </motion.section>
     );
@@ -262,6 +278,11 @@ function Chapter({ item, index, lead, stacked, calm }) {
                         />
                     </GridDistortion>
                 </motion.div>
+                {/* The page's half-black — see .photoVeil in globals.scss.
+                    Constant, and under the wash rather than mixed into it: the
+                    wash is this chapter's own STATE (it lifts as the next plate
+                    climbs over), and a photograph's weight is not a state. */}
+                <span className="photoVeil" aria-hidden="true" />
                 <motion.span className="Partners__chapter__wash" aria-hidden="true" style={{ opacity: still ?? dim }} />
             </div>
 

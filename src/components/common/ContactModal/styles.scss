@@ -13,7 +13,22 @@
     z-index: 1001;
     display: grid;
     place-items: center;
-    padding: 12vh 5vw;
+    // 7vh, and the number is not a taste: it is what makes `place-items: center`
+    // mean anything here.
+    //
+    // The padding is symmetric, so the box this centres in was 100vh − 24vh =
+    // 76vh tall. The sheet below is allowed 82vh, and 86vh on a short laptop —
+    // taller than the box centring it. An item bigger than its grid area does
+    // not come out centred, it comes out hanging off the bottom, and that is
+    // exactly what was measured: the top edge sat at 12vh at every size, dead on
+    // the padding, while the foot ran to within 18px of the bottom of a 720
+    // screen and 38px of a 768.
+    //
+    // At 7vh the box is 86vh, which is the tallest the sheet is ever allowed to
+    // be, so it fits and the centring does its job. The sheet rises about 5vh on
+    // a laptop and the gap above and below it comes out equal — 52/53 at
+    // 1260×720, 65/65 at 1366×768, 81/81 at 1440×900, 124/123 at 1920×1080.
+    padding: 7vh 5vw;
     pointer-events: none;
 }
 
@@ -87,7 +102,16 @@
 
 .ContactModal__claim {
     margin: 2vh 0 4vh;
-    max-width: 28ch;
+    // 28ch was a measure for a column of prose and this is one sentence. It
+    // held the line to 245px inside a 577px column at 1260×720 and to 348px at
+    // 1920 — a third of the column left empty either side of it — and bought a
+    // third line with the space it was not using. At 40ch the sentence sets in
+    // two lines at every width from a small laptop up, and the line it gives
+    // back is a line the sheet was overflowing by.
+    //
+    // A phone overrides this to `none` (the column IS the sheet there) and a
+    // phone on its side drops the sentence altogether. Neither is touched.
+    max-width: 40ch;
     font-family: "Switzer-Light", sans-serif;
     font-size: clamp(0.95rem, 1.2vw, 1.35rem);
     line-height: 1.5;
@@ -96,7 +120,11 @@
 
 .ContactModal__form {
     position: relative;
-    padding: 4vh 2vw;
+    // The last eleven pixels. 1440×900 is the one stop where the gaps and the
+    // fields above did not quite pay for the sheet on their own — it is not
+    // short enough for the laptop block below to reach it and not tall enough
+    // to have the room 1920 does.
+    padding: 3.4vh 2vw;
     border: 1px solid rgba(255, 255, 255, 0.16);
 
     // Arm and standoff both in rem, and they have to move together: the marks
@@ -116,11 +144,21 @@
     .corner--bl { bottom: -0.375rem; left: -0.375rem; border-bottom-width: 1px; border-left-width: 1px; }
     .corner--br { bottom: -0.375rem; right: -0.375rem; border-bottom-width: 1px; border-right-width: 1px; }
 
-    label { display: block; margin-bottom: 2.4vh; }
+    // The sheet was taller than the screen it opens on at every size measured —
+    // 1260×720, 1366×768, 1440×900 and 1920×1080 all scrolled inside themselves,
+    // by 89, 78, 125 and 97 pixels. Nothing in here was wrong individually; the
+    // rhythm was simply set for a screen with room to spare and there is none.
+    //
+    // The height comes back out of the gaps and the fields, in that order, and
+    // NOT out of the message box — see the textarea below, which is given its
+    // old padding back on purpose. It is the one field whose size means
+    // something: it is where the reader writes a paragraph, and a shorter box
+    // says a shorter answer will do.
+    label { display: block; margin-bottom: 1.5vh; }
 
     .label {
         display: block;
-        margin-bottom: 0.9vh;
+        margin-bottom: 0.55vh;
         font-family: "Switzer-Light", sans-serif;
         font-size: 0.64rem;
         letter-spacing: 0.2em;
@@ -141,7 +179,12 @@
         appearance: none;
         display: block;
         width: 100%;
-        padding: 1.1vh 0;
+        // Halved, and it is the single biggest saving in the sheet: five fields
+        // × two edges. A one-line field is a rule with a word sitting on it —
+        // the air above and below it is not doing any of the reading.
+        //
+        // Touch keeps its 44px floor further down, so no finger target moves.
+        padding: 0.55vh 0;
         border: 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.26);
         // Not inherited from the border shorthand above, and iOS rounds a
@@ -164,6 +207,11 @@
     textarea {
         resize: none;
         line-height: 1.5;
+        // The padding the fields above just gave up, kept here. The message box
+        // is the one field that is not a rule with a word on it, and its height
+        // is the sheet's invitation to write something — so it ends this change
+        // exactly the height it began it.
+        padding: 1.1vh 0;
         // Three lines and the room they need, so the box reads as somewhere to
         // write a paragraph rather than a fourth one-line field that happens to
         // wrap. `rows` alone is a count of lines the browser sizes from its own
@@ -212,6 +260,17 @@
         color: rgba(255, 255, 255, 0.4);
     }
 }
+
+// The right-hand column of the landscape sheet, and nothing at all anywhere
+// else.
+//
+// `display: contents` rather than a wrapper that is unset somewhere: the box is
+// never generated, so the message box, the consent line and the send lay out as
+// direct children of the form exactly as they did before this element existed —
+// same block flow, same margins, same selectors (every rule in here reaches
+// them as a descendant, not a child). The landscape block at the foot of the
+// file is the one place it becomes a box.
+.ContactModal__aside { display: contents; }
 
 .ContactModal__req { font-style: normal; color: rgba(255, 255, 255, 0.85); }
 // ---- the send ----------------------------------------------------------
@@ -319,11 +378,15 @@
     &:hover { color: var(--wText); border-bottom-color: var(--wText); }
 }
 
-// The two addresses at the foot of the form — a phone's whole right-hand half.
+// The two addresses — a phone's whole right-hand half, at the foot of the form
+// in portrait and at the head of the second column in landscape.
 //
 // Unscoped on purpose. This element only exists once the markup has decided it
-// is on a phone (MQ_PHONE in index.jsx), so a media query around it would
-// restate a branch that has already happened, and get to disagree with it.
+// is on a phone (MQ_PHONE / MQ_LAND in index.jsx), so a media query around it
+// would restate a branch that has already happened, and get to disagree with
+// it. What the landscape block does add is the handful of numbers that only
+// make sense when these two lines are the top of a column rather than the
+// bottom of a form — the air above them, and the room the ✕ needs.
 //
 // No rule and no "nebo rovnou" over them: the send is already the end of a
 // sentence drawn as a line, and a second hairline 28px under it would read as
@@ -430,6 +493,132 @@
     .ContactModal__form { padding: 4vh 6vw; }
 }
 
+// ---- the tablet, upright -----------------------------------------------
+//
+// 750 to 900 and portrait, and both ends of that are somebody else's decision:
+// 900 is where the block above hands over to the desktop grid, and 750 is
+// MQ_PHONE — below it her half is not laid out, it is NOT BUILT, so there is no
+// photograph here to put anywhere. This block is exactly the band where the
+// markup has one and the screen is upright.
+//
+// The block above gave that band the phone's arrangement: one column, her
+// photograph a 16/10 letterbox across the top, the form under it. On 768×1024
+// that spends the first third of the sheet on an introduction and leaves the
+// form running down a single column, which is a shape for a screen 390px wide,
+// not for one nearly twice that.
+//
+// So: her half is a row — photograph on the left, her name and her two
+// addresses beside it — and the form is the two columns the landscape block
+// already draws, at a tablet's spacing rather than a 320px screen's.
+@include v(md) {
+    @include between-px(750px, 900px) {
+        // The form first, her half under it. The block above puts her on top
+        // because on ONE narrow column she would otherwise be pushed off the
+        // bottom by the form — but this is two columns of form on a screen
+        // nearly 800 across, and the sheet was opened to write in. The
+        // introduction reads better as a signature than as a preface.
+        //
+        // So the ✕'s clearance moves up here with the reading. It is pinned to
+        // the top-right of the sheet and no longer scrolls past anything.
+        .ContactModal__formCol {
+            grid-row: 1;
+            padding: calc(1.4vh + 44px) 5vw 2vh;
+        }
+
+        .ContactModal__person {
+            grid-row: 2;
+            // A grid rather than a flex row, because her half's children are
+            // flat — photograph, name, role, rule, "or", two addresses — with
+            // no wrapper to make a second column out of. The photograph takes
+            // the first track and spans down it; everything else is sent to the
+            // second and stacks there in its own order.
+            display: grid;
+            // Smaller. Under the form it is a signature rather than an
+            // introduction, and 38% of the sheet was a portrait the size of the
+            // thing it was signing.
+            grid-template-columns: 26% minmax(0, 1fr);
+            column-gap: 4vw;
+            align-content: start;
+            // No clearance for the ✕ any more — it is pinned to the top of the
+            // sheet and the reading is up there with it now.
+            padding: 1vh 5vw 2.5vh;
+        }
+
+        .ContactModal__photo {
+            grid-column: 1;
+            // Eight is more rows than her half will ever have — six today, and
+            // the CMS decides two of them. Overshooting a span costs nothing;
+            // `1 / -1` would resolve to `1 / span 1` on a grid with no explicit
+            // rows, which is the trap this file has hit before.
+            grid-row: 1 / span 8;
+            // `start`, not the default stretch: stretched over its span the row
+            // heights would set the height and the 4:5 would be decoration.
+            align-self: start;
+            // The cap in the block above is for a photograph across the top of
+            // a phone. Here it is a portrait beside a column of type, and the
+            // ratio is the whole of its shape.
+            aspect-ratio: 4 / 5;
+            max-height: none;
+        }
+
+        .ContactModal__person > *:not(.ContactModal__photo) {
+            grid-column: 2;
+        }
+
+        // Her name leads the second column, so it starts at the top of the
+        // photograph rather than a third of the way down it.
+        .ContactModal__name { margin-top: 0; }
+
+        // The form in two columns — the same division the landscape block
+        // makes, and for the same reason: the four one-line fields want a
+        // narrow measure and the message box wants a wide one. Even tracks
+        // here, not 0.9/1.1: at 768 both columns are over 300px and neither is
+        // the one that starves.
+        .ContactModal__form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            // Four rows for the four things on the left and a fifth for the
+            // slack, so the message box grows into it instead of leaving a hole
+            // under the send. The aside spans all five.
+            grid-template-rows: auto auto auto auto minmax(0, 1fr);
+            column-gap: 3vw;
+            padding: 2vh 4vw;
+
+            > label { grid-column: 1; }
+            > .timeRow { grid-column: 1; grid-row: 4; margin-bottom: 0; }
+        }
+
+        // Message, consent and send, travelling together. The two addresses are
+        // NOT in here on a tablet — they are beside her photograph above, and
+        // the markup only puts them in this column when the sheet is landscape.
+        .ContactModal__aside {
+            display: flex;
+            flex-direction: column;
+            grid-column: 2;
+            grid-row: 1 / -1;
+            min-width: 0;
+
+            > label {
+                display: flex;
+                flex-direction: column;
+                flex: 1 1 auto;
+                min-height: 0;
+                margin-bottom: 0.75rem;
+            }
+
+            // Taller, and it is the message box that makes the form taller:
+            // the right-hand column is the tall one, so the form is as tall as
+            // this. The room comes from the photograph below, which gave up
+            // twelve points of the sheet's width and the height that went with
+            // it — a sheet opened to write in should spend that on the writing.
+            textarea {
+                flex: 1 1 11rem;
+                min-height: 9rem;
+            }
+        }
+    }
+}
+
 // ---- phone -------------------------------------------------------------
 // The sheet, on a phone, is the form.
 //
@@ -444,11 +633,11 @@
 // the top of the sheet, and the rest of this block is what that leaves to
 // settle: the claim's measure, the rhythm between fields, and the send.
 //
-// Placed BEFORE the two landscape blocks that follow, not after. At 568×320
-// this and `phs-h` both match, and `phs-h` has already made the decisions a
-// viewport 320px tall needs — a 20px top padding where this one spends 56 on
-// clearing a ✕ that is beside the eyebrow anyway, and a sheet measured against
-// the height rather than the width. Those have to win, so they come last.
+// Placed BEFORE the landscape block that follows, not after. At 568×320 this
+// and `phs-h` both match, and `phs-h` has already made the decisions a viewport
+// 320px tall needs — a form in two columns rather than one, a ✕ the eyebrow
+// sits beside, and a sheet measured against the height rather than the width.
+// Those have to win, so they come last.
 @include below(xs) {
     // Nearly the whole screen, and the reason is the send button.
     //
@@ -542,59 +731,228 @@
 }
 
 // ---- phone landscape ---------------------------------------------------
-// ≤520px tall there is no half of the screen to give the photograph: the form
-// leads, everything compacts, and the sheet scrolls inside itself instead of
-// clipping. Written after the narrow block on purpose — at 844×390 both match,
-// and source order is what lets these win.
+// A phone on its side: 568×320 at the smallest, 949×432 at the largest. Wide,
+// and 320 to 432 pixels tall — a shape neither of the two blocks above was
+// written for, and the one the sheet was worst on. Measured before this block:
+// the form was one column at all three sizes and the scroller ran 439px past
+// the bottom at 568×320, 288 at 844×390 and 244 at 949×432, so the send button
+// was off the screen on every phone anyone could turn sideways.
+//
+// So landscape gets its own composition, and the point of it is that nothing
+// scrolls:
+//
+//   left    jméno, e-mail, telčíslo and the Od/Do pair — who you are and when
+//           to ring, four short fields that want a narrow column
+//   right   her two addresses, then the message box, then the send under it —
+//           the reasons the sheet was opened, in the order they are used
+//
+// and no photograph at any size. Two columns is what buys the height back: the
+// form is 606px tall stacked at 568×320 and 257 beside itself.
+//
+// `phs-h` and not `phl-h`. `phl` starts at 800px wide, which is over the SE
+// (568), the 8 (667) and the 12 mini (780) held sideways — three phones this
+// has to work on, all of which would fall back to the desktop sheet. `phs` is
+// min-width 480 / max-height 520 / landscape: every phone on its side, no
+// tablet (768 in landscape) and no laptop. index.jsx spells the same query as
+// MQ_LAND, because the markup has to have removed her half under exactly the
+// condition the stylesheet lays out two columns under.
+//
+// Written after the narrow and portrait blocks on purpose — at 568×320 all
+// three match and source order is what lets this one win. Which means it has to
+// answer every number they set, not only the ones it wants to change.
 @include phs-h {
-    .ContactModal__wrap { padding: 12px 5vw; }
+    // 10px of inset, the same the portrait block uses, and the row spelled out
+    // for the same reason it is spelled out there: the wrap is a bare grid, its
+    // one implicit row is `auto`, and a track that grows to its content makes
+    // `max-height: 100%` on the sheet mean "as tall as the sheet already is" —
+    // `.ContactModal__scroll` then comes out with scrollHeight === clientHeight
+    // and is not a scroller at all. `minmax(0, 1fr)` pins the track to the wrap,
+    // which is fixed to inset 0 and therefore the layout viewport.
+    //
+    // That is what keeps the send button reachable with the keyboard up. Two
+    // columns fit a 320-tall screen; they do not fit the ~186px Android leaves
+    // when a field takes focus, and on that screen something has to scroll.
+    // `100%` and not `100vh` for the same reason — vh goes on measuring the
+    // screen the keyboard is covering.
+    .ContactModal__wrap {
+        padding: 0.625rem;
+        grid-template-rows: minmax(0, 1fr);
+    }
+    .ContactModal { max-height: 100%; }
+    .ContactModal__close { top: 0.625rem; right: 0.625rem; }
 
-    .ContactModal { max-height: calc(100vh - 24px); }
+    // One column of sheet, holding two columns of form. The seam divided the
+    // form from the person's half and there is no person's half here; the
+    // second column is drawn by the space between them, not by a rule.
+    .ContactModal__scroll { grid-template-columns: minmax(0, 1fr); }
+    .ContactModal__seam { display: none; }
 
-    // Back to document order: the form first. Opening on a screen 390px tall
-    // means opening on what the visitor came to do.
     .ContactModal__formCol {
         grid-row: 1;
-        padding: 20px 7vw 4vh;
-    }
-    .ContactModal__person {
-        grid-row: 2;
-        padding: 2vh 7vw 4vh;
-    }
-
-    // The cap the phone block above lifts, put back. There it buys the claim a
-    // line on a column 300px wide; here the column is 430 across and the line
-    // runs the width of the sheet, straight at the ✕ pinned in the corner —
-    // measured at 568×320 it stops 13px short of it, which is the string's luck
-    // and not the layout's doing.
-    .ContactModal__claim { margin: 1.4vh 0 2.6vh; max-width: 28ch; }
-    .ContactModal__photo { max-height: 60vh; }
-    .ContactModal__close { top: 10px; right: 10px; }
-    // No height for the box here. `lt-h` below is `max-height: 800px` and this
-    // is `max-height: 520px`, so every screen this block describes matches that
-    // one too and it is written later — a value set here would be overwritten
-    // by the laptop's on the very phones it was meant for. The one shortened
-    // height lives there and covers both.
-}
-
-// From 800px wide there is room to lay the halves beside each other again —
-// the sheet reads like the desktop one, only denser, and the internal scroll
-// carries whatever the 390px of height cannot show.
-@include phl-h {
-    .ContactModal__scroll {
-        grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
-    }
-    .ContactModal__seam { display: block; }
-    .ContactModal__formCol {
         grid-column: 1;
-        padding: 20px 3.5vw 4vh;
+        display: flex;
+        flex-direction: column;
+        // 8px top and bottom, 14 at the sides. Portrait can spend 10 all round
+        // because it has 844px of screen; at 320 the two pixels a side are a
+        // line of the consent notice, and the sheet's own border is still there
+        // to say where the sheet ends.
+        padding: 0.5rem 0.875rem;
     }
-    .ContactModal__person {
-        grid-row: 1;
+
+    // The eyebrow is the whole of the header, and it sits opposite the ✕ — so
+    // it keeps its hands off the corner the ✕ is pinned in. "Spojme se" is nine
+    // characters and clears it by 380px today; the string comes from the Studio
+    // and the next one might not.
+    .ContactModal__eyebrow {
+        margin-bottom: 0.35rem;
+        padding-right: 2.75rem;
+    }
+
+    // The claim does not. Measured at 568×320: the sheet has 298px inside its
+    // border, the two columns need 257 of them, and the claim is three lines
+    // and 81px with its margins — there is no arrangement of it that leaves the
+    // send button on the screen. It is the same trade the portrait block made
+    // with the photograph, and the reader loses a sentence rather than a form
+    // they can finish. Hidden rather than dropped from the markup, unlike her
+    // half: this is one <p> with nothing behind it, and her half is a WebGL
+    // canvas and a portrait fetch.
+    .ContactModal__claim { display: none; }
+
+    .ContactModal__form {
+        // Grows into whatever the column has spare, and gives it back in one
+        // order: the message box shrinks to the 3rem floor below, and only then
+        // does the sheet start to scroll. Which is what has to happen under the
+        // keyboard — the layout viewport drops to about 186px at 568×320, the
+        // left column alone is 250 of them and cannot shrink at all, so
+        // something scrolls or the send button is gone.
+        flex: 1 1 auto;
+
+        // The frame comes off. A hairline 6px inside the sheet's own hairline is
+        // a second border around the first, and the 18px of padding and rule it
+        // costs is a row of the form at 320px tall. Its top-right corner mark
+        // also lands under the ✕, which is pinned 10px off the same corner.
+        // `> .corner` and not `.corner`: the submit button carries four of its
+        // own, deeper in.
+        padding: 0;
+        border: 0;
+        > .corner { display: none; }
+
+        display: grid;
+        // Wider on the right. The left column holds four one-line fields and is
+        // legible at 220px; the right holds a message box and a button 194px
+        // across, and starves first.
+        grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+        // Four rows for the four things on the left, and a fifth that takes
+        // whatever a 432px-tall screen has spare — the aside spans all five, so
+        // the slack lands inside it and the message box grows into it instead
+        // of leaving a hole under the send.
+        grid-template-rows: auto auto auto auto minmax(0, 1fr);
+        column-gap: 1.25rem;
+
+        // The three at the top of the form. The message box is not among them
+        // any more — it is inside the aside, which is why this can stay a plain
+        // child selector.
+        > label { grid-column: 1; }
+        > .timeRow { grid-column: 1; grid-row: 4; margin-bottom: 0; }
+
+        // The rhythm, tighter than portrait's by about a third. Portrait spends
+        // 1.25rem between fields because it has 844px of screen; here the four
+        // fields and their labels have to come in under 250.
+        label { margin-bottom: 0.4rem; }
+        // 1.1 rather than the font's own leading. These are one line of 10px
+        // uppercase with a fifth of an em of tracking, and the 3.3px the normal
+        // line box hangs above and below each of them is, over the four of them
+        // and the fifth in the aside, sixteen pixels of a screen 320px tall —
+        // none of it legibility.
+        .label { margin-bottom: 0.15rem; line-height: 1.1; }
+        .gdpr { margin: 0 0 0.6rem; }
+    }
+
+    // The right-hand column: two addresses, a message box, the consent line and
+    // the send. `display: contents` everywhere else, a flex column here.
+    .ContactModal__aside {
+        display: flex;
+        flex-direction: column;
         grid-column: 2;
-        padding: 20px 3.5vw 4vh;
+        // All five rows, so the column is as tall as the form and the message
+        // box below has somewhere to grow. `-1` resolves against the explicit
+        // grid, which is why the rows above are written out rather than left
+        // implicit — `1 / -1` on an implicit grid is `1 / span 1`.
+        grid-row: 1 / -1;
+        min-width: 0;
+
+        // The message box takes the slack. It is the one field whose size is
+        // worth something — everything else in here has a height it wants and
+        // no use for more.
+        > label {
+            display: flex;
+            flex-direction: column;
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-bottom: 0.5rem;
+        }
+
+        // The basis, and not only a min-height. A textarea's automatic size is
+        // its `rows` — three lines, 83px with the touch block's 16px type — and
+        // an `auto` basis hands that number to the column as the height it
+        // wants, whatever floor is under it. Measured at 568×320: the right
+        // column came out 277px against a sheet with 298, the grid stretched to
+        // hold it, and the send went 18px past the bottom. 5rem is what the box
+        // asks for, 3rem is what it will take, and the shrink between them is
+        // the whole of the sheet's give on the shortest screen we target.
+        textarea {
+            flex: 1 1 4rem;
+            min-height: 3rem;
+        }
     }
-    .ContactModal__photo { aspect-ratio: 4 / 3; max-height: none; }
+
+    // Her two addresses, at the head of the column rather than the foot of the
+    // form.
+    .ContactModal__reach {
+        margin-top: 0;
+        margin-bottom: 0.55rem;
+        // The ✕ is 44px of tap target pinned 10px off the sheet's right edge,
+        // and this column's own edge is 15px in from it — so 44px of padding
+        // here is what keeps an address out from under the only way out. Empty
+        // space, not an overlap: two tap targets on top of each other is the
+        // bug the portrait pass spent the gap below fixing.
+        padding-right: 2.75rem;
+        // 1.15rem, and it is the same arithmetic portrait's 1.25 comes out of,
+        // run against the shorter box below. The links are 27.6px tall here, so
+        // the 44px hit boxes they hang are 27.6 + gap apart centre to centre and
+        // the gap has to clear 16.4 for them not to lie on top of each other.
+        // 1rem measured 0.4px short of it — a hairline of the sheet where the
+        // wrong address rings.
+        gap: 1.15rem;
+
+        // Enough padding to hang the underline off and no more. Portrait can
+        // afford 0.55rem a side because these two are the last thing on a long
+        // form; here they are the top of a column with a message box under them.
+        // The 44px target is the ::after above, not the box, so this costs
+        // nothing a thumb can feel.
+        //
+        // And the address is allowed to break mid-word. An e-mail has no break
+        // opportunity in it — no space, and a browser will not break on the @ or
+        // the dots — so a column too narrow for one does not wrap it, it lets it
+        // run: measured at 480×320, the widest this block reaches down to, the
+        // address ran 40px past its own padding and straight under the ✕. From
+        // 568 up it is one line either way.
+        .ContactModal__link {
+            padding-top: 0.3rem;
+            padding-bottom: 0.3rem;
+            overflow-wrap: anywhere;
+        }
+    }
+
+    // No wrapping down here. The portrait block lets the rule drop to its own
+    // line because at 320px wide the button is nearly the whole form; the right
+    // column is 275px at the narrowest landscape size and the line is a line.
+    .ContactModal__send {
+        flex-wrap: nowrap;
+        gap: 0.75rem;
+    }
+
+    .ContactModal__send__rule { flex: 1 1 1.5rem; min-width: 1.5rem; }
 }
 
 // ---- short laptop ------------------------------------------------------
@@ -602,18 +960,47 @@
 // here. Shaving the two paddings and the claim's air is cheaper than letting a
 // laptop scroll a dialog a desktop shows whole.
 @include lt-h {
+    // 86vh stays, and it is now exactly the height of the box the wrap centres
+    // the sheet in — see the note up there. Raising it would put the sheet back
+    // outside that box and hang it off the bottom edge again, so the last of the
+    // room has to come out of the paddings instead.
+    //
+    // What is left to find is small and real: at 1250×677 — the shortest laptop
+    // reported — the sheet still scrolled inside itself by 17px after the
+    // centring was fixed. These four trims are that 17px, taken where a
+    // fraction of a vh is a fraction of a gap nobody reads.
     .ContactModal { max-height: 86vh; }
-    .ContactModal__formCol { padding: 3.6vh 3vw; }
-    .ContactModal__person { padding: 3.6vh 3vw; }
-    .ContactModal__claim { margin: 1.6vh 0 2.8vh; }
-    .ContactModal__form { padding: 3vh 2vw; }
+    .ContactModal__formCol { padding: 3.2vh 3vw; }
+    .ContactModal__person { padding: 3.2vh 3vw; }
+    .ContactModal__claim { margin: 1.2vh 0 1.9vh; }
+    .ContactModal__form { padding: 2vh 2vw; }
+    .ContactModal__form label { margin-bottom: 1.1vh; }
+
+    // The last seven pixels, and they are not the form's.
+    //
+    // Measured at 1220×660: the sheet's two columns come to 573px against a
+    // 566px interior, and BOTH columns are 573 — the grid makes them equal, so
+    // the taller one sets the number. That is the right-hand one. Her portrait
+    // is 4:5 off the column's width, which makes it 485px tall on a screen that
+    // has 478 to give, and no amount taken out of the form on the left changes
+    // it: the left column was already 431 and had 142px of slack.
+    //
+    // So the cap is on the picture, and it is a WIDTH cap: with `aspect-ratio`
+    // and `width: 100%`, a max-height would leave the width where it was and
+    // squash a portrait into a letterbox. 57.6vh is 72vh of height through the
+    // 4:5, and 72vh is the tallest the picture can be at 660. It binds below
+    // about 672px of viewport and nowhere else — at 1250×677 the column's own
+    // width is already the smaller number, so every laptop above the shortest
+    // keeps the portrait it has.
+    .ContactModal__photo { max-width: 57.6vh; }
     // Same trade as the paddings above it: a laptop 720px tall showing the
     // whole sheet is worth a line of the box.
     //
-    // `max-height: 800px` catches more than a laptop — a phone in landscape and
-    // a 667-tall phone in portrait are both under it — which is why the two
-    // blocks above leave the height to this one rather than each setting their
-    // own for this one to overwrite.
+    // Only a laptop, whatever the 800px reads like on its own: `lt` is
+    // min-width 1200 as well, so the widest phone we target on its side (949)
+    // is 250px short of this block and it never sees this height. The landscape
+    // block above used to defer to this one on the strength of the 800 alone —
+    // it does not any more, and sets its own.
     .ContactModal__form textarea { min-height: 4rem; }
 }
 

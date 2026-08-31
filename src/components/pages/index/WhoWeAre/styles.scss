@@ -137,6 +137,47 @@
         }
     }
 
+    // ---- tablet, upright ----
+    //
+    // The block above is a phone's column read on a screen 818 across, and the
+    // photograph is what gives it away: `width: 100%` against a 395:445 ratio
+    // is 720 wide and 811 tall at 818, so it fills the screen from under the
+    // navbar to past the fold and the section below it is empty. On a phone
+    // 100% is 342 and the same rule is right.
+    //
+    // A tall narrow screen wants both of them smaller — the reader's own
+    // reading of it, and it is the correct one: there is height to spend and
+    // width to be careful with. The picture keeps its ratio (the cap is on the
+    // WIDTH, since the ratio is what derives the height from it) and the copy
+    // comes down a step with it.
+    @include v(md) {
+        @include below-px(900) {
+            gap: 3vh;
+            // 6vh is 70px at 1174 and the navbar's own box is 81, so the
+            // picture was starting behind the site's name. The floor is what
+            // clears it; the vh term is what keeps the air on a taller tablet.
+            padding: max(9vh, 104px) 6vw 6vh;
+
+            .WhoWeAre__text p {
+                // 5vw is 41px here and lands on the 2rem ceiling. Against a
+                // picture that is no longer half the screen, that reads as a
+                // headline rather than as the paragraph it is.
+                font-size: clamp(1.15rem, 3.1vw, 1.75rem);
+            }
+
+            .WhoWeAre__photo {
+                // 62% of the column, and a rem ceiling so it stops growing
+                // once the tablet does: 416px is where a 1024-tall screen has
+                // it, and there is no reason for 1180 to have it bigger.
+                width: min(62%, 26rem);
+                // To the right, which is the side it is on in the grid this
+                // column stands in for.
+                align-self: flex-end;
+                max-height: none;
+            }
+        }
+    }
+
     // Phone in landscape (≤520px tall; phs picks up every landscape width from
     // 568×320 up, so phl needs no block of its own). Width alone lands these
     // devices in the desktop grid — an 844×390 phone is "desktop" to every

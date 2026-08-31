@@ -37,6 +37,16 @@ html[data-preload="1"] {
         transform: translateY(-10px);
         pointer-events: none;
     }
+
+    // And the patička, for the same reason and on the same terms as under the
+    // veil (see PageVeil's stylesheet): it is mounted in _app rather than in any
+    // page, so the `main` hold above has never covered it. On a first load that
+    // showed as the one lit thing under a transparent curtain for anyone who
+    // reloaded far enough down a short page.
+    .SiteFooter {
+        opacity: 0;
+        pointer-events: none;
+    }
 }
 
 // The reveal: the clip rectangle, the zoom and the fade-in are all driven as
@@ -47,6 +57,17 @@ html[data-preload="1"] {
     transition:
         opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s,
         transform 0.6s cubic-bezier(0.22, 1, 0.36, 1) 0.08s;
+}
+
+// Unqualified for the same reason the navbar's is: a transition declared inside
+// the held state can only animate the way IN to it, because the moment the
+// attribute goes the declaration goes with it and the return is a jump. Stated
+// here, on the element itself, this one curve is both the exit and the entry.
+//
+// 0.55s and the page's own curve, so the patička leaves on exactly the ride
+// <main> leaves on rather than a second, slightly different one beside it.
+.SiteFooter {
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 // ── the mosaic ──────────────────────────────────────────────────────────

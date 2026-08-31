@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import Arrow from "@/components/common/ui/Arrow";
+import { RiArrowDownSLine } from "@remixicon/react";
 import { toast } from "sonner";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
@@ -35,6 +36,12 @@ export default function AddReview({ consultants = [] }) {
     });
 
     useEffect(() => setMounted(true), []);
+
+    // The roster the picker is built from. `consultants` arrives from
+    // /recenze as plain names — `consultants.map((c) => c.name)` — so a blank
+    // one is a record with no name rather than a person, and it would open the
+    // list with an unpickable empty row in it.
+    const roster = consultants.filter(Boolean);
 
     useEffect(() => {
         if (!open) return;
@@ -179,24 +186,81 @@ export default function AddReview({ consultants = [] }) {
                                 the fold. Same attribute, same reason, as
                                 ContactModal and RevSheet. */}
                             <div className="AddRev__scroll" data-lenis-prevent>
-                                <label className="AddRev__field">
+                                {/* The three modifiers below carry no look of
+                                    their own. They are the handles the
+                                    landscape-phone rule places the form's two
+                                    columns with, and a stylesheet that has to
+                                    find "the first field" by counting children
+                                    breaks the next time a field is added. */}
+                                <label className="AddRev__field AddRev__field--name">
                                     <span>Vaše jméno <em>*</em></span>
                                     <input type="text" value={form.customerName} onChange={set("customerName")} data-cursor="frame" />
                                 </label>
 
-                                <label className="AddRev__field">
+                                {/* The one field that is a choice rather than a
+                                    sentence, and now the control that says so.
+                                    It was an `<input list>` — a suggest box you
+                                    could also type a stranger's name into —
+                                    while the form's own check has always read
+                                    «Vyberte prosím poradce», choose. A native
+                                    <select> is what that sentence describes: it
+                                    hands a phone its own wheel, and the roles,
+                                    the focus handling and the type-ahead a
+                                    hand-rolled listbox would owe come from the
+                                    platform for nothing.
+
+                                    At every width, deliberately. Which advisor
+                                    this is about is a closed question on a
+                                    desktop exactly as it is on a phone, and the
+                                    site already answers it this way in two other
+                                    places — the homepage CTA and the benefit
+                                    programme — so the look is theirs, the shared
+                                    `pickField` in styles/system/_controls.scss.
+
+                                    With no roster it falls back to what was here
+                                    before. See the note in styles.scss: a picker
+                                    whose only choice is «Benefit Program» would
+                                    turn a CMS outage into a review page that
+                                    cannot be told which person the review is
+                                    about, and typing a name is worse than
+                                    picking one but far better than that. */}
+                                <label className="AddRev__field AddRev__field--pick">
                                     <span>Koho se týká <em>*</em></span>
-                                    <input
-                                        type="text"
-                                        list="addrev-consultants"
-                                        value={form.consultantName}
-                                        onChange={set("consultantName")}
-                                        data-cursor="frame"
-                                    />
-                                    <datalist id="addrev-consultants">
-                                        {consultants.map((name) => <option key={name} value={name} />)}
-                                        <option value="Benefit Program" />
-                                    </datalist>
+                                    {roster.length > 0 ? (
+                                        <span className="AddRev__pick__field">
+                                            <select
+                                                className="AddRev__pick__select"
+                                                value={form.consultantName}
+                                                onChange={set("consultantName")}
+                                                data-cursor="frame"
+                                            >
+                                                {/* Disabled rather than merely
+                                                    empty: the field is required,
+                                                    so the blank is a state to
+                                                    leave and never one to come
+                                                    back to. It is also what the
+                                                    reset after a successful send
+                                                    returns the control to. */}
+                                                <option value="" disabled>Vyberte poradce</option>
+                                                {roster.map((name) => <option key={name} value={name}>{name}</option>)}
+                                                <option value="Benefit Program">Benefit Program</option>
+                                            </select>
+                                            <RiArrowDownSLine className="AddRev__pick__chevron" size={20} aria-hidden="true" />
+                                        </span>
+                                    ) : (
+                                        <>
+                                            <input
+                                                type="text"
+                                                list="addrev-consultants"
+                                                value={form.consultantName}
+                                                onChange={set("consultantName")}
+                                                data-cursor="frame"
+                                            />
+                                            <datalist id="addrev-consultants">
+                                                <option value="Benefit Program" />
+                                            </datalist>
+                                        </>
+                                    )}
                                 </label>
 
                                 <label className="AddRev__field AddRev__field--text">

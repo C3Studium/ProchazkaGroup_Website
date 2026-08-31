@@ -143,3 +143,59 @@
         clip-path: inset(-40% 0% -40% 0%);
     }
 }
+
+// Not on a screen this shape, whatever is pointing at it.
+//
+// On a real phone this rule never fires, and that is worth saying rather than
+// leaving to be discovered: index.jsx reads `(hover: none)` and returns null, so
+// on a handset there is no `.cursor` in the document at all — measured, at
+// 953×437, 844×390 and 568×320, zero nodes and zero bytes of it in the server's
+// HTML.
+//
+// Where it does fire is a desktop browser pulled down to a phone's landscape
+// shape, which is how the layout gets checked and is the one place a pointer and
+// these dimensions coexist. A ring and a dot chasing the mouse across a 437px
+// band is a desktop flourish in a window with no room for it, so it goes, and
+// the system's own arrow — which the site never hides — does the pointing.
+// Not on a touchscreen, whatever shape it is.
+//
+// index.jsx already answers this and answers it harder — it reads `(hover:
+// none)` and returns null, so on a handset or a tablet there is no `.cursor` in
+// the document at all. This is the belt to that brace: the flag is read in an
+// effect, so for the frame between hydration and that effect the markup exists,
+// and this is what keeps it off the screen for it. It is also the one rule that
+// survives if the component is ever mounted from somewhere that does not run
+// the check.
+@include touch {
+    .cursor {
+        display: none;
+    }
+}
+
+// And not on a screen this shape either, whatever is pointing at it.
+//
+// Where the rule above cannot fire is a DESKTOP browser pulled down to a
+// handset's or a tablet's dimensions, which is how the layout gets checked and
+// is the one place a pointer and these shapes coexist. A ring and a dot chasing
+// the mouse across a 437px band, or down an 818px column, is a desktop flourish
+// in a window with no room for it — so it goes, and the system's own arrow,
+// which the site never hides, does the pointing.
+//
+// Portrait is bounded at 900 and landscape is not extended past a phone on
+// purpose: no laptop is ever upright, so 600–900 upright is a tablet and
+// nothing else, but 1024×768 in landscape is both a tablet and a real small
+// monitor. Taking the cursor off that one would cost a desktop its pointer to
+// catch a tablet that has already lost it in index.jsx.
+@include phs-h {
+    .cursor {
+        display: none;
+    }
+}
+
+@include v(md) {
+    @include below-px(900) {
+        .cursor {
+            display: none;
+        }
+    }
+}

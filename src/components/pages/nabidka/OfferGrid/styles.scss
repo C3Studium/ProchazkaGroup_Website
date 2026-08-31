@@ -256,14 +256,22 @@
     will-change: transform;
 }
 
+// Ground for the copy at the foot, and only that — the picture's overall weight
+// is the veil's job now (.photoVeil, globals.scss), which sits under this one.
+//
+// So the stops are re-cut to what they have to ADD to a half-black rather than
+// to a bare photograph. 0.84 over 0.5 lands the foot at 0.92, which is where it
+// was and where the copy needs it; the head goes to nothing and is left at the
+// veil's own half. Kept as the same three stops in the same places so the ramp
+// has the same shape it always had.
 .OfferWall__block__scrim {
     position: absolute;
     inset: 0;
     background: linear-gradient(
         to top,
-        rgba(2, 12, 18, 0.92) 0%,
-        rgba(2, 12, 18, 0.6) 34%,
-        rgba(2, 12, 18, 0.06) 68%
+        rgba(2, 12, 18, 0.84) 0%,
+        rgba(2, 12, 18, 0.35) 34%,
+        rgba(2, 12, 18, 0) 68%
     );
     pointer-events: none;
 }

@@ -1,0 +1,135 @@
+// ── controls a phone gets instead of a composition ──
+//
+// Two looks that started inside pages/index/ChooseAdvisor and are now wanted in
+// a second section as well: the benefit programme's "Mám poradce" branch, which
+// on a phone lying down gives up its ten-row roster for the same native picker
+// and its printed telephone number for the same bracketed mark.
+//
+// They live here rather than in either component because a look owned by one
+// section and reached for by another is a look that drifts: the two would agree
+// on the day they were copied and disagree at the first change to a border or a
+// tap target. `src/styles/system/` is where the things every stylesheet may need
+// already live, and _shortcuts.scss forwards this file, so both callers reach
+// these with the import the sync script already writes for them and no second
+// one to keep in step.
+//
+// Nothing here emits CSS on its own — mixins only, exactly like the rest of the
+// system — so a file that never calls them pays nothing, and the bytes land
+// inside whichever media query each caller includes them in.
+
+// How the native picker is drawn, in one place, because three stops now turn one
+// on: this section's phone held upright, the same phone lying on its side, and
+// the benefit programme's client branch lying down. What it LOOKS like has
+// nothing to do with which way round the phone is or which section it is in — a
+// line with words over it in every case — so the look lives here and each stop
+// keeps only the placement it actually differs on.
+//
+// `$block` is the caller's own BEM stem, because the class names are the one
+// thing that genuinely differs between the two sections. The default is the
+// stem this was written against, so ChooseAdvisor's call site is unchanged and
+// so is the CSS it emits, byte for byte.
+@mixin pickField($block: "ChooseAdvisor__pick") {
+    .#{$block}__label {
+        display: block;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.1em;
+        opacity: 0.85;
+        margin-bottom: 0.9vh;
+    }
+
+    .#{$block}__field {
+        position: relative;
+        display: block;
+    }
+
+    .#{$block}__select {
+        // A field on this page is a line with words over it. The
+        // browser's own control is a rounded grey box with a system
+        // font and a chevron of its own, so all of that comes off —
+        // the same strip the form does to its inputs, restated here
+        // because this control lives outside the form's box.
+        appearance: none;
+        -webkit-appearance: none;
+        width: 100%;
+        // The finger's floor. 16px is also the size under which iOS
+        // zooms the page to focus a control, and a zoom the reader
+        // did not ask for leaves them scrolled sideways on a page
+        // that has no sideways.
+        min-height: 44px;
+        background: transparent;
+        border: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.6);
+        border-radius: 0;
+        box-shadow: none;
+        color: var(--wText);
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+        font-size: max(16px, 1rem);
+        letter-spacing: 0.01em;
+        // room on the right for the chevron drawn over it
+        padding: 0.45rem 2rem 0.45rem 0.2rem;
+        outline: none;
+
+        &:focus {
+            border-bottom-color: var(--hColor);
+        }
+
+        // The list that opens is drawn by the platform. iOS spins
+        // its own wheel and ignores everything here; Android and a
+        // desktop browser inherit from the control, which on this
+        // page is white type on nothing at all. Stated, so the
+        // names are legible in the popup wherever it comes from.
+        option {
+            color: #0b1220;
+            background-color: #ffffff;
+        }
+    }
+
+    .#{$block}__chevron {
+        position: absolute;
+        right: 0.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        opacity: 0.75;
+        // it is the control's mark, not a second target beside it
+        pointer-events: none;
+    }
+}
+
+// The telephone number as a mark rather than as a line of type: a square
+// bracketed by the four corner ticks `cornerButton` already draws, with a glyph
+// in the middle of it and nothing else.
+//
+// What is here is only what a square costs. Everything the button already is —
+// the ticks, their spread, the 44px tap expander on touch — comes from
+// `.cornerButton` in common/ui/CornerButton, which is global; and the accent it
+// is painted in stays with the caller, because the two sections that ask do not
+// share one (--hColor2 in ChooseAdvisor, --hColor in the benefit programme).
+//
+// $box is stated by every caller and never defaulted: this control's whole job
+// is to be big enough to hit, and a default would be a number somebody could
+// inherit without noticing it was too small. $glyph is sized against $box rather
+// than left at the 22px react-icons hands over — on a box much bigger than a
+// word the mark sits in the middle of four ticks with nothing between them and
+// it, which is the mistake the portrait card had to correct.
+//
+// ChooseAdvisor's own portrait rule is deliberately NOT folded into this: its
+// declarations are interleaved with the grid placement that puts it beside the
+// photograph, so calling this there would reorder the compiled portrait CSS —
+// and this pass is allowed to change nothing outside a landscape phone.
+@mixin callIcon($box, $glyph) {
+    // back on, as the display `cornerButton` gives it
+    display: inline-flex;
+    justify-content: center;
+    width: $box;
+    height: $box;
+    // the ticks are the frame; the button's own label padding would only push
+    // them off the box they are meant to bracket
+    padding: 0;
+
+    svg {
+        width: $glyph;
+        height: $glyph;
+    }
+}

@@ -1,7 +1,7 @@
 import Image from "next/image";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import Link from "next/link";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 import { RiStackLine, RiShakeHandsLine, RiBarChartGroupedLine } from "@remixicon/react";
 import RotatingButton from "@/components/common/ui/stickyButtons/buttons/RotatingButton";
@@ -11,8 +11,9 @@ import { editable, editableLink } from "@/cms/edit";
 import { externalClass } from "@/components/common/ui/externalLink";
 import {
     HERO_PINS_AT,
+    geometryFor,
     showcaseProgressFromHero,
-    trackXAt,
+    useStackScale,
 } from "@/components/pages/aboutUs/aboutStack";
 
 // The heading, the three marks and the photograph come from the CMS (siteCopy
@@ -116,6 +117,12 @@ export default function AboutHero({ title: cmsTitle, marks: cmsMarks, photo: cms
     // problem: they are fields of the block whether or not they are filled in.
     const marksDocId = cmsMarks?.length ? docId : null;
 
+    // The track this hero erases itself against, at whatever width the screen
+    // rides it — the same hook the showcase reads, which is the whole point of
+    // the hook. Two answers here and the shared edge stops being shared.
+    const scale = useStackScale();
+    const geo = useMemo(() => geometryFor(scale), [scale]);
+
     // Measured against the section, which is deliberately NOT the thing that is
     // pinned — the stage inside it is. A sticky element's rect freezes the
     // moment it pins, so measuring against it would freeze the scroll with it.
@@ -143,7 +150,7 @@ export default function AboutHero({ title: cmsTitle, marks: cmsMarks, photo: cms
     // hand-set numbers. There is nothing here to keep in step: it is the same
     // description of where the track is that moves the track.
     const clearWipe = useTransform(raw, (value) => {
-        const covered = 100 - trackXAt(showcaseProgressFromHero(value));
+        const covered = 100 - geo.trackXAt(showcaseProgressFromHero(value));
         return `inset(0% ${Math.min(100, Math.max(0, covered)).toFixed(2)}% 0% 0%)`;
     });
 
@@ -160,7 +167,7 @@ export default function AboutHero({ title: cmsTitle, marks: cmsMarks, photo: cms
     // as they fade, the way the thing erasing them is travelling, rather than
     // dimming where they stand.
     const marksLeaving = useTransform(raw, (value) => {
-        const edge = trackXAt(showcaseProgressFromHero(value));
+        const edge = geo.trackXAt(showcaseProgressFromHero(value));
         // 1 while the edge is still well clear of them, 0 once it is on them
         return Math.min(1, Math.max(0, (edge - 40) / 22));
     });

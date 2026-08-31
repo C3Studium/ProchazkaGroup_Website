@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import { animate, cubicBezier, motion, useInView, useMotionValue, useScroll, useTransform } from "framer-motion";
@@ -158,8 +158,23 @@ export default function History({ open = true, onReady, panels }) {
         offset: ["start start", "end end"],
     });
 
-    // Panels ride right to left, one viewport each.
-    const x = useTransform(scrollYProgress, [0, 1], ["0vw", `-${LAST * 100}vw`]);
+    // A panel is one viewport wide, or two on a tablet upright — see the block
+    // at the foot of styles.scss, which sets the panel and the track. This is
+    // the third number in that set and it is a motion value, so the stylesheet
+    // cannot reach it: the travel has to be told separately or the ride stops
+    // half way along a track twice as long as it thinks.
+    const [panelVw, setPanelVw] = useState(100);
+    useEffect(() => {
+        const query = window.matchMedia(
+            "(min-width: 600px) and (max-width: 900px) and (orientation: portrait)");
+        const read = () => setPanelVw(query.matches ? 200 : 100);
+        read();
+        query.addEventListener("change", read);
+        return () => query.removeEventListener("change", read);
+    }, []);
+
+    // Panels ride right to left, one panel each.
+    const x = useTransform(scrollYProgress, [0, 1], ["0vw", `-${LAST * panelVw}vw`]);
 
     // Whether the stylesheet has stacked the panels into a column — the same
     // 820px seam as `below-px(820)` in styles.scss. A motion value rather than
@@ -170,7 +185,11 @@ export default function History({ open = true, onReady, panels }) {
     // that composition's coordinates on a narrow screen, so nothing flashes.
     const stacked = useMotionValue(0);
     useEffect(() => {
-        const query = window.matchMedia("(max-width: 820px)");
+        // The same set the stylesheet stacks on. An upright tablet rides now, so
+        // it is not in it — left at a bare 820 this would tell every panel it was
+        // in a column while the stylesheet was riding them past.
+        const query = window.matchMedia(
+            "(max-width: 599.98px), (max-width: 820px) and (orientation: landscape)");
         const read = () => stacked.set(query.matches ? 1 : 0);
         read();
         query.addEventListener("change", read);
@@ -225,6 +244,7 @@ export default function History({ open = true, onReady, panels }) {
                         The list is a fixed four and never reorders. */}
                     {milestones.map((item, index) => (
                         <Panel
+                            k={panelVw / 100}
                             key={index}
                             item={item}
                             index={index}
@@ -240,7 +260,15 @@ export default function History({ open = true, onReady, panels }) {
     );
 }
 
-function Panel({ item, index, progress, intro, stacked, open }) {
+// `k` is the panel's width as a multiple of the screen — 1 everywhere, 2 on a
+// tablet upright. Every HORIZONTAL coordinate below is written in vw, which is
+// the screen and not the panel, so widening the panel moved nothing on its own:
+// the composition stayed its old size in the left half of a box twice as big.
+// Multiplying them here is what actually scales it.
+//
+// `top` is deliberately not multiplied. It is vh, and the screen is exactly as
+// tall as it was — doubling it would drop every photograph through the floor.
+function Panel({ item, index, progress, intro, stacked, open, k = 1 }) {
     // How far this panel is from the middle of the screen, in viewports: 0 when
     // it is centred, 1 when it is a whole screen off to the right, -1 to the
     // left. The track moves by exactly one viewport per step, so this is the
@@ -315,7 +343,7 @@ function Panel({ item, index, progress, intro, stacked, open }) {
                 style={{
                     opacity,
                     x: numeralX,
-                    left: `${item.numeral.left}vw`,
+                    left: `${item.numeral.left * k}vw`,
                     top: `${item.numeral.top}vh`,
                 }}
             >
@@ -324,7 +352,7 @@ function Panel({ item, index, progress, intro, stacked, open }) {
 
             {/* Then the rules, so everything else stands on them. */}
             {item.rules.map((rule, i) => (
-                <Rule key={i} rule={rule} draw={draw} />
+                <Rule key={i} rule={rule} draw={draw} k={k} />
             ))}
 
             {/* The box, not the <Image>: the picture and the shader plane laid
@@ -337,9 +365,9 @@ function Panel({ item, index, progress, intro, stacked, open }) {
                 style={{
                     opacity,
                     clipPath: photoClip,
-                    left: `${photo.left}vw`,
+                    left: `${photo.left * k}vw`,
                     top: `${photo.top}vh`,
-                    width: `${photo.width}vw`,
+                    width: `${photo.width * k}vw`,
                     aspectRatio: String(photo.ratio),
                 }}
             >
@@ -368,9 +396,9 @@ function Panel({ item, index, progress, intro, stacked, open }) {
             <div
                 className="History__copy"
                 style={{
-                    left: `${copy.left}vw`,
+                    left: `${copy.left * k}vw`,
                     top: `${copy.top}vh`,
-                    width: `${copy.width}vw`,
+                    width: `${copy.width * k}vw`,
                     textAlign: copy.align,
                 }}
             >
@@ -394,11 +422,11 @@ function Panel({ item, index, progress, intro, stacked, open }) {
 
 // One rule, drawn in as its panel arrives — from its start, the way every other
 // rule on the site is drawn.
-function Rule({ rule, draw }) {
+function Rule({ rule, draw, k = 1 }) {
     const vertical = rule.v !== undefined;
     const style = vertical
         ? {
-            left: `${rule.v}vw`,
+            left: `${rule.v * k}vw`,
             top: `${rule.from}vh`,
             height: `${rule.to - rule.from}vh`,
             width: "1px",
@@ -406,9 +434,9 @@ function Rule({ rule, draw }) {
             scaleY: draw,
         }
         : {
-            left: `${rule.from}vw`,
+            left: `${rule.from * k}vw`,
             top: `${rule.y ?? rule.h}vh`,
-            width: `${rule.to - rule.from}vw`,
+            width: `${(rule.to - rule.from) * k}vw`,
             height: "1px",
             transformOrigin: "left center",
             scaleX: draw,

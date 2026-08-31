@@ -21,7 +21,18 @@ import { motion, useMotionValue, useSpring } from "framer-motion";
 // attribute's value says what to do: `frame` closes the marks, `hold` hides the
 // cursor altogether for an element that draws its own.
 export default function Cursor() {
-    const [touch, setTouch] = useState(false);
+    // Answered at the first render rather than corrected from the effect below.
+    //
+    // It used to start false and be put right after mount, which is fine on the
+    // machine this was drawn on and wrong on the device it matters for: the
+    // markup shipped in the server's HTML, so a phone painted a ring and a dot
+    // in the top-left corner and then took them away again when hydration
+    // caught up. A cursor, briefly, on a device that has no pointer to put one
+    // on. `_app` loads this with `ssr: false` so there is no server render to
+    // disagree with — see the note there.
+    const [touch, setTouch] = useState(
+        () => typeof window !== "undefined" && window.matchMedia("(hover: none)").matches,
+    );
     const [visible, setVisible] = useState(false);
     // null, "frame", or "hold". Two of the three draw something; the third is
     // the cursor getting out of the way.

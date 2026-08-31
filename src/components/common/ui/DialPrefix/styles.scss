@@ -1,0 +1,79 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. This file takes the browser's own select apart and does
+// nothing else: the type, the colour and the size come from whichever form the
+// control is standing in, through the `prefix` class it shares with the span it
+// replaced.
+.DialPrefix {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    white-space: nowrap;
+}
+
+.DialPrefix__select {
+    // A rounded, shaded control is the one shape this site does not draw.
+    appearance: none;
+    -webkit-appearance: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: none;
+    // Everything about how it reads is the form's, not this file's.
+    font: inherit;
+    color: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    cursor: pointer;
+    outline: none;
+
+    // The closed control is as wide as the code in it and no wider.
+    //
+    // A select takes its width from its widest option, so this is really a
+    // constraint on what the options may say — see index.jsx, where they are
+    // bare codes for exactly this reason. The cap is the belt to that brace: it
+    // holds the field's front to four characters and a chevron whatever a
+    // future entry in the list turns out to be, and the number keeps the row.
+    width: auto;
+    max-width: 4.5em;
+    // Safari gives a bare select a minimum it will not go under.
+    min-width: 0;
+
+    &:focus-visible {
+        outline: 1px solid rgba(255, 255, 255, 0.6);
+        outline-offset: 3px;
+    }
+
+    // The list itself is the platform's, and on a dark page a platform list is
+    // drawn in the platform's colours. The one thing worth saying is what the
+    // text sits on, or Windows hands out white-on-white.
+    option {
+        color: #111;
+        background-color: #fff;
+    }
+}
+
+.DialPrefix__chevron {
+    flex: none;
+    // The mark answers the type beside it rather than the screen, so it does
+    // not have to be told anything when a form sets its prefix a size smaller.
+    opacity: 0.75;
+    pointer-events: none;
+}
+
+.DialPrefix__rule {
+    margin-left: 0.15rem;
+}
+
+// A finger needs somewhere to land. The control is a line of text inline with
+// another line of text, so the target is grown downwards and upwards out of it
+// rather than by moving anything — an inline-flex box with a min-height would
+// push the number's baseline off the rule it shares with the field.
+@include touch {
+    .DialPrefix__select {
+        padding: 0.6rem 0;
+        margin: -0.6rem 0;
+    }
+}

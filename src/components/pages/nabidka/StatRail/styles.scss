@@ -675,6 +675,33 @@
             font-size: clamp(0.76rem, 3.4vw, 0.96rem);
         }
 
+        // --- the same three, on a tablet upright ---
+        //
+        // Everything above is sized in vw, which is a phone rule read on a
+        // screen twice as wide: 15vw of 390 is 58px and right, 15vw of 825 is
+        // 124 and lands on the 5.2rem ceiling at 83. The figures came out half
+        // again as big for no reason but the width, and the band had to be tall
+        // enough to hold them — which is why it was 176px on a 1174 screen for
+        // three lines of type.
+        //
+        // Brought back to the size they are on a phone, so the band can be the
+        // size it is on a phone too. 7vw of 825 is the same 58px, and the two
+        // ceilings are what hold it there from 600 up.
+        @include v(md) {
+            .StatRail__figure {
+                font-size: clamp(3rem, 7vw, 3.8rem);
+            }
+
+            .StatRail__caption,
+            .StatRail__short {
+                font-size: clamp(0.72rem, 1.5vw, 0.92rem);
+            }
+
+            .StatRail__note {
+                font-size: clamp(0.76rem, 1.6vw, 0.96rem);
+            }
+        }
+
         // The three counts, once the offer is running: one band under the bar
         // cut in three, rather than the wide screen's cluster of tiles. Each
         // third is 130px, which is room for the figure and the two words that

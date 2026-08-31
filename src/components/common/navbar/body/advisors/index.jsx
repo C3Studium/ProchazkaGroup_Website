@@ -7,7 +7,7 @@ import { RiPhoneLine } from '@remixicon/react'
 import CornerMarks from '@/components/common/ui/CornerMarks'
 import { CURTAIN } from '@/components/common/ui/entrance'
 import { FALLBACK_ROSTER, dial } from '@/constants/roster'
-import { usePhone } from '@/helpers/usePhone'
+import { usePhoneOrTabletUpright } from '@/helpers/usePhone'
 
 // The roster, inside the menu's own panel.
 //
@@ -189,7 +189,11 @@ const wallIn = {
 
 export default function Advisors({ roster, calm, touch, onPick }) {
     const [hovered, setHovered] = useState(0);
-    const phone = usePhone({ eager: true });
+    // Upright and no wider than a tablet. The sheet a phone gets is the sheet a
+    // tablet upright wants too, only bigger — see PHONE_OR_TABLET_UPRIGHT in
+    // @/helpers/usePhone, which is its own constant rather than a wider PHONE
+    // because two other components read that one and neither wants this.
+    const phone = usePhoneOrTabletUpright({ eager: true });
     const people = useMemo(() => (roster?.length ? roster : FALLBACK_ROSTER), [roster]);
     const [lead, ...rest] = people;
 

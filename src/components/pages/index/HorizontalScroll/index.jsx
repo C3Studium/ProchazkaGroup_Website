@@ -78,7 +78,14 @@ function useDeckLayout() {
             const h = window.innerHeight;
             let next;
 
-            if (w <= 820) {
+            // The same set the stylesheet stacks on, and it has to be the same
+            // set: this branch cuts a deck for a column, and a tablet upright
+            // now rides instead of stacking. Read the block in styles.scss for
+            // what the two arms are. Left at `w <= 820` a 768 tablet took the
+            // column's deck into a panel that is a screen wide.
+            const stacks = w < 600 || (w <= 820 && w > h);
+
+            if (stacks) {
                 // Stacked layout: the deck is the column's width, fan included —
                 // the fan leans right by ~2 card distances, so the card itself
                 // gets ~72vw and the whole deck stays inside the viewport.

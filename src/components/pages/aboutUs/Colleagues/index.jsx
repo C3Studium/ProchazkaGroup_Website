@@ -4,7 +4,7 @@ import { animate, cubicBezier, motion, useInView, useMotionValue, useScroll, use
 import { RiPhoneLine, RiMailLine, RiFacebookLine, RiInstagramLine } from "@remixicon/react";
 import { ARRIVE_TO } from "@/components/pages/aboutUs/aboutStack";
 import { FALLBACK_ROSTER, dial } from "@/constants/roster";
-import { usePhone } from "@/helpers/usePhone";
+import { PHONE_LANDSCAPE, usePhoneOrTabletUpright } from "@/helpers/usePhone";
 import { editable, editableDoc, editableLink, isEditMode } from "@/cms/edit";
 
 // The heading comes from the CMS (siteCopy "o-nas.colleagues" — see
@@ -277,7 +277,38 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
     // PHONE constant. It is a separate question from `isTouch`: a tablet is
     // touched and keeps the list, and a phone is a phone whether or not the
     // browser will admit to a coarse pointer.
-    const phone = usePhone();
+    // Upright and no wider than a tablet — the twin of the stylesheet's block
+    // for this component. A tablet upright reads the same sheet of faces, so
+    // it has to build the same tiles.
+    const phone = usePhoneOrTabletUpright();
+
+    // ── and whether it is that same phone lying down ──
+    //
+    // A third question, and none of the three answers it. `isTouch` is about a
+    // pointer, `phone` is about the upright composition, and this is about one
+    // attribute on one element: on a phone held sideways the roster below is
+    // given its own overflow (see `phs-h` in the stylesheet), and a scroll
+    // container inside a Lenis page has to say so or Lenis takes the gesture
+    // and scrolls the document instead — the list never moves. It is the same
+    // reason ContactModal's sheet and the review sheet carry the attribute.
+    //
+    // Read here rather than through `usePhoneAny`, and that is the point of the
+    // distinction spelled out in @/helpers/usePhone: PHONE_ANY is also the
+    // upright phone, where this <ul> is a grid of ten tiles that does not
+    // scroll at all — the attribute there would take the page's own scroll away
+    // from the reader over a sheet of faces and give it to nothing.
+    //
+    // Starts false and is corrected after mount, the shape `isTouch` above uses
+    // and for its reason: this section is server-rendered, and the first client
+    // render has to agree with markup written where there was no viewport.
+    const [sideways, setSideways] = useState(false);
+    useEffect(() => {
+        const mq = window.matchMedia(PHONE_LANDSCAPE);
+        const read = () => setSideways(mq.matches);
+        read();
+        mq.addEventListener("change", read);
+        return () => mq.removeEventListener("change", read);
+    }, []);
 
     // Which portrait of the selected person is showing. Only some of them have
     // a second one (see people.js); for the rest this stays on the first, and
@@ -483,11 +514,15 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                         ))}
                     </motion.h2>
 
+                    {/* The roster. On a phone lying down this box is also the
+                        scroller — see `sideways` above for why the attribute is
+                        conditional rather than simply always on. */}
                     <motion.ul
                         className="Colleagues__names"
                         ref={namesRef}
                         initial="hidden"
                         animate={namesSeen ? "shown" : "hidden"}
+                        {...(sideways ? { "data-lenis-prevent": "" } : null)}
                     >
                         {rows}
                     </motion.ul>

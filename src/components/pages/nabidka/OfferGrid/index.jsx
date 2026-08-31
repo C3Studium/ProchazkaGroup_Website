@@ -382,6 +382,13 @@ function Cell({ rung, width, of, stacked, still }) {
                     style={{ objectFit: "cover", objectPosition: rung.position }}
                 />
             </motion.div>
+            {/* The page's half-black — see .photoVeil in globals.scss. This
+                block had only the gradient below, which is a ground for the
+                copy at the foot and leaves the TOP of the picture at full
+                strength: at 1440×900 the last block in the wall was a lit map
+                and a man's face at the top of the frame with the heading
+                sitting across them. */}
+            <span className="photoVeil" aria-hidden="true" />
             <span className="OfferWall__block__scrim" aria-hidden="true" />
 
             <motion.div className="OfferWall__block__copy" style={{ y: copyY }}>

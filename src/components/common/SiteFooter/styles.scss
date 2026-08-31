@@ -463,6 +463,51 @@
         }
     }
 
+    // ---- tablet, upright ----
+    //
+    // The block above stacks the claim over the contact and turns the call to
+    // action into a column, which is a phone's answer read on a screen 800
+    // across. Upright at 799 that leaves "kdykoliv jste připraveni" and its
+    // button on one line of a page half of which is empty, and the hours block
+    // a whole screen further down.
+    //
+    // Back to the two columns the laptop has — the claim and its offer on the
+    // left, the contact on the right, so the offer and the hours it is offered
+    // in stand beside each other. Narrower, not different: this is the same
+    // decision the rest of the upright-tablet pass makes.
+    @include v(md) {
+        @include below-px(900) {
+            .SiteFooter__top {
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 4vw;
+            }
+
+            .SiteFooter__claim .SiteFooter__claim__cta {
+                flex-direction: row;
+                align-items: center;
+                gap: 2.5vw;
+            }
+
+            // The two lines closer together.
+            //
+            // Nothing is spacing them: what stands between them is the tap
+            // target itself. The touch block at the top of this file gives each
+            // link `min-height: 2.75rem` and centres its line in it, which is
+            // 44px a link and therefore 27px of empty box between a number and
+            // an address that are one thought.
+            //
+            // 2.25rem is 36px, and it is a trade rather than a free win — 44 is
+            // the guideline and this is under it. It is taken here and nowhere
+            // else because a tablet is held in two hands rather than thumbed,
+            // and because these two are the only links in this block: there is
+            // nothing next to either of them to hit by mistake. A phone keeps
+            // its 44.
+            .SiteFooter__contact .SiteFooter__contact__row .details a {
+                min-height: 2.25rem;
+            }
+        }
+    }
+
     // A desktop window that is wide but short (521–700px): the panel's content
     // does not shrink with the height, so the 60vh window would be outgrown.
     // The reveal keeps working — it just opens a taller window. Below 820px

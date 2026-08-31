@@ -6,8 +6,11 @@ import { motion, useTransform } from "framer-motion";
 import { ENTERS, PHOTO, RISE, group } from "@/components/common/ui/entrance";
 import { toast } from "sonner";
 import { RiMapPinLine, RiThumbUpLine, RiChat3Line, RiArrowDownSLine, RiPhoneLine } from "@remixicon/react";
+import DialPrefix from "@/components/common/ui/DialPrefix";
+import { DEFAULT_DIAL } from "@/constants/dialPrefixes";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { EXTERNAL_CLASS } from "@/components/common/ui/externalLink";
+import { usePhoneAny } from "@/helpers/usePhone";
 import { editable, editableDoc, editableLink } from "@/cms/edit";
 
 // What this section renders when the CMS has nothing to say — an unreachable
@@ -85,7 +88,7 @@ const REQUIRED = [
     ["phone", "Telefonní číslo"],
 ];
 
-const EMPTY = { name: "", email: "", phone: "", timeFrom: "", timeTo: "" };
+const EMPTY = { name: "", email: "", phone: "", dial: DEFAULT_DIAL, timeFrom: "", timeTo: "" };
 
 // Deliberately loose: a stricter pattern rejects addresses that are perfectly
 // valid, and the only thing that ever really proves an address is sending to it.
@@ -134,6 +137,24 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
         submit: formCopy.submit || FORM_COPY.submit,
     };
     const progress = useSectionProgress(sectionRef);
+
+    // A phone, held either way round — see @/helpers/usePhone. The stylesheet
+    // draws seven structural rules across this section and puts every one of
+    // them out on a phone: they are laid out in vh against a 100vh canvas that
+    // both phone stops give up. Off screen they still cost something, because
+    // each is a motion value chained off the scroll and written to a node on
+    // every frame of it, so on the least powerful device the site runs on they
+    // are simply not built.
+    //
+    // Not `eager`: this section is server-rendered and the first client render
+    // has to agree with markup written where there was no viewport to measure.
+    // Nothing is lost by answering `false` for one frame either — what that
+    // frame renders is seven `display: none` divs.
+    //
+    // This is the ONLY thing here that branches at runtime. The picker below
+    // and the roster it stands in for are both in the markup at every width on
+    // purpose; see the note above the picker.
+    const phone = usePhoneAny();
 
     // One published consultant is enough to switch over; anything less keeps
     // the designed placeholder rather than rendering a half-empty column.
@@ -256,6 +277,11 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                 index, so the photograph, the name, the counts and the number
                 answer a change here exactly as they answer a tap on a row.
 
+                On a phone held EITHER way: both phone stops in the stylesheet
+                turn this on and the roster off, because ten names are ten
+                names whichever way round the screen is, and lying down there
+                is a third of the height to spend on them.
+
                 Both controls are in the markup at every width and the
                 stylesheet decides which is on. Nothing about that is worked
                 out at runtime, so the section that ships is the section that
@@ -322,7 +348,7 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                     <motion.label variants={RISE}>
                         <span className="label">Telčíslo<Req />&nbsp;|</span>
                         <div className="telRow">
-                            <span className="prefix">+420 <RiArrowDownSLine size={16} /> |</span>
+                            <DialPrefix value={values.dial} onChange={set("dial")} separator />
                             <input
                                 type="tel"
                                 name="phone"
@@ -397,24 +423,39 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                             // matches styles.scss, in the order the rules
                             // themselves stack: half a card beside the call on
                             // a phone held upright (≤600 portrait), full column
-                            // width when the section merely stacks (≤820), 38vw
-                            // beside the name in phone landscape, 26vw in the
+                            // width when the section merely stacks (≤820),
+                            // NOTHING on a phone lying down, and 26vw in the
                             // desktop grid. On the phone it is a square thumb of
                             // `min(150px, 40vw)`: 40vw is the honest figure at
                             // 320 and slightly generous above it, where the 150
                             // ceiling binds — and a picture asked for slightly
                             // large is a few kilobytes, one asked for small is
                             // blurred.
-                            sizes="(max-width: 600px) and (orientation: portrait) 40vw, (max-width: 820px) 88vw, (max-height: 520px) 38vw, 26vw"
+                            //
+                            // The landscape clause is kept although that stop
+                            // draws no photograph at all now, and it is kept
+                            // BECAUSE of the one before it: a 568-wide phone on
+                            // its side is under 820 and would otherwise be told
+                            // 88vw. A `display: none` picture is never fetched
+                            // — the element is not in the viewport, so native
+                            // lazy-loading never reaches it — but a browser that
+                            // ignores that should ask for the small candidate,
+                            // not the large one. 40vw is the phone's own figure
+                            // from the first clause; nothing here has an opinion
+                            // about a picture nobody can see.
+                            sizes="(max-width: 600px) and (orientation: portrait) 40vw, (min-width: 480px) and (max-height: 520px) and (orientation: landscape) 40vw, (max-width: 820px) 88vw, 26vw"
                             style={{ objectFit: "cover", objectPosition: "top center" }}
                         />
                     </GridDistortion>
                 </motion.div>
-                {/* Phone only: the number as a target beside the face rather
-                    than as a line of type under it. A second element and not
-                    the link at the foot of this column restyled, because what
-                    changes is the CONTENT — a mark where the digits were — and
-                    no rule can swap a text node for an SVG.
+                {/* Phone only, and now held either way round: the number as a
+                    target rather than as a line of type — beside the face
+                    upright, and lying down under the "Zavolejte nebo napište"
+                    that used to caption the digits, where there is no face at
+                    all. A second element and not the link at the foot of this
+                    column restyled, because what changes is the CONTENT — a
+                    mark where the digits were — and no rule can swap a text
+                    node for an SVG.
 
                     It dials what that link dials, off the same fallback, so
                     the two cannot point at different numbers. The words it
@@ -464,14 +505,20 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                 </motion.a>
             </motion.div>
 
-            {/* Structural lines — verticals continue ReviewsPreview's endpoints */}
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vLeft" style={{ scaleY: vLeftDraw }} />
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vRight" style={{ scaleY: vRightDraw }} />
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vAccent" style={{ scaleY: accentDraw }} />
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--hClaim" style={{ scaleX: hClaimDraw }} />
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vClaim" style={{ scaleY: vClaimDraw }} />
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--hHelp" style={{ scaleX: hHelpDraw }} />
-            <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--hName" style={{ scaleX: hNameDraw }} />
+            {/* Structural lines — verticals continue ReviewsPreview's endpoints.
+                Not on a phone in either orientation, where the stylesheet has
+                already put all seven out; see `phone` above. */}
+            {!phone && (
+                <>
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vLeft" style={{ scaleY: vLeftDraw }} />
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vRight" style={{ scaleY: vRightDraw }} />
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vAccent" style={{ scaleY: accentDraw }} />
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--hClaim" style={{ scaleX: hClaimDraw }} />
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--vClaim" style={{ scaleY: vClaimDraw }} />
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--hHelp" style={{ scaleX: hHelpDraw }} />
+                    <motion.div className="ChooseAdvisor__line ChooseAdvisor__line--hName" style={{ scaleX: hNameDraw }} />
+                </>
+            )}
         </motion.section>
     );
 }

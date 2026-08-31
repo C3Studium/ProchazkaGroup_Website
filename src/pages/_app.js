@@ -31,14 +31,22 @@ const CursorGrid = dynamic(
 import Navbar from "@/components/common/navbar";
 import Preloader from "@/components/common/PreLoader";
 import PageVeil from "@/components/common/PageVeil";
-import Cursor from "@/components/common/ui/Cursor";
+// The custom cursor. Client-side only, and for the same reason the shader and
+// the lattice above are: there is nothing for the server to draw. It also has
+// to answer "is there a pointer here at all" before its first paint — rendered
+// on the server it shipped a ring and a dot into the HTML of every phone, which
+// were then taken away again on hydration. See its own note.
+const Cursor = dynamic(() => import("@/components/common/ui/Cursor"), {
+    ssr: false,
+});
 import { Toaster } from "sonner";
 // import Footer from "@/components/common/footer";
 import SiteFooter from "@/components/common/SiteFooter";
 
 export default function App({ Component, pageProps }) {
   useEditArming();
-  const { pathname } = useRouter();
+  const router = useRouter();
+  const { pathname } = router;
 
   // Which surface this is, for the one rule that has to tell them apart.
   //
@@ -74,6 +82,60 @@ export default function App({ Component, pageProps }) {
       window.lenis.destroy()
     }
   }, [])
+
+  // Every page opens at its own top, by whichever of the three doors the
+  // visitor came through.
+  //
+  // The browser gets two of them wrong for this site. A reload restores the
+  // offset it was left at, and so does a back or forward step — both put the
+  // reader down in the middle of a page whose entrances are all keyed to
+  // arriving at its start. On /o-nas that is worse than untidy: the hero and
+  // the showcase are one pinned mechanism measured from the top of the
+  // document, and landing inside it means landing inside an animation that was
+  // never played.
+  //
+  // `manual` turns the browser's own restoration off. Everything after it is
+  // done here rather than in PageVeil so that it covers navigations the veil
+  // does not drive — a back button, a router.push from anywhere — and not only
+  // the ones it does.
+  //
+  // Placed after the effect above on purpose: effects run in the order they are
+  // written, so by the time this one does there is a Lenis to talk to.
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const toTop = () => {
+      // The Studio keeps its own place. It is a dense admin that scrolls in its
+      // own panels and is outside every pass this rule belongs to; sending it
+      // home on each of its internal route changes would be a regression, not a
+      // fix.
+      if (window.location.pathname.startsWith("/studio")) return;
+      window.scrollTo(0, 0);
+      // Lenis holds a scroll position of its own and would glide the page back
+      // to it on the next frame. `immediate` makes this a jump rather than a
+      // visible ride; `force` is because the veil stops Lenis for the length of
+      // a transition, and a stopped instance ignores a plain scrollTo.
+      if (window.lenis) window.lenis.scrollTo(0, { immediate: true, force: true });
+    };
+
+    toTop();
+    router.events.on("routeChangeComplete", toTop);
+
+    // The third door: a step back into the bfcache. No mount, no route change,
+    // and the browser restores the offset itself — so neither of the two above
+    // ever hears about it.
+    const onShow = (e) => {
+      if (e.persisted) toTop();
+    };
+    window.addEventListener("pageshow", onShow);
+
+    return () => {
+      router.events.off("routeChangeComplete", toTop);
+      window.removeEventListener("pageshow", onShow);
+    };
+  }, [router.events])
 
   return (
     <CookiesProvider>

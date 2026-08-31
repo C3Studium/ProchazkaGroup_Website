@@ -45,6 +45,20 @@ const REACH = { type: "spring", stiffness: 150, damping: 26, restDelta: 0.001 };
 const PUSH = 62;
 const FALLOFF = 165;
 
+// How far a neighbour moves is written against the MAP, and what the reader sees
+// is a WINDOW onto it — so the two only agree while the window is the whole map.
+// On a phone it is not: the map is blown up until the band shows less than a
+// quarter of its width (see PHONE_WINDOW in index.jsx), and sixty-two units that
+// spend six per cent of a desktop screen spend nearly thirty of a phone's. The
+// countries flew apart on the tap.
+//
+// So the push is given as a share of what is on screen rather than of the map,
+// which is the same six per cent at both ends. The falloff is deliberately NOT
+// scaled with it: that number decides WHICH neighbours answer, and shrinking it
+// would leave the country next door moving on its own while the rest of the
+// group stood still.
+const pushFor = (visible) => PUSH * visible;
+
 // What the flag and its date need inside the country, in map units. A country
 // grows by whatever it is short of that — and never by less than a fifth,
 // because a country that does not visibly move has not answered the pointer.
@@ -78,9 +92,11 @@ const scaleFor = ([w, h]) =>
 const FLAG_OF = 12 / 850;
 const flagFor = (width) => Math.round(Math.min(34, Math.max(10, width * FLAG_OF)));
 
-export default function EuropeMap({ ride, at, step, width = 850, caption = false, coarse = false, ground = false }) {
+export default function EuropeMap({ ride, at, step, width = 850, caption = false, coarse = false, ground = false, focus = false, visible = 1 }) {
     const [held, setHeld] = useState(-1);
     const flagW = flagFor(width);
+    // What one unit of the map is worth against what the reader can see.
+    const push = pushFor(visible);
 
     // Drawn on as it arrives, country by country in the order they were opened.
     const drawn = useTransform(ride, [at, at + step * 1.6], [0, 1]);
@@ -97,11 +113,24 @@ export default function EuropeMap({ ride, at, step, width = 850, caption = false
         // Ground rather than picture: it is the size of the screen and it has no
         // edge, because the stylesheet fades all four of them out. See
         // EuropeMap--ground.
-        <div className={`EuropeMap${caption ? " EuropeMap--read" : ""}${ground ? " EuropeMap--ground" : ""}`}>
+        <div className={`EuropeMap${caption ? " EuropeMap--read" : ""}${ground ? " EuropeMap--ground" : ""}${focus ? " EuropeMap--focus" : ""}`}>
             {/* Its own proportions, from the projection: the flags are placed
                 in percentages of this box, so it has to be exactly the map's
                 shape or every flag lands off its country. */}
-            <div className="EuropeMap__frame" style={{ aspectRatio: `${MAP.w} / ${MAP.h}` }}>
+            {/* As ground the frame is told its width in pixels rather than
+                taking it from its height, because on a phone it is WIDER than
+                the box it sits in — the band shows the middle of the map and
+                the rest overflows to both sides. Everywhere else the number is
+                the same one the height would have produced, so this changes
+                nothing there. */}
+            <div
+                className="EuropeMap__frame"
+                style={
+                    ground || focus
+                        ? { width, aspectRatio: `${MAP.w} / ${MAP.h}` }
+                        : { aspectRatio: `${MAP.w} / ${MAP.h}` }
+                }
+            >
                 <svg
                     className="EuropeMap__plate"
                     viewBox={`0 0 ${MAP.w} ${MAP.h}`}
@@ -135,6 +164,8 @@ export default function EuropeMap({ ride, at, step, width = 850, caption = false
                                 held={held === i}
                                 from={held >= 0 ? MARKETS[held] : null}
                                 coarse={coarse}
+
+                                push={push}
                                 onHold={() => setHeld(i)}
                                 onLeave={() => setHeld((v) => (v === i ? -1 : v))}
                                 onTap={() => setHeld((v) => (v === i ? -1 : i))}
@@ -157,6 +188,8 @@ export default function EuropeMap({ ride, at, step, width = 850, caption = false
                             from={held >= 0 ? MARKETS[held] : null}
                             flagW={flagW}
                             coarse={coarse}
+
+                            push={push}
                             onHold={() => setHeld(i)}
                             onLeave={() => setHeld((v) => (v === i ? -1 : v))}
                             onTap={() => setHeld((v) => (v === i ? -1 : i))}
@@ -189,7 +222,7 @@ export default function EuropeMap({ ride, at, step, width = 850, caption = false
     );
 }
 
-function Country({ market, index, drawn, held, from, coarse, onHold, onLeave, onTap }) {
+function Country({ market, index, drawn, held, from, coarse, push, onHold, onLeave, onTap }) {
     // Its own slice of the drawing. Sixteen countries over the run, in the
     // order they were opened, so the map fills the way the history reads.
     const share = index / MARKETS.length;
@@ -205,8 +238,8 @@ function Country({ market, index, drawn, held, from, coarse, onHold, onLeave, on
         const vy = market.at[1] - from.at[1];
         const dist = Math.hypot(vx, vy) || 1;
         const force = Math.exp(-dist / FALLOFF);
-        dx = (vx / dist) * PUSH * force;
-        dy = (vy / dist) * PUSH * force;
+        dx = (vx / dist) * push * force;
+        dy = (vy / dist) * push * force;
         scale = 1 - 0.08 * force;
     }
 
@@ -235,7 +268,7 @@ function Country({ market, index, drawn, held, from, coarse, onHold, onLeave, on
     );
 }
 
-function Flag({ market, index, drawn, held, from, flagW = 26, coarse, onHold, onLeave, onTap }) {
+function Flag({ market, index, drawn, held, from, flagW = 26, coarse, push, onHold, onLeave, onTap }) {
     const Mark = FLAGS[market.iso];
     const share = index / MARKETS.length;
     const shown = useTransform(drawn, [share * 0.9, share * 0.9 + 0.12], [0, 1]);
@@ -251,8 +284,8 @@ function Flag({ market, index, drawn, held, from, flagW = 26, coarse, onHold, on
         // own country while that country is getting out of the way.
         const dist = Math.hypot(vx, vy) || 1;
         const force = Math.exp(-dist / FALLOFF);
-        dx = (vx / dist) * PUSH * force;
-        dy = (vy / dist) * PUSH * force;
+        dx = (vx / dist) * push * force;
+        dy = (vy / dist) * push * force;
     }
 
     return (

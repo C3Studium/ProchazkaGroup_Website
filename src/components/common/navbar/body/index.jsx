@@ -63,6 +63,56 @@ const SPANS = {
     partneri: { cols: [4],    rows: [3] },
 };
 
+// The bento is not one grid, it is three, and the cuts are drawn from the
+// tracks — so all three have to be described or the panel is ruled for a shape
+// it is not drawing. The table above is the wide one; these two are the others,
+// and each is the same map its own block in the stylesheet writes.
+//
+// What this fixes, measured at 817×1174 and 390×844: below 820px the boxes are
+// two across and four down, but the cut for a box's right-hand edge was still
+// asking "is this box in column FOUR" and the one for its foot "is it in row
+// THREE". Against a two-column, four-row map that is the wrong question twice.
+// BENEFIT PROGRAM lost the rule between it and O NÁS, because in the wide map
+// it is the last column and needs none; and O NÁS lost the rule between it and
+// RECENZE, because in the wide map it is the last row. Every other box happened
+// to answer the same either way.
+//
+// PARTNEŘI has the fifth row across both columns. It used to be hidden here —
+// four rows seat seven boxes once NABÍDKA has taken two — and the page then had
+// no way in from the menu at all. Only the SIDEWAYS map below still drops it.
+//
+// Five rows and not four is load-bearing for the cuts, not just for the seat:
+// asked "is this box in the last row" against four, the boxes in row 4 would
+// each draw a rule under themselves that the row beneath now needs open, and
+// PARTNEŘI would draw one along the panel's own bottom frame.
+const COMPACT_COLS = 2;
+const COMPACT_ROWS = 5;
+const SPANS_COMPACT = {
+    hlavni:   { cols: [1],    rows: [1] },
+    kontakt:  { cols: [2],    rows: [1] },
+    nabidka:  { cols: [1, 2], rows: [2] },
+    benefit:  { cols: [1],    rows: [3] },
+    onas:     { cols: [2],    rows: [3] },
+    poradci:  { cols: [1],    rows: [4] },
+    recenze:  { cols: [2],    rows: [4] },
+    partneri: { cols: [1, 2], rows: [5] },
+};
+
+// A phone on its side: four across, two down, and it wins wherever it and the
+// block above both match — it is written after it in the stylesheet.
+const SIDEWAYS_COLS = 4;
+const SIDEWAYS_ROWS = 2;
+const SPANS_SIDEWAYS = {
+    hlavni:   { cols: [1],    rows: [1] },
+    nabidka:  { cols: [2, 3], rows: [1] },
+    benefit:  { cols: [4],    rows: [1] },
+    kontakt:  { cols: [1],    rows: [2] },
+    onas:     { cols: [2],    rows: [2] },
+    poradci:  { cols: [3],    rows: [2] },
+    recenze:  { cols: [4],    rows: [2] },
+    partneri: { cols: [4],    rows: [2] },
+};
+
 // Which edge each box's picture unfolds from. Always the outer one, so every
 // box opens towards the middle of the bento.
 const OPENS = {
@@ -260,6 +310,31 @@ const SIZE = {
     advisors: { width: 'min(92vw, 107.5rem)', height: 'min(86vh, 61.25rem)' },
 };
 
+// The same panel on a laptop with a short viewport.
+//
+// The box is centred on the window, and the navbar is fixed over the top 81px
+// of it. At 86vh that leaves the roster's top edge at 50px on a 1260×720 — 31px
+// BEHIND the site's own name and menu — and the same at every stop this query
+// covers: 46 at 1220×660, 54 at 1366×768, 56 at 1440×800. Only the roster; the
+// menu is 70vh and already clears it.
+//
+// 72vh is the largest round figure that clears the bar at the shortest of them
+// (1220×660, where it lands at 79px with 11px of air) and it moves the top edge
+// down by half a hundred pixels at the size this was reported on. The height is
+// what moves it: the box is centred, so the only way its top goes down is for
+// the box to be shorter — a `top` offset would push the foot off the screen,
+// which at 720 has only 50px to give.
+//
+// Same `min(<vh>, <rem>)` shape as the two above, and that is load-bearing:
+// framer interpolates between values of the same template by walking the
+// numbers in them, so a `calc()` here would animate the panel's growth out of
+// the menu as a snap. The rem term is dead in this range (61.25rem is 980px and
+// nothing here is 800 tall) and is kept for exactly that reason.
+const SIZE_SHORT = {
+    menu: SIZE.menu,
+    advisors: { width: 'min(92vw, 107.5rem)', height: 'min(72vh, 61.25rem)' },
+};
+
 // The box resizes on the house springs — the width leads, the height trails it
 // by a few frames. See /nabidka.
 const GROW_W = { type: 'spring', stiffness: 150, damping: 26, restDelta: 0.5 };
@@ -310,24 +385,44 @@ const useMedia = (query) => {
 // 520px. The JS must not write its 4×3 track lists there — an inline
 // `grid-template-columns` with four values beats the stylesheet's two-column
 // map and squeezes the whole bento into half the panel.
-const COMPACT = '(max-width: 820px), (max-height: 520px)';
+// The third arm is a tablet upright at 820–900, which the stylesheet gives the
+// five-row map. Without it `compact` is false there and the 4×3 track list is
+// written inline over a grid that has two columns and five rows — the tracks
+// win, the areas are left addressing rows that no longer exist, and the bento
+// collapses into a corner of the panel.
+const COMPACT =
+    '(max-width: 820px), (max-height: 520px), (max-width: 900px) and (orientation: portrait)';
 
 // No hover to drive the wall with, so the tap has to be both the reach and the
 // choice. `hover: none` rather than `pointer: coarse` alone — a laptop with a
 // touchscreen still has the hover.
 const TOUCH = '(hover: none)';
 
-// A phone, as against anything else with a touchscreen. The distinction earns
-// its own query because the two-step below is right on one and wrong on the
-// other, and `hover: none` cannot tell them apart.
+// A `PHONE` query used to be here, telling a phone from anything else with a
+// touchscreen. It existed for one reason: the box's two-step was right on a
+// tablet and wrong on a phone. There is no two-step any more — one tap goes,
+// on everything — so there is nothing left for the distinction to decide, and
+// `TOUCH` above is the whole of what this panel needs to know.
+
+// A laptop with a short viewport: 1280×720, 1220×660, 1366×768, 1440×800. This
+// is the site's own `lt` stop, written out because the panel's size is an
+// inline style animated by framer and a stylesheet cannot reach it. MUST stay
+// identical to `lt` in styles/system/_breakpoints.scss.
+const SHORT_LAPTOP = '(min-width: 1200px) and (max-height: 800px)';
+
+// Which of the three bento maps is on the screen. Two queries rather than the
+// `compact` one above, because that is an OR of both small stops and the two
+// draw DIFFERENT grids — asked as one question it cannot tell them apart.
 //
-// 600 is the site's own v(md) stop — the width at which a portrait layout
-// starts being read as a tablet — and it sits in the empty band between the
-// widest phone we target (430 across) and the narrowest tablet in portrait
-// (768). The second clause is the same phone held sideways: nothing wider than
-// a phone in landscape is shorter than 520px, which is already how the
-// stylesheet tells those two apart.
-const PHONE = '(hover: none) and (max-width: 600px), (hover: none) and (max-height: 520px)';
+// Each must stay identical to the block that owns its map in styles.scss:
+// NARROW is that file's `below-px(820)`, SIDEWAYS its `phs-h`. Sideways is
+// tested first here for the same reason it wins there — it is written last.
+// The second arm is a tablet upright, which the stylesheet's own block reaches
+// with `v(md) + from-px(600)` and this has to match: 820–900 upright draws the
+// same five-row map and would otherwise be measured against the wide one.
+const NARROW =
+    '(max-width: 820px), (max-width: 900px) and (orientation: portrait)';
+const SIDEWAYS = '(min-width: 480px) and (max-height: 520px) and (orientation: landscape)';
 
 // The office is in Písek and the clock in the rail says so. Read on the client
 // only: the server has no idea what time it is, and a time rendered into the
@@ -355,8 +450,18 @@ export default function NavbarBody({ setMenu, onSheet }) {
     const time = useOfficeClock();
     const calm = useReducedMotion();
     const touch = useMedia(TOUCH);
-    const phone = useMedia(PHONE);
     const compact = useMedia(COMPACT);
+    const shortLaptop = useMedia(SHORT_LAPTOP);
+    const narrow = useMedia(NARROW);
+    const sideways = useMedia(SIDEWAYS);
+
+    // The map the cuts are drawn from, and its own last column and last row —
+    // which is the whole of what a cut asks about.
+    const grid = sideways
+        ? { spans: SPANS_SIDEWAYS, cols: SIDEWAYS_COLS, rows: SIDEWAYS_ROWS }
+        : narrow
+          ? { spans: SPANS_COMPACT, cols: COMPACT_COLS, rows: COMPACT_ROWS }
+          : { spans: SPANS, cols: COLS, rows: ROWS };
 
     // The menu opens on the page you are on, so the ground behind it is already
     // where you are — the one thing a menu can say before you have touched it.
@@ -464,7 +569,7 @@ export default function NavbarBody({ setMenu, onSheet }) {
             <motion.div
                 id="navPanel"
                 className="navPanel"
-                animate={SIZE[view]}
+                animate={(shortLaptop ? SIZE_SHORT : SIZE)[view]}
                 transition={calm
                     ? { duration: 0.3, ease: CURTAIN }
                     : { width: GROW_W, height: GROW_H }}
@@ -532,52 +637,45 @@ export default function NavbarBody({ setMenu, onSheet }) {
                             // it is rather than looking like a link and not
                             // being one.
                             //
-                            // On a TABLET the tap is the reach, because there is
-                            // no hover to open a box with: the first tap on a
-                            // closed box opens it — photograph, note — and only
-                            // a tap on the box that is already open goes
-                            // through. A tablet has the screen to make that
-                            // worth having.
+                            // ONE TAP, on anything with a touchscreen.
                             //
-                            // On a PHONE the same two steps are a toll. A box
-                            // the size of a thumbnail has very little to preview
-                            // with, and charging two taps for every destination
-                            // spends exactly what a menu is meant to save. So a
-                            // phone gets no intermediate state at all: every box
-                            // is what it looks like, one tap leaves or opens the
-                            // sheet, and the only box showing its photograph is
-                            // the page you are already on — `hovered` is never
-                            // set here, so `shown` stays on `here`, which is the
-                            // one preview nobody had to ask for.
+                            // A tablet used to get two: the tap was treated as
+                            // the reach, since there is no hover to open a box
+                            // with, so the first tap on a closed box opened it —
+                            // photograph, note — and only a tap on the already
+                            // open box went through. A phone was exempt.
                             //
-                            // A closed page box on a tablet is a <button>, not a
-                            // dimmed Link, and that is not a style choice.
+                            // The preview is not worth a tap. It is a
+                            // photograph and a line of note on a box the reader
+                            // has already decided about; there is no choice
+                            // being made in it, so the second tap is a toll on
+                            // every destination in the menu, which is exactly
+                            // what a menu is for saving. The roster is the
+                            // different case and keeps its own step, because
+                            // there the first tap is a genuine choice — WHICH
+                            // advisor — and the opening is that choice being
+                            // made.
+                            //
+                            // So the box is a real Link on touch as it always
+                            // was on a phone, and that is not a style choice:
                             // PageVeil intercepts every internal <a> click in
                             // the CAPTURE phase, before any handler here could
-                            // preventDefault — so the first tap on an <a> would
-                            // start the page transition no matter what this
-                            // component decided. As a button the tap belongs to
-                            // this panel; the box becomes the real Link the
-                            // moment it is open, and the second tap leaves
-                            // through the veil exactly like a desktop click.
-                            // On a phone the box is that Link from the start,
-                            // which is precisely why one tap now leaves.
-                            const closedOnTouch = touch && !phone && !open;
-                            const Inner = item.modal || closedOnTouch ? 'button' : Link;
-
-                            const activate = (e) => {
-                                if (!closedOnTouch) return false;
-                                e.preventDefault();
-                                setHovered(index);
-                                return true;
-                            };
+                            // preventDefault. A <button> is how the old first
+                            // tap could belong to this panel at all. As a Link
+                            // the tap leaves through the veil exactly like a
+                            // desktop click.
+                            //
+                            // `hovered` is never set from a tap now, so `shown`
+                            // stays on `here` — the only box showing its
+                            // photograph is the page you are already on, which
+                            // is the one preview nobody had to ask for.
+                            const Inner = item.modal ? 'button' : Link;
 
                             const innerProps = item.modal
                                 ? {
                                     type: 'button',
                                     'aria-haspopup': 'dialog',
-                                    onClick: (e) => {
-                                        if (activate(e)) return;
+                                    onClick: () => {
                                         // The roster stays inside the panel;
                                         // only the contact sheet is a sheet.
                                         if (item.modal === 'advisors') { setView('advisors'); return; }
@@ -585,16 +683,11 @@ export default function NavbarBody({ setMenu, onSheet }) {
                                         onSheet?.(item.modal);
                                     },
                                 }
-                                : closedOnTouch
-                                    ? {
-                                        type: 'button',
-                                        onClick: activate,
-                                    }
-                                    : {
-                                        href: item.href,
-                                        onClick: close,
-                                        'aria-current': isHere ? 'page' : undefined,
-                                    };
+                                : {
+                                    href: item.href,
+                                    onClick: close,
+                                    'aria-current': isHere ? 'page' : undefined,
+                                };
 
                             return (
                                 <motion.div
@@ -621,14 +714,10 @@ export default function NavbarBody({ setMenu, onSheet }) {
                                         data-marks
                                         // Focus preview is a keyboard thing. On
                                         // touch a tap fires focus BEFORE click,
-                                        // so an unguarded focus would open the
-                                        // box mid-tap: on a tablet the click
-                                        // would then land on the already-open
-                                        // state — acting on the first tap, which
-                                        // is exactly what its two-step exists to
-                                        // prevent — and on a phone it would put
-                                        // a photograph on screen for the two
-                                        // frames before the page leaves.
+                                        // so an unguarded focus would put a
+                                        // photograph on the screen for the two
+                                        // frames between the finger landing and
+                                        // the page leaving.
                                         onFocus={() => { if (!touch) setHovered(index); }}
                                     >
                                         {/* Mounted, not conditional: eight
@@ -694,14 +783,14 @@ export default function NavbarBody({ setMenu, onSheet }) {
                                         four rules close the outside, and drawn
                                         twice a hairline reads heavier than the
                                         ones beside it. */}
-                                    {!SPANS[area].cols.includes(COLS) && (
+                                    {!grid.spans[area].cols.includes(grid.cols) && (
                                         <span
                                             className="navPanel__cut navPanel__cut--v"
                                             style={{ '--sweep': `${(-0.7 * index).toFixed(1)}s` }}
                                             aria-hidden="true"
                                         />
                                     )}
-                                    {!SPANS[area].rows.includes(ROWS) && (
+                                    {!grid.spans[area].rows.includes(grid.rows) && (
                                         <span
                                             className="navPanel__cut navPanel__cut--h"
                                             style={{ '--sweep': `${(-0.7 * index - 0.35).toFixed(1)}s` }}

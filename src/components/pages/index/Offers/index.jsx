@@ -58,7 +58,11 @@ const PHOTO_SLATS = [0, 1, 2, 3, 4];
 // the 550vh timeline never runs, and anything still keyed to `journey` sits at
 // its end state — which for the stack is faded out. So under this width the
 // content stops listening to scroll and carries its own entrances instead.
-const STACK_QUERY = "(max-width: 820px)";
+// An upright tablet is NOT in this set: it takes the pinned stage and the
+// desktop layout exactly. See the matching block in styles.scss, which carries
+// the reading of the two arms — the stop stopped being a width.
+const STACK_QUERY =
+    "(max-width: 599.98px), (max-width: 820px) and (orientation: landscape)";
 
 // The stacked entrances speak the same grammar as the journey-driven ones —
 // slats slide their slice up into place, copy draws out from behind its left
@@ -244,6 +248,7 @@ export default function Offers({ partnerLogos: cmsLogos, copyLines: cmsCopyLines
         mq.addEventListener("change", update);
         return () => mq.removeEventListener("change", update);
     }, []);
+
 
     // Resolved before anything else, because the timeline below is measured
     // against partnerLogos.length: the orbit advances by a fixed number of

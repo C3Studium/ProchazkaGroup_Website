@@ -1,15 +1,9 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { cubicBezier } from "framer-motion";
 import { editable } from "@/cms/edit";
-import {
-    GROW_TO,
-    PAIR_VW,
-    RIDE_END,
-    progressAtTrackX,
-    trackXAt,
-} from "@/components/pages/aboutUs/aboutStack";
+import { GROW_TO, RIDE_END } from "@/components/pages/aboutUs/aboutStack";
 
 // One set of discs for the whole section, in three phases.
 //
@@ -35,7 +29,11 @@ import {
 // the second one is centred on the moment that card's mark crosses the middle
 // of the screen, which is where it is being looked at.
 const MARK_CENTRE_VW = 8 + 18; // the mark's middle, in from the card's left edge
-const CARD_2_CENTRED = progressAtTrackX(50 - (PAIR_VW + MARK_CENTRE_VW));
+// Was a module constant, and could be while there was one geometry. The
+// track is twice as wide on a tablet upright, so where card two is centred
+// depends on which track — see geometryFor in ../../aboutStack.
+const card2CentredIn = (geo) =>
+    geo.progressAtTrackX(50 - (geo.PAIR_VW + MARK_CENTRE_VW));
 
 // Measured against the RIDE rather than against the whole section, and that is
 // not fussiness: the hops are a fixed share of the ride, so if these pads are
@@ -44,11 +42,32 @@ const CARD_2_CENTRED = progressAtTrackX(50 - (PAIR_VW + MARK_CENTRE_VW));
 // whatever else is added after them — which is exactly what happened when the
 // squeeze was given its own stretch at the end.
 const RIDE_SPAN = RIDE_END - GROW_TO;
-const HOP_1 = [GROW_TO, CARD_2_CENTRED - 0.158 * RIDE_SPAN];
-const REST_2 = [CARD_2_CENTRED - 0.158 * RIDE_SPAN, CARD_2_CENTRED + 0.132 * RIDE_SPAN];
+const hopsIn = (geo) => {
+    const c2 = card2CentredIn(geo);
+
+    // Where the flight ends and the discs come loose.
+    //
+    // On a wide screen that is RIDE_END — the moment the track parks — and the
+    // stretch after it is the discs' playground, the part where they are free
+    // and the pointer can reach them.
+    //
+    // A tablet upright rides a track twice as long (see geometryFor) in the same
+    // scroll, so the same schedule has the discs crossing twice the distance and
+    // still arriving at the last moment of the ride: they are caught mid-flight
+    // exactly where they are meant to have settled, and the playground is what
+    // gets spent. Ending the flight at 85% of the ride instead of all of it
+    // hands that stretch back — the discs land while there is still section left
+    // to see them in.
+    const end = geo.k > 1 ? GROW_TO + 0.85 * RIDE_SPAN : RIDE_END;
+
+    return {
+        HOP_1: [GROW_TO, c2 - 0.158 * RIDE_SPAN],
+        REST_2: [c2 - 0.158 * RIDE_SPAN, c2 + 0.132 * RIDE_SPAN],
 // The second hop ends where the track parks, so the discs come loose at the
 // same moment the room they are in stops moving.
-const HOP_2 = [CARD_2_CENTRED + 0.132 * RIDE_SPAN, RIDE_END];
+        HOP_2: [c2 + 0.132 * RIDE_SPAN, end],
+    };
+};
 
 // ---- how they look ------------------------------------------------------
 const EDGE_ON_DEG = 70; // past ~72° a 1.4px ring edge-on is more aliasing than object
@@ -125,7 +144,11 @@ const screenEase = (t, localSpan, trackSpan) => {
 // The frame loop below writes `style.transform` on the disc and `style.opacity`
 // on the label every frame; an attribute is neither, so annotating the label
 // changes nothing about what this file does.
-export default function Circles({ progress, labels = [], markRefs, docId }) {
+export default function Circles({ progress, labels = [], markRefs, docId, geo }) {
+    // The three moments the discs are timed against, for THIS track. They were
+    // module constants; the track has two widths now, so they are read off the
+    // geometry the section is riding.
+    const { HOP_1, REST_2, HOP_2 } = useMemo(() => hopsIn(geo), [geo]);
     const layerRef = useRef(null);
     const nodeRefs = useRef([]);
     const pointerRef = useRef(null);
@@ -268,8 +291,8 @@ export default function Circles({ progress, labels = [], markRefs, docId }) {
                 // How far the track itself slides across each hop, in px. This
                 // is the share `screenEase` has to take back out.
                 const vwPx = window.innerWidth / 100;
-                const trackSpan1 = (trackXAt(HOP_1[1]) - trackXAt(HOP_1[0])) * vwPx;
-                const trackSpan2 = (trackXAt(HOP_2[1]) - trackXAt(HOP_2[0])) * vwPx;
+                const trackSpan1 = (geo.trackXAt(HOP_1[1]) - geo.trackXAt(HOP_1[0])) * vwPx;
+                const trackSpan2 = (geo.trackXAt(HOP_2[1]) - geo.trackXAt(HOP_2[0])) * vwPx;
 
                 list.forEach((body, i) => {
                     // Staggered, just — at a third of this again the group

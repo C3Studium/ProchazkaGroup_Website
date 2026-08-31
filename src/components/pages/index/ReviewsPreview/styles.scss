@@ -33,11 +33,26 @@
 
         p {
             max-width: none;
-            // The grid clamps quotes because its cells are cut in vh and
-            // cannot grow; this column can, so the quote is given back whole.
-            display: block;
-            -webkit-line-clamp: unset;
-            overflow: visible;
+            // Four lines, and the height is fixed at four rather than capped at
+            // them — that is the whole of the jump.
+            //
+            // The pair on screen is swapped for the next pair on a timer, and
+            // this column used to hand the quote back whole (`line-clamp:
+            // unset`) on the grounds that a column can grow where the desktop
+            // grid's vh-cut cells cannot. It can, but then a one-line quote and
+            // a five-line quote are two different heights and every rotation
+            // moved everything under them. Measured at 390×844 before this: the
+            // first slot came out 393px on one turn and 201 on the next, the
+            // section 1056 then 864 — a fifth of the page, twice a minute.
+            //
+            // `height` and not `min-height`, so a short quote reserves the four
+            // lines it is not using. "…více" is already in the markup and is
+            // what the ceiling hands the reader.
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 4;
+            overflow: hidden;
+            height: 6em;
         }
     }
 
@@ -425,7 +440,14 @@
     }
 
 
-    @include below-px(820) {
+    // Stacked — and an upright TABLET is back in this set, at the reader's own
+    // call: on a screen this narrow the reading wants a column, not the desktop's
+    // three. The first arm is the original stop and covers a phone either way up
+    // and a small landscape window; the second is what adds an upright tablet up
+    // to 900, so 768, 820 and 834 all read the same rather than 834 alone falling
+    // through to the wide layout.
+    @media (max-width: 820px),
+           (max-width: 900px) and (orientation: portrait) {
         @include reviewsStacked;
     }
 
@@ -435,6 +457,46 @@
     // scrolls instead of fitting.
     @include phs-h {
         @include reviewsStacked;
+
+        // One quote, not two.
+        //
+        // Stacked, the two reviews are a column, and a column on a 390-tall
+        // screen means the second one is never on screen at the same time as
+        // the first — it is read by scrolling past the section's own heading
+        // and the button that offers the whole page of them. So it is not a
+        // second review, it is the first review again, further down. The one
+        // that is left is the longer of the two and the one the runner's dot
+        // travels to, and "Prohlédněte si další recenze" above it already says
+        // where the rest are.
+        .ReviewsPreview__review--second {
+            display: none;
+        }
+
+        // And smaller. The quote is set at the size a desktop cell gives it —
+        // 1.3vw with a 1rem floor, which on a phone held sideways is the floor
+        // every time, so a client's paragraph arrives at body size in a band
+        // 390px tall. These are a step down from that, and the tag and the name
+        // come with it so the three keep their order of emphasis.
+        .ReviewsPreview__review__body p {
+            font-size: clamp(0.82rem, 1.5vw, 1.05rem);
+            line-height: 1.45;
+            // A column that can grow has no business cutting anything — the
+            // stacked form already unclamps this, and with only one quote left
+            // there is room for all of it.
+            max-width: none;
+        }
+
+        // Written at the depth the originals are, inside `.ReviewsPreview__review`.
+        // Restated from out here they lose on specificity and do nothing, which
+        // is exactly what the first attempt did — the quote above took only
+        // because it is addressed through its own wrapper as well.
+        .ReviewsPreview__review .ReviewsPreview__review__tag {
+            font-size: clamp(0.9rem, 1.6vw, 1.15rem);
+        }
+
+        .ReviewsPreview__review .ReviewsPreview__review__author {
+            font-size: clamp(0.72rem, 1.15vw, 0.88rem);
+        }
     }
 
     @include phl-h {

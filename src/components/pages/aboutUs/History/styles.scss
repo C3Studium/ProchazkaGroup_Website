@@ -167,7 +167,12 @@
     }
 }
 
-@include below-px(820) {
+// Stacked — and an upright tablet is NOT in this set any more: it rides, like
+// a laptop. The first arm is every phone upright and any window that narrow;
+// the second is a phone on its side and a small landscape window, which have
+// the width but not the height.
+@media (max-width: 599.98px),
+       (max-width: 820px) and (orientation: landscape) {
     .History {
         height: auto;
     }
@@ -227,4 +232,52 @@
         max-width: none;
     }
 
+}
+
+// ---- tablet, upright: the ride, twice as wide ----
+//
+// Same composition a laptop gets, on a panel of 200vw instead of 100. Every
+// coordinate inside a panel is a percentage OF THE PANEL — the photograph at
+// 44%, the copy at 38% — so doubling the panel doubles both against the screen
+// and nothing inside has to be told about it.
+//
+// The cost is real and was accepted: a panel twice the screen is a panel the
+// reader travels through rather than sees at once, and the section is twice as
+// long in scroll. That is the trade for keeping the arrangement instead of
+// folding it into a column.
+//
+// The track's travel is the other half of this and is in index.jsx — it is a
+// motion value, so a stylesheet cannot reach it. The two are one number.
+@include v(md) {
+    @include below-px(900) {
+        .History {
+            height: 800vh;
+        }
+
+        .History__track {
+            width: 800vw;
+        }
+
+        .History__panel {
+            flex: 0 0 200vw;
+        }
+
+        // The type, against the panel rather than against the screen.
+        //
+        // Nothing inside a panel scales with it on its own — every coordinate
+        // is written in vw, and vw is the SCREEN. The photograph, the copy
+        // column, the rules and the numeral are multiplied in index.jsx (see
+        // `k` on Panel); the type is here, and 1.15vw is
+        // 9px here, so both of these were sitting on their rem floors, 15px of
+        // body copy in a column 76vw wide. Doubling the panel had made the
+        // measure twice as wide and left the words the size they were.
+        .History__copy p {
+            font-size: clamp(1.4rem, 2.3vw, 2rem);
+            line-height: 1.55;
+        }
+
+        .History__date {
+            font-size: clamp(1rem, 1.6vw, 1.3rem);
+        }
+    }
 }

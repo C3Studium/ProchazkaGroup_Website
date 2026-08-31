@@ -372,8 +372,27 @@
         }
     }
 
-    @include below-px(820) {
-        // No horizontal scroll on small screens: panels stack vertically.
+    // No horizontal scroll on small screens: panels stack vertically.
+    //
+    // A tablet held UPRIGHT is not one of them any more. It keeps the ride —
+    // the only upright stop on the site that does — and the reason is the one
+    // the reader gives: at 768 or 818 across there is width enough for a panel
+    // to be a panel, and height enough that pinning a screen and travelling
+    // across it costs nothing. The stacking exists for a phone, where a panel
+    // reduced to 390px is a column of its own contents and the ride would be
+    // four screens of scrolling sideways through them.
+    //
+    // Raw rather than `below-px(820)`, because the stop is no longer a width:
+    //
+    //   under 600           every phone upright, and any window that narrow
+    //   ≤820 and landscape  a phone on its side at 568 or 780, and a small
+    //                       landscape window — the shapes that have the width
+    //                       but not the height
+    //
+    // What falls through both is upright from 600 to 820, which is the tablet.
+    // Above 820 nothing stacked before and nothing stacks now.
+    @media (max-width: 599.98px),
+           (max-width: 820px) and (orientation: landscape) {
         height: auto;
 
         .HScroll__sticky {
@@ -499,13 +518,138 @@
 
     }
 
-    // Phone in landscape (844×390 up to 932×430): wider than the stacking
-    // cutoff, so it gets the full pinned ride — at 390px of height. The
-    // desktop measures collide there: the paragraph ran into the CTA parked
-    // at bottom 31vh, the join panel's body overran the bottom edge, and the
-    // 400px-tall deck was taller than the viewport (the deck itself is cut
-    // for this in useDeckLayout; here is everything CSS owns). Type steps
-    // down against the short edge and the blocks spread back out.
+    // ---- tablet, upright ----
+    //
+    // The deck, smaller. Everything else on this panel is the desktop's and
+    // stays so — the rules run from the panel before into the one after.
+    //
+    // The deck is the one thing here a media query cannot size: CardSwap is
+    // handed pixel numbers (see useDeckLayout in index.jsx) and an upright
+    // tablet takes the `w < 1200` branch, which is 400 across. Sat at 74vw of
+    // an 818 screen that is 405 to 805 before the fan, and the fan leans right
+    // by about two card distances on top of it — so the back of the deck was
+    // over the panel's edge.
+    //
+    // A transform rather than a smaller number, because the number is shared
+    // with every narrow window above 820 and this is the only one that is
+    // upright. The `translate(-50%, -50%)` is the base rule's centring and has
+    // to be repeated: one `transform` declaration replaces the other whole.
+    // And the reading over it, which is the change this page makes three times —
+    // the offers section and the advisor CTA do the same thing with their own
+    // photographs. Beside the deck the copy had 32vw, which is 262px on an 818
+    // screen; over it, it has the panel.
+    @include v(md) {
+        @include below-px(900) {
+            .HScroll__panel--clients {
+                .HScroll__stack {
+                    transform: translate(-50%, -50%) scale(0.68);
+                }
+
+                // Above the deck, which sits at 3. Without this the cards are
+                // simply painted over the words — the deck's z-index is there
+                // to keep it off the rules, and the reading was never in the
+                // same space as it before.
+                .HScroll__heading,
+                .HScroll__info,
+                .HScroll__ctaWrap {
+                    z-index: 4;
+                }
+
+                .HScroll__heading { top: 25vh; }
+
+                // The measure, not the column: 32vw was a third of a landscape
+                // screen with a deck beside it. There is no beside any more.
+                .HScroll__info {
+                    top: 34vh;
+                    width: 72vw;
+                }
+
+                // Under the copy, not down at the panel's foot. `bottom` is the
+                // desktop's anchor and it is the right one there — the button
+                // sits clear above the rule at 73vh with the deck beside it.
+                // Here the copy ends around 41vh and the button was at 74, with
+                // a third of the panel of nothing between the sentence and the
+                // thing it is asking you to do.
+                .HScroll__ctaWrap {
+                    top: 45vh;
+                    bottom: auto;
+                }
+
+                // The half-black. On each card rather than over the deck: the
+                // cards are dealt in 3D and one flat layer over the container
+                // would sit in front of the front card and behind nothing else.
+                .HScroll__card::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    pointer-events: none;
+                }
+
+                // Above the veil, or the caption is under the thing that was
+                // put there to make type legible.
+                .HScroll__card__caption {
+                    z-index: 2;
+                }
+            }
+
+            // The third panel is the one that reads better as a column than as
+            // an overlay: the reading first, the photograph under it.
+            //
+            // Its picture is 32vw by 55vh on a laptop, which upright is 262
+            // wide and 646 tall — a column of picture, and the crop is `cover`,
+            // so what that frame showed of the trophies was a vertical slice of
+            // them. It is not a plate the copy can sit on either, the way the
+            // other two are: this panel's copy is a heading, a paragraph and a
+            // button, and there is more of it than a half-height band can hold.
+            //
+            // So both come out of absolute placement and the panel becomes what
+            // it is — one column. The picture keeps a share of the width rather
+            // than all of it, so it reads as this panel's illustration and not
+            // as its ground.
+            .HScroll__panel--join {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: flex-start;
+                gap: 3.5vh;
+                // The floor clears the fixed navbar.
+                padding: max(9vh, 104px) 7vw 8vh;
+
+                // `order`, not the markup: the picture is written first there
+                // and it is first on every screen that places these two by
+                // hand, which is every screen but this one.
+                .HScroll__photo {
+                    order: 1;
+                    position: static;
+                    width: min(58%, 24rem);
+                    height: 26vh;
+                }
+
+                .HScroll__photo::after {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    background-color: rgba(0, 0, 0, 0.5);
+                    pointer-events: none;
+                }
+
+                // 34vw is 278px here and set this copy in six lines. Given the
+                // column, it is three — and the button under it comes up with
+                // them, because the body was always a flex column and the
+                // button always its last child.
+                .HScroll__body {
+                    order: 0;
+                    position: static;
+                    width: auto;
+                    max-width: 46rem;
+                }
+            }
+        }
+    }
+
     @include phl-h {
         .HScroll__heading {
             font-size: clamp(1.7rem, 6.5vh, 2.4rem);
@@ -531,10 +675,16 @@
         }
 
         .HScroll__panel--clients {
-            .HScroll__heading { top: 16vh; }
+            // Down, and the two of them closer together. At 16vh the heading
+            // sat level with the bar and eighteen vh of nothing stood between
+            // it and the paragraph it introduces, so they read as two separate
+            // things in the same column rather than as a heading and its text.
+            // Twelve vh apart is the gap the pair had on the wide screen this
+            // was drawn for.
+            .HScroll__heading { top: 26vh; }
 
             .HScroll__info {
-                top: 34vh;
+                top: 38vh;
                 width: 34vw;
             }
 
@@ -544,7 +694,17 @@
 
             // The deck is short-edge sized now; centred a touch lower so the
             // fan's upward lean clears the header.
-            .HScroll__stack { top: 54%; }
+            //
+            // And scaled down. CardSwap is handed pixel numbers rather than
+            // CSS — see useDeckLayout — so this is the one place its size can
+            // be trimmed without touching the geometry the fan is built from:
+            // the cards keep their proportions and their spacing, the whole
+            // thing is simply drawn smaller. The translate has to stay in the
+            // same declaration or the deck loses the centring it is placed by.
+            .HScroll__stack {
+                top: 54%;
+                transform: translate(-50%, -50%) scale(0.8);
+            }
 
             .HScroll__card__caption {
                 font-size: 0.8rem;
@@ -564,8 +724,11 @@
                 width: 30vw;
             }
 
+            // Down for the same reason as the panel before it: at 14vh the
+            // words started under the bar with the whole lower half of the
+            // screen empty beneath them.
             .HScroll__body {
-                top: 14vh;
+                top: 26vh;
                 left: 42vw;
                 width: 48vw;
                 gap: 2.2vh;

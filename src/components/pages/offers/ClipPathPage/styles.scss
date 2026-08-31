@@ -10,8 +10,26 @@
 // under 900 by accident; 932x430 is the same phone a size up and does not. The
 // height clause is the half that actually names the case — see phs-h below,
 // which tunes the arrangement for it.
+// Nothing held UPRIGHT is in here any more. A phone and a tablet both get the
+// pinned ride and the parallax, the same sequence a laptop gets — only the
+// reading is placed differently, and only on a phone (see the blocks at the
+// foot of this file). A tablet upright takes the desktop arrangement as it is,
+// on a narrower screen.
+//
+// So what is left is a window in LANDSCAPE that is neither a phone nor big
+// enough to ride: too narrow, or short enough that the reading would be sitting
+// on itself. Two arms, and they are what remains of the original
+// `(max-width: 900px), (max-height: 520px)` after every upright viewport and
+// every phone have been taken out of it.
+//
+//   ≤900 landscape, taller than 520  a small window that is not flat
+//   under 480 landscape              a window too small to be either
+//
+// Upright is unconditional now, at every width: under 600 is a phone, 600–900 a
+// tablet, over 900 a desktop window turned on its side. All three ride.
 @mixin stacked {
-    @media (max-width: 900px), (max-height: 520px) {
+    @media (max-width: 900px) and (min-height: 521px) and (orientation: landscape),
+           (max-width: 479px) and (orientation: landscape) {
         @content;
     }
 }
@@ -107,28 +125,29 @@
     position: absolute;
     inset: 0;
     pointer-events: none;
+    // Re-cut against the half-black underneath it (.photoVeil, globals.scss).
+    // These are what the gradient has to ADD to a photograph already at one
+    // half, not to a bare one — so the two ends land where they always did:
+    // 0.64 over 0.5 is 0.82 at the head, 0.72 over 0.5 is 0.86 at the foot. The
+    // middle is the one place the sum genuinely rises, from 0.24 to about 0.6,
+    // and that is the veil doing what it was asked to do.
     background: linear-gradient(
         to bottom,
-        rgba(2, 14, 21, 0.82) 0%,
+        rgba(2, 14, 21, 0.64) 0%,
         // Lighter across the middle than it was. The reading has a plate of its
         // own now, so the wash no longer has to carry it — and dimming the
         // photograph twice left it at fourteen per cent of its own brightness
         // behind the copy.
-        rgba(2, 14, 21, 0.24) 30%,
-        rgba(2, 14, 21, 0.26) 62%,
-        rgba(2, 14, 21, 0.86) 100%
+        rgba(2, 14, 21, 0.2) 30%,
+        rgba(2, 14, 21, 0.22) 62%,
+        rgba(2, 14, 21, 0.72) 100%
     );
 }
 
-// The last thing the sequence does: it goes out into the page's own ground
-// rather than stopping. Above every chapter, so it takes the whole stage.
-.Partners__close {
-    position: absolute;
-    inset: 0;
-    z-index: 20;
-    background-color: #020e15;
-    pointer-events: none;
-}
+// `.Partners__close` was here — a sheet of the page's own ground over the whole
+// stage, fading up to solid as the sequence ran out. It is gone, element and
+// rule both. The sequence ends by holding its last chapter instead; see
+// CLOSE_RUN in index.jsx.
 
 // ---- the rules -------------------------------------------------------------
 //
@@ -310,9 +329,7 @@
 // its scroll progress runs from 0 to 1 over the four chapters TOGETHER rather
 // than over each in turn. Left connected, that timeline reported the first
 // partner as buried by the time the reader had scrolled a screen — its eyebrow,
-// its sentence and its button faded out under the reader's thumb — and the
-// closing sheet, which the pinned ride only reaches at the very end, covered
-// the last two chapters in flat black.
+// its sentence and its button faded out under the reader's thumb.
 //
 // index.jsx disconnects them on the same query. These are the belt to that
 // brace: they hold from the first paint, before matchMedia has been read, and
@@ -342,10 +359,6 @@
         overflow: visible;
     }
 
-    // The full stop is the pinned ride's last gesture and has nothing to end
-    // here. See index.jsx — it is not mounted either.
-    .Partners__close { display: none; }
-
     .Partners__chapter {
         position: relative;
         inset: auto;
@@ -370,6 +383,11 @@
     // the reading. Here the reading is below the picture and the picture is a
     // picture, so it goes — and its scroll-driven opacity with it.
     .Partners__chapter__wash { background: none; opacity: 1 !important; }
+
+    // And the half-black goes with it, for the same sentence. Nothing is read
+    // over these photographs down here, so there is nothing for a veil to make
+    // legible — it would only be a dull picture.
+    .photoVeil { display: none; }
 
     .Partners__rule { display: none; }
 
@@ -417,36 +435,113 @@
 // sees one whole. The arrangement is the same — picture, then what it is about
 // — drawn to the shape of the screen it is on. Last, so it wins over the block
 // above, which it also matches.
-@include phs-h {
-    .Partners__mark { padding: clamp(4.5rem, 20vh, 7rem) 5vw clamp(0.75rem, 3vh, 1.5rem); }
-
-    .Partners__stage {
-        padding: 0 5vw;
-        gap: clamp(2rem, 11vh, 4.5rem);
-    }
-
-    .Partners__chapter__plate {
-        aspect-ratio: 21 / 9;
-        // The picture is `object-fit: cover`, so a cap crops it rather than
-        // squashing it — and a crop that leaves room for the reading under it
-        // is the whole point.
-        max-height: 62vh;
+// ---- upright, from a tablet up ----
+//
+// The desktop arrangement, on a screen that is narrower than it. Nothing moves:
+// the reading is still the column down the right-hand side over a full-bleed
+// picture, and the ride, the parallax and the opening window are the desktop's.
+// What changes is the one number that does not survive the rotation.
+//
+// 34vw is a third of a landscape screen and a good measure on it. Upright it is
+// 261px on a 768 tablet — the call to action broke over two lines and the
+// figure's sentence over three, inside a plate that had the shorter half of the
+// screen to sit in. A share of the width has to be bigger when the width is the
+// short side.
+//
+// Capped as well as scaled: past about 870px of width the 26rem holds it at the
+// measure the reading was drawn for, which is what keeps a large tablet upright
+// looking like the laptop rather than like a poster.
+@include v(md) {
+    .Partners__column {
+        width: min(48vw, 26rem);
+        right: 5vw;
     }
 
     .Partners__panel {
-        padding: clamp(1.1rem, 7vh, 2rem) 5vw;
-
-        // The plate keeps the picture's width — they are the same chapter and
-        // a plate that stops short of the photograph above it reads as a
-        // mistake. It is the SENTENCE that gets the measure: across 844px
-        // this line ran the full width of the screen, which is a line to get
-        // lost in rather than a column.
-        .Partners__panel__offer { max-width: 52ch; }
+        padding: clamp(1.4rem, 3.4vh, 2.4rem) 4vw;
     }
 
     .Partners__deal {
-        margin: clamp(0.6rem, 3.5vh, 1.2rem) 0 0 5vw;
-        padding: clamp(0.9rem, 5vh, 1.7rem) 5vw;
+        // The indent is a share of the width too, and 5vw of an upright screen
+        // put the plate's left edge past the middle of the one above it.
+        margin-left: 3vw;
+        padding: clamp(1rem, 2.4vh, 1.6rem) 4vw;
+    }
+}
+
+// ---- the phone, upright ----
+//
+// It rides now, so the reading is over the picture rather than under it, and
+// the desktop column it inherits is a 34vw strip pinned to the right-hand
+// margin — 133px across a 390 screen. This is the same reading, given the width
+// of the phone and set at its foot.
+//
+// Along the bottom on purpose. The picture is the chapter and it is worth
+// looking at; a plate at the middle of the screen sits on the middle of the
+// photograph, which is where the photograph is. Five vh of ground under it so
+// it reads as standing on the screen rather than falling off it.
+@include v(xs) {
+    @include below-px(600) {
+        .Partners__column {
+            top: auto;
+            bottom: 5vh;
+            right: 5vw;
+            left: 5vw;
+            width: auto;
+            transform: none;
+        }
+
+        .Partners__panel {
+            padding: clamp(1rem, 2.6vh, 1.5rem) 5vw;
+        }
+
+        .Partners__deal {
+            // The indent belonged to a 34vw column with room either side. Here
+            // the two plates are the width of the screen less its margins, and
+            // an inset one would only look like it had slipped.
+            margin: clamp(0.5rem, 1.4vh, 0.85rem) 0 0;
+            padding: clamp(0.75rem, 2vh, 1.2rem) 5vw;
+        }
+    }
+}
+
+// ---- the phone, on its side ----
+//
+// Also riding, and here the screen is wide and short: a column of two plates
+// down the right would be most of the height of the viewport. So the two go
+// side by side — the reading on the left, what it is worth on the right — which
+// is the one arrangement that uses a landscape screen as a landscape screen.
+//
+// Last in the file, so it wins over the upright block above wherever both could
+// be read to match.
+@include phs-h {
+    .Partners__column {
+        top: auto;
+        bottom: 5vh;
+        left: 4vw;
+        right: 4vw;
+        width: auto;
+        transform: none;
+        flex-direction: row;
+        align-items: flex-end;
+        gap: 3vw;
+    }
+
+    // The reading takes the room; the figure takes what it needs. Both floored
+    // at zero so a long partner name cannot push the other off the screen.
+    .Partners__panel {
+        flex: 1 1 0;
+        min-width: 0;
+        padding: clamp(0.8rem, 4vh, 1.3rem) 2.6vw;
+    }
+
+    .Partners__deal {
+        flex: 0 1 34%;
+        min-width: 0;
+        // No top margin and no indent: they are beside each other now, and the
+        // gap on the row is the space between them.
+        margin: 0;
+        padding: clamp(0.7rem, 3.4vh, 1.1rem) 2.6vw;
     }
 }
 

@@ -5,7 +5,8 @@ import Lines, { hasLines } from "@/components/common/ui/lines";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion, useTransform } from "framer-motion";
-import { RiArrowDownSLine } from "@remixicon/react";
+import DialPrefix from "@/components/common/ui/DialPrefix";
+import { DEFAULT_DIAL } from "@/constants/dialPrefixes";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { editable, editableList, editableLink } from "@/cms/edit";
 
@@ -360,7 +361,16 @@ export default function QnaContact({ copy = {} }) {
                                     className="QnaContact__field"
                                 >
                                     <span {...editable(formDoc, "items.2.label", "text")} className="label">{form.fieldLabels[2]}</span>
-                                    <span {...editable(formDoc, "items.4.label", "text")} className="prefix">{form.prefix} <RiArrowDownSLine size={15} /></span>
+                                    {/* The editable string that was here is
+                                        the control's list now — see
+                                        constants/dialPrefixes. `form.prefix`
+                                        is still read above and still what an
+                                        editor sets, so it is what the field
+                                        OPENS on. */}
+                                    <DialPrefix
+                                        defaultValue={form.prefix || DEFAULT_DIAL}
+                                        size={15}
+                                    />
                                     <input type="tel" name="phone" placeholder="Lorem ipsum" data-cursor="frame" />
                                 </motion.label>
 

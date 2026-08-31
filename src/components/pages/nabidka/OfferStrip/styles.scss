@@ -776,3 +776,106 @@
         }
     }
 }
+
+// ── the map as ground on a phone ───────────────────────────────────────
+//
+// Same idea as the wide ground above, arrived at from the opposite side. There
+// the map is contained and the box is the thing that overflows nothing; here the
+// map is half again wider than the screen and the BAND is the window onto it —
+// see mapBox in index.jsx for why a phone gets a band rather than the slot.
+//
+// Which means the mask changes elements. It has to be measured against whatever
+// bounds the visible picture, and on a phone that is this box, not the frame:
+// a fade at 13% of a frame 662px wide falls 148px off the side of a 366px
+// screen, where there is nothing to fade.
+.EuropeMap--ground .EuropeMap__frame,
+.EuropeMap--focus .EuropeMap__frame {
+    // The inline width is the whole point — the frame is allowed to be wider
+    // than the box it stands in.
+    max-width: none;
+}
+
+// ── the map as a window onto itself ────────────────────────────────────
+//
+// Both the phone held upright and the phone on its side show a PART of the map,
+// blown up, with the rest cropped: see `zoom` on the blocks in index.jsx, and
+// PHONE_WINDOW for the upright one. What differs between them is only how much
+// — a quarter of the plate upright, where the screen is portrait against a
+// landscape map, and better than half on its side, where the two nearly agree
+// and all sixteen countries still fit. Everything below is the same either way,
+// so it is written once.
+.EuropeMap--focus {
+    // The frame inside is positioned against this box.
+    position: relative;
+
+    $sides: linear-gradient(90deg, transparent 0%, #000 12%, #000 88%, transparent 100%);
+    $ends: linear-gradient(180deg, transparent 0%, #000 8%, #000 92%, transparent 100%);
+
+    -webkit-mask-image: $sides, $ends;
+    mask-image: $sides, $ends;
+    -webkit-mask-composite: source-in;
+    mask-composite: intersect;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+
+    // A mask hides pixels and nothing else — the hit test still reaches them.
+    // Without this the sea a hundred and fifty pixels off the side of the screen
+    // is still a country you can tap.
+    overflow: hidden;
+
+    .EuropeMap__frame {
+        // Its own fades off: they are measured against the frame, which here is
+        // several times the box and therefore the wrong thing to fade. The one
+        // on the box above replaces them.
+        -webkit-mask-image: none;
+        mask-image: none;
+
+        // Placed rather than flowed. The frame is now larger than its box in
+        // both directions, and a flex item has no way to say which part of
+        // itself the box is a window onto. Positioned, the second translate is
+        // exactly "move it by this fraction of itself", which is the only form
+        // the sum below can be written in honestly.
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        flex: none;
+        height: auto;
+
+        // Czechia in the middle. The frame's own centre is at (0.5, 0.5) of
+        // itself and Czechia sits at (0.488, 0.616) — see PHONE_FOCUS in
+        // index.jsx, which is read off the generated map rather than eyeballed.
+        // The difference is what this shifts by, so what lands in the middle is
+        // the country this page belongs to and not the sea south of Denmark.
+        transform: translate(-50%, -50%) translate(1.2%, -11.6%);
+    }
+}
+
+@include v(xs) {
+    @include below-px(600) {
+        // What is left that is the UPRIGHT phone's alone. The window, the mask,
+        // the crop and Czechia's centring are shared with the phone on its side
+        // and live in .EuropeMap--focus above.
+        .EuropeMap--ground {
+            // Over the map's foot, not under the picture. A line beneath it
+            // would put the ground back in a box, which is what this undoes —
+            // and it still has to be readable over whatever country has ended
+            // up behind it, hence the ground under the type.
+            .EuropeMap__read__line {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 2;
+                height: auto;
+                padding: 1.6rem 6vw 0.7rem;
+                border-top: 0;
+                background-image: linear-gradient(
+                    to top,
+                    rgba(2, 14, 21, 0.88) 0%,
+                    rgba(2, 14, 21, 0.55) 55%,
+                    rgba(2, 14, 21, 0) 100%
+                );
+            }
+        }
+    }
+}

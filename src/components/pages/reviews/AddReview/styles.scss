@@ -293,6 +293,66 @@
     }
 }
 
+// «Koho se týká», as the closed question it always was — see index.jsx. The
+// look is the shared `pickField` in styles/system/_controls.scss, the same one
+// dressing the homepage CTA's picker and the benefit programme's: the browser's
+// rounded box stripped off both prefixes, a bottom rule in its place, the 44px
+// floor, an explicit `option` colour so the platform's own popup is legible
+// wherever it is drawn, and a chevron laid over the control rather than beside
+// it. Included at no breakpoint at all, because this control is wanted at every
+// width and not only on the phone the other two callers turn it on for.
+//
+// It emits one selector this component has no element for — `__label`, because
+// the label here is the form's own `.AddRev__field > span` and has to stay the
+// size the two labels above and below it are. A dead rule is the price of not
+// writing the picker a third time, and it is the cheaper of the two.
+.AddRev__field--pick {
+    @include pickField("AddRev__pick");
+
+    // The shared look wraps the control in a span, and a span that is a direct
+    // child of `.AddRev__field` is what this form draws its labels as — so the
+    // wrapper arrives wearing one. The margin is the visible half of that: 4px
+    // under the field, measured, which on a landscape phone is 4px the form
+    // does not have. The half that would have been worse is `text-transform`,
+    // which inherits and which the shared select does not restate: every name
+    // in the roster would have opened in the platform's popup in capitals.
+    .AddRev__pick__field {
+        margin-bottom: 0;
+        text-transform: none;
+    }
+
+    // The shared look was written for sections set in Poppins with a brighter
+    // rule under the control. Here it stands between two Switzer inputs in a
+    // stack of three, and a field that disagrees with its neighbours on type,
+    // on where its text starts and on how bright its line is reads as a control
+    // borrowed off another page rather than as the third field of this form.
+    // The mechanics above stay shared; only the skin is restated, and every
+    // value below is copied from the `input, textarea` rule this field sits in.
+    .AddRev__pick__select {
+        font-family: "Switzer-Light", sans-serif;
+        font-size: clamp(0.82rem, 0.95vw, 1.02rem);
+        // The right side keeps the room the chevron is drawn in; the other
+        // three are the inputs' own, so the three fields start their text on
+        // one line.
+        padding: clamp(0.5rem, 1.4vh, 0.9rem) 2rem clamp(0.5rem, 1.4vh, 0.9rem) clamp(0.3rem, 1vw, 0.8rem);
+        border-bottom-color: rgba(255, 255, 255, 0.28);
+        transition: border-color 0.35s ease;
+
+        // The same 16px floor the touch rule above puts under the inputs, and
+        // for the same reason: below it iOS zooms the page to focus a control
+        // and leaves it zoomed. Restated here rather than folded into that rule
+        // because this selector is two classes deep and would win over it.
+        @include touch {
+            font-size: max(16px, clamp(0.82rem, 0.95vw, 1.02rem));
+        }
+
+        // White, not the brand accent the shared look focuses in: this card is
+        // drawn in hairlines and one field lighting up in colour would be the
+        // only coloured thing in it.
+        &:focus { border-bottom-color: rgba(255, 255, 255, 0.8); }
+    }
+}
+
 // Present for scripts, invisible and unreachable for people.
 .AddRev__trap {
     position: absolute;
@@ -356,4 +416,118 @@
     }
 
     .AddRev__note { margin-top: 0.9rem; }
+}
+
+// ── the phone lying down: one form, two columns ──
+//
+// `phs-h` and not `phl-h`. Both stop at 520px of height, but phl starts at
+// 800px across and a phone on its side is often narrower than that — the SE is
+// 568, the 8 is 667, the 12 mini is 780 — so phl would hand the three smallest
+// screens the layout written for the largest one. phs starts at 480 and catches
+// all of them.
+//
+// Everything above this stop keeps its single column untouched. This is the one
+// place where the form does not fit at all: the scroller is 211px tall on a
+// 568×320 screen and holds 391px of form, so the send plate — the only reason
+// the sheet is open — starts 129px below the fold and is reached by scrolling a
+// card that has already stopped the page behind it. Measured before this rule:
+// 180px over at 568×320, 114px at 844×390, 74px at 949×432.
+//
+// Two columns is what buys the room back, and it is the shape the height is
+// already in: a landscape screen is short and wide, so the fix is to stop
+// spending the width and start spending it. Left, the two short answers — the
+// reader's name and which advisor; right, the long one and the plate that sends
+// it. Nothing is hidden and nothing is made smaller.
+@include phs-h {
+    .AddRev__scroll {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        // r1 and r2 are the two left fields with the textarea spanning both;
+        // r3 is the floor the two columns end on together. All three sized from
+        // their contents, so the card is exactly as tall as the form and
+        // centres in the screen rather than being stretched to fill it.
+        grid-template-rows: auto auto auto;
+        column-gap: clamp(0.9rem, 3vw, 1.6rem);
+        // Also the last slack there is. On the shortest screen we target the
+        // card comes out 300px tall in the 307 the sheet's own padding leaves
+        // of a 320px viewport, and two rows of that are these gaps — at the
+        // 0.8rem the stacked form spaces its fields by they are what puts it
+        // back over. Against 9.6px of white the difference is not visible;
+        // against the fold it is the whole of it.
+        row-gap: 0.6rem;
+        align-content: start;
+        align-items: start;
+
+        // The send plate's corner marks stand 0.3125rem below its box, and the
+        // plate is now the last thing in its column rather than a paragraph up
+        // from the end — so the side padding the scroller already carries for
+        // those marks is owed at the bottom too. Without it the marks are the
+        // only thing overflowing and the form scrolls by exactly their reach.
+        padding-bottom: 0.3125rem;
+
+        // The gaps above are the spacing now. A per-field bottom margin would
+        // be added to them and is the one length here that cannot see the grid.
+        .AddRev__field { margin-bottom: 0; }
+    }
+
+    .AddRev__field--name { grid-column: 1; grid-row: 1; }
+    .AddRev__field--pick { grid-column: 1; grid-row: 2; }
+
+    // The long answer, down the whole right-hand side. A flex column rather
+    // than a block so the textarea can take the height its label does not.
+    .AddRev__field--text {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        align-self: stretch;
+        display: flex;
+        flex-direction: column;
+
+        // `rows={5}` is 122px of natural height, and a grid track is at least
+        // as tall as what spans it — so left to itself the textarea, not the
+        // form, decides how tall the card is, and on a 320px screen it decides
+        // wrong. Asking for the 5rem the short-screen rule above already picked
+        // as this box's floor puts the two name-sized fields opposite back in
+        // charge of the height, and `flex: 1 1 auto` then grows the textarea
+        // back into whatever they came to — 121px, measured, at 568×320.
+        textarea {
+            flex: 1 1 auto;
+            height: 5rem;
+            min-height: 0;
+        }
+    }
+
+    // `justify-self: start` because a grid item is blockified — the plate is
+    // `inline-flex` and shrink-wraps its label everywhere else, and stretched
+    // across a column it would be the one control this pass redrew. Where it
+    // sits is the change; what it is stays the same.
+    .AddRev__send {
+        grid-column: 2;
+        grid-row: 3;
+        justify-self: start;
+        // The 1vh above it was the space between the plate and the field it
+        // followed down a column. The row gap is that space now, and left in
+        // place this would be added to it — and would sit the plate 4px below
+        // the line the note opposite is centred on.
+        margin-top: 0;
+    }
+
+    // Not in the layout that was asked for, so it goes where there is room for
+    // it and where it is still read: the bottom of the left column, level with
+    // the plate it is a condition of. Its top margin was the space above it in
+    // a stack and is now the row gap's job, and centring it in the row lines it
+    // up with the plate rather than with the top of the row the plate is taller
+    // than.
+    //
+    // The two things that are also not in that layout and did not move: the
+    // eyebrow, which lives in the card's head with the close mark and is pinned
+    // above this scroller already — dropping it into a column would take the
+    // only way out of the sheet with it; and the honeypot, which is
+    // `position: absolute` and therefore not a grid item at all, so it stays
+    // 9999px off to the left with no track of its own.
+    .AddRev__note {
+        grid-column: 1;
+        grid-row: 3;
+        align-self: center;
+        margin: 0;
+    }
 }

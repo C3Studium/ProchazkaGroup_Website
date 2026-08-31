@@ -158,11 +158,25 @@ const SECTIONS = [
         text: { x: 0.04, y: 0.07, w: 0.44 },
         short: {
             text: { x: 0.13, y: 0.06, w: 0.34 },
-            blocks: [{ kind: "map", x: 0.5, y: 0.06, w: 0.47, h: 0.9 }],
+            // The map as the ground here too, the way it is upright and on a
+            // desktop: the words stand ON it rather than beside it, it takes the
+            // screen's whole height rather than the slot's, and it is a window
+            // onto the plate rather than the whole of it.
+            //
+            // The three numbers are solved rather than chosen. Which dimension
+            // binds swaps around with the orientation — the zoom is taken from
+            // the box's WIDTH, so a wider box magnifies more, which shrinks the
+            // share of the plate that fits vertically. Spain is the westernmost
+            // country and Greece the southernmost and they pull opposite ways.
+            // Given the mask's own safe area, 0.58 is the largest map that still
+            // keeps all sixteen clear of the fade at 568, 844 and 932 alike, and
+            // Spain is what decides it. It comes out around 1019px across on a
+            // 844 screen against the 689 that was here before.
+            blocks: [{ kind: "map", x: 0.3, y: 0, w: 0.69, h: 1, tall: true, zoom: 0.58 }],
         },
         stacked: {
             text: { x: 0.06, y: 0.13, w: 0.88 },
-            blocks: [{ kind: "map", x: 0.03, y: 0.52, w: 0.94, h: 0.6 }],
+            blocks: [{ kind: "map", bleed: true }],
         },
         blocks: [
             // No fractions: this one is the ground rather than a box on it. It
@@ -354,10 +368,76 @@ const CAPTION_H = 36;
 // That is also what carries it across into the sections either side of it: this
 // is a band that travels sideways, and a map that stopped at a line would be a
 // picture sliding past rather than ground the band is laid on.
-const mapBox = (block, slot, reserve, view) => {
+// On a phone the ground is a BAND, not the whole slot.
+//
+// A phone's slot is portrait and the map is half again wider than it is tall, so
+// the two cannot both be satisfied. Contained, the map came out a strip of
+// continent in a screen of nothing — the picture in a box this was asked to stop
+// being. Covering the whole slot is worse: the visible window would be a quarter
+// of the plate's width, and four of our own sixteen countries fall outside it.
+//
+// So the box is a band across the middle, and the map covers THAT: enlarged
+// until it fills the width, overflowing to both sides, and faded out at all four
+// edges by the stylesheet. What gets cut is sea and the far ends of the
+// continent — Iceland one side, the Urals the other — which is exactly what a
+// background can afford to lose.
+//
+const PHONE_BAND = 0.62;
+
+// How much of the plate the band is a window onto, and where that window sits.
+//
+// A phone showing all sixteen countries shows them at the size of the flags
+// standing on them, which is a diagram of a map rather than a map. So it does
+// not show all sixteen: it shows Czechia, in the middle, with what is around it
+// — this page is the Czech branch's and that is the thing worth being able to
+// read. 23% of the plate across is the zoom, and the window is centred on
+// Czechia's own anchor rather than on the plate's middle or on the countries'.
+//
+// What that keeps, measured off europe.js rather than guessed: Germany, Austria,
+// Poland and Slovakia — the four it actually borders — with Hungary, Slovenia,
+// Switzerland, Croatia, Belgium, Romania and Italy around them. Twelve of the
+// sixteen. France, Spain, Ukraine and Greece fall outside and are cropped, which
+// is what the overflow on the band is for.
+const PHONE_WINDOW = 0.23;
+// Czechia's anchor as a fraction of the plate, from europe.js. The stylesheet
+// offsets the frame by the difference between this and its own middle; if the
+// map is ever regenerated with a different frame, this is the number that moves.
+export const PHONE_FOCUS = { x: 0.488, y: 0.616 };
+// Below the words, which stand at 0.13 with a heading and a lead under them.
+const PHONE_BAND_TOP = 0.34;
+
+const mapBox = (block, slot, reserve, view, stacked) => {
+    if (block.bleed && stacked) {
+        const height = Math.round(slot.h * PHONE_BAND);
+        return {
+            box: {
+                left: slot.x,
+                top: slot.y + slot.h * PHONE_BAND_TOP,
+                width: slot.w,
+                height,
+            },
+            // Not cover — a window. The map is blown up until the band shows
+            // only PHONE_WINDOW of its width, and everything outside is cut by
+            // the overflow on the band.
+            mapW: Math.round(slot.w / PHONE_WINDOW),
+        };
+    }
+
     const box = block.bleed
         ? { left: slot.x, top: 0, width: slot.w, height: view.h }
         : place(block, slot);
+
+    // A block that names a zoom is a window onto the plate: the map is blown up
+    // until the box shows that share of its width, and the overflow is cropped.
+    // The box keeps the shape the section gave it.
+    if (block.zoom) {
+        // `tall` reaches past the slot to the screen's own height — the slot
+        // stops below the bar and above the foot rule, and ground has no reason
+        // to.
+        const win = block.tall ? { ...box, top: 0, height: view.h } : box;
+        return { box: win, mapW: Math.round(win.width / block.zoom) };
+    }
+
     const height = Math.min(box.height - reserve, box.width / MAP_RATIO);
     return { box: { ...box, height: height + reserve }, mapW: height * MAP_RATIO };
 };
@@ -668,10 +748,10 @@ function Block({ block, slot, section, at, ride, coarse, mode, view }) {
         // Arrives the way the squares do — scaled into itself, not raised —
         // because it is one of the boxes and not a picture beside them.
         const stacked = mode === "stacked";
-        const { box, mapW } = mapBox(block, slot, stacked ? CAPTION_H : 0, view);
+        const { box, mapW } = mapBox(block, slot, stacked ? CAPTION_H : 0, view, stacked);
         return (
             <motion.div
-                className={`OfferStrip__box OfferStrip__map${block.bleed ? " OfferStrip__map--ground" : ""}`}
+                className={`OfferStrip__box OfferStrip__map${block.bleed || block.tall ? " OfferStrip__map--ground" : ""}`}
                 style={{ ...box, opacity: enter, scale: grown }}
             >
                 {/* The map is told how many pixels wide it is going to be.
@@ -688,6 +768,15 @@ function Block({ block, slot, section, at, ride, coarse, mode, view }) {
                     caption={stacked}
                     coarse={coarse}
                     ground={!!block.bleed}
+                    // A window onto the plate rather than the whole of it —
+                    // true for the phone's band and for the phone on its side,
+                    // false for the wide ground, which shows the lot.
+                    focus={!!block.zoom || (!!block.bleed && stacked)}
+                    // What share of the map the reader can actually see. The
+                    // phone's band is a window onto a zoomed plate, and how far
+                    // a neighbour is pushed has to be a share of THAT, not of a
+                    // map three quarters of which is off the screen.
+                    visible={block.zoom ?? (block.bleed && stacked ? PHONE_WINDOW : 1)}
                 />
             </motion.div>
         );

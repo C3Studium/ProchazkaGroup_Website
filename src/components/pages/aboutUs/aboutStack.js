@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 // The About page's first two sections are one mechanism, not two.
 //
 // AboutHero pins; MemberShowcase is pulled up over it, grows its first card out
@@ -212,3 +216,125 @@ export const ARRIVE_TO = 0.375;
  */
 export const showcaseProgressFromHero = (heroProgress) =>
     Math.min(1, Math.max(0, (heroProgress * HERO_MEASURE_VH - PIN_AT_VH) / SHOW_SCROLL_VH));
+
+// ---- the same geometry, twice as wide -----------------------------------
+//
+// A tablet held upright rides this track too — see the gate in MemberShowcase's
+// stylesheet — and at 818px across a 44vw card is 360px and a 32vw photograph
+// 262: a column of copy beside a strip of picture, which is what "squashed"
+// means here.
+//
+// Doubling it is NOT a matter of multiplying the output, and that is the whole
+// reason this is a factory rather than a constant times k. The screen does not
+// scale with the track: TRAVEL is TRACK − 100 whatever TRACK is, so at double
+// width the travel is 456 − 100 = 356, not 128 × 2. Multiply `trackXAt` instead
+// and the last photograph finishes 114vw past the right-hand edge.
+//
+// What scales is a size ON THE TRACK. What does not is a position ON THE
+// SCREEN — LAND_AT_VW, where the first card comes to rest; FULL_HEIGHT_AT_VW,
+// sixty per cent of the way across; SEAM_VW, where Colleagues' halves meet.
+// Those are about the viewport, and the viewport is the same either way.
+export const UPRIGHT_TABLET =
+    "(min-width: 600px) and (max-width: 900px) and (orientation: portrait)";
+
+// 1.3, and the ceiling is arithmetic rather than taste.
+//
+// At the parked end the last photograph is flush with the right-hand edge, so
+// the last CARD occupies [100 − PHOTO − CARD, 100 − PHOTO] of the screen. A
+// pair wider than 100vw therefore cannot have both halves on it at the end,
+// and the card is the half that loses — it is pushed off to the left.
+//
+//   k = 1.0   pair  76vw   last card starts at  24vw   fits
+//   k = 1.3   pair  99vw   last card starts at   1vw   fits
+//   k = 1.5   pair 114vw   last card starts at −14vw   off-screen
+//   k = 2.0   pair 152vw   last card starts at −52vw   off-screen
+//
+// Measured at 2.0 before this was worked out: the third card ran from −425 to
+// 294 on an 818 screen, so five sixths of it — its copy, its button and the
+// room the discs come to rest in — were off the left edge, and four of the six
+// discs with them. That is what looked like an animation finishing late; it
+// had finished, off the screen.
+//
+// 100 / 76 is 1.32, so 1.3 is the largest round figure that keeps the whole
+// pair on the screen at the end. Going wider means giving up the flush-right
+// ending, which is a different decision and not this one.
+export const UPRIGHT_SCALE = 1.3;
+
+/**
+ * The whole ride at a given width multiple. `k = 1` returns exactly the numbers
+ * the module exports above, which is what every screen but an upright tablet
+ * gets.
+ *
+ * Everything that reads the track's position — this section, the hero that
+ * erases itself against it, the discs that fly along it — has to take its
+ * geometry from ONE of these. Two of them on one page at two different k is the
+ * seam coming apart.
+ */
+export const geometryFor = (k = 1) => {
+    const CARD = CARD_VW * k;
+    const PHOTO = PHOTO_VW * k;
+    const PAIR = CARD + PHOTO;
+    const TRACK = MEMBER_COUNT * PAIR;
+    const TRAVEL = TRACK - 100;
+    const RIDE_SPAN = LAND_AT_VW + TRAVEL;
+
+    const trackAt = (progress) => {
+        const p = Math.min(1, Math.max(0, progress));
+        if (p <= GROW_TO) return 100 - (100 - LAND_AT_VW) * growthAt(p);
+        if (p >= RIDE_END) return -TRAVEL;
+        return LAND_AT_VW - RIDE_SPAN * ((p - GROW_TO) / (RIDE_END - GROW_TO));
+    };
+
+    const progressAt = (vw) => {
+        if (vw >= LAND_AT_VW) {
+            return unsettle((100 - vw) / (100 - LAND_AT_VW)) * GROW_TO;
+        }
+        return GROW_TO + (RIDE_END - GROW_TO) * ((LAND_AT_VW - vw) / RIDE_SPAN);
+    };
+
+    // Derived from the inverse above, so "full height once the leading edge has
+    // passed 60% of the screen" stays that rule at either width rather than
+    // becoming a number that happened to be right at one of them.
+    const fullHeightAt = progressAt(FULL_HEIGHT_AT_VW) / SETTLED;
+
+    return {
+        k,
+        CARD_VW: CARD,
+        PHOTO_VW: PHOTO,
+        PAIR_VW: PAIR,
+        TRACK_VW: TRACK,
+        TRAVEL_VW: TRAVEL,
+        RIDE_SPAN_VW: RIDE_SPAN,
+        trackXAt: trackAt,
+        progressAtTrackX: progressAt,
+        heightAt: (progress) => settle(progress / fullHeightAt),
+        growthAt,
+    };
+};
+
+/**
+ * The width multiple this screen rides at, as a piece of state.
+ *
+ * One hook, read by all three of the components that share the geometry — this
+ * section, the hero and the discs — so the three cannot answer differently.
+ * That is the only reason it lives in this file rather than in each of them:
+ * the numbers were put here once for exactly this, and a scale is one of the
+ * numbers.
+ *
+ * Starts at 1 and is corrected from the effect, like every other media flag on
+ * the site: the server has no viewport, and the markup either side of hydration
+ * has to match.
+ */
+export const useStackScale = () => {
+    const [k, setK] = useState(1);
+
+    useEffect(() => {
+        const mq = window.matchMedia(UPRIGHT_TABLET);
+        const read = () => setK(mq.matches ? UPRIGHT_SCALE : 1);
+        read();
+        mq.addEventListener("change", read);
+        return () => mq.removeEventListener("change", read);
+    }, []);
+
+    return k;
+};

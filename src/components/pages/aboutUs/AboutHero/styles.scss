@@ -46,13 +46,20 @@
     // No pin below the breakpoint, so no overlap to reserve room for either —
     // the section is exactly its content again.
     //
-    // The gate has a HEIGHT arm as well as a width one, and it must stay
-    // identical to MemberShowcase's (index.jsx matchMedia + styles.scss): the
-    // showcase stacks at `(max-width: 820px), (max-height: 520px)`, and if this
-    // hero kept its 460vh pin at, say, 844x390, it would erase itself against a
-    // track that never arrives — a long blank pinned stretch before the stacked
-    // showcase. The two sections pin together or stack together, never one each.
-    @media (max-width: 820px), (max-height: 520px) {
+    // This gate must stay identical to MemberShowcase's (index.jsx matchMedia +
+    // the block in its styles.scss, which carries the full reading of the three
+    // arms). If this hero kept its 460vh pin where the showcase stacks, it would
+    // erase itself against a track that never arrives — a long blank pinned
+    // stretch before the stacked showcase. And if it stacked where the showcase
+    // rides, the track would travel in across nothing. The two sections pin
+    // together or stack together, never one each.
+    //
+    // A phone held sideways moved from the first group to the second: it now
+    // pins and rides, so it is deliberately NOT in this list.
+    @media (max-width: 479px),
+           (max-width: 599.98px) and (orientation: portrait),
+           (max-width: 820px) and (min-height: 521px) and (orientation: landscape),
+           (max-height: 520px) and (orientation: portrait) {
         height: auto;
     }
 }
@@ -273,7 +280,52 @@
         @include lineSweep(x, -1.8s);
     }
 
-    @media (max-width: 820px), (max-height: 520px) {
+    // ---- tablet, upright ----
+    //
+    // The photograph over the three marks rather than beside them.
+    //
+    // The wide grid puts the picture in columns 4–6 and the marks in 2–4 of the
+    // same row, which is the composition a landscape screen affords. Upright at
+    // 818 that leaves the marks a 300px column and the picture a 470px one, with
+    // the marks pushed to the foot of a 61vh row so the two barely acknowledge
+    // each other. Stacked, each gets the width.
+    //
+    // The marks come up a size with the room: 2.6vw is 21px here, which is
+    // smaller than the body copy on the page. These three are the first claim
+    // the section makes and they were the quietest thing in it.
+    @include v(md) {
+        @include below-px(900) {
+            // r4 becomes the picture's alone and the marks take r5, which the
+            // wide layout leaves as whitespace under everything.
+            grid-template-rows: 22vh 46vh 3vh 44vh 1fr;
+
+            .AboutHero__photo {
+                grid-column: 2 / 6;
+                grid-row: 4;
+            }
+
+            .AboutHero__marks {
+                grid-column: 2 / 6;
+                grid-row: 5;
+                align-self: start;
+                padding: 3vh 0 0;
+                gap: 2vh;
+            }
+
+            .AboutHero__mark {
+                gap: 1.6rem;
+
+                .AboutHero__mark__label {
+                    font-size: clamp(1.5rem, 4vw, 2.4rem);
+                }
+            }
+        }
+    }
+    // Same gate as the box above and as MemberShowcase's — see the note there.
+    @media (max-width: 479px),
+           (max-width: 599.98px) and (orientation: portrait),
+           (max-width: 820px) and (min-height: 521px) and (orientation: landscape),
+           (max-height: 520px) and (orientation: portrait) {
         // Nothing is pinned here, so the negative `top` must go with the pin —
         // left behind, it would lift the stage half a screen the moment its
         // parent grew taller than it. The clear-out goes too: it is an inline

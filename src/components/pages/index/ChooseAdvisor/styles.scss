@@ -1,5 +1,13 @@
 @use "../../../../styles/system/_shortcuts.scss" as *;
 
+// The picker's look is shared. It is drawn in three places now — this section
+// on a phone held upright, the same section lying down, and the benefit
+// programme's client branch lying down — so it moved to
+// styles/system/_controls.scss, which _shortcuts.scss forwards into every
+// stylesheet. `@include pickField` with no argument emits exactly the class
+// names and the declarations it emitted here, byte for byte; the benefit
+// programme passes its own BEM stem.
+//
 // Advisor picker + contact form. Columns split at 31vw and 65vw — the same x
 // where ReviewsPreview's closing lines end above, so the verticals continue.
 // The form owns the CENTER column, the advisor profile the right one.
@@ -659,7 +667,14 @@
         }
     }
 
-    @include below-px(820) {
+    // Stacked — and an upright TABLET is back in this set, at the reader's own
+    // call: on a screen this narrow the reading wants a column, not the desktop's
+    // three. The first arm is the original stop and covers a phone either way up
+    // and a small landscape window; the second is what adds an upright tablet up
+    // to 900, so 768, 820 and 834 all read the same rather than 834 alone falling
+    // through to the wide layout.
+    @media (max-width: 820px),
+           (max-width: 900px) and (orientation: portrait) {
         grid-template-columns: 1fr;
         grid-template-rows: none; // rows are content-sized again once stacked
         height: auto;
@@ -712,7 +727,7 @@
     // at 430 across and the narrowest tablet at 768. It is the same bound the
     // bar, the navigation panel and the advisor roster took in this pass, and
     // the pair is meant: portrait alone is also every tablet ever made, and
-    // `phl-h` below owns this same phone on its side.
+    // `phs-h` below owns this same phone on its side.
     //
     // Before the landscape block on purpose, so a phone turned over goes on
     // getting the map written for it rather than this one.
@@ -742,8 +757,22 @@
     // The structural lines need nothing here: they are drawn in vh against a
     // 100vh canvas this section gave up at 820, and the 820 stop already puts
     // them out.
+    // 900 and not 600, and it is the reader's own call: an upright tablet gets
+    // THIS layout rather than one of its own.
+    //
+    // The block above — the one that starts at 820 — is the intermediate, and
+    // it is what a tablet had: the roster printed out as ten rows, the map and
+    // the hours under it, the form under those. Measured at 818×1174 that came
+    // to 2629px of section. This one is 1139 on a phone because it does not
+    // print the left column at all: the roster is the picker, and the office
+    // block is in the patička two scrolls down.
+    //
+    // Everything below is written in vw and vh with rem ceilings, so it scales
+    // into the extra width on its own — the picker is the column's width, the
+    // portrait stops at its 150px cap, and the claim's clamp lands on its
+    // ceiling instead of its floor. Nothing here needed a second version.
     @include v(xs) {
-        @include below-px(600) {
+        @include below-px(900) {
             // The whole left column goes, in one move: the roster it exists for
             // is now the picker, "Kde nás najdete" and its pin were the thing
             // the reader asked to lose, and the hours-and-number line under
@@ -803,72 +832,7 @@
 
             // ---- the picker ----
             .ChooseAdvisor__pick {
-                .ChooseAdvisor__pick__label {
-                    display: block;
-                    text-transform: uppercase;
-                    font-size: 0.7rem;
-                    letter-spacing: 0.1em;
-                    opacity: 0.85;
-                    margin-bottom: 0.9vh;
-                }
-
-                .ChooseAdvisor__pick__field {
-                    position: relative;
-                    display: block;
-                }
-
-                .ChooseAdvisor__pick__select {
-                    // A field on this page is a line with words over it. The
-                    // browser's own control is a rounded grey box with a system
-                    // font and a chevron of its own, so all of that comes off —
-                    // the same strip the form does to its inputs, restated here
-                    // because this control lives outside the form's box.
-                    appearance: none;
-                    -webkit-appearance: none;
-                    width: 100%;
-                    // The finger's floor. 16px is also the size under which iOS
-                    // zooms the page to focus a control, and a zoom the reader
-                    // did not ask for leaves them scrolled sideways on a page
-                    // that has no sideways.
-                    min-height: 44px;
-                    background: transparent;
-                    border: none;
-                    border-bottom: 1px solid rgba(255, 255, 255, 0.6);
-                    border-radius: 0;
-                    box-shadow: none;
-                    color: var(--wText);
-                    font-family: "Poppins", sans-serif;
-                    font-weight: 200;
-                    font-size: max(16px, 1rem);
-                    letter-spacing: 0.01em;
-                    // room on the right for the chevron drawn over it
-                    padding: 0.45rem 2rem 0.45rem 0.2rem;
-                    outline: none;
-
-                    &:focus {
-                        border-bottom-color: var(--hColor);
-                    }
-
-                    // The list that opens is drawn by the platform. iOS spins
-                    // its own wheel and ignores everything here; Android and a
-                    // desktop browser inherit from the control, which on this
-                    // page is white type on nothing at all. Stated, so the
-                    // names are legible in the popup wherever it comes from.
-                    option {
-                        color: #0b1220;
-                        background-color: #ffffff;
-                    }
-                }
-
-                .ChooseAdvisor__pick__chevron {
-                    position: absolute;
-                    right: 0.2rem;
-                    top: 50%;
-                    transform: translateY(-50%);
-                    opacity: 0.75;
-                    // it is the control's mark, not a second target beside it
-                    pointer-events: none;
-                }
+                @include pickField;
             }
 
             // ---- the card: face and the call side by side, then the name,
@@ -977,87 +941,283 @@
         }
     }
 
-    // Phone in landscape: 100vh is 320–430px and each desktop column runs past
-    // 600 — the composition cannot fit and must not clip. The section gives up
-    // its viewport height and reflows: list and form side by side (the pair
-    // the reader acts on), the chosen advisor full-width below with the
-    // portrait beside the name instead of above it. The structural lines are
-    // drawn in vh against a 100vh canvas that no longer exists, so they go.
-    // Written after the 820 stop on purpose: an 800–820 viewport that is also
-    // short is a phone on its side, and this layout is the one that fits it.
-    @include phl-h {
+    // ---- phone, landscape ----
+    //
+    // The same phone as the block above, on its side, and that is a different
+    // problem rather than the same one rotated: 320–430px of height with the
+    // browser's own furniture already inside it, and a width that carries two
+    // of the three target sizes (844, 932) straight past the 820 stop into the
+    // desktop grid.
+    //
+    // The stop is `phs-h` and not `phl-h`. `phl-h` starts at 800, which is the
+    // 13 and the 15 Pro Max and nothing else — the SE at 568, the 8 at 667, the
+    // 12 mini at 780 were all falling through to the `below-px(820)` stack
+    // written for a tablet held upright, and measured 1616px of section on a
+    // 320px screen. `phs-h` is the same 480/520 landscape stop with every one
+    // of them inside it, so the whole range is one layout instead of two, and
+    // `phl-h` is a subset of it with nothing left to say. Written after the 820
+    // block on purpose, so it wins the 480–820 overlap.
+    //
+    // What was here before was the desktop composition folded once: the ten
+    // radio rows beside the form, the portrait full-bleed under them. 1034px on
+    // a 390px screen — two and a half screens of scrolling to reach one button,
+    // and the first of them was a roster.
+    //
+    // What replaces it is the shape the section is actually used in. The roster
+    // becomes the picker the portrait block already built — the OS wheel, over
+    // ten names, in one tap. The form takes the full width and splits at the
+    // waist: what somebody types about THEMSELVES on the left (name, email, and
+    // the consent line that belongs to them), what they are asking FOR on the
+    // right (the number to ring, when to ring it, and the button). At 390 tall
+    // those six fields cannot be a column — stacked they are the whole screen
+    // twice over — and side by side they are one screenful with the pitch and
+    // the choice above them.
+    //
+    // And the photograph goes. It is the one element here with no upper bound:
+    // it was 321×281 at 844, a whole screenful of face before a reader reached
+    // anything they could act on, and there is no size at which a portrait is
+    // worth a third of a landscape phone.
+    //
+    // Ordering is done with explicit grid placement, not with `order` as the
+    // portrait block uses: the form has to become a grid of its own here, and
+    // once two grids are involved a row and a column say where a thing is far
+    // more plainly than a running count does.
+    @include phs-h {
         height: auto;
+        // The section owns the frame now. Its three columns are gone — the left
+        // one entirely, the middle one is a pass-through — so the padding that
+        // used to sit on each of them has nothing left to sit on.
         grid-template-columns: 1fr 1fr;
         grid-template-rows: none; // rows are content-sized again once reflowed
+        column-gap: 5vw;
+        row-gap: 3.5vh;
+        padding: 5vh 5vw 6vh;
 
+        // The whole left column goes, for the reason the portrait block gives
+        // at length: the roster it exists for is the picker now, and "Kde nás
+        // najdete", its map pin and the hours-and-number line under them are an
+        // office block that the footer of this same page prints in full — the
+        // heading, the street address, "Kontakt | 8-16" and a number (see
+        // common/SiteFooter). Nothing is lost; it is one scroll further down,
+        // where somebody looking for an office looks. Keeping it here would
+        // cost 128px of a 390px screen to say it twice.
         .ChooseAdvisor__left {
-            grid-column: 1;
-            grid-row: 1;
-            padding: 7vh 3vw 5vh 5vw;
+            display: none;
         }
 
+        // Not a column any more, a pass-through: the claim and the form are
+        // placed on the section's own grid and the chosen advisor has to sit
+        // between them. Safe for the same reason it is safe in portrait — this
+        // div is an ORCHESTRATOR, its `group()` variant carries a stagger and
+        // no visual property at all, so `contents` takes no box away.
         .ChooseAdvisor__formCol {
-            grid-column: 2;
-            grid-row: 1;
-            gap: 4vh;
-            padding: 7vh 5vw 5vh 3vw;
+            display: contents;
+        }
 
-            .ChooseAdvisor__claim {
-                max-width: none;
+        .ChooseAdvisor__formCol .ChooseAdvisor__claim {
+            grid-column: 1 / -1;
+            grid-row: 1;
+            // qualified with the column for the same reason the 820 stop is:
+            // the base 25vw cap is written a level deeper and outweighs it
+            max-width: none;
+            // One line across the full width at 844 and 932, two at 568. A step
+            // down from the shared size, because the sentence is here to be
+            // read once on the way past, not to be the composition.
+            font-size: clamp(0.95rem, 2.1vw, 1.2rem);
+            line-height: 1.45;
+        }
+
+        // The choice and what it chose, abreast: the picker on the left, the
+        // number it just selected on the right. The answer costs no height at
+        // all this way — it fills the half-row beside a control that was going
+        // to be there regardless.
+        .ChooseAdvisor__pick {
+            display: block;
+            grid-column: 1;
+            grid-row: 2;
+            align-self: end;
+
+            @include pickField;
+
+            // 0.9vh is 7px on the tall screen the mixin was written for and 3
+            // on this one, which reads as a label that has fallen onto its
+            // field. Held in rem, where the gap does not shrink with the phone.
+            .ChooseAdvisor__pick__label {
+                margin-bottom: 0.4rem;
+            }
+        }
+
+        // What is left of the profile is the one thing on it that DOES
+        // something. The face is out for the room; the name is out because the
+        // picker two centimetres to the left is already printing it; the counts
+        // are out because they are a claim about somebody, and a claim is what
+        // the pitch above is for.
+        //
+        // What is left is the CALL, and it is the mark rather than the digits.
+        // This block used to print the number as a line of type and said so at
+        // length — the reason given was that the icon card was gone and a phone
+        // on its side had no other way to ring the person it had just chosen.
+        // The card is here now, so that reason has expired, and printing both
+        // would be the duplicate action the portrait block refuses two hundred
+        // lines up: two targets a thumb's width apart dialling one number.
+        //
+        // The mark and not the digits, because the mark is the smaller of the
+        // two and this row has a picker in the other half of it — and because
+        // what a phone does with a telephone number is ring it, which is the
+        // one thing the mark is. Nothing is unsaid: `aria-label` on it states
+        // the number in full (see index.jsx), so a reader hears what is about
+        // to be called, and the label over it still says what the pair is for.
+        .ChooseAdvisor__profile {
+            grid-column: 2;
+            grid-row: 2;
+            // A column, and it has to be one: in the markup the mark comes
+            // BEFORE the words that caption it — upright it is placed in a grid
+            // cell of its own and source order never comes up — so left as a
+            // block it printed the button and then its own label underneath it,
+            // against a picker across the row that reads label first. `order`
+            // and not a second element, because it is the same two things in a
+            // different arrangement.
+            display: flex;
+            flex-direction: column;
+            // the mark is a fixed square and would otherwise stretch to the
+            // full width of a track sized for the form below it
+            align-items: flex-start;
+            align-self: end;
+            padding: 0;
+
+            .ChooseAdvisor__photo,
+            .ChooseAdvisor__name,
+            .ChooseAdvisor__social,
+            .ChooseAdvisor__phone {
+                display: none;
             }
 
-            .ChooseAdvisor__form {
-                margin-top: 0;
+            // Set as the picker's label is set, because that is what it now is:
+            // the two are a labelled pair across the row, and a caption in the
+            // profile's own size would read as a heading over half of it.
+            .ChooseAdvisor__callText {
+                order: 1;
+                display: block;
+                // The desktop rule centres this in its column, and in a block
+                // container that declaration does nothing — which is why the
+                // line has always read from the left edge here. Now that the
+                // column is a flex one it would be obeyed, and the label would
+                // sit centred over a mark that is not, so it is turned off
+                // where the layout changed rather than where it was written.
+                align-self: flex-start;
+                margin: 0 0 0.4rem;
+                font-size: 0.7rem;
+                letter-spacing: 0.1em;
+                opacity: 0.85;
+            }
 
-                .timeRow .times {
-                    gap: 2rem;
+            // 2.75rem is 44px — the floor, exactly, and exactly what the number
+            // it replaces measured, so the row it sits in is the height it has
+            // always been and the section does not move. Not the portrait
+            // card's 4.5rem: that size answers a 150px photograph standing
+            // beside it, and there is no photograph here.
+            //
+            // The glyph stays the 22px react-icons hands over (1.375rem is the
+            // same number, held in rem so it keeps step above 1921 with the
+            // ticks that bracket it) — half the box, which is the proportion
+            // the portrait card arrived at the long way round.
+            // The accent is the caller's, and it is stated BEFORE the include:
+            // the mixin ends in a nested `svg` rule, and a declaration written
+            // after one is emitted as a second rule block behind it.
+            .ChooseAdvisor__iconCall {
+                order: 2;
+                color: var(--hColor2);
 
-                    label input {
-                        width: 5rem;
+                @include callIcon(2.75rem, 1.375rem);
+            }
+        }
+
+        // ---- the form, in two ----
+        .ChooseAdvisor__formCol .ChooseAdvisor__form {
+            grid-column: 1 / -1;
+            grid-row: 3;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 5vw;
+            row-gap: 1vh;
+            align-content: start;
+            margin-top: 0;
+            padding: 2.4vh 4vw 3vh;
+
+            // The three top-level labels are Jméno, Email and Telčíslo in that
+            // order. `nth-of-type` counts labels among labels, so the two
+            // inside .timeRow — which are nested a level down — are not in the
+            // reckoning and cannot shift these by arriving.
+            //
+            // Row 1 is the heading across both tracks, then:
+            //   col 1   Jméno · Email · the consent line
+            //   col 2   Telčíslo · Od/Do · the button
+            // The consent sits under the reader's own two fields rather than
+            // over the button, because it is the taller of the two things that
+            // could fill that cell and the button wants the floor of its track.
+            > h3 {
+                grid-column: 1 / -1;
+                margin-bottom: 0;
+                font-size: clamp(1.05rem, 2.6vw, 1.4rem);
+            }
+
+            > label:nth-of-type(1) { grid-column: 1; grid-row: 2; } // Jméno
+            > label:nth-of-type(2) { grid-column: 1; grid-row: 3; } // Email
+            > .gdpr                { grid-column: 1; grid-row: 4; }
+            > label:nth-of-type(3) { grid-column: 2; grid-row: 2; } // Telčíslo
+            > .timeRow             { grid-column: 2; grid-row: 3; }
+            > .ChooseAdvisor__submit { grid-column: 2; grid-row: 4; }
+
+            // 0.78vw floors at 0.65rem here, which is 10px of tracked caps over
+            // a 44px field. Held at the picker's 0.7rem so every label in the
+            // section is one size.
+            .label {
+                font-size: 0.7rem;
+                margin-bottom: 0.6vh;
+            }
+
+            // Od and Do share their track rather than each holding a fixed
+            // width: 5rem apiece plus the words plus a 2rem gutter is 246px in
+            // a 241px column at 568, and a fixed width has no way to know that.
+            .timeRow .times {
+                gap: 1.2rem;
+
+                label {
+                    flex: 1;
+                    min-width: 0;
+
+                    input {
+                        width: 100%;
+                        min-width: 0;
                     }
                 }
             }
-        }
 
-        .ChooseAdvisor__profile {
-            grid-column: 1 / -1;
-            grid-row: 2;
-            display: grid;
-            grid-template-columns: minmax(0, 38vw) 1fr;
-            align-items: start;
-            column-gap: 5vw;
-            row-gap: 2.2vh;
-            padding: 5vh 5vw 7vh;
-
-            .ChooseAdvisor__photo {
-                grid-column: 1;
-                grid-row: 1 / 5;
-                align-self: start;
-                height: 72vh;
+            .gdpr {
+                align-self: center;
+                margin: 0;
+                // the base 20vw cap is a third of the track it is in here
+                max-width: none;
+                font-size: 0.65rem;
+                line-height: 1.4;
             }
 
-            .ChooseAdvisor__name {
-                grid-column: 2;
+            // In the flex column it rode `margin-top: auto` to the box's floor
+            // and sat at its right edge. It is a grid item now with a cell of
+            // its own, so it takes the whole track: the widest target on the
+            // screen, at the corner a thumb is already resting on.
+            .ChooseAdvisor__submit {
+                align-self: end;
+                justify-self: stretch;
+                justify-content: center;
                 margin-top: 0;
-            }
-
-            .ChooseAdvisor__social {
-                grid-column: 2;
-                margin-top: 0;
-            }
-
-            // in the desktop column these centered themselves and rode
-            // margin-top: auto to the section's floor; beside the portrait
-            // they are two more lines of the same left-aligned stack
-            .ChooseAdvisor__callText,
-            .ChooseAdvisor__phone {
-                grid-column: 2;
-                justify-self: start;
-                align-self: auto;
-                margin-top: 0;
+                min-height: 44px;
+                padding: 0.5rem 1rem;
+                font-size: clamp(1rem, 2.6vw, 1.35rem);
             }
         }
 
+        // drawn in vh against a 100vh canvas this section has just given up
         .ChooseAdvisor__line {
             display: none;
         }

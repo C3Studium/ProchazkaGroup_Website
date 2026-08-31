@@ -41,8 +41,10 @@ $panel: rgba(0, 0, 0, 0.6);
     // reads it as a desktop and hands it the pinned two-column stage — which at
     // 390px of height put the heading through the navbar and ten rows in a
     // space that gives each of them two finger-widths less than a tap needs.
-    // The height is what identifies it (phs: max-height 520px), and it takes
-    // the same stacked flow the portrait phone does.
+    // The height is what identifies it (phs: max-height 520px). The box is the
+    // same answer the portrait phone gets — no pin, no pull-back, one screen —
+    // but what stands in it is not: see the landscape block at the foot of the
+    // stage below.
     @include phs-h {
         height: auto;
         margin-top: 0;
@@ -579,13 +581,18 @@ $panel: rgba(0, 0, 0, 0.6);
     //   under `touch` below. A fifth way to ring the same person, sixty pixels
     //   from the first, is the thing the roster's own notes warn against.
     //
-    // Portrait AND under 600px, both bounds meant: `phs-h` below owns the same
-    // phone on its side and would collide with every rule in here, and portrait
-    // alone is also every tablet ever made. 600 is the bound the rest of this
-    // pass settled on and the one the roster's matchMedia reads, so the two
-    // cannot disagree about what a phone is.
+    // Portrait, up to 900. `phs-h` below owns the same phone on its SIDE and
+    // would collide with every rule in here, so the orientation bound is meant;
+    // the width bound moved from 600 to 900 because a tablet upright takes this
+    // same view, only bigger — a sheet of faces and the chosen one under them is
+    // what a narrow screen wants at either size, and 818px of width does not
+    // turn it into the pinned two-half arrangement a laptop gets.
+    //
+    // The twin of PHONE_OR_TABLET_UPRIGHT in @/helpers/usePhone, which the
+    // roster's matchMedia reads: the stylesheet lays the tiles out, the hook
+    // decides what a tile IS, and the two cannot disagree about it.
     @include v(xs) {
-        @include below-px(600) {
+        @include below-px(900) {
             // One screen, near enough. The sheet takes what it needs and the
             // record takes the rest, which is the whole repair: the faces, the
             // person chosen out of them and the ways to reach that person are
@@ -876,36 +883,253 @@ $panel: rgba(0, 0, 0, 0.6);
         }
     }
 
-    // A phone in landscape — see the note on the box above. Everything the
-    // stacked flow states in vh is restated here in px, because a vh is four
-    // pixels on a 390px-tall screen: the rows had come out at 32px against the
-    // 44px a tap needs, and the list's own top padding had all but vanished.
+    // ── the phone, held sideways ──
+    //
+    // The stacked flow is the wrong shape here, and it is the same wrong shape
+    // the upright block above was written to answer, arriving from the other
+    // side. Measured before this: 1037px of section at 568×320, 1129 at 844×390
+    // and 1188 at 949×432 — three screens of page for one section — with the
+    // ten names running the full width and the face they choose beginning below
+    // the last of them. A name and the person it names were never once on the
+    // screen together.
+    //
+    // A phone on its side already has the shape this section was drawn for,
+    // wide and short. What it does not have is the height: ten rows at the 44px
+    // a finger needs is 520px of roster against 320 of screen, and no
+    // arrangement of ten names is both tappable and entirely in view. So the
+    // two halves come back — the roster on the left, the person on the right —
+    // and the one thing that is new is that the ROSTER SCROLLS INSIDE ITSELF.
+    // That is what lets the section be exactly one screen tall while every row
+    // keeps its target: the reader moves the list, not the page.
+    //
+    // Carried over from the navigation's roster, which had its landscape
+    // layout worked out first (src/components/common/navbar/body/advisors):
+    // the row instead of the column; the chosen person on the RIGHT, which is
+    // where the thumb of the hand holding the phone already is; a fixed clamp
+    // for that half rather than a share of the row, so the composition does not
+    // shift under a thumb that is choosing somebody; hairlines at 0.16 white
+    // where two blocks meet; and dropping what does not fit at 568 rather than
+    // shrinking everything until it does.
+    //
+    // Deliberately NOT carried over: that roster is one row and nothing
+    // scrolls, because it draws FACES and ten faces fit across a landscape
+    // phone at a size a finger can hit. This half draws NAMES — the words are
+    // the roster here, as they are on every other screen this section has — and
+    // a name is read along a line, so ten of them are a column. A column of ten
+    // does not fit down 320px. Where the roster gave every tile a share of a
+    // box, this gives the box an overflow. Same ten people, same gesture, and
+    // the difference between the two is the difference between the things being
+    // listed.
     @include phs-h {
+        // The choreography, called off, and the ground the two halves stand on
+        // — see the mixin. Six of its declarations belong to the stacked column
+        // rather than to the unpinning and are taken back below: the stage's
+        // direction, height and overflow, the two halves' `flex`, and the
+        // panel's height. Its `transform: none !important` is not one of them
+        // and is doing real work — the halves' closing is an inline style from
+        // framer measured against a pin that does not exist here.
         @include colleagues-stacked;
 
+        // Bare, because this whole block is already inside `.Colleagues__stage`
+        // — writing the class again here would compile to
+        // `.Colleagues__stage .Colleagues__stage` and match nothing. Measured
+        // the hard way: the panel took its new height and the stage stayed a
+        // column.
+        flex-direction: row;
+        // One screen and not a pixel more. `vh` first for an engine that does
+        // not know `svh`, exactly as the upright block states its own box, and
+        // for the same reason: everything inside is a share of this, so a
+        // dropped declaration is a section with no height.
+        height: 100vh;
+        height: 100svh;
+        // The roster's overflow is the roster's own. Nothing else here has any
+        // business leaving the stage.
+        overflow: hidden;
+
+        // ---- the left half: the roster ----
         .Colleagues__list {
-            padding: 56px 6vw 28px;
+            flex: 1 1 auto;
+            min-width: 0;
+            // A column allowed to be shorter than what is in it, which is the
+            // whole of what makes the list inside it scrollable. Without this
+            // the flex item takes its content's height and the overflow below
+            // has nothing to overflow.
+            min-height: 0;
+            // 72 at the top rather than the 56 this block had. The navbar is
+            // fixed and sits over this: its box runs to 78px at 568 and 844 and
+            // to 80 at 949, and while it steals no taps — the container is
+            // `pointer-events: none` and only its children take them back — 56
+            // left nine pixels between the wordmark and the heading, which is
+            // not air, it is a near miss. The other three sides are small
+            // because the room here is horizontal, and every vertical pixel
+            // spent on margin is a row the reader has to scroll for.
+            padding: 72px 5vw 12px;
+            // Where the two halves meet. The seam this section draws elsewhere
+            // is a scroll-drawn line and there is no scroll pass here to draw
+            // it, so the mark is a hairline on the block instead — the roster's
+            // own answer to the same problem, and its weight.
+            border-right: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        // Both words on one line. Stacked they are 54px of a 320px screen spent
+        // on a heading, and this screen is short and wide: what there is room
+        // for is across. Each line keeps its own rule, so the mark is unchanged
+        // — two underscored words side by side rather than one above the other.
+        // It wraps if the CMS is ever given a longer heading, and then it costs
+        // what it costs.
+        .Colleagues__heading {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.45em;
+            font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+        }
+
+        // ── the roster, scrolling inside itself ──
+        //
+        // The <ul> and not a wrapper around it: it holds the ten rows and
+        // nothing else, so it already IS the box the overflow belongs on.
+        //
+        // `data-lenis-prevent` is set on this element from index.jsx and is not
+        // decoration. The page runs Lenis, which takes a wheel or a drag,
+        // calls preventDefault on it and scrolls the document — so without the
+        // attribute a drag inside this list moves the page behind it and the
+        // list never moves at all. ContactModal__scroll and the review sheet
+        // carry it for exactly this.
+        .Colleagues__names {
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-top: 12px;
+            // Sideways is clipped rather than scrollable: the hover step is a
+            // transform on the two cells of a row, and a transform counts
+            // towards scrollable overflow — left as `auto` it put a horizontal
+            // bar under the list the first time a name was taken.
+            overflow-x: hidden;
+            overflow-y: auto;
+            // A flick that runs out of roster stays in the roster instead of
+            // rubber-banding the page behind it.
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            // The rows carry their own rule; this is the air around it.
+            gap: 4px;
+            // Both ends softened, because a scroller's edge is a cut and this
+            // one is 12px under the heading's own rule: at rest the first name
+            // was sliced across the middle by nothing the reader could see, and
+            // read as a rendering fault rather than as a list with more in it.
+            // Fourteen pixels — less than half a line, so no row is ever
+            // unreadable, and enough that the cut is a fade. Prefixed as well,
+            // the pair this codebase already writes.
+            $fade: linear-gradient(
+                to bottom,
+                transparent 0,
+                #000 14px,
+                #000 calc(100% - 14px),
+                transparent 100%
+            );
+            -webkit-mask-image: $fade;
+            mask-image: $fade;
         }
 
         .Colleagues__name {
             // 14px each side of a ~17px line box is what actually lands the
             // row at the 44px a tap needs — 12px measured out at 41.
             padding: 14px 0;
-            grid-template-columns: 3.5rem 1fr;
+            // 3.5rem was a desktop's column for two digits, standing in one
+            // 264px wide at 568. The room it gives back goes to the name.
+            grid-template-columns: 2.2rem 1fr;
+            gap: 0.4rem;
         }
 
-        // The screen is short, so the portrait takes all of it rather than
-        // seven tenths — 70vh of a landscape phone is a letterbox.
+        // ---- the right half: the person ----
         .Colleagues__panel {
-            height: 100vh;
+            // A fixed clamp rather than a share of the row, which is the
+            // roster's decision and its reason: what is on this side must not
+            // move under a thumb that is choosing somebody on the other.
+            //
+            // The floor is what four 44px targets need standing in a line with
+            // the padding around them. The cap is about the picture: what fills
+            // this box is a `cover` crop of a standing figure, and a box much
+            // wider than 4:5 takes that crop out of the head. It comes out
+            // 236×320, 304×390 and 340×432 — every one of them within a hair of
+            // 3:4, which is the shape a portrait already is.
+            flex: 0 0 clamp(236px, 36%, 340px);
+            // Stretched by the row it is in, not measured off the viewport. The
+            // mixin's 70vh is a letterbox on a screen this short and the 100vh
+            // that used to be here was the stacked column's answer to that.
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-start;
+            padding: 0 0.85rem 0.85rem;
+
+            // The record lies on a photograph, so it takes the scrim the
+            // upright block puts under it for the same reason — see the note
+            // there. Shorter, because what sits on it here is a line of numbers,
+            // a motto and the targets, and not a name at 6vw as well.
+            &::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 55%;
+                z-index: 0;
+                pointer-events: none;
+                background-image: linear-gradient(
+                    to top,
+                    rgba(3, 13, 19, 0.92) 0%,
+                    rgba(3, 13, 19, 0.72) 26%,
+                    rgba(3, 13, 19, 0.24) 58%,
+                    rgba(3, 13, 19, 0) 100%
+                );
+            }
+        }
+
+        // Into the flow at the foot of the picture, exactly as upright does it
+        // and for its argument: pinned, these two are measured off `--frame-x`
+        // and `--frame-bottom`, which are a wide screen's insets — 6vw and 7vh
+        // of a 236px panel puts the motto and the targets in the same corner.
+        .Colleagues__meta,
+        .Colleagues__links {
+            position: static;
         }
 
         .Colleagues__meta {
-            bottom: 76px;
+            // 20vw is 114px here, which is a measure of the viewport and not of
+            // the box this now stands in.
+            max-width: 100%;
         }
 
+        .Colleagues__counter {
+            margin-bottom: 0.2rem;
+            font-size: 0.62rem;
+        }
+
+        // Two lines and then it stops, the same bound the upright record puts
+        // on it. These come from the CMS where nobody is counting characters,
+        // and here the third line is the one that pushes the targets off the
+        // bottom of a 320px screen.
+        .Colleagues__moto {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.72rem;
+            line-height: 1.35;
+        }
+
+        // Four 44px targets in 212px of usable panel at 568. The gap is what
+        // gives, not the targets: 0.7rem between them is 210 against 212 and no
+        // room for a rounding error, 0.35rem is 193 and nineteen pixels of it.
+        // Wrapping is the belt — a fifth target, or a browser that rounds the
+        // wrong way, becomes two rows rather than one row running off the edge.
         .Colleagues__links {
-            bottom: 20px;
+            flex-wrap: wrap;
+            margin-top: 0.7rem;
+            gap: 0.35rem;
         }
     }
 

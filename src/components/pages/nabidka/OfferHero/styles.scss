@@ -77,12 +77,12 @@
         }
     }
 
-    .OfferHero__scrim {
-        position: absolute;
-        inset: 0;
-        background-color: #000;
-        pointer-events: none;
-    }
+    // The veil that used to be declared here is .photoVeil in globals.scss now,
+    // and this selector is deliberately gone rather than emptied: nested, it is
+    // one class deeper than that one, so a `background-color: #000` left behind
+    // would beat the half-black with a solid one and paint the photograph out
+    // altogether. The class is still on the element, as its name in this
+    // section; it carries no declarations anywhere.
 
     // Only the left edge, and only as far in as the headline reaches. A scrim
     // over the whole plate to make two lines of type legible would cost the

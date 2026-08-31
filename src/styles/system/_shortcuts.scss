@@ -1,6 +1,13 @@
 @use "sass:math";
 @use "./index.scss" as sys;
 
+// Shared control looks — the native picker and the telephone mark a phone gets
+// instead of a roster and a printed number. Forwarded rather than left for each
+// caller to `@use`, because the sync script writes exactly one import into every
+// stylesheet (this one) and a second one written by hand is a second one to keep
+// correct when a file moves. Mixins only, so forwarding emits nothing.
+@forward "./controls.scss";
+
 // font shortcut
 @mixin font($token) { @include sys.font($token); }
 

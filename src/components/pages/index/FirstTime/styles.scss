@@ -171,7 +171,15 @@
         }
     }
 
-    @include below-px(820) {
+    // Stacked, and an upright tablet is NOT in that set: from 600 to 900 across
+    // it takes the desktop layout exactly, which is what this stop is for.
+    //
+    //   under 600           every phone upright, and any window that narrow
+    //   ≤820 and landscape  a phone on its side, and a small landscape window
+    //
+    // Raw rather than `below-px(820)`, because the stop stopped being a width.
+    @media (max-width: 599.98px),
+           (max-width: 820px) and (orientation: landscape) {
         height: auto;
         grid-template-columns: 6vw 44vw 44vw 6vw;
         grid-template-rows: 4vh auto auto 4vh auto 3vh;

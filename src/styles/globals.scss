@@ -126,5 +126,25 @@ body[data-footer="hidden"] .SiteFooter {
   display: none;
 }
 
+// One half-black over a background photograph, and the same one everywhere.
+//
+// Every section that opens a photograph behind type had grown its own answer to
+// the same question — a flat black at 0.28 rising to 0.58 in the hero, three
+// different per-cell values in the rail, a bottom-up gradient in the wall — so
+// the same picture read as a different picture in each of them, and one of them
+// was still darkening after the photograph it darkened had gone.
+//
+// This is the constant they now share. A gradient on top of it is a different
+// job — ground for a specific line of type at a specific edge — and those stay
+// where they earn their keep.
+.photoVeil {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
 
 

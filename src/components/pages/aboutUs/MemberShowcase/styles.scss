@@ -314,12 +314,46 @@
         @include lineSweep(y, -1.4s);
     }
 
-    // Raw on purpose: no helper composes an OR of two features. The height arm
-    // is phones held sideways (and any window squashed that flat) — an 844×390
-    // phone clears the 820px gate but cannot hold the pinned column, and the
-    // discs' room collapses to a box they cannot be put back inside. 520px is
-    // the phs/phl ceiling. MUST match the matchMedia list in index.jsx.
-    @media (max-width: 820px), (max-height: 520px) {
+    // Raw on purpose: no helper composes an OR of three feature pairs. MUST
+    // match the matchMedia list in index.jsx and the two blocks in
+    // AboutHero/styles.scss — the hero and this section pin together or stack
+    // together, never one each.
+    //
+    // This list is exactly the old `(max-width: 820px), (max-height: 520px)`
+    // MINUS a phone held sideways, which now rides like the desktop does. Proved
+    // equal over every integer viewport from 240×240 to 2600×1600 before it was
+    // written, because the three arms are not obviously the same set as the two
+    // they replace:
+    //
+    //   (max-width: 479px)                          anything narrow — every
+    //                                               phone held upright
+    //   (max-width: 820px) and (min-height: 521px)  the tablet upright, and any
+    //                                               window ≤820 that is not flat
+    //   (max-height: 520px) and (orientation: portrait)
+    //                                               flat AND upright, which is a
+    //                                               shape no phone has and no
+    //                                               landscape window can be
+    //
+    // What falls through all three is `min-width: 480px` + `max-height: 520px` +
+    // landscape — the phs-h stop the rest of this pass uses. Sideways phones
+    // ride; so does a desktop window squashed that flat, which is what phs-h
+    // means everywhere else on this site.
+    // A TABLET UPRIGHT is out of this set now too, for the same reason the
+    // sideways phone was: it rides. 818×1174 has the width for a card and a
+    // photograph abreast and the height to pin a screen and travel across it —
+    // the stacking is for a column 390px wide, where a pair would be two
+    // slivers.
+    //
+    // The four arms, and the second is the one that was added: `(max-width:
+    // 599.98px) and (orientation: portrait)` catches the 480–599 upright band
+    // that the old `(max-width: 820px) and (min-height: 521px)` used to catch
+    // along with the tablet. Everything else is unchanged — a phone upright is
+    // arm one, a small landscape window arm three, a flat upright window arm
+    // four, and a phone on its side falls through all of them as before.
+    @media (max-width: 479px),
+           (max-width: 599.98px) and (orientation: portrait),
+           (max-width: 820px) and (min-height: 521px) and (orientation: landscape),
+           (max-height: 520px) and (orientation: portrait) {
         // No pin and no ride on small screens: the pairs stack down the page,
         // and with nothing pinned there is no overlap to pull back over.
         height: auto;
@@ -451,11 +485,160 @@
     // so for one render the clip is written by the desktop branch.
     //
     // Portrait AND under 600px, which is the bound the rest of this phone pass
-    // settled on. A phone on its side and a tablet in portrait are stacked too
-    // and have the same fault; they are deliberately left as they are, because
-    // this pass may not change what anything but a phone renders.
+    // settled on.
     @include v(xs) {
         @include below-px(600) {
+            .MemberShow__viewport {
+                clip-path: none !important;
+            }
+        }
+    }
+
+    // ---- tablet, upright: the same ride, twice as wide ----
+    //
+    // 44vw is 360px at 818 and 32vw is 262 — a column of copy beside a strip of
+    // picture. Doubled they are 720 and 524, which is the composition the ride
+    // was drawn as, on a screen that has the height to spend on it.
+    //
+    // These three are the stylesheet's half of geometryFor(2) in
+    // ../aboutStack.js: the track's width and its travel are computed there and
+    // written inline, and the card and the photograph are sized here. The two
+    // halves are one number — get them out of step and the last photograph
+    // stops landing flush with the right-hand edge.
+    @include v(md) {
+        @include below-px(900) {
+            .MemberShow__card {
+                width: 57.2vw;
+            }
+
+            .MemberShow__card__inner {
+                width: 57.2vw;
+            }
+
+            .MemberShow__photo {
+                flex: 0 0 41.6vw;
+            }
+        }
+    }
+    // ---- the phone on its side: the ride, cut to a screen a third the height ----
+    //
+    // This layout is the desktop's, not the stacked column's: card on the left,
+    // its photograph on the right at 32vw against the card's 44vw, riding as one
+    // track. What changes here is only that the card's column of copy has to fit
+    // 320px instead of 1080, and it did not: measured at 568×320 before this
+    // block, the footnote's baseline was 418px down a 320px screen — a hundred
+    // pixels below the bottom edge — and the room between the button and the
+    // footnote had been squeezed to nothing.
+    //
+    // The discs go. They are the one thing in this section that cannot be made
+    // smaller and still be itself: six rings that fly the length of the track
+    // and settle into the leftover room on the third card, and that room is 0px
+    // at 568×320 and 17px at 844×390. Absolutely positioned into a box of no
+    // height, they came out sitting on top of the footnote — legible neither as
+    // discs nor as a sentence. A journey with nowhere to land is not a shortened
+    // journey, so they are not shortened.
+    @include phs-h {
+        .MemberShow__circles {
+            display: none;
+        }
+
+        .MemberShow__card__inner {
+            // The floor, not the share: 12vh of a 320px screen is 38px and the
+            // navbar is fixed over the top of it, so the eyebrow — this card's
+            // faintest thing — was inside the site's own line of text. The same
+            // reasoning as the stacked block above, at a landscape screen's
+            // scale.
+            //
+            // 90px is measured, not guessed: the navbar's bottom edge sits at
+            // 78px at these widths and 80px at the widest, so this is the rule
+            // plus about ten pixels of air. An earlier 58px cleared 12vh and
+            // nothing else — the eyebrow came out twenty pixels behind the
+            // site's own name.
+            //
+            // What pays for it is the three margins below, trimmed by eleven
+            // pixels between them. The column's spare room at 568×320 — the
+            // mark's own height, which is what `flex: 1` leaves over — is 37px,
+            // so this had to be spent from a budget rather than added.
+            padding: max(12vh, 90px) 3vw 3vh;
+
+            .MemberShow__card__quote {
+                margin-top: 2vh;
+                // The desktop ceiling is 35vw against a 44vw card; here the card
+                // is 250px wide and a column narrower than the box it sits in
+                // buys nothing but more lines.
+                max-width: none;
+                // Smaller is FEWER lines, not more: at the inherited 1.3rem
+                // floor this quote broke into six lines of ten characters and
+                // stood 168px tall on its own. The whole saving is here.
+                font-size: clamp(0.95rem, 2.4vw, 1.25rem);
+                line-height: 1.3;
+            }
+
+            .MemberShow__card__cta {
+                margin-top: 2vh;
+            }
+
+            // Still `flex: 1` from the rule above, and still doing something
+            // even with the discs gone: it is what holds the footnote to the
+            // bottom of the card the way it is held on every other screen. Its
+            // height is also the column's spare room, which is what the top
+            // padding above was measured against.
+            .MemberShow__card__mark {
+                margin-top: 1vh;
+            }
+
+            .MemberShow__card__foot {
+                max-width: none;
+                font-size: 0.6rem;
+                line-height: 1.5;
+            }
+        }
+    }
+
+    // And the phone on its side, where the squeeze is called off for a DIFFERENT
+    // reason — worth stating, because this rule looks like the one above and is
+    // not.
+    //
+    // Sideways, this section is pinned and does ride (see the gate above). So
+    // there is a pin. What there is not is the other half of the event:
+    // Colleagues is stacked at this size — its two halves do not close on a
+    // seam, because sideways it is a scrolling list beside a portrait, not a
+    // pin at all. The squeeze exists to shrink this section to nothing at the
+    // exact moment those halves touch, and with nothing arriving it is a screen
+    // clipping itself away over an empty gradient. That was measured at nearly
+    // nine hundred pixels of it — more than two landscape screens — where the
+    // middle of the viewport hit nothing at all.
+    //
+    // The two sections part company here instead, which is a plain cut rather
+    // than a weld. It is the honest ending for a layout where the thing being
+    // welded to does not exist.
+    //
+    // A tablet in portrait (601–820) is stacked and still has the fault the
+    // block above describes. That one is not a phone and is left for whenever
+    // tablets are looked at.
+    @include phs-h {
+        .MemberShow__viewport {
+            clip-path: none !important;
+        }
+    }
+
+    // And a tablet upright, for the same reason as the phone on its side and
+    // measured the same way.
+    //
+    // This section is pinned here and does ride, so there is a pin. What there
+    // is not is the other half of the event: Colleagues is stacked at this size
+    // — `.Colleagues__stage` reads `position: static` at 818×1174, against
+    // `sticky` on a laptop — so its two halves never close on a seam. The
+    // squeeze exists to shrink this section to nothing at the moment they touch.
+    //
+    // Left running it takes the end of the section away instead. Measured before
+    // this rule: at 95% of the section the viewport is clipped to
+    // `inset(0% 49.68% 0% 44.05%)` and at 100% the middle of the screen hits no
+    // element at all — the last stretch of the ride, the third card's copy and
+    // the discs still loose in its room, cut away over a page that is not
+    // arriving.
+    @include v(md) {
+        @include below-px(900) {
             .MemberShow__viewport {
                 clip-path: none !important;
             }

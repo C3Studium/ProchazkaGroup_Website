@@ -468,7 +468,10 @@ export default function OfferHero() {
     // value, so the two disagreed by whatever the lag happened to be and the
     // handover flashed. Every value this section parts on now settles before
     // the last stretch, so lag cannot land inside the cut.
-    const scrimOpacity = useTransform(progress, [0, 0.45, 0.85, 1], [0.28, 0.28, 0.58, 0.58]);
+    // The scrim's own ramp used to be here — 0.28 through to 0.58 on this same
+    // timeline. It is a flat half now (see .photoVeil in globals.scss), so there
+    // is nothing left for the scroll to drive. The paragraph above still holds
+    // for everything else this section parts on.
 
     // Reduced motion gets the composition, not the choreography: the plate is
     // simply there. The scroll-driven opening stays — it is the page's
@@ -588,11 +591,16 @@ export default function OfferHero() {
                             style={{ opacity: shadeOpacity }}
                             aria-hidden="true"
                         />
-                        <motion.div
-                            className="OfferHero__scrim"
-                            style={{ opacity: scrimOpacity }}
-                            aria-hidden="true"
-                        />
+                        {/* The page's one half-black — see .photoVeil in
+                            globals.scss. This element was already the overlay
+                            that class describes; what it carried was a ramp
+                            from 0.28 to 0.58 across the hero's own scroll,
+                            which is the same picture at two different weights
+                            depending on where the reader had stopped. 0.5 is
+                            inside a tenth of both ends of that ramp, so the
+                            handover to the rail below reads as it did — that
+                            movement is a scale and a position, not a fade. */}
+                        <div className="OfferHero__scrim photoVeil" aria-hidden="true" />
                     </motion.div>
                 </motion.div>
 

@@ -300,7 +300,82 @@
         }
     }
 
-    @include below-px(820) {
+    // ---- tablet, upright ----
+    //
+    // The desktop layout, with one change made three times across this page: the
+    // picture is half as tall and the reading sits ON it rather than beside it.
+    //
+    // Beside it is what a landscape screen affords. Upright, the photograph's
+    // 32vw is 262px and the copy's 41vw is 335 — two columns that are each too
+    // narrow for what is in them, on a screen that has height to spare and none
+    // to waste. One plate the width of the section, with the reading over it,
+    // uses the width once instead of splitting it.
+    //
+    // Everything else is the desktop's, deliberately: the rules are a network
+    // that runs from the section above into the one below, and the stats they
+    // pass through are laid out to meet them. Moving a block here would break a
+    // line three sections long.
+    @include v(md) {
+        @include below-px(900) {
+            // Reading, then the picture under it — the same column the third
+            // panel of the horizontal scroll settled on, and for the same
+            // reason: this section's copy is four lines and a button, which is
+            // more than a half-height plate can carry.
+            .Offers__info {
+                top: 26vh;
+                left: 8.5vw;
+                width: 74vw;
+            }
+
+            .Offers__ctaWrap {
+                top: 42vh;
+                left: 8.5vw;
+            }
+
+            .Offers__photo {
+                // Half of 54vh, and a share of the width rather than all of it:
+                // under the reading it is this section's illustration, not its
+                // ground.
+                top: 52vh;
+                left: 8.5vw;
+                width: 46vw;
+                height: 27vh;
+            }
+
+            // The half-black rides WITH the picture, on the pane that carries
+            // it — not on the frame around it.
+            //
+            // On the frame it was a black rectangle sitting in the section from
+            // the moment the section existed: the frame is deliberately empty
+            // before the move — the five slats each hold their own slice and
+            // slide it up into place, and the grid and the orbit show through
+            // the gap until they do. A veil on the frame darkens that emptiness,
+            // so what the reader met was a black plate that a photograph later
+            // assembled inside.
+            //
+            // The pane is the element that slides. Its box is five slats wide
+            // and each slat clips its own share of it, so one veil here comes
+            // out as a veil on every slice, arriving exactly when the slice
+            // does.
+            .Offers__photo__pane::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+            }
+        }
+    }
+
+    // Stacked, and an upright tablet is NOT in that set: from 600 to 900 across
+    // it takes the desktop layout exactly, which is what this stop is for.
+    //
+    //   under 600           every phone upright, and any window that narrow
+    //   ≤820 and landscape  a phone on its side, and a small landscape window
+    //
+    // Raw rather than `below-px(820)`, because the stop stopped being a width.
+    @media (max-width: 599.98px),
+           (max-width: 820px) and (orientation: landscape) {
         height: auto;
 
         .Offers__sticky {

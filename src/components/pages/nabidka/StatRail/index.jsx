@@ -845,8 +845,17 @@ const geomFor = (vw, vh) => {
         // line taking the full width underneath, which it needs: the L left it
         // a 242px column to be read in.
         //
-        // A band is the bar's clearance and then a count and its line.
-        return { narrow: true, band: Math.max(15, ((clearOf(vw) + 48) / vh) * 100) };
+        // A band is the bar's clearance and then a count and its line — 140px,
+        // and that is a height in pixels rather than a share of the screen.
+        //
+        // There used to be a 15% floor under it, and a floor written as a share
+        // only ever binds on a screen tall enough not to need one: it never
+        // touches a phone (16.6% at 390×844, 24.6% at 320×568 — the pixels win
+        // every time) and it bound on nothing BUT a tablet upright, where it
+        // took the band from the 140px it asks for to 154 at 768×1024 and 177 at
+        // 825×1174. Three of those is half the screen, spent on three lines of
+        // type that come to a hundred and forty.
+        return { narrow: true, band: ((clearOf(vw) + 48) / vh) * 100 };
     }
     const q = squareOf() * 100;
     return { narrow: false, q, s: (q * vw) / vh };
@@ -1026,10 +1035,24 @@ const boxClusterAt = (vw, vh, [x, y], grown) => {
 // so the cell reading it does not have to know which composition it is in.
 const COUNT_BAND = 66;
 
+// The same three counts on a tablet upright, as blocks rather than as a rule
+// with numbers in it.
+//
+// The band is 66px tall across the whole width, which on a phone is three tiles
+// about 130 by 66 — near enough square to read as a block. On an 825-wide
+// tablet the same share is 275 by 66: a strip. So upright and wide enough, each
+// takes less width and more height, and the three come out as a row of blocks
+// with the rest of the line left as ground. 600 is the site's own stop between
+// a phone upright and a tablet upright, and the widest phone we target is 430
+// across, so nothing held in a hand can reach this.
+const COUNT_BLOCK_VW = 24;
+const COUNT_BLOCK_H = 118;
+
 const countBandAt = (vw, vh) => {
     const top = (clearOf(vw) / vh) * 100;
-    const h = (COUNT_BAND / vh) * 100;
-    const w = 100 / 3;
+    const tablet = vw >= 600;
+    const h = ((tablet ? COUNT_BLOCK_H : COUNT_BAND) / vh) * 100;
+    const w = tablet ? COUNT_BLOCK_VW : 100 / 3;
     return [0, 1, 2].map((i) => ({
         rect: [top, 100 - w * (i + 1), 100 - top - h, w * i],
         open: 0,
@@ -1252,7 +1275,22 @@ function Cell({
 
     // The others step back. Size alone says which cell is largest but not which
     // one is being read; this is what turns three boxes into a sequence.
-    const recede = useTransform(focus, [0, 1], [0.34, 0]);
+    const recedeAt = useTransform(focus, [0, 1], [0.34, 0]);
+
+    // And it leaves when the photographs leave. This is the odd darkening at the
+    // end of the band: `focus` settles at 0 for all three cells once the ride is
+    // over, so all three sat at 0.34 black — and `photoOut` had already taken
+    // the photographs they were dimming away. Measured at 1440×900: from y=5850
+    // to the end of the section, some 2600px of scroll, the cells' photos and
+    // their scrims all read 0.00 while every `recede` still read 0.34. Three
+    // black rectangles over the map, dimming nothing, for two and a half
+    // screens.
+    //
+    // Multiplied by `photoOut` rather than re-timed, because that is the honest
+    // statement of the rule: "this cell is not the one being read" is a thing to
+    // say only while there is a cell with a photograph in it to say it about.
+    // The scrim beside it has always been written this way.
+    const recede = useTransform([recedeAt, photoOut], ([r, p]) => r * p);
 
     // The caption waits for a cell big enough to read it in. Scaled down with
     // the rest of the block it landed at about seven pixels in the smallest
@@ -1461,7 +1499,16 @@ function Cell({
             </motion.div>
             <motion.div
                 className="StatRail__cell__scrim"
-                style={{ opacity: useTransform(photoOut, (v) => v * cell.scrim) }}
+                // One half, flat, on every photograph on the page — see the
+                // note on .photoVeil in globals.scss. This element already WAS
+                // that overlay (absolute, inset 0, black); what it did not have
+                // was one strength. It carried a per-cell 0.58 / 0.44 / 0.62,
+                // so the same picture was three different pictures depending on
+                // which box it was in.
+                //
+                // Still multiplied by `photoOut`: this sits outside the box that
+                // fades, so it has to be told when the photograph has gone.
+                style={{ opacity: useTransform(photoOut, (v) => v * 0.5) }}
                 aria-hidden="true"
             />
             {/* Ground for this cell's own copy, at its own foot. A single

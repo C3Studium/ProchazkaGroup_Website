@@ -299,7 +299,15 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 // the site's own `$v md` stop, and it sits in the empty gap between the widest
 // phone we target, 430, and the narrowest tablet in portrait, 768.
 @include v(xs) {
-    @include below-px(600) {
+    // 900, not 600: a tablet held upright takes this same sheet, only bigger.
+    // 818px of width does not make a wall of ten faces, it makes this grid with
+    // more room in it.
+    //
+    // The twin of PHONE_OR_TABLET_UPRIGHT in @/helpers/usePhone, which is what
+    // decides whether a tile is a link or a button and which portraits are
+    // fetched. The two have to move together or the sheet is laid out as one
+    // thing and built as another.
+    @include below-px(900) {
         .navAdv {
             flex-direction: column;
             // Edge to edge. The panel is 92vw of the screen and that is already
@@ -694,33 +702,6 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     }
 }
 
-// Phone, landscape. The widest of them (932×430) clears the 900px stop above
-// on width alone and would get the desktop wall at a height where a row is a
-// strip of chins. The same treatment as portrait — a scrolling column, the
-// trading disabled — with heights sized to the short viewport rather than to
-// 46vh of a tall one. After every width-only stop above, because a landscape
-// phone matches those on width alone and source order is the tiebreak.
-@include phs-h {
-    .navAdv {
-        flex-direction: column;
-        overflow-y: auto;
-    }
-
-    .navAdv__lead {
-        flex: none !important;
-        min-height: 250px;
-    }
-
-    .navAdv__rest { flex: none !important; }
-
-    .navAdv__row {
-        flex: none !important;
-        min-height: 210px;
-    }
-
-    .navAdv__cell { flex: 1 1 0 !important; }
-}
-
 .navAdv__tel {
     display: flex;
     align-items: center;
@@ -739,4 +720,160 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
         opacity: 1;
         transform: translateY(0);
     }
+}
+
+// ── the phone, on its side ──
+//
+// Landscape is not portrait rotated. There the panel is deep and the answer is
+// a sheet of faces with the record under it; here the panel is 157px from top
+// to bottom at 568×320 and the only dimension there is any of is across.
+//
+// What was here before was portrait's answer applied to a box shaped nothing
+// like it: a scrolling column, the lead given a 250px band and each row 210
+// more, which is 690px of roster inside 129 of panel. The chosen advisor filled
+// the view on his own and the other nine were under the fold — a roster you
+// scroll past a face to read is not a roster, which is the same sentence the
+// portrait block above was written to answer.
+//
+// So the wall goes back to being what it is on a wide screen: ONE ROW. The lead
+// moves to the right, where the thumb already is, and is cut to a quarter of
+// the width — he is the display, not the whole of it. The other nine sit beside
+// him to the left, five and four, at a size a finger can hit. Nothing scrolls,
+// because nothing is given a height any more: every block is a share of a box
+// whose height the panel decides.
+//
+// After every width-only stop above AND after the base rules for the record
+// itself, because a landscape phone matches those on width alone and source
+// order is the tiebreak at equal specificity.
+@include phs-h {
+    .navAdv {
+        // The row. Every width-only stop above turns this into a column, which
+        // is the right answer on a tall screen and the wrong one here.
+        flex-direction: row;
+        // Nothing runs off any edge, in either direction. The blocks are sized
+        // to the box now, so there is nothing to scroll to.
+        overflow: hidden;
+        // Edge to edge, on portrait's own argument: the panel is 94vw of the
+        // screen and that is already the margin. The 28px back is 22% more
+        // height at 568×320 — the difference between a 64px tile and a 78px one.
+        padding: 0;
+    }
+
+    // ── the one that is chosen ──
+    //
+    // On the right, which is what was asked for and is also where the thumb of
+    // the hand holding the phone already is. `order` rather than a change of
+    // source: the wide-screen wall reads lead-first and goes on doing so.
+    .navAdv__lead {
+        order: 2;
+        // A quarter of the row, floored and capped. 132 is the floor index.jsx
+        // will not squeeze a portrait below and the same number serves here; the
+        // cap is for the OTHER screen this query catches — a desktop window
+        // squashed under 520px tall, where a quarter of 1600 is a poster. Fixed
+        // rather than a share of the wall's arithmetic, so the composition does
+        // not move under a thumb that is choosing somebody.
+        flex: 0 0 clamp(132px, 26%, 240px) !important;
+        // 46vh from the stop above is a portrait's idea of height. Here the
+        // block is as deep as the roster and no deeper.
+        min-height: 0;
+        // Its right-hand hairline would land in the same pixel as the panel's
+        // own right rule, and its bottom one on the rail's. Two hairlines in one
+        // pixel read as one bright edge against nine ordinary ones; .navAdv
+        // clips the extra away.
+        margin: 0 -1px -1px 0;
+    }
+
+    .navAdv__rest {
+        order: 1;
+        // Everything the display did not take.
+        flex: 1 1 auto !important;
+        min-width: 0;
+        margin-bottom: -1px;
+    }
+
+    // Two rows sharing the height between them, five and four. `flex: none` and
+    // a 210px floor is where the overflow came from.
+    .navAdv__row {
+        flex: 1 1 0 !important;
+        min-height: 0;
+        // The wrap the sub-750 stop asks for is a portrait's answer to five
+        // abreast. Five abreast is exactly what fits here, and wrapping would
+        // put the last two back under the fold.
+        flex-wrap: nowrap;
+    }
+
+    .navAdv__cell {
+        // Even shares at rest...
+        flex: 1 1 0 !important;
+        // Undoes the 220px the wrapped-pairs layout below 750 asks for.
+        min-height: 0;
+        transition: flex-grow 0.55s $curtain;
+
+        // ...and the one that was tapped takes half a share more from the four
+        // beside it. The wall's own trading cannot do this here: index.jsx
+        // animates flex-grow inline and every stop in this file overrides it
+        // with !important, so the growth is driven by the class the tap sets —
+        // which is the class the unfold is already driven by, so the two arrive
+        // together. At 568 that is a 79px tile going to 110 with the other four
+        // still at 71, comfortably over the 44px a finger needs.
+        &.is-open { flex-grow: 1.55 !important; }
+    }
+
+    // 0.9rem by 1rem is 32px of padding on a tile 79 wide.
+    .navAdv__cell__link { padding: 0.45rem 0.5rem; }
+
+    // The display can afford a margin worth having.
+    .navAdv__lead .navAdv__cell__link { padding: 0.7rem 0.8rem; }
+
+    .navAdv__ord {
+        gap: 0.28rem;
+        font-size: 0.62rem;
+
+        .navAdv__tick { width: 0.6rem; }
+    }
+
+    // Small, because a tile is 64px of usable width at 568 and "Procházka" is
+    // the longest word in the roster. It still says who each face is, which is
+    // the one thing the portrait sheet gives up and does not have to here — the
+    // tiles are square rather than 3:4 and there is a line's worth under the
+    // chin.
+    .navAdv__name {
+        font-size: 0.72rem;
+        line-height: 1.2;
+
+        .is-open & { font-size: 0.8rem; }
+    }
+
+    .navAdv__lead .navAdv__name {
+        font-size: 0.95rem;
+        line-height: 1.16;
+    }
+
+    .navAdv__lead .is-open .navAdv__name { font-size: 1.05rem; }
+
+    // The motto is the first thing that does not fit. At 568 the open tile has
+    // 64px of usable height and the name and the number are already 60 of it,
+    // and this is the line that pushes both off the top — `justify-content:
+    // flex-end` means an overflow is taken out of the ordinal and then the name.
+    // It comes back at phl-h below, where the tiles are half as tall again.
+    .navAdv__moto { display: none; }
+
+    .navAdv__tel {
+        margin-top: 0.35rem;
+        font-size: 0.68rem;
+        gap: 0.3rem;
+    }
+}
+
+// Landscape, from 800 across — the 13 and the 15 Pro Max on their sides, and
+// not the SE at 568. The tiles are 118×122 rather than 79×79 there, which is
+// room for the line the block above had to drop.
+@include phl-h {
+    .navAdv__moto {
+        display: grid;
+        max-width: 24ch;
+        line-height: 1.35;
+    }
+
+    .navAdv__cell__link { padding: 0.55rem 0.65rem; }
 }

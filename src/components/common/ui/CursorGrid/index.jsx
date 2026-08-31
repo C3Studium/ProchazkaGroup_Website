@@ -1,7 +1,7 @@
 "use client";
 
 import { isGroundCovered, subscribeGround } from "../pageGround";
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const FALLOFF_CURVES = {
     linear: (t) => t,
@@ -56,6 +56,12 @@ export default function CursorGrid({
     const containerRef = useRef(null);
     const canvasRef = useRef(null);
     const propsRef = useRef({});
+    // Whether this device has a pointer that hovers. Read at the first render
+    // rather than from an effect, which this may do because it is only ever
+    // loaded with `ssr: false` — there is no server render to disagree with.
+    const [fine] = useState(
+        () => typeof window === "undefined" || !window.matchMedia("(hover: none)").matches,
+    );
     const coveredRef = useRef(false);
 
     const wakeRef = useRef(null);
@@ -84,9 +90,14 @@ export default function CursorGrid({
 
         // Touch hygiene: the lattice is pointer history and nothing else — a
         // device with no hovering pointer has no history for it to draw, so
-        // nothing is wired at all: no listeners, no ResizeObserver, no rAF, and
-        // the canvas stays transparent. The node itself stays in the tree so
-        // the first client render matches the server's.
+        // nothing is wired at all: no listeners, no ResizeObserver, no rAF.
+        //
+        // The canvas used to stay in the tree anyway, on the grounds that the
+        // first client render had to match the server's. It never had to: this
+        // component is only ever reached through a `dynamic(..., ssr: false)`
+        // in _app, so there is no server render to match. What a phone actually
+        // got was a full-screen canvas element that could never draw a pixel —
+        // see the guard on the render itself now.
         if (window.matchMedia("(hover: none)").matches) return;
 
         const ctx = canvas.getContext("2d");
@@ -315,6 +326,12 @@ export default function CursorGrid({
     useEffect(() => {
         wakeRef.current?.();
     }, [gridOpacity, color, lineWidth, maxOpacity, fillOpacity, cellRadius]);
+
+    // Nothing at all where there is no pointer. The effects above already
+    // decline to wire anything up on touch, so what this removes is a
+    // full-screen canvas and its backing store, sitting in the tree of every
+    // phone on the site to draw a lattice that can never be lit.
+    if (!fine) return null;
 
     return (
         <div ref={containerRef} className={["cursorGrid", className].filter(Boolean).join(" ")}>
