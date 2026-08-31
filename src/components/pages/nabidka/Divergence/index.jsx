@@ -113,12 +113,22 @@ export default function Divergence() {
     // The two figures and the year are read off the head, not off the scroll:
     // the head is the thing that has a position.
     useMotionValueEvent(eased, "change", (t) => {
+        // Each of these is set to what it should be rather than to something
+        // new, which is what lets React stop here on most frames. setYear and
+        // setLate already did: a year is a number and `t > 0.74` is a boolean,
+        // and setting either to the value it already holds is a bail-out.
+        //
+        // setReads did not, because an object literal is never equal to the
+        // last one however identical its contents — so a component of ~370
+        // lines was reconciled on every frame of the scroll to arrive at the
+        // same two integers it already had. The figures are rounded to whole
+        // percent and only change some tens of times across the whole board,
+        // so the fresh object is built only when one of them has moved.
         setYear(yearAt(t));
         setLate(t > 0.74);
-        setReads({
-            s: Math.round(readAt(CURVES.s, t)),
-            bez: Math.round(readAt(CURVES.bez, t)),
-        });
+        const s = Math.round(readAt(CURVES.s, t));
+        const bez = Math.round(readAt(CURVES.bez, t));
+        setReads((prev) => (prev.s === s && prev.bez === bez ? prev : { s, bez }));
     });
 
     const put = useCallback(

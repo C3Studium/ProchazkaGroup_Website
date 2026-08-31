@@ -46,6 +46,46 @@ void main() {
 // And it sleeps. The original renders every frame forever; this one stops when
 // the last cell has relaxed and wakes on the next pointer move, because the
 // page already has a full-screen raymarch behind it.
+// The size the photograph goes to the GPU at.
+//
+// THREE.TextureLoader is handed a URL and fetches it, which means it gets the
+// file as it sits on disk — and the files on disk are camera originals.
+// Measured over one scroll of the homepage, the textures uploaded were
+// 6014x4016, 5540x5540 and 3951x5926: 92, 117 and 89 megabytes of GPU memory
+// each, for canvases whose laid-out boxes are between 259 and 907 pixels wide.
+// The upload itself is the cost that shows — a single texSubImage2D of a
+// 5540px photograph is tens of milliseconds of blocked main thread, and it is
+// what the ~200ms frames on a scroll of the homepage and /o-nas were.
+//
+// The fallback <Image> underneath has never had this problem: Next resizes what
+// it serves. So the texture is pointed at the same optimiser rather than at the
+// original, at a width that matches the box it will be drawn in. OfferHero
+// already did this by hand, with a _2000 copy of its photograph committed
+// beside the original and a comment explaining why; this is that fix made
+// general, and that call site now gets it without the second file.
+//
+// Only same-origin paths are rewritten. A data: URI, an .svg, an already
+// optimised URL or anything absolute is handed through untouched — and if the
+// optimiser refuses what it is given, boot() falls back to the original URL, so
+// the worst case is the behaviour this replaces.
+const NEXT_WIDTHS = [640, 750, 828, 1080, 1200, 1920];
+
+// One of next.config's images.qualities. A value outside that list is a 400
+// from the optimiser rather than a fall back to a default, which is how this
+// was found: 75 — the framework's own default — is not in this site's list,
+// and every texture quietly took the original-size path instead.
+const QUALITY = 80;
+
+const textureUrl = (src, boxWidth) => {
+    if (typeof src !== "string" || !src.startsWith("/") || src.startsWith("//")) return src;
+    if (src.startsWith("/_next/image") || src.endsWith(".svg")) return src;
+    // Retina, but only to a point: this is a photograph with a ripple running
+    // through it, not a diagram, and the second pixel is not visible in it.
+    const want = (boxWidth || 900) * Math.min(window.devicePixelRatio || 1, 2);
+    const w = NEXT_WIDTHS.find((n) => n >= want) ?? NEXT_WIDTHS[NEXT_WIDTHS.length - 1];
+    return `/_next/image?url=${encodeURIComponent(src)}&w=${w}&q=${QUALITY}`;
+};
+
 export default function GridDistortion({
     imageSrc,
     alt = "",
@@ -188,7 +228,9 @@ export default function GridDistortion({
                 wake();
             };
 
-            new THREE.TextureLoader().load(imageSrc, (texture) => {
+            const loader = new THREE.TextureLoader();
+
+            const onTexture = (texture) => {
                 texture.minFilter = THREE.LinearFilter;
                 texture.magFilter = THREE.LinearFilter;
                 texture.wrapS = THREE.ClampToEdgeWrapping;
@@ -198,6 +240,17 @@ export default function GridDistortion({
                 fitCover();
                 wake();
                 setReady(true);
+            };
+
+            // offsetWidth for the same reason resize() uses it: the laid-out
+            // box, not the transformed one. Several of these canvases sit
+            // inside a scroll-driven scale, and sizing the texture from a
+            // rect would buy a different picture at every scroll position.
+            const sized = textureUrl(imageSrc, container.offsetWidth);
+            loader.load(sized, onTexture, undefined, () => {
+                // The optimiser would not serve it. A picture at the wrong
+                // size beats no picture, so this takes the original.
+                if (sized !== imageSrc) loader.load(imageSrc, onTexture);
             });
 
             const pointer = { x: -1, y: -1, vx: 0, vy: 0, inside: false };
