@@ -20,6 +20,18 @@
 //   POST   /api/cms/auth/users                invite     (owner)
 //   PATCH  /api/cms/auth/users/:id            role/state (owner)
 //   DELETE /api/cms/auth/users/:id            remove     (owner)
+//   GET    /api/cms/settings/status           environment (owner)
+//   GET    /api/cms/settings/probe            anon probe  (owner)
+//   GET    /api/cms/settings/keys             API keys    (owner)
+//   POST   /api/cms/settings/keys             issue        (owner)
+//   DELETE /api/cms/settings/keys/:id         revoke       (owner)
+//   GET    /api/cms/settings/sessions         who is in    (owner)
+//   DELETE /api/cms/settings/sessions/:id     end one      (owner)
+//   POST   /api/cms/settings/sessions/revoke-all           (owner)
+//   GET    /api/cms/widget                    widget look  (public)
+//   PUT    /api/cms/widget                    change it    (owner)
+//   GET    /api/cms/content/documents         published    (API key)
+//   GET    /api/cms/content/documents/:id     published    (API key)
 //   POST   /api/cms/reviews                   submission (public, rate limited)
 //
 // One route rather than a file per endpoint because the auth decision, the

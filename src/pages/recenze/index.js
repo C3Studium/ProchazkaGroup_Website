@@ -2,7 +2,7 @@ import Head from "next/head";
 
 import ReviewsHero from "@/components/pages/reviews/ReviewsHero";
 import ReviewWall from "@/components/pages/reviews/ReviewWall";
-import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, readEditable, readPublished } from "@/cms/server/site"
+import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
 
 // ISR on the same terms as the other pages: reviews are approved by an editor a
 // few times a month, and `revalidate` is what lets an approval reach the public
@@ -15,26 +15,43 @@ export async function getStaticProps(context) {
     // therefore carried no document id and none of its four annotated lines
     // existed. Measured — 0 annotated elements on /recenze against 4 on /kontakt
     // and /nabidky, which take the shared `footerStaticProps` and get the switch
-    // for free. `draft` is true exactly when the request carries the bypass
-    // cookie /api/studio/edit sets for a signed-in editor.
-    const draft = Boolean(context?.draftMode)
-    const read = draft ? readEditable : readPublished
+    // for free. `viewOf` reads the bypass cookie and answers with one of the
+    // three readers — published, draft, or the site as it stood at a chosen
+    // moment. See @/cms/server/site/archive.js.
+    const view = viewOf(context)
+    const read = readerFor(view)
 
     // Cannot reject — every read inside answers with empty rather than throwing,
     // so an unreachable database yields the page with an empty wall rather than
     // a build failure. See @/cms/server/site.
-    const [reviews, consultants, footer, contact, assistant] = await Promise.all([
-        getApprovedReviews({ limit: 200 }),
-        getConsultants({ kind: 'consultant' }),
-        getFooterContent({ draft }),
-        getContactContent({ draft }),
+    const [content, reviews, consultants, footer, contact, assistant] = await Promise.all([
+        // This page's own blocks — the head, the word the grid ends on, and the
+        // ask. `cms.config.js` says which documents those are and where each
+        // field lands; the reviews and the roster stay their own reads because
+        // they are lists rather than copy.
+        getPageContent("/recenze", view),
+        // `read` on all five. The wall and the roster were published reads
+        // whoever was asking, which is invisible to a visitor, wrong in the
+        // editor's preview, and in the Archive would be today's two hundred
+        // reviews under a date from March.
+        getApprovedReviews({ limit: 200, read }),
+        getConsultants({ kind: 'consultant', read }),
+        getFooterContent(view),
+        getContactContent(view),
         getAssistant({ read }),
     ])
 
     return {
         props: {
+            content,
             // An id per review, because the wall places each card by attribute
             // and the store's rows do not carry one the client can see.
+            //
+            // `...review` AFTER it, which is deliberate: a read that carried an
+            // id — and only `readEditable` attaches one — replaces the
+            // positional id with the document's own, which is what lets the wall
+            // annotate a card as its own `review`. A published read carries no
+            // id, so nothing about this reaches a public page.
             reviews: reviews.map((review, index) => ({ id: `r${index}`, ...review })),
             consultants: consultants.map((c) => c.name).filter(Boolean),
             footer,
@@ -45,7 +62,7 @@ export async function getStaticProps(context) {
     }
 }
 
-export default function ReviewsPage({ reviews = [], consultants = [] }) {
+export default function ReviewsPage({ reviews = [], consultants = [], content }) {
     return (
         <>
             <Head>
@@ -122,8 +139,17 @@ export default function ReviewsPage({ reviews = [], consultants = [] }) {
                 </script>
             </Head>
             <main lang="cs" key="reviews-page">
-                <ReviewsHero count={reviews.length} />
-                <ReviewWall reviews={reviews} consultants={consultants} />
+                {/* `content` carries a `docId` per block only when this page is
+                    being rendered for the Studio's editing frame — see
+                    `f.docId()` in @/cms/site/fields. On the public page it is
+                    absent and every annotation helper answers with nothing. */}
+                <ReviewsHero count={reviews.length} copy={content?.hero} />
+                <ReviewWall
+                    reviews={reviews}
+                    consultants={consultants}
+                    copy={content?.wall}
+                    formCopy={content?.form}
+                />
             </main>
         </>
     )

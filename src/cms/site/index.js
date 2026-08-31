@@ -15,9 +15,16 @@ export {
     defineBlock,
     defineBlockList,
     defineCustom,
+    defineGlobals,
     defineList,
     definePage,
     defineSite,
     pageFor,
+    readsAt,
     resolvePage,
+    undeclaredCustom,
 } from './define.js'
+
+// Which routes a document is on — the same declarations read the other way
+// round, so that publishing can regenerate exactly the pages that changed.
+export { dynamicPages, routesForDocument, sourceHolds } from './deps.js'

@@ -20,15 +20,26 @@ export function formatDateTime(value) {
     : "—"
 }
 
+/**
+ * Czech pluralises on 1 / 2–4 / 5+ — and it also DECLINES, which the previous
+ * table did not. "před" takes the instrumental and "za" the accusative, so the
+ * dictionary form is wrong in both directions: the editor's "Naposledy upraveno"
+ * line has been printing *před 1 minuta* and *před 5 hodin* where Czech says
+ * *před minutou* and *před 5 hodinami*.
+ *
+ * Six forms per unit rather than three, because there is no rule that derives
+ * one case from the other. `size` last, as before.
+ */
 const UNITS = [
-  ["rok", "roky", "let", 31536000],
-  ["měsíc", "měsíce", "měsíců", 2592000],
-  ["den", "dny", "dní", 86400],
-  ["hodina", "hodiny", "hodin", 3600],
-  ["minuta", "minuty", "minut", 60],
+  // past (instrumental)          future (accusative)
+  [["rokem", "roky", "lety"], ["rok", "roky", "let"], 31536000],
+  [["měsícem", "měsíci", "měsíci"], ["měsíc", "měsíce", "měsíců"], 2592000],
+  [["dnem", "dny", "dny"], ["den", "dny", "dní"], 86400],
+  [["hodinou", "hodinami", "hodinami"], ["hodinu", "hodiny", "hodin"], 3600],
+  [["minutou", "minutami", "minutami"], ["minutu", "minuty", "minut"], 60],
 ]
 
-/** Czech pluralises on 1 / 2–4 / 5+, so a bare Intl.RelativeTimeFormat is wrong. */
+/** A bare Intl.RelativeTimeFormat gets neither the plural nor the case right. */
 export function formatRelative(value) {
   const date = asDate(value)
   if (!date) return "—"
@@ -36,11 +47,12 @@ export function formatRelative(value) {
   const seconds = Math.round((Date.now() - date.getTime()) / 1000)
   if (Math.abs(seconds) < 60) return "právě teď"
 
-  for (const [one, few, many, size] of UNITS) {
+  const past = seconds > 0
+  for (const [instrumental, accusative, size] of UNITS) {
     const count = Math.floor(Math.abs(seconds) / size)
     if (count < 1) continue
-    const noun = count === 1 ? one : count < 5 ? few : many
-    return seconds > 0 ? `před ${count} ${noun}` : `za ${count} ${noun}`
+    const [one, few, many] = past ? instrumental : accusative
+    return `${past ? "před" : "za"} ${count} ${form(count, one, few, many)}`
   }
   return "právě teď"
 }

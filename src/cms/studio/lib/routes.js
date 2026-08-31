@@ -7,8 +7,10 @@
  *   /studio/moderation           review queue
  *   /studio/edit                 edit the site's pages in place
  *   /studio/media                media library
+ *   /studio/archive              the archive (owners only), three sub-pages
  *   /studio/stats                stats panel
  *   /studio/users                user management (owners only)
+ *   /studio/settings             configuration portal (owners only)
  *   /studio/<type>               document list
  *   /studio/<type>/<id|new>      document editor
  *
@@ -31,13 +33,16 @@ export const BASE = "/studio"
 // is reserved for the stronger reason: a type named that would be shadowed by a
 // page file, not by a branch in parseRoute, and would fail with no warning at
 // all.
-export const RESERVED = ["moderation", "edit", "media", "stats", "users", "preview"]
+export const RESERVED = ["moderation", "edit", "media", "archive", "stats", "users", "settings", "preview"]
 
 export function parseRoute(path) {
   const segments = (Array.isArray(path) ? path : path ? [path] : []).filter(Boolean)
 
   if (!segments.length) return { view: "overview" }
-  if (RESERVED.includes(segments[0])) return { view: segments[0] }
+  // A reserved view may carry one more segment, and exactly one screen uses it:
+  // the archive's three sub-pages are one view with three lists, not three
+  // views. Everything else ignores `section` and is unaffected.
+  if (RESERVED.includes(segments[0])) return { view: segments[0], section: segments[1] || null }
   if (segments.length === 1) return { view: "list", type: segments[0] }
 
   return { view: "editor", type: segments[0], id: segments[1], isNew: segments[1] === "new" }
@@ -74,8 +79,34 @@ export const hrefs = {
   edit: (page) => (page && page !== "/" ? `${BASE}/edit?p=${encodeURIComponent(page)}` : `${BASE}/edit`),
 
   media: () => `${BASE}/media`,
+
+  /**
+   * The archive. `section` is one of ARCHIVE_SECTIONS' segments — null for the
+   * timeline, which is the sub-page the address without a segment lands on.
+   *
+   * `at` opens the framed site as of a moment instead of the list. It is a query
+   * parameter rather than a path segment for two reasons: it is a *state of* the
+   * timeline and the browser's back button has to return to the timeline rather
+   * than out of the archive — and the moment view must be hosted at exactly
+   * `/studio/archive`, which is the address `frame.js` `isArchiveFrame()`
+   * recognises. Hence `from` rather than a sub-page segment.
+   */
+  archive: (section, { at, page, from } = {}) => {
+    const base = section ? `${BASE}/archive/${section}` : `${BASE}/archive`
+    const query = new URLSearchParams()
+    if (at) query.set("t", at)
+    if (page && page !== "/") query.set("p", page)
+    // Which sub-page the moment was opened from, so leaving it lands back there.
+    // It cannot be a path segment: `frame.js` `isArchiveFrame()` asks whether the
+    // parent document is exactly `/studio/archive`, so a moment framed from
+    // `/studio/archive/texty` would not be recognised as the record it is.
+    if (from) query.set("from", from)
+    const search = query.toString()
+    return search ? `${base}?${search}` : base
+  },
   stats: () => `${BASE}/stats`,
   users: () => `${BASE}/users`,
+  settings: () => `${BASE}/settings`,
   list: (type) => `${BASE}/${type}`,
   editor: (type, id) => `${BASE}/${type}/${id}`,
   create: (type) => `${BASE}/${type}/new`,

@@ -1,25 +1,29 @@
 import { useState } from "react"
-import { useRouter } from "next/router"
-import { usePort, useRevision } from "../context/StudioProvider"
-import { useAsync, useDebounced } from "../hooks/useAsync"
-import { useToast } from "../context/ToastProvider"
-import { hrefs } from "../lib/routes"
-import { STATE_LABELS, mediaUrl, previewOf, restoreOutcome, stateOf } from "../lib/documents"
-import { formatRelative, plural, truncate } from "../lib/format"
-import { Button, IconButton, SearchInput, Segmented, Select } from "../ui/controls"
-import { Badge, EmptyState, ErrorState, SkeletonRows } from "../ui/feedback"
-import { ConfirmDialog } from "../ui/Modal"
-import Icon from "../ui/Icon"
-import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout"
+import { useStudioRouter } from "../../runtime/navigation.jsx"
+import { usePort, useRevision, useAuth } from "../context/StudioProvider.jsx"
+import { useAsync, useDebounced } from "../hooks/useAsync.js"
+import { useToast } from "../context/ToastProvider.jsx"
+import { hrefs } from "../lib/routes.js"
+import { STATE_LABELS, mediaUrl, previewOf, restoreOutcome, stateOf } from "../lib/documents.js"
+import { formatRelative, plural, truncate } from "../lib/format.js"
+import { Button, IconButton, SearchInput, Segmented, Select } from "../ui/controls.jsx"
+import { Badge, EmptyState, ErrorState, SkeletonRows } from "../ui/feedback.jsx"
+import { ConfirmDialog } from "../ui/Modal.jsx"
+import Icon from "../ui/Icon.jsx"
+import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout.jsx"
 import styles from "./DocumentListView.module.scss"
 
 const PER_PAGE = 25
 
+// The filter names the state, so it takes the state's name. It used to read
+// "S neuloženými změnami" while the chip on the row it selected said something
+// else again — two names for one thing on one screen. Contract 3's three states
+// in the order an editor thinks about them: live, waiting, not yet.
 const STATE_FILTERS = [
   { value: "", title: "Vše" },
-  { value: "published", title: "Publikované" },
-  { value: "edited", title: "S neuloženými změnami" },
-  { value: "draft", title: "Koncepty" },
+  { value: "published", title: STATE_LABELS.published.label },
+  { value: "edited", title: STATE_LABELS.edited.label },
+  { value: "draft", title: STATE_LABELS.draft.label },
 ]
 
 // The archive is a view, not a URL someone has to know about. Two segments at
@@ -37,8 +41,11 @@ const ARCHIVE = "archive"
  * a consultant.
  */
 export default function DocumentListView({ type }) {
+  const { role } = useAuth()
+  // Undefined `createRoles` means anybody; only `review` narrows it today.
+  const mayCreate = !type?.createRoles || !role || type.createRoles.includes(role)
   const port = usePort()
-  const router = useRouter()
+  const router = useStudioRouter()
   const toast = useToast()
   const { revision, bump } = useRevision()
 
@@ -113,9 +120,14 @@ export default function DocumentListView({ type }) {
         subtitle={type.description}
         meta={loading && data ? <span className={styles.refreshing}>aktualizuji…</span> : null}
         actions={
-          <Button href={hrefs.create(type.name)} variant="primary" icon="plus">
-            Nový dokument
-          </Button>
+          // A type can say who may author it — `review` says the administrator
+          // only, and the reason is in schemas/review.js. The server refuses the
+          // create regardless; this is what stops it being offered.
+          mayCreate ? (
+            <Button href={hrefs.create(type.name)} variant="primary" icon="plus">
+              Nový dokument
+            </Button>
+          ) : null
         }
       />
 

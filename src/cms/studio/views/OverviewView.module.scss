@@ -1,4 +1,4 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../../styles/viewport" as *;
 @use "../styles/tokens.module" as t;
 
 /* No cards. The two regions are told apart by a hairline that runs the full
@@ -251,7 +251,7 @@
 /* Narrow: one column, and the body scrolls as a whole rather than as two
    independent panes — two scroll areas side by side stop paying for themselves
    once neither is wide enough to hold a line of text. */
-@media (max-width: 1080px) {
+@include below-px(1080) {
   .body {
     overflow-y: auto;
   }

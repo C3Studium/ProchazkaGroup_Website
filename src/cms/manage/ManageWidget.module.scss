@@ -1,0 +1,152 @@
+
+/* The manage badge, on the public site.
+
+   A CSS module because everything under src/cms must be one: scripts/sync-styles.js
+   globs every non-module .scss under src/ into the site's global stylesheet, so a
+   plain .scss here would ship these rules to every visitor whether or not the
+   widget ever renders. The module travels with the component's own chunk.
+
+   Nothing here reaches for the Studio's tokens (src/cms/studio/styles) — that
+   file is the admin's design system and importing it would pull the admin's
+   variables onto a public page. The five values below are literals for that
+   reason, and there are five of them. */
+
+.root {
+  position: fixed;
+  z-index: 1050; /* over the navbar (165) and its sheet; under the custom cursor
+                    (1100) and the opening curtain / page veil (1200), so the
+                    site's own arrival still happens over the top of it. */
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  padding: 8px 8px 8px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+
+  background: var(--cms-manage-bg, #0b1a22e6);
+
+  color: #eaf6fb;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+
+  /* Only the badge takes the pointer; the corner around it stays the page's. */
+  max-width: calc(100vw - 32px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+
+  animation: cms-manage-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Blur is opt-out because a translucent badge over a moving shader is unreadable
+   without it; it is opt-in-able because backdrop-filter is the single most
+   expensive thing on this page and a slow machine may not want it. */
+/* Unprefixed only. The build emits the `-webkit-` twin itself (every other
+   backdrop-filter in this repo is written this way and both land in the CSS);
+   writing the prefix by hand made the tool DROP the unprefixed declaration, and
+   the measured result was a rule that read `{-webkit-backdrop-filter:blur(14px)}`
+   and a computed `backdrop-filter: none` in Chromium. */
+.root[data-blur="on"] {
+  backdrop-filter: blur(14px);
+}
+
+/* The four corners. 20px clears the site's own sticky buttons and the safe
+   area on a phone; the offsets are literal rather than a shared variable so
+   that reading one rule tells you where the badge is. */
+.root[data-corner="bottom-left"] {
+  bottom: max(20px, env(safe-area-inset-bottom));
+  left: max(20px, env(safe-area-inset-left));
+}
+
+.root[data-corner="bottom-right"] {
+  bottom: max(20px, env(safe-area-inset-bottom));
+  right: max(20px, env(safe-area-inset-right));
+}
+
+.root[data-corner="top-left"] {
+  top: max(20px, env(safe-area-inset-top));
+  left: max(20px, env(safe-area-inset-left));
+}
+
+.root[data-corner="top-right"] {
+  top: max(20px, env(safe-area-inset-top));
+  right: max(20px, env(safe-area-inset-right));
+}
+
+.label {
+  white-space: nowrap;
+  opacity: 0.72;
+}
+
+.open {
+  padding: 7px 13px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 160ms ease, border-color 160ms ease;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.34);
+  }
+}
+
+.hide {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  opacity: 0.55;
+  cursor: pointer;
+  transition: opacity 160ms ease, background 160ms ease;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.12);
+  }
+}
+
+/* One ring, both controls, and it is drawn rather than inherited: the site's
+   global sheet is not guaranteed to give an anchor in a fixed badge anything
+   visible, and "keyboard reachable" is worth nothing if the reach cannot be
+   seen. focus-visible rather than focus so a mouse click does not draw it. */
+.open:focus-visible,
+.hide:focus-visible {
+  outline: 2px solid #98dbf8;
+  outline-offset: 2px;
+  opacity: 1;
+}
+
+@keyframes cms-manage-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Reduced motion means none: the badge appears where it belongs, at once. The
+   hover transitions go too — they are motion in the same sense, and this
+   machine is the one the setting is verified on. */
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    animation: none;
+  }
+
+  .open,
+  .hide {
+    transition: none;
+  }
+}

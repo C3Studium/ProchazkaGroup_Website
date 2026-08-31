@@ -22,7 +22,12 @@ import { CUSTOM, CUSTOM_LIMITS, DEFAULT_PRESET, byId, matching, stepZoom } from 
  * where, and what else is on screen beside them. The hook owns the frame, the
  * device, the zoom and the overlay; it owns no pixel of UI.
  *
- * The two callers differ in one more thing, and it is deliberately a parameter
+ * There is a third caller now — the Archive, which frames the site as it stood
+ * at a chosen moment. It differs from the other two in the one way that matters
+ * to this hook and it says so through `annotated`: it is a record, so its frame
+ * carries no `?edit=1` and mounts no overlay. Everything else it uses unchanged.
+ *
+ * The callers differ in one more thing, and it is deliberately a parameter
  * rather than a branch in here: where the page being framed and the cache buster
  * come from. The preview keeps both in its own URL because switching
  * draft/published is a real navigation that must land on the same page; the edit
@@ -73,12 +78,35 @@ const clampSide = (value) =>
  * @param {string} [options.bust]         cache buster, forwarded into the frame URL
  * @param {function} options.onNavigate   told when the framed document turned out
  *                                        to be a different page than expected
+ * @param {boolean} [options.annotated]   whether the framed URL carries `?edit=1`
  */
-export function useFrameSurface({ sitePath, bust, onNavigate, editing = false }) {
+export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, annotated = true }) {
     const [view, setView, viewReady] = usePersistedJson(VIEW_KEY, DEFAULT_VIEW)
 
     const stageRef = useRef(null)
     const frameRef = useRef(null)
+
+    /**
+     * The frame's address, in one place because three callers need it to agree.
+     *
+     * `annotated` is the third surface's doing. The preview and the editor both
+     * want `?edit=1` — it is what arms `editable()` inside the page, and the
+     * load handler below *re-points the frame* at a flagged URL when a
+     * navigation drops the flag. The archive wants neither: it renders a record,
+     * so nothing in it may be annotated, and a frame that kept re-pointing at a
+     * URL it had just refused would reload for ever. One boolean decides both
+     * halves, so the two cannot be set inconsistently.
+     *
+     * Nothing else about the URL differs between the three. The Archive's moment
+     * is NOT a parameter here and must not become one: it travels in Next's
+     * signed preview cookie, set by /api/studio/asof, precisely so that the
+     * bodies it replays are not reachable by typing something onto a public URL.
+     * See src/cms/server/site/archive.js.
+     */
+    const srcFor = useCallback(
+        (path) => frameUrl(path, { edit: annotated, bust }),
+        [annotated, bust],
+    )
     // Set only by a refresh, read only by the load that follows it. A page change
     // reloads the iframe too and must land at the top, like following a link.
     const pendingScroll = useRef(null)
@@ -233,9 +261,9 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false })
 
         const framed = sitePathFromFrame(location.pathname)
         if (framed === null) {
-            // Not a page of the site — /studio, an API route. Neither surface is a
-            // browser and neither will host the admin inside itself.
-            frame.src = frameUrl(sitePath, { bust })
+            // Not a page of the site — /studio, an API route. No surface here is a
+            // browser and none of them will host the admin inside itself.
+            frame.src = srcFor(sitePath)
             return
         }
 
@@ -246,9 +274,12 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false })
             return
         }
 
+        // Only a surface that asked to be annotated cares whether the flag
+        // survived the navigation. See `srcFor`.
+        if (!annotated) return
         const flagged = new URLSearchParams(location.search).get(EDIT_PARAM) === EDIT_VALUE
-        if (!flagged) frame.src = frameUrl(framed, { bust })
-    }, [bust, onNavigate, sitePath])
+        if (!flagged) frame.src = srcFor(framed)
+    }, [annotated, onNavigate, sitePath, srcFor])
 
     // ---------------------------------------------------------- the overlay --
 
@@ -334,7 +365,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false })
         overlayRef.current?.update({ zoom })
     }, [zoom])
 
-    const src = sitePath === null ? null : frameUrl(sitePath, { bust })
+    const src = sitePath === null ? null : srcFor(sitePath)
 
     return {
         // the device

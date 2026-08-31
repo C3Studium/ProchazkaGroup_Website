@@ -17,6 +17,7 @@ import CornerButton from "@/components/common/ui/CornerButton";
 import Arrow from "@/components/common/ui/Arrow";
 import { projects } from "@/constants/nabidkypage";
 import { trackEvent } from "@/hooks/trackEvent";
+import { editable, editableLink } from "@/cms/edit";
 
 // the site's own glide — away quickly, then a long approach
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
@@ -55,6 +56,30 @@ const CLOSE_RUN = 60;
 const STACK_QUERY =
     "(max-width: 900px) and (min-height: 521px) and (orientation: landscape)," +
     "(max-width: 479px) and (orientation: landscape)";
+
+// The two words this section owns outright — everything else on the page is a
+// partner's. They come from the CMS over `nabidky.sekce` (see cms.config.js);
+// what is written here is what the page ships with and what each field falls
+// back to on its own, so an empty CMS, an unreachable database or a block that
+// fills in nothing renders exactly this page.
+//
+// The partners themselves stay in `src/constants/nabidkypage.js`, and how many
+// there are stays a code change: the section's measuring height is
+// `100 + last * RUN` vh and the ride's arithmetic is computed from the count, so
+// a fifth entry arriving from a database would not add a chapter — it would move
+// the seam every value on this page is measured against. Same rule /o-nas's
+// showcase follows, for the same reason.
+const SECTION = {
+    label: "Partneři",
+    dealLabel: "Co z toho máte",
+    // The link out to a partner. Its words and its target both belong to the
+    // chapter rather than here — a target is per-partner and so, in principle,
+    // are the words — so this is only the fallback the four share today.
+    visit: "Navštívit stránky",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
 
 // False on the server and on the first client paint, so the markup either side
 // of hydration is identical — matchMedia cannot be read while rendering. The
@@ -95,7 +120,7 @@ function useStacked() {
 //
 // There is one arrangement. The switch between frames, a grid and a list was
 // three ways of saying the same thing, and the sequence is the one worth having.
-export default function Partners() {
+export default function Partners({ section = {}, chapters: blocks }) {
     const [front, setFront] = useState(0);
     const { gate } = useGlobalContext();
     // Below the gate the plates are not fixed and there is no ride to be part
@@ -108,6 +133,47 @@ export default function Partners() {
     const ground = gate !== "hold";
     const sectionRef = useRef(null);
     const last = projects.length - 1;
+
+    // The section's own two words, over the ones above.
+    const chrome = {
+        label: say(section.label, SECTION.label),
+        dealLabel: say(section.dealLabel, SECTION.dealLabel),
+        docId: section.docId,
+    };
+
+    // The four chapters, merged onto the four the page owns BY POSITION — the
+    // key list in cms.config.js is declared in this order. Truncated to them for
+    // the reason the section's length is a code change: a fifth block would not
+    // appear at the end of the ride, it would appear with no screen of scroll
+    // allotted to it.
+    //
+    // `number` is deliberately not the React key: it is a field an editor can
+    // change, and two chapters that came to say "01" would be two children with
+    // one key. The position is the identity here — the list never reorders.
+    const chapters = projects.map((project, index) => {
+        const block = blocks?.[index] || null;
+        return {
+            ...project,
+            number: say(block?.number, project.number),
+            tag: say(block?.tag, project.tag),
+            title: say(block?.title, project.title),
+            description: say(block?.description, project.description),
+            visit: say(block?.visit, SECTION.visit),
+            href: say(block?.href, project.href),
+            // The figure is absent on two of the four and must stay absent: the
+            // component draws no `<em>` for a falsy one, and the shipped value
+            // is `null` rather than an empty string.
+            dealFigure: say(block?.dealFigure, project.dealFigure),
+            deal: say(block?.deal, project.deal),
+            src: block?.photo?.src || project.src,
+            // `alt: 'own'` in the configuration refuses the block's title as a
+            // stand-in alt — a partner's name is not a description of their
+            // photograph — so an unwritten alt arrives empty and the shipped one
+            // stands.
+            alt: say(block?.photo?.alt, project.alt),
+            docId: block?.docId,
+        };
+    });
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
@@ -141,7 +207,12 @@ export default function Partners() {
         >
             {/* All the chrome there is: what this is, and how far through. */}
             <div className="Partners__mark">
-                <span className="Partners__mark__label">Partneři</span>
+                <span
+                    className="Partners__mark__label"
+                    {...editable(chrome.docId, "title", "text")}
+                >
+                    {chrome.label}
+                </span>
                 <span className="Partners__mark__rule" aria-hidden="true" />
                 {/* Pinned, this counts where the ride has got to. Stacked, the
                     mark is a heading at the top of a list that is then scrolled
@@ -160,14 +231,16 @@ export default function Partners() {
             </div>
 
             <div className="Partners__stage">
-                {projects.map((item, index) => (
+                {chapters.map((item, index) => (
                     <Chapter
-                        key={item.number}
+                        key={index}
                         item={item}
                         index={index}
                         lead={lead}
                         stacked={stacked}
                         calm={calm}
+                        dealLabel={chrome.dealLabel}
+                        dealDocId={chrome.docId}
                     />
                 ))}
                 {/* The full stop used to be here: a sheet of the page's own
@@ -183,7 +256,7 @@ export default function Partners() {
     );
 }
 
-function Chapter({ item, index, lead, stacked, calm }) {
+function Chapter({ item, index, lead, stacked, calm, dealLabel, dealDocId }) {
     // How far this chapter has come in. 0 while the one before it still holds
     // the screen, 1 once its window is fully open. The first is simply open.
     const enter = useTransform(lead, (p) => clamp01(p - (index - 1)));
@@ -264,6 +337,7 @@ function Chapter({ item, index, lead, stacked, calm }) {
                     preference takes away. The window keeps opening: it is tied
                     to the scroll, and it is how the page is read. */}
                 <motion.div
+                    {...editable(item.docId, "image", "image")}
                     className="Partners__chapter__ride"
                     style={{ y: stacked || calm ? 0 : rideY }}
                 >
@@ -304,18 +378,29 @@ function Chapter({ item, index, lead, stacked, calm }) {
                         className="Partners__panel__eyebrow"
                         style={{ opacity: still ?? eyebrowIn, y: stacked ? 0 : eyebrowY }}
                     >
-                        <em>{item.number}</em>
+                        {/* The ordinal has an element and can carry an
+                            annotation. The tag beside it is a bare text node
+                            sharing this paragraph with two others — annotating
+                            the paragraph would store the `<em>` and the rule as
+                            copy and drop both on the first save — so it is
+                            `items.0.label` and is edited in the Studio's form. */}
+                        <em {...editable(item.docId, "items.0.lead", "text")}>{item.number}</em>
                         <i />
                         {item.tag}
                     </motion.span>
 
-                    <motion.h2 className="Partners__panel__name" style={{ clipPath: stacked ? "none" : nameClip }}>
+                    <motion.h2
+                        className="Partners__panel__name"
+                        style={{ clipPath: stacked ? "none" : nameClip }}
+                        {...editable(item.docId, "title", "text")}
+                    >
                         {item.title}
                     </motion.h2>
 
                     <motion.p
                         className="Partners__panel__offer"
                         style={{ opacity: still ?? offerIn, y: stacked ? 0 : offerY }}
+                        {...editable(item.docId, "body", "text")}
                     >
                         {item.description}
                     </motion.p>
@@ -324,8 +409,22 @@ function Chapter({ item, index, lead, stacked, calm }) {
                         className="Partners__panel__act"
                         style={{ opacity: still ?? ctaIn, y: stacked ? 0 : ctaY }}
                     >
-                        <CornerButton href={item.href} className="Partners__panel__cta" onClick={onVisit}>
-                            Navštívit stránky
+                        {/* Words AND target, both on the chapter's own block:
+                            this link leaves the site for one named partner, so
+                            neither half is the section's. `editableLink` renders
+                            a form rather than editing in place, which is what
+                            lets it sit on a button that draws four corner marks
+                            and an arrow inside itself. */}
+                        <CornerButton
+                            {...editableLink(item.docId, {
+                                text: "items.2.label",
+                                href: "items.0.value",
+                            })}
+                            href={item.href}
+                            className="Partners__panel__cta"
+                            onClick={onVisit}
+                        >
+                            {item.visit}
                             <span className="cornerButton__arrow"><Arrow direction="upRight" /></span>
                         </CornerButton>
                     </motion.div>
@@ -335,12 +434,31 @@ function Chapter({ item, index, lead, stacked, calm }) {
                     so it is read rather than skimmed past inside a paragraph —
                     and set as a figure, which is what it is. */}
                 <motion.div className="Partners__deal" style={{ opacity: still ?? dealIn, y: stacked ? 0 : dealY }}>
-                    <span className="Partners__deal__label">Co z toho máte</span>
+                    {/* One field, four elements — the same words stand over all
+                        four plates, so editing one moves all of them. The same
+                        bargain /o-nas's showcase makes for the button its three
+                        cards share. */}
+                    <span
+                        className="Partners__deal__label"
+                        {...editable(dealDocId, "items.0.label", "text")}
+                    >
+                        {dealLabel}
+                    </span>
                     <span className="Partners__deal__line">
                         {item.dealFigure && (
-                            <em className="Partners__deal__figure">{item.dealFigure}</em>
+                            <em
+                                className="Partners__deal__figure"
+                                {...editable(item.docId, "items.1.lead", "text")}
+                            >
+                                {item.dealFigure}
+                            </em>
                         )}
-                        <span className="Partners__deal__rest">{item.deal}</span>
+                        <span
+                            className="Partners__deal__rest"
+                            {...editable(item.docId, "items.1.label", "text")}
+                        >
+                            {item.deal}
+                        </span>
                     </span>
                 </motion.div>
             </div>

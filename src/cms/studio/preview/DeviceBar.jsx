@@ -1,8 +1,9 @@
-import { useRouter } from "next/router"
+import { useStudioRouter } from "../../runtime/navigation.jsx"
 
-import { hrefs } from "../lib/routes"
-import Icon from "../ui/Icon"
-import { DevicePicker, ZoomControls } from "./FrameControls"
+import { STATE_LABELS } from "../lib/documents.js"
+import { hrefs } from "../lib/routes.js"
+import Icon from "../ui/Icon.jsx"
+import { DevicePicker, ZoomControls } from "./FrameControls.jsx"
 import styles from "./preview.module.scss"
 
 /**
@@ -33,7 +34,7 @@ export default function DeviceBar({
     onFit,
     onRefresh,
 }) {
-    const router = useRouter()
+    const router = useStudioRouter()
     const isDraft = mode === "draft"
 
     return (
@@ -72,13 +73,21 @@ export default function DeviceBar({
                     previewed rides along so switching versions compares like with
                     like instead of dropping the editor back on the homepage. */}
                 <div className={styles.modes} role="group" aria-label="Verze obsahu">
+                    {/* Both chips take their word from STATE_LABELS. The right
+                        one already agreed with the rest of the Studio; the left
+                        one said "Rozpracováno" while the list said "Neuložené
+                        změny" and the overview said "změny" — three names for
+                        the state this switch exists to show. The title still
+                        says what it means for this surface, because a version
+                        switch and a badge on a row are answering the same
+                        question from different sides. */}
                     <a
                         href={hrefs.preview({ mode: "draft", from: router.query.from, page })}
                         className={`${styles.mode} ${isDraft ? styles.modeOn : ""}`}
                         aria-current={isDraft ? "true" : undefined}
-                        title="Neuložené i nepublikované úpravy"
+                        title="Uložené úpravy, které na webu ještě nejsou"
                     >
-                        Rozpracováno
+                        {STATE_LABELS.edited.label}
                     </a>
                     <a
                         href={hrefs.preview({ mode: "published", from: router.query.from, page })}
@@ -86,7 +95,7 @@ export default function DeviceBar({
                         aria-current={!isDraft ? "true" : undefined}
                         title="Přesně to, co je teď na webu"
                     >
-                        Publikováno
+                        {STATE_LABELS.published.label}
                     </a>
                 </div>
 

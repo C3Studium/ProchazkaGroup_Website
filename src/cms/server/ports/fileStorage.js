@@ -140,6 +140,29 @@ export const createFileStorage = ({ bucket }) => {
             return { key, size: body.byteLength, contentType }
         },
 
+        /**
+         * The stored bytes.
+         *
+         * Two kinds of key reach this driver and only one of them is in the
+         * store: an uploaded object under `uploads/…`, and a seeded row whose
+         * "key" is a path into the committed site assets (`/assets/portraits/
+         * …`). The second is not something this driver wrote and cannot be
+         * resolved against the store directory, so it is read from `public/`
+         * instead — which is where it actually is.
+         */
+        async get(key) {
+            const source = String(key || '')
+            if (!source) throw invalid('fileStorage.get: chybí klíč')
+
+            const target = source.startsWith('/')
+                ? path.join(process.cwd(), 'public', source.replace(/^\/+/, ''))
+                : resolveAssetPath(source)
+
+            if (!fs.existsSync(target)) throw invalid(`Soubor ${source} v úložišti není`)
+
+            return fs.readFileSync(target)
+        },
+
         async remove(keys) {
             const list = (Array.isArray(keys) ? keys : [keys]).filter(Boolean)
             if (!list.length) return

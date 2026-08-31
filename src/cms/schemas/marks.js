@@ -281,10 +281,26 @@ export const markNamed = (name) => (typeof name === 'string' && MARKS[name]) || 
  * Answers PLAIN for a field that declares nothing, so a caller shaping copy has
  * no branch to write and a schema edit cannot break the public homepage.
  */
-export const markAtPath = (type, path) => {
+export const markAtPath = (type, path) => markNamed(fieldAtPath(type, path)?.options?.mark) || PLAIN
+
+/**
+ * The field descriptor a dotted path names, or `null`.
+ *
+ * The walk `markAtPath` has always made, given a name of its own because a
+ * second caller needs the node rather than the mark on it: the annotation audit
+ * (@/cms/audit) asks whether a `data-cms-field` names a field this type declares
+ * at all, which is the same traversal and must not become a second copy of it.
+ *
+ * `*` is "the one member of this list" — the spelling the configuration and the
+ * `lines` annotations already use. A NUMERIC segment is not accepted here and is
+ * not an oversight: `items.0.label` and `items.*.label` are the same field, and
+ * normalising one into the other is the caller's job precisely because
+ * `markAtPath`'s answer for a numeric path was `PLAIN` before this existed.
+ */
+export const fieldAtPath = (type, path) => {
     let node = type
     for (const segment of String(path).split('.')) {
-        if (!node) return PLAIN
+        if (!node) return null
         if (segment === '*') {
             const members = node.members || []
             node = members.length === 1 ? members[0] : null
@@ -292,5 +308,5 @@ export const markAtPath = (type, path) => {
         }
         node = (node.fields || []).find((field) => field.name === segment) || null
     }
-    return markNamed(node?.options?.mark) || PLAIN
+    return node
 }

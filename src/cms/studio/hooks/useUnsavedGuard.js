@@ -1,17 +1,29 @@
 import { useEffect, useRef } from "react"
-import { useRouter } from "next/router"
+
+import { useStudioRouter } from "../../runtime/navigation.jsx"
 
 /**
- * Guards unsaved editor state on both exits an editor can take: closing the tab
- * and navigating inside the Studio.
+ * Hlídá neuložené změny na obou cestách, kterými se dá z editoru odejít:
+ * zavřením panelu a přechodem uvnitř Studia.
  *
- * The in-app half aborts the Next route change with a thrown error, which is the
- * documented way to cancel `routeChangeStart` in the Pages Router. The throw is
- * swallowed here rather than surfaced — Next logs an unhandled rejection
- * otherwise and it would read as a crash in the console during normal use.
+ * ## Proč se to neptá routeru
+ *
+ * Pages Router umí přechod ohlásit a nechat ho zrušit vyhozením výjimky.
+ * App Router žádnou takovou událost nemá a napodobit ji nejde. Kdyby tenhle
+ * háček stál na událostech, fungoval by v jednom routeru a v druhém by mlčky
+ * nedělal nic — a strážce, který mlčky nedělá nic, je horší než žádný, protože
+ * se na něj spoléhá.
+ *
+ * Ptá se proto navigace, ne routeru. Každý přechod Studia jde přes `push` nebo
+ * `replace` v adaptéru, takže registrovaný strážce dostane slovo v obou. Pages
+ * Router se navíc ptá i u přechodů, které Studio nevyvolalo — to je navíc, ne
+ * základ.
+ *
+ * `beforeunload` zůstává: zavření panelu ani znovunačtení není přechod a žádný
+ * router o něm neví.
  */
 export function useUnsavedGuard(isDirty, message = "Máte neuložené změny. Opravdu chcete odejít?") {
-  const router = useRouter()
+  const navigation = useStudioRouter()
   const dirty = useRef(isDirty)
   dirty.current = isDirty
 
@@ -23,23 +35,22 @@ export function useUnsavedGuard(isDirty, message = "Máte neuložené změny. Op
       return message
     }
 
-    const onRouteChange = (url) => {
-      if (!dirty.current) return
+    /** `false` znamená „neodcházej". Potvrzení počítá za vyřízené. */
+    const guard = () => {
+      if (!dirty.current) return true
       if (window.confirm(message)) {
         dirty.current = false
-        return
+        return true
       }
-      router.events.emit("routeChangeError")
-      // eslint-disable-next-line no-throw-literal
-      throw "routeChange aborted by unsaved-changes guard"
+      return false
     }
 
     window.addEventListener("beforeunload", onBeforeUnload)
-    router.events.on("routeChangeStart", onRouteChange)
+    const release = navigation.guard(guard)
 
     return () => {
       window.removeEventListener("beforeunload", onBeforeUnload)
-      router.events.off("routeChangeStart", onRouteChange)
+      release()
     }
-  }, [router, message])
+  }, [navigation, message])
 }

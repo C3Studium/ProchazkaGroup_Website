@@ -57,6 +57,22 @@ $h-constraints: (
   )
 );
 
+// Max-width stops. Everything above is a min-width ladder, which is the right
+// default for designing upward from the phone; these name a width a layout has
+// to fold AT, which is what an existing `@media (max-width: N)` rule already
+// says. `below()` reads this map as well as the two ladders.
+$h-max: (
+  // The phone in portrait, as a form factor rather than as a width the design
+  // grows from. Above the widest phone this table recognises (430px — see the
+  // note on `phl`) and below the narrowest tablet in portrait (`$v md`, 600px),
+  // so a 7" tablet keeps the tablet layout and a large phone does not get it.
+  //
+  // Only half the answer on its own: a phone in landscape is 932px wide and
+  // matches no max-width a tablet does not. `below-with-phone()` in _mixins.scss
+  // is what pairs this with `phs`.
+  ph: 560px
+);
+
 // Vertical (portrait) min-width breakpoints (bp → up), ordered smallest → largest.
 $v: (
   xs: 320px,

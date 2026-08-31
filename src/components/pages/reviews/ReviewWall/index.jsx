@@ -4,8 +4,22 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion } from "framer-motion";
 import AddReview from "@/components/pages/reviews/AddReview";
+import LikeButton from "@/components/common/ui/LikeButton";
+import { useReactions } from "@/components/common/ui/LikeButton/useReactions";
+import { ACTIONS_MODERATE, editable, editableDoc } from "@/cms/edit";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
+
+// What the grid says for itself when the CMS says nothing. Two words for two
+// states, and only ever one of them on screen. `seedReviewsPage.js` was
+// generated out of these exact strings.
+const SHIPPED = {
+    endDone: "To je zatím všechno",
+    endLoading: "Načítám další…",
+    // The question over the like button. Shipped as well as the two above, for
+    // the same reason: an empty CMS renders exactly this page.
+    voteAsk: "Souhlasíte s recenzí?",
+};
 
 // How many arrive at once. A multiple of the widest column count, so a batch
 // never leaves the grid ragged while the next one is on its way.
@@ -35,7 +49,10 @@ const sizeOf = (message) => {
 // Clicking opens the expanding sheet the partners page uses: one `layoutId` on
 // the card and one on the name, so it is that card that grows rather than a new
 // thing fading in over it.
-export default function ReviewWall({ reviews, consultants = [] }) {
+//
+// @param {object} [copy]     this grid's own block, from `getPageContent`.
+// @param {object} [formCopy] the ask's block, handed straight to AddReview.
+export default function ReviewWall({ reviews, consultants = [], copy = {}, formCopy = {} }) {
     const [count, setCount] = useState(BATCH);
     const [hover, setHover] = useState(null);
     const [open, setOpen] = useState(null);
@@ -67,7 +84,22 @@ export default function ReviewWall({ reviews, consultants = [] }) {
     }, [open]);
 
     const shown = useMemo(() => reviews.slice(0, count), [reviews, count]);
+
+    /**
+     * „Líbí se" pro to, co je právě na obrazovce.
+     *
+     * `shown`, ne `reviews`: zeď dokládá po dávkách a ptát se předem na dvě stě
+     * recenzí by byl dotaz o dvě stě id kvůli dvanácti kartám. Klíč hooku je
+     * seznam id, takže s každou další dávkou doběhne jeden dotaz navíc.
+     */
+    const likeIds = useMemo(() => shown.map((review) => review.id), [shown]);
+    const likes = useReactions("review", likeIds);
     const done = count >= reviews.length;
+
+    const docId = copy.docId;
+    const endDone = copy.endDone || SHIPPED.endDone;
+    const endLoading = copy.endLoading || SHIPPED.endLoading;
+    const voteAsk = copy.voteAsk || SHIPPED.voteAsk;
 
     // Which cards are holding text back.
     //
@@ -136,8 +168,10 @@ export default function ReviewWall({ reviews, consultants = [] }) {
             {/* Above the wall, not under it: it is the one thing this page asks
                 for, and asking at the bottom is asking after the answer. */}
             <div className="RevWall__bar">
-                <AddReview consultants={consultants} />
+                <AddReview consultants={consultants} copy={formCopy} />
                 <span className="RevWall__bar__rule" aria-hidden="true" />
+                {/* Unannotated: both numbers are how many reviews came back
+                    and how many are on screen, so nothing here is stored. */}
                 <span className="RevWall__bar__count">
                     {String(shown.length).padStart(2, "0")}
                     <em> / {String(reviews.length).padStart(2, "0")} recenzí</em>
@@ -156,6 +190,19 @@ export default function ReviewWall({ reviews, consultants = [] }) {
                             }${clipped.has(review.id) ? " is-clipped" : ""}`}
                             data-cursor="frame"
                             data-cursor-label="Rozkliknout"
+                            /* The card is a `review` document and the popup it
+                                opens is narrowed to moderation — hide and
+                                archive, no fields. A review is the customer's
+                                words and nobody on this side may rewrite them;
+                                `ACTIONS_MODERATE` is that sentence, and it is a
+                                statement about THIS surface rather than about
+                                the type, which is edited in full in Schvalování
+                                recenzí. `review.id` is the document's own id
+                                whenever editing is armed and the positional
+                                `r3` otherwise — see the note in
+                                src/pages/recenze/index.js — and `editableDoc`
+                                answers `{}` in the second case. */
+                            {...editableDoc(review.id, "review", ACTIONS_MODERATE)}
                             onClick={() => setOpen(review)}
                             // The lift is a pointer resting on a card, and a
                             // finger cannot rest: a tap fires enter and leave in
@@ -216,6 +263,34 @@ export default function ReviewWall({ reviews, consultants = [] }) {
                                         Rozkliknout
                                     </span>
                                 </div>
+
+                                {/* Vlastní řádek pod patičkou, ne vedle jména.
+                                    Karta se tím stane vyšší, což je v pořádku —
+                                    zeď je bento a výšky se stejně liší. Klik
+                                    nesmí propadnout na kartu, jinak by „líbí
+                                    se" recenzi zároveň rozkliklo. */}
+                                <div
+                                    className="RevWall__cell__vote"
+                                    onClick={(event) => event.stopPropagation()}
+                                    onPointerDown={(event) => event.stopPropagation()}
+                                >
+                                    {/* One field, printed on every card — so
+                                        every card carries the same address and
+                                        editing one moves all of them. Same as
+                                        the deal label on /nabidky. */}
+                                    <span
+                                        className="RevWall__cell__voteAsk"
+                                        {...editable(docId, "items.2.label", "text")}
+                                    >
+                                        {voteAsk}
+                                    </span>
+                                    <LikeButton
+                                        liked={likes.isLiked(review.id)}
+                                        count={likes.countOf(review.id, review.likes || 0)}
+                                        label={`Souhlasím s recenzí od ${review.customerName}`}
+                                        onToggle={() => likes.toggle(review.id)}
+                                    />
+                                </div>
                             </div>
                         </motion.article>
                     ))}
@@ -228,14 +303,23 @@ export default function ReviewWall({ reviews, consultants = [] }) {
 
             <div className="RevWall__end">
                 <span className="RevWall__end__rule" aria-hidden="true" />
-                <span className="RevWall__end__word">
-                    {done ? "To je zatím všechno" : "Načítám další…"}
+                {/* One element, two stored strings, and the address is whichever
+                    one it is showing. That is not a second mechanism: the rule
+                    is still that a field is written by one element, and here it
+                    is the same element at two different moments. Annotating it
+                    with one fixed address would offer an editor a box that
+                    writes the word they are not looking at. */}
+                <span
+                    className="RevWall__end__word"
+                    {...editable(docId, done ? "items.0.label" : "items.1.label", "text")}
+                >
+                    {done ? endDone : endLoading}
                 </span>
             </div>
 
             {mounted && createPortal(
                 <AnimatePresence>
-                    {open && <ReviewSheet review={open} onClose={() => setOpen(null)} />}
+                    {open && <ReviewSheet review={open} onClose={() => setOpen(null)} likes={likes} voteAsk={voteAsk} />}
                 </AnimatePresence>,
                 document.body,
             )}
@@ -243,7 +327,7 @@ export default function ReviewWall({ reviews, consultants = [] }) {
     );
 }
 
-function ReviewSheet({ review, onClose }) {
+function ReviewSheet({ review, onClose, likes, voteAsk }) {
     return (
         <>
             <motion.div
@@ -278,6 +362,22 @@ function ReviewSheet({ review, onClose }) {
                             <span className="RevSheet__for">{review.consultantName}</span>
                         )}
                     </div>
+
+                    {/* Stejná lišta jako na kartě. Rozkliknutá recenze je jiný
+                        blok než ta na zdi, ne zvětšená kopie — takže tu musí
+                        být znovu, jinak by šlo souhlasit jen z jednoho ze dvou
+                        míst, kde je recenze celá k přečtení. */}
+                    {likes ? (
+                        <div className="RevSheet__vote">
+                            <span className="RevSheet__voteAsk">{voteAsk}</span>
+                            <LikeButton
+                                liked={likes.isLiked(review.id)}
+                                count={likes.countOf(review.id, review.likes || 0)}
+                                label={`Souhlasím s recenzí od ${review.customerName}`}
+                                onToggle={() => likes.toggle(review.id)}
+                            />
+                        </div>
+                    ) : null}
                 </motion.article>
             </div>
         </>

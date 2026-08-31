@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
 import { rootRamp } from "@/helpers/checkViewport";
+import { editable, editableLink } from "@/cms/edit";
 
 // What people said, as a wall that will not hold still.
 //
@@ -63,7 +64,32 @@ const QUIET = 0.25;
 const VARIANCE = 0.5;
 const LEAN = 7;
 
-export default function ReviewDrift({ reviews = [] }) {
+// What the head of the wall says with no CMS behind it. `lead` has no element of
+// its own — it is a bare text node sharing its paragraph with the link — so it
+// is the block's `body` and is edited in the form; the link's words are their
+// own element and are edited on the page.
+//
+// The cards are NOT annotated, and that is deliberate rather than missing: they
+// are `review` documents, somebody else's words, and they already have one
+// moderation surface on the homepage's wall. A third affordance for the same
+// documents on a third page is two too many.
+const SHIPPED = {
+    n: "08",
+    title: "Co o nás říkají",
+    lead: "Přes tři tisíce domácností. Tohle je jich pár.",
+    more: "Všechny recenze",
+};
+
+/**
+ * @param {object[]} [reviews]
+ * @param {object} [copy] the `nabidka.recenze` block, from `getPageContent`.
+ */
+export default function ReviewDrift({ reviews = [], copy = {} }) {
+    const docId = copy.docId;
+    const n = copy.n || SHIPPED.n;
+    const title = copy.title || SHIPPED.title;
+    const lead = copy.lead || SHIPPED.lead;
+    const more = copy.more || SHIPPED.more;
     const wall = useRef(null);
     const plane = useRef(null);
     const tracks = useRef([]);
@@ -365,16 +391,30 @@ export default function ReviewDrift({ reviews = [] }) {
                 whileInView="shown"
                 viewport={ENTERS}
             >
-                <motion.p className="RevDrift__n" variants={RISE}>
-                    08
+                <motion.p
+                    {...editable(docId, "items.0.label", "text")}
+                    className="RevDrift__n"
+                    variants={RISE}
+                >
+                    {n}
                 </motion.p>
-                <motion.h2 className="RevDrift__title" variants={RISE}>
-                    Co o nás říkají
+                <motion.h2
+                    {...editable(docId, "title", "text")}
+                    className="RevDrift__title"
+                    variants={RISE}
+                >
+                    {title}
                 </motion.h2>
                 <motion.p className="RevDrift__lead" variants={RISE}>
-                    Přes tři tisíce domácností. Tohle je jich pár.
-                    <Link href="/recenze" className="RevDrift__more">
-                        Všechny recenze
+                    {lead}
+                    {/* Words only: the target is a path on this site, which is
+                        the site's own routing rather than content. */}
+                    <Link
+                        {...editableLink(docId, { text: "items.1.label" })}
+                        href="/recenze"
+                        className="RevDrift__more"
+                    >
+                        {more}
                     </Link>
                 </motion.p>
             </motion.header>

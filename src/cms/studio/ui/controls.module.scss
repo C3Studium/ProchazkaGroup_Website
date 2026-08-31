@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 /* ---------------------------------------------------------------- button --
@@ -399,6 +398,49 @@
 
 .segmentActive .segmentCount {
   color: var(--st-accent);
+}
+
+/* A phone held upright. The toolbar wraps there (ViewLayout), so the strip is no
+   longer the last thing on the bar's bottom rule and must stop reaching for it —
+   `-1px` into a row gap draws the active underline through the middle of the bar
+   rather than along its edge.
+
+   The height is not decoration. Stretched to a 46px toolbar the segment was a
+   46px touch target by accident; on its own flex line it collapses to the 20px
+   of its own text, which is half the minimum for a thumb and is the control the
+   whole screen is navigated by. */
+@include t.stacked {
+  .segmented {
+    align-self: center;
+    margin-bottom: 0;
+  }
+
+  .segment {
+    height: 44px;
+  }
+
+  /* Sizes chosen for a mouse, measured under a thumb. `sm` is 28px and it is
+     what the queue's Schválit and Zamítnout are; the icon buttons are 30px
+     square; a checkbox with no label — the one on every queue row — is its 16px
+     box and nothing else. None of the three is a target anyone hits reliably at
+     arm's length, and all three are on the screen this brief exists for.
+
+     Widths are left alone: these controls are already wide enough, and the row
+     they sit on has room in the other direction. */
+  .sm {
+    height: 40px;
+  }
+
+  .iconButton {
+    width: 40px;
+    height: 40px;
+  }
+
+  .checkbox {
+    justify-content: center;
+    min-width: 34px;
+    min-height: 34px;
+  }
 }
 
 /* ---------------------------------------------------------------- search -- */

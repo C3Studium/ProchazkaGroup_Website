@@ -17,13 +17,13 @@ import BenefitReviews from "@/components/pages/benefit/BenefitReviews";
 import QnaContact from "@/components/pages/index/QnaContact";
 
 import {
-    getApprovedReviews,
     getAssistant,
     getContactContent,
     getFooterContent,
     getHomepageContent,
-    readEditable,
-    readPublished,
+    getPageContent,
+    readerFor,
+    viewOf,
 } from "@/cms/server/site"
 
 // This page took `footerStaticProps` until it grew a belt of reviews. A page
@@ -35,23 +35,34 @@ import {
 const REVALIDATE_SECONDS = 600
 
 export async function getStaticProps(context) {
-    const draft = Boolean(context?.draftMode)
-    const read = draft ? readEditable : readPublished
+    // One call, three readers: published, draft, or the site as it stood at a
+    // chosen moment. See @/cms/server/site/archive.js.
+    const view = viewOf(context)
+    const read = readerFor(view)
 
     // The enrolment's "still no advisor" answer opens the homepage's whole
     // advisor block — read from the same place as the homepage, so the two
     // cannot come to say different things.
-    const [reviews, home, footer, contact, assistant] = await Promise.all([
-        getApprovedReviews({ limit: 16 }),
-        getHomepageContent(),
-        getFooterContent({ draft }),
-        getContactContent({ draft }),
+    //
+    // The belt of reviews travels inside `content` rather than beside it: this
+    // route declares `reviews` as one of its sources in cms.config.js, so
+    // `getPageContent` already runs that query, and a second
+    // `getApprovedReviews` here would be the same read twice per regeneration.
+    const [content, home, footer, contact, assistant] = await Promise.all([
+        getPageContent("/benefit-program", view),
+        getHomepageContent(view),
+        getFooterContent(view),
+        getContactContent(view),
         getAssistant({ read }),
     ])
 
     return {
         props: {
-            reviews: reviews.map((review, index) => ({ id: `r${index}`, ...review })),
+            // The belt keys its cards by this rather than by position, and a
+            // published review carries no id of its own — only the draft reader
+            // attaches one, and the spread lets it win where it does.
+            reviews: (content?.reviews || []).map((review, index) => ({ id: `r${index}`, ...review })),
+            content,
             consultants: home?.consultants || [],
             advisorsCopy: home?.advisorsCopy || {},
             advisorFormCopy: home?.advisorFormCopy || {},
@@ -65,6 +76,7 @@ export async function getStaticProps(context) {
 
 export default function BenefitProgramPage({
     reviews = [],
+    content = {},
     consultants = [],
     advisorsCopy = {},
     advisorFormCopy = {},
@@ -144,21 +156,26 @@ export default function BenefitProgramPage({
                 contact form already exist on the homepage and are imported as
                 they stand — a second implementation of a FAQ is a second set of
                 answers to keep true. */}
+            {/* Every section owns its own fallbacks — each knows what "nothing"
+                should look like for each of its fields — so all these props do
+                is stop an absent `content` from being a property access on
+                undefined. */}
             <main lang="cs">
-                <BenefitIntro />
-                <BenefitJourney />
+                <BenefitIntro copy={content?.intro} />
+                <BenefitJourney head={content?.journey} steps={content?.steps} />
                 {/* Rewards + the printed cards as one horizontal bento
                     journey — grow-and-push from the navbar's wall, ridden
                     sideways. Replaces the ledger and the static bento. */}
-                <BenefitRide />
-                <BenefitBothWin />
+                <BenefitRide copy={content?.ride} />
+                <BenefitBothWin copy={content?.doubt} />
                 {/* The doubt's answer in other people's words, then the way
                     in — the invitation lands after the proof, not before it. */}
-                <BenefitReviews reviews={reviews} />
+                <BenefitReviews reviews={reviews} copy={content?.reviewsCopy} />
                 <BenefitEnroll
                     consultants={consultants}
                     advisorsCopy={advisorsCopy}
                     advisorFormCopy={advisorFormCopy}
+                    copy={content?.enroll}
                 />
 
                 {/* Both fall back to their own shipped copy when given nothing,

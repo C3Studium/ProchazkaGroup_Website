@@ -12,7 +12,7 @@ import { people } from "./people";
 // is still the same Lorem sentence, and Latin on the page is worse than a
 // placeholder that reads. They are assigned by position, which is why none of
 // them uses a gendered verb — the list is half women. The real ones live on each
-// consultant's own record (`motto` in src/cms/schemas/consultant.js) and these
+// consultant's own record (`motto` in src/content/types/consultant.js) and these
 // are only ever seen with no content system behind the page.
 export const MOTTOS = [
     "Finance mají dávat klid, ne starosti.",

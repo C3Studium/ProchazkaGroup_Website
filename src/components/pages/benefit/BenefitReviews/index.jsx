@@ -5,6 +5,23 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
+import { editable } from "@/cms/edit";
+
+// The section's two lines of its own — everything else on the belt is a
+// client's words, moderated as a review document rather than edited as copy.
+// They come from the CMS over `benefit-program.recenze` (see cms.config.js) and
+// fall back to what is written here, so an empty CMS renders exactly this
+// section.
+const COPY = {
+    // The `<em>` of the eyebrow. The words beside it are a bare text node in the
+    // same paragraph and have no element of their own — see the eyebrow below.
+    ord: "06",
+    eyebrow: "Takhle o nás mluví",
+    lead: "Recenze klientů — i těch, kteří k nám přišli na doporučení.",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
 
 // Benefit program — 06, what people say, as one horizontal belt.
 //
@@ -128,7 +145,14 @@ const COARSE_EASE = 0.7;
 const cruiseFor = (w, coarse) =>
     Math.min(SPEED, Math.max(200, w * 0.62)) * (coarse ? COARSE_EASE : 1);
 
-export default function BenefitReviews({ reviews = [] }) {
+export default function BenefitReviews({ reviews = [], copy = {} }) {
+    const said = {
+        ord: say(copy.ord, COPY.ord),
+        eyebrow: say(copy.eyebrow, COPY.eyebrow),
+        lead: say(copy.lead, COPY.lead),
+        docId: copy.docId,
+    };
+
     const trackRef = useRef(null);
     const wallRef = useRef(null);
     const offset = useRef(0);
@@ -401,11 +425,18 @@ export default function BenefitReviews({ reviews = [] }) {
                 whileInView="shown"
                 viewport={ENTERS}
             >
+                {/* The `<em>` carries its own annotation; the words beside it
+                    are a bare text node sharing this paragraph with it, so they
+                    are `items.0.label` and are edited in the form. */}
                 <motion.p className="BenReviews__eyebrow" variants={RISE}>
-                    <em>06</em> Takhle o nás mluví
+                    <em {...editable(said.docId, "items.0.lead", "text")}>{said.ord}</em>{` ${said.eyebrow}`}
                 </motion.p>
-                <motion.p className="BenReviews__lead" variants={RISE}>
-                    Recenze klientů — i těch, kteří k nám přišli na doporučení.
+                <motion.p
+                    className="BenReviews__lead"
+                    variants={RISE}
+                    {...editable(said.docId, "items.1.label", "text")}
+                >
+                    {said.lead}
                 </motion.p>
             </motion.header>
 

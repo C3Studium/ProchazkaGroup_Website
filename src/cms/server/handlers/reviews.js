@@ -1,10 +1,19 @@
 // POST /api/cms/reviews — public review submission.
 //
-// This route replaces the browser-side insert in src/hooks/useReviewForm.js,
-// which today writes to the reviews table with the anon key. That path stays
-// working until someone cuts over deliberately; nothing here touches it.
+// This route replaced the browser-side insert in src/hooks/useReviewForm.js,
+// which wrote to the legacy reviews table with the anon key. That hook, its
+// read companion useFetchDatabase.js and the anon-key client supabaseClient.js
+// are deleted — this is the only submission path, and a component that tried to
+// restore the old one would fail to resolve the import rather than quietly
+// writing to the database again.
 //
-// What changes when it is cut over:
+// Note what code can and cannot fix. Deleting the hook removed the *caller*;
+// the anon key itself still carries insert/update rights on `reviews`, `people`
+// and `total`, so anyone holding it (it ships in every page) can still write
+// there with curl. Only the database can close that, which is what
+// src/cms/server/migrations/0004_legacy_lockdown.sql is for.
+//
+// What the cut-over bought:
 //
 //   - No write-capable key in the browser. The submission is a POST to this
 //     handler and the database write happens with the service role.
@@ -25,7 +34,7 @@
 //     `data` is world-readable for published documents, so an approved review
 //     would publish the submitter's address.
 
-import { consultantFullName } from '@/cms/schemas/consultant'
+import { displayNameOf, reviewSubjectType } from '@/cms/site/types'
 
 import { createSupabaseDataPort } from '../adapter.js'
 import { conflict, invalid } from '../errors.js'
@@ -95,7 +104,7 @@ const isKnownConsultant = async (port, submitted) => {
     return rows.some((row) => {
         const body = row?.data || {}
         return (
-            wanted === nameKey(consultantFullName(body)) ||
+            wanted === nameKey(displayNameOf(reviewSubjectType, body)) ||
             wanted === nameKey(`${body.firstName ?? ''} ${body.lastName ?? ''}`)
         )
     })

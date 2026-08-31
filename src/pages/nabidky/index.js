@@ -1,14 +1,46 @@
 import Head from "next/head"
 
-import { footerStaticProps } from "@/cms/server/site"
+import { getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
 
-// The only content on this route today is the patička, which `_app` renders
-// and which therefore has to travel on this page's props. One shared
-// implementation rather than a copy per page — see @/cms/server/site/footer.
-export const getStaticProps = footerStaticProps
 import ClipPathPage from "@/components/pages/offers/ClipPathPage"
 
-export default function PrilezitostiPage() {
+// ISR, on the same terms as /cookies and /o-nas: a partner's discount changes a
+// few times a year, and `revalidate` is what lets a publish reach the public
+// site without a deploy.
+const REVALIDATE_SECONDS = 600
+
+/**
+ * This page's own reader, in place of the shared `footerStaticProps` it used
+ * while it had no copy of its own.
+ *
+ * `viewOf(context)` reads Next's signed preview cookie and answers with one of
+ * three things — the published site, the draft, or the site as it stood at a
+ * chosen moment. A visitor carries no cookie and therefore gets the statically
+ * generated page, the published bodies and no document id in its props; the
+ * moment cannot arrive any other way, because there is no query parameter to
+ * type. Same arrangement as /cookies.
+ *
+ * Cannot reject: every read inside answers with empty rather than throwing, so
+ * an absent table or an unreachable database yields the page the component
+ * ships with rather than a build failure. See @/cms/server/site/read.
+ */
+export async function getStaticProps(context) {
+    const view = viewOf(context)
+
+    const [content, footer, contact, assistant] = await Promise.all([
+        getPageContent("/nabidky", view),
+        getFooterContent(view),
+        getContactContent(view),
+        getAssistant({ read: readerFor(view) }),
+    ])
+
+    return {
+        props: { content, footer, contact, assistant },
+        revalidate: REVALIDATE_SECONDS,
+    }
+}
+
+export default function PrilezitostiPage({ content }) {
     return (
         <>
             <Head>
@@ -80,10 +112,12 @@ export default function PrilezitostiPage() {
             </Head>
             <main lang="cs" key="offers-page">
                 {/* The patička is not mounted here: _app renders SiteFooter for
-                    every page, which is what `footerStaticProps` above feeds.
-                    The old <Footer /> that used to sit here would be a second
-                    one. */}
-                <ClipPathPage />
+                    every page, which is what the `footer` prop above feeds. The
+                    old <Footer /> that used to sit here would be a second one. */}
+                {/* The section owns every fallback — it knows what "nothing"
+                    should look like for each field — so all this does is stop an
+                    absent `content` from being a property access on undefined. */}
+                <ClipPathPage section={content?.section} chapters={content?.chapters} />
             </main>
         </>
     )

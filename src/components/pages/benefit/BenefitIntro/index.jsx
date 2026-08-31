@@ -3,6 +3,7 @@ import { motion, cubicBezier, useReducedMotion } from "framer-motion";
 import { RiGiftLine } from "@remixicon/react";
 import Arrow, { SCROLL_NUDGE } from "@/components/common/ui/Arrow";
 import { useGlobalContext } from "@/context/LoadProvider";
+import { editable } from "@/cms/edit";
 
 // SCROLL TECHNIQUE (step two):
 // A pinned stage with a layered parallax handoff, then a wipe.
@@ -40,6 +41,26 @@ const PHOTO = {
     alt: "Poradce Procházka Group při schůzce s klientkou",
 };
 
+// Copy comes from the CMS (`benefit-program.uvod` — see cms.config.js). These
+// are the words the section ships with and what every field falls back to on
+// its own, so an empty CMS, an unreachable database or a block that fills in
+// nothing but its title renders exactly this screen.
+const COPY = {
+    eyebrow: "Benefit program",
+    title: "Doporučte nás",
+    statement: "Doporučte nás někomu, koho znáte — až se stane naším klientem, pošleme vám poukaz.",
+    figureValue: "47 500 Kč",
+    // Beside the gift icon, inside the same `<span>` as it. A bare text node
+    // sharing its parent with markup has no element of its own to click, so
+    // this one is edited in the Studio's form — see the note at the label.
+    figureLabel: "celková hodnota odměn v programu",
+    origin: "Procházka Group · Písek · OVB Allfinanz",
+    scrollCue: "Jak to funguje",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
+
 // Benefit program — opening section.
 //
 // One screen, and it has one job: a reader who leaves it must be able to say
@@ -54,7 +75,7 @@ const PHOTO = {
 // No ground of its own: the WebGL shader mounted in _app sits behind every page
 // and anything laid over it here, however translucent, only flattens it. The
 // one wash in the section belongs to the photograph, not to the section.
-export default function BenefitIntro() {
+export default function BenefitIntro({ copy = {} }) {
     const { gate } = useGlobalContext();
     const go = gate === "go";
     // Calm means the things that never stop, stop. The arrow's nudge is the
@@ -70,6 +91,24 @@ export default function BenefitIntro() {
     // is first seen. On client-side navigations gate is "go" from the first
     // render, so the original delay still applies there.
     const ground = gate !== "hold";
+
+    // Field by field, over the words above.
+    const said = {
+        eyebrow: say(copy.eyebrow, COPY.eyebrow),
+        title: say(copy.title, COPY.title),
+        statement: say(copy.statement, COPY.statement),
+        figureValue: say(copy.figureValue, COPY.figureValue),
+        figureLabel: say(copy.figureLabel, COPY.figureLabel),
+        origin: say(copy.origin, COPY.origin),
+        scrollCue: say(copy.scrollCue, COPY.scrollCue),
+    };
+    // `alt: 'own'` in the configuration refuses the block's title as a stand-in
+    // alt, so an unwritten alt arrives empty and the shipped one stands.
+    const photo = copy.photo?.src
+        ? { src: copy.photo.src, alt: say(copy.photo.alt, PHOTO.alt) }
+        : PHOTO;
+    const doc = copy.docId;
+
     return (
         <section className="BenefitIntro">
             {/* The rule network. Four lines on the grid's own column and row
@@ -113,8 +152,9 @@ export default function BenefitIntro() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={go ? { opacity: 1, y: 0 } : undefined}
                 transition={{ duration: 0.68, ease: GLIDE, delay: 0.15 }}
+                {...editable(doc, "items.0.label", "text")}
             >
-                Benefit program
+                {said.eyebrow}
             </motion.p>
 
             <h1 className="BenefitIntro__title">
@@ -124,8 +164,9 @@ export default function BenefitIntro() {
                     initial={{ y: "0.32em", opacity: 0 }}
                     animate={go ? { y: "0em", opacity: 1 } : undefined}
                     transition={{ duration: 0.98, ease: GLIDE, delay: 0.13 }}
+                    {...editable(doc, "title", "text")}
                 >
-                    Doporučte nás
+                    {said.title}
                 </motion.span>
             </h1>
 
@@ -135,9 +176,9 @@ export default function BenefitIntro() {
                     initial={{ opacity: 0, y: 24 }}
                     animate={go ? { opacity: 1, y: 0 } : undefined}
                     transition={{ duration: 0.75, ease: GLIDE, delay: 0.43 }}
+                    {...editable(doc, "body", "text")}
                 >
-                    Doporučte nás někomu, koho znáte — až se stane naším
-                    klientem, pošleme vám poukaz.
+                    {said.statement}
                 </motion.p>
 
                 <motion.div
@@ -146,13 +187,26 @@ export default function BenefitIntro() {
                     animate={go ? { opacity: 1, y: 0 } : undefined}
                     transition={{ duration: 0.75, ease: GLIDE, delay: 0.53 }}
                 >
-                    <span className="BenefitIntro__figure__value">47 500 Kč</span>
+                    <span
+                        className="BenefitIntro__figure__value"
+                        {...editable(doc, "items.1.value", "text")}
+                    >
+                        {said.figureValue}
+                    </span>
                     <span className="BenefitIntro__figure__label">
                         {/* The icon says "poukaz" without spending a second
                             line on it — the label has room for the scale of the
-                            figure or for what form it takes, not both. */}
+                            figure or for what form it takes, not both.
+
+                            It is also why these words carry no annotation: they
+                            are a bare text node sharing this `<span>` with the
+                            icon, and an in-place editor rebuilds the element's
+                            children out of what it read — which would store the
+                            `<svg>` as copy and drop it on the first save. The
+                            words are `items.1.label` and are edited in the
+                            form. */}
                         <RiGiftLine size={20} aria-hidden="true" />
-                        celková hodnota odměn v programu
+                        {said.figureLabel}
                     </span>
                 </motion.div>
             </div>
@@ -174,10 +228,11 @@ export default function BenefitIntro() {
                 initial={{ clipPath: "inset(100% 0% 0% 0%)", scale: 1.06 }}
                 animate={ground ? { clipPath: "inset(0% 0% 0% 0%)", scale: 1 } : undefined}
                 transition={{ duration: 1.13, ease: GLIDE, delay: gate === "go" ? 0.6 : 0 }}
+                {...editable(doc, "image", "image")}
             >
                 <Image
-                    src={PHOTO.src}
-                    alt={PHOTO.alt}
+                    src={photo.src}
+                    alt={photo.alt}
                     fill={true}
                     priority={true}
                     quality={90}
@@ -195,8 +250,9 @@ export default function BenefitIntro() {
                 initial={{ opacity: 0 }}
                 animate={go ? { opacity: 1 } : undefined}
                 transition={{ duration: 0.75, ease: GLIDE, delay: 0.65 }}
+                {...editable(doc, "items.2.label", "text")}
             >
-                Procházka Group · Písek · OVB Allfinanz
+                {said.origin}
             </motion.p>
 
             {/* The page below this is long and every part of it answers a
@@ -214,7 +270,12 @@ export default function BenefitIntro() {
                 >
                     <Arrow direction="down" />
                 </motion.span>
-                <span className="BenefitIntro__scroll__text">Jak to funguje</span>
+                <span
+                    className="BenefitIntro__scroll__text"
+                    {...editable(doc, "items.3.label", "text")}
+                >
+                    {said.scrollCue}
+                </span>
             </motion.div>
         </section>
     );

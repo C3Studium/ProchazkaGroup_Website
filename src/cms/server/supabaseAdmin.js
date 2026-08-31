@@ -30,25 +30,52 @@
 // Supabase path takes over and nothing else changes" a fact about the code
 // rather than an intention.
 
-import { createClient } from '@supabase/supabase-js'
+import { createRequire } from 'node:module'
 
-import {
-    assertServer,
-    hasServiceRoleKey,
-    supabaseAnonKey,
-    supabaseServiceRoleKey,
-    supabaseUrl,
-} from './env.js'
+/**
+ * Supabase SDK se natahuje až ve chvíli, kdy se na Supabase opravdu jde.
+ *
+ * Napsané jako obyčejný `import` nahoře by bylo tvrdou závislostí: projekt,
+ * který si zvolil Postgres, by se bez něj nepostavil — bundler ho hledá při
+ * překladu, ne až za běhu. `createRequire` ho vyžádá teprve v té větvi, která
+ * ho potřebuje, takže instalace bez Supabase je legitimní volba, ne chyba.
+ */
+const supabaseSdk = () => {
+    try {
+        return createRequire(import.meta.url)('@supabase/supabase-js')
+    } catch {
+        throw new Error(
+            'Chybí @supabase/supabase-js. Buď ho doinstaluj, nebo nastav DATABASE_URL ' +
+                'a jeď na Postgresu.',
+        )
+    }
+}
+
+import { createPgClient } from './pgClient.js'
+
+import { assertServer, databaseUrl, hasServiceRoleKey, supabaseAnonKey, supabaseServiceRoleKey, supabaseUrl } from './env.js'
 import { getFileClient } from './fileStore/client.js'
 
 let adminClient = null
+let pgClientInstance = null
 
 export const getAdminClient = () => {
     assertServer('getAdminClient')
+
+    // Postgres má přednost před Supabase, když je nastavený.
+    //
+    // Rozhoduje přítomnost DATABASE_URL, ne nějaký přepínač navíc: nastavit
+    // adresu databáze a čekat, že se do ní nepůjde, nedává smysl — a přepínač,
+    // který se s ní může rozejít, je jen další místo, kde se dá udělat chyba.
+    if (databaseUrl()) {
+        pgClientInstance = pgClientInstance || createPgClient({ connectionString: databaseUrl() })
+        return pgClientInstance
+    }
+
     if (!hasServiceRoleKey()) return getFileClient({ role: 'service' })
     if (adminClient) return adminClient
 
-    adminClient = createClient(supabaseUrl(), supabaseServiceRoleKey(), {
+    adminClient = supabaseSdk().createClient(supabaseUrl(), supabaseServiceRoleKey(), {
         auth: {
             // A service-role client has no user session to persist or refresh,
             // and doing either on a serverless instance leaks state between
@@ -76,10 +103,24 @@ let anonClient = null
 // holds against either backend rather than only against Postgres.
 export const getAnonClient = () => {
     assertServer('getAnonClient')
+
+    // Na Postgresu je to tentýž klient jako pro editory — a není to ústupek.
+    //
+    // Oddělený anonymní klient existuje kvůli Supabase, kde je anonymní klíč
+    // veřejný: kdyby veřejné čtení jelo přes service-role, stačil by jeden únik
+    // a byly by venku i koncepty. Na Postgresu žádný veřejný přístup není,
+    // přihlašovací údaje má jen server, a tak není co oddělovat.
+    //
+    // Záruka „veřejné čtení nevidí koncepty" tím nemizí, jen se přesouvá tam,
+    // kam patří: `listPublished()` filtruje na publikované řádky v dotazu.
+    // Předtím to bylo pojištěné dvakrát — právy i dotazem — a na Postgresu to
+    // tiše vracelo prázdno, protože anonymní klient nešel vyrobit.
+    if (databaseUrl()) return getAdminClient()
+
     if (!hasServiceRoleKey()) return getFileClient({ role: 'anon' })
     if (anonClient) return anonClient
 
-    anonClient = createClient(supabaseUrl(), supabaseAnonKey(), {
+    anonClient = supabaseSdk().createClient(supabaseUrl(), supabaseAnonKey(), {
         auth: {
             persistSession: false,
             autoRefreshToken: false,

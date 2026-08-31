@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 /* Same row grammar as the document list: a hairline between rows, no cards, no
@@ -218,7 +217,7 @@
 
 /* Narrow windows drop the columns that are context rather than content, exactly
    as the document list does. */
-@media (max-width: 900px) {
+@include t.compact {
   .row {
     padding: 10px var(--st-s5);
   }

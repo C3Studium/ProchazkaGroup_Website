@@ -5,10 +5,17 @@
  * holds exactly the value shapes src/cms/core/fieldTypes.js accepts.
  */
 
-// /o-nas and the two surfaces `_app` renders under every route, kept in their own
-// file so this one and that one are never edited in the same place at once.
+// One file per page wired after this one — the homepage, /o-nas with the two
+// surfaces `_app` renders under every route, and the two legal notices — so that
+// no two of them are ever edited in the same place at once. Each is one import
+// here and one spread below, and that is the whole seam.
 import { seedAboutCopy } from './seedAbout.js'
+import { seedBenefitCopy } from './seedBenefit.js'
+import { seedCookiesCopy } from './seedCookies.js'
 import { seedHomepageAssets, seedHomepageCopy } from './seedHomepage.js'
+import { seedOfferCopy } from './seedNabidka.js'
+import { seedPrivacyCopy } from './seedPrivacy.js'
+import { seedReviewsCopy } from './seedReviewsPage.js'
 
 /* ---------------------------------------------------------------- assets -- */
 
@@ -1685,7 +1692,12 @@ const siteCopy = [
   },
 
   ...seedAboutCopy,
+  ...seedBenefitCopy,
+  ...seedCookiesCopy,
   ...seedHomepageCopy,
+  ...seedOfferCopy,
+  ...seedPrivacyCopy,
+  ...seedReviewsCopy,
 ]
 
 /* ----------------------------------------------------------------- reviews -- */

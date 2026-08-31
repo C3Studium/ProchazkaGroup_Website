@@ -42,8 +42,15 @@ export function registerStatsSource(source) {
 export const listStatsSources = () => [...sources.values()]
 export const getStatsSource = (id) => sources.get(id) || null
 
+/**
+ * Rozsahy, které jde nabídnout.
+ *
+ * Clarity Data Export API bere `numOfDays` 1 až 3 a nic delšího neumí — delší
+ * období jsou jen na jejich vlastní nástěnce, kam vede odkaz. Nabízet tady
+ * „30 dní" by znamenalo tlačítko, které vždycky vrátí chybu.
+ */
 export const DEFAULT_RANGES = [
   { id: "1", title: "24 hodin", days: 1 },
-  { id: "7", title: "7 dní", days: 7 },
-  { id: "30", title: "30 dní", days: 30 },
+  { id: "2", title: "2 dny", days: 2 },
+  { id: "3", title: "3 dny", days: 3 },
 ]

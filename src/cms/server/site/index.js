@@ -25,6 +25,14 @@ export {
 // only by the Studio preview, behind Next's draft-mode cookie. See draft.js.
 export { readEditable } from './draft.js'
 
+// The third reader, and the same exception on stronger terms. `readAt` answers
+// with the bodies that were published at a chosen moment, out of
+// cms_document_revision; `viewOf` is how a `getStaticProps` learns which of the
+// three readers a request is asking for, and it reads Next's signed preview
+// cookie — never a query parameter, so no public URL can reach a moment. See
+// archive.js.
+export { getArchiveMoment, momentOf, readAt, readerAt, readerFor, viewOf } from './archive.js'
+
 export {
     getSiteCopy,
     getPartners,

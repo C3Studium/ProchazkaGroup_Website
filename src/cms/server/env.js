@@ -86,6 +86,13 @@ export const ipHashSalt = () => {
 export const maxUploadBytes = () =>
     Number(optional('CMS_MAX_UPLOAD_BYTES', String(8 * 1024 * 1024)))
 
+// CMS_BUILD_ID and VERCEL_GIT_COMMIT_SHA are read in
+// src/cms/server/buildId.js rather than here. They are the one exception to
+// this file's rule and it is worth naming: every variable above configures what
+// this deployment DOES, and those two only say which deployment it IS — a fact
+// the archive records beside a revision and nothing branches on. They are listed
+// in ENV_REFERENCE below so the audit still finds them from one place.
+
 // --- Authentication (src/cms/AUTH.md) ---------------------------------------
 
 // Signs the session cookie. Required, with no fallback: a development default
@@ -108,6 +115,33 @@ export const bootstrapAdmin = () => {
     if (!email || !password) return null
     return { email, password }
 }
+
+/**
+ * Adresa Postgresu, nebo prázdno, když se jede na Supabase.
+ *
+ * Railway dává dvě: privátní jede vnitřní sítí (rychlejší, bez poplatku za
+ * přenos) a zvenčí na ni není vidět; veřejná chodí přes proxy. Která je ta
+ * správná, se pozná podle toho, kde běžíme — `RAILWAY_ENVIRONMENT` nastavuje
+ * Railway samo. Vybírat to ručně by znamenalo přepínat při každém nasazení
+ * a jednou na to zapomenout.
+ */
+export const databaseUrl = () => {
+    const inside = Boolean(optional('RAILWAY_ENVIRONMENT', ''))
+    const priv = optional('DATABASE_PRIVATE_URL', '')
+    const pub = optional('DATABASE_URL', '')
+    return (inside && priv) || pub || priv || ''
+}
+
+/** Kde leží média, když je nese S3 nebo MinIO. */
+export const s3Config = () => ({
+    endpoint: optional('CMS_S3_ENDPOINT', ''),
+    bucket: optional('CMS_S3_BUCKET', 'cms-media'),
+    accessKeyId: optional('CMS_S3_ACCESS_KEY_ID', ''),
+    secretAccessKey: optional('CMS_S3_SECRET_ACCESS_KEY', ''),
+    region: optional('CMS_S3_REGION', 'us-east-1'),
+    // Adresa, ze které si soubor stahuje prohlížeč. Na privátní se nedostane.
+    publicBase: optional('CMS_MEDIA_HOST', '') || optional('CMS_S3_PUBLIC_ENDPOINT', ''),
+})
 
 export const isProduction = () => process.env.NODE_ENV === 'production'
 
@@ -195,5 +229,24 @@ export const ENV_REFERENCE = Object.freeze([
         required: false,
         exists: false,
         note: 'NEW, optional. Defaults to 8388608 (8 MiB).',
+    },
+    {
+        name: 'CMS_BUILD_ID',
+        required: false,
+        exists: false,
+        note: 'NEW, optional. Recorded on every revision as the identity of the ' +
+              'deployed code, so the Archive can name which code replays an old ' +
+              'body. Unset is normal on Vercel, which supplies ' +
+              'VERCEL_GIT_COMMIT_SHA; set it only where that does not exist. ' +
+              'Read in src/cms/server/buildId.js.',
+    },
+    {
+        name: 'VERCEL_GIT_COMMIT_SHA',
+        required: false,
+        exists: false,
+        note: 'Supplied by Vercel, not by anyone. A system environment variable ' +
+              'exposed to builds and to functions at runtime; recorded on every ' +
+              'revision when CMS_BUILD_ID is unset. Absent on a developer ' +
+              'machine, where a revision honestly records no build at all.',
     },
 ])

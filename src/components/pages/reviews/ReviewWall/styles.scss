@@ -514,3 +514,41 @@
         transition-duration: 0.001s;
     }
 }
+
+/* „Souhlasíte s recenzí?" — vlastní řádek pod patičkou karty.
+ *
+ * Vpravo dole, jak bylo zadáno. Karta tím vyroste; zeď je bento a výšky se v ní
+ * stejně liší, takže to nic nerozhodí. */
+.RevWall__cell__vote {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 0.9rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgb(255 255 255 / 10%);
+}
+
+.RevWall__cell__voteAsk {
+    font-size: 0.78rem;
+    line-height: 1.2;
+    text-align: right;
+    opacity: 0.55;
+}
+
+/* Táž lišta v rozkliknuté recenzi. Vlastní třídy, protože RevSheet je jiný blok
+ * než karta na zdi — ne zvětšená kopie. */
+.RevSheet__vote {
+    display: flex;
+    gap: 0.9rem;
+    align-items: center;
+    justify-content: flex-end;
+    margin-top: 1.4rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgb(255 255 255 / 12%);
+}
+
+.RevSheet__voteAsk {
+    font-size: 0.86rem;
+    opacity: 0.6;
+}

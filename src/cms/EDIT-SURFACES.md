@@ -242,6 +242,12 @@ still editable; the *number of items* is not. Say which you found.
 *Odebrat* on the control itself and only *Nahradit* opens anything — that is the
 discrepancy to close.
 
+Since round five the `image` popup also carries **Oříznout** — a crop frame over
+the picture, applied server-side, rewriting one library row rather than minting a
+second. It has one rule worth knowing before using it: **a crop applies where you
+applied it**, not everywhere the picture is used. See `MEDIA.md` for why, and for
+what a reusable cropped variant would take.
+
 ## 5. The selection colour
 
 The outline and control currently borrow `--st-accent`, the Studio's own accent,

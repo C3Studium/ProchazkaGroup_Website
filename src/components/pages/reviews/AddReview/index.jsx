@@ -5,9 +5,25 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import Arrow from "@/components/common/ui/Arrow";
 import { RiArrowDownSLine } from "@remixicon/react";
+import { editable } from "@/cms/edit";
 import { toast } from "sonner";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
+
+// What this asks when the CMS says nothing. `seedReviewsPage.js` was generated
+// out of these exact strings, so the two cannot drift apart silently.
+//
+// The three field labels are NOT here and are not in the CMS. Each is
+// `<span>Vaše jméno <em>*</em></span>`: the words have no element of their own,
+// and annotating the span would store the asterisk as part of the copy and drop
+// its `<em>` on the first save.
+const SHIPPED = {
+    eyebrow: "Recenze",
+    open: "Napsat recenzi",
+    submit: "Odeslat",
+    sending: "Odesílám…",
+    note: "Recenze se zveřejní až po schválení.",
+};
 
 // The one thing this page asks of the reader, kept where it can always be
 // reached: a fixed plate in the corner rather than a button somewhere down the
@@ -15,10 +31,12 @@ const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 //
 // It posts to /api/cms/reviews, which is this site's own public endpoint: it
 // builds the stored body itself, forces `approved: false`, and carries a
-// honeypot. The older `useReviewForm` hook writes to Supabase instead, which is
-// NOT where this page reads its reviews from — wiring the form to that would
-// have submissions land in a database nothing on the site displays.
-export default function AddReview({ consultants = [] }) {
+// honeypot. It is the only submission path left: the `useReviewForm` hook that
+// wrote straight to the legacy Supabase table with the browser's anon key is
+// deleted, so nothing can land a review in a database this page never reads.
+//
+// @param {object} [copy] this block, from `getPageContent("/recenze")`.
+export default function AddReview({ consultants = [], copy = {} }) {
     const [open, setOpen] = useState(false);
     // Calm, not killed: the sheet still fades, it just stops travelling.
     const calm = useReducedMotion();
@@ -28,6 +46,14 @@ export default function AddReview({ consultants = [] }) {
     // never server-rendered — the same shape ReviewWall uses for the review
     // sheet a few lines down the page.
     const [mounted, setMounted] = useState(false);
+    const docId = copy.docId;
+    const words = {
+        eyebrow: copy.eyebrow || SHIPPED.eyebrow,
+        open: copy.open || SHIPPED.open,
+        submit: copy.submit || SHIPPED.submit,
+        sending: copy.sending || SHIPPED.sending,
+        note: copy.note || SHIPPED.note,
+    };
     const [form, setForm] = useState({
         customerName: "",
         consultantName: "",
@@ -83,17 +109,22 @@ export default function AddReview({ consultants = [] }) {
     return (
         <>
             <div className="AddRev">
+                {/* The words only. The corner marks and the arrow are empty
+                    elements beside them, so the button's text IS the stored
+                    value — the same arrangement CornerButton is annotated
+                    under on /cookies. */}
                 <button
                     type="button"
                     className="AddRev__button"
                     data-cursor="frame"
                     onClick={() => setOpen(true)}
+                    {...editable(docId, "items.0.label", "text")}
                 >
                     <span className="corner corner--tl" />
                     <span className="corner corner--tr" />
                     <span className="corner corner--bl" />
                     <span className="corner corner--br" />
-                    Napsat recenzi
+                    {words.open}
                     <Arrow direction="upRight" />
                 </button>
             </div>
@@ -158,7 +189,12 @@ export default function AddReview({ consultants = [] }) {
                                 thing that scrolls away, and with it the only
                                 way out of a sheet that has stopped the page. */}
                             <div className="AddRev__panel__head">
-                                <span className="AddRev__panel__eyebrow">Recenze</span>
+                                <span
+                                    className="AddRev__panel__eyebrow"
+                                    {...editable(docId, "title", "text")}
+                                >
+                                    {words.eyebrow}
+                                </span>
                                 <button
                                     type="button"
                                     className="AddRev__close"
@@ -280,17 +316,30 @@ export default function AddReview({ consultants = [] }) {
                                     aria-hidden="true"
                                 />
 
-                                <button type="submit" className="AddRev__send" data-cursor="frame" disabled={busy}>
+                                {/* Two stored strings on one element, and the
+                                    address is whichever it is showing — the
+                                    same reading ReviewWall's end word takes.
+                                    The word in flight is stored so an editor can
+                                    change it in the form; it is on the page for
+                                    the length of one POST, which is why the
+                                    array's input is not hidden. */}
+                                <button
+                                    type="submit"
+                                    className="AddRev__send"
+                                    data-cursor="frame"
+                                    disabled={busy}
+                                    {...editable(docId, busy ? "items.2.label" : "items.1.label", "text")}
+                                >
                                     <span className="corner corner--tl" />
                                     <span className="corner corner--tr" />
                                     <span className="corner corner--bl" />
                                     <span className="corner corner--br" />
-                                    {busy ? "Odesílám…" : "Odeslat"}
+                                    {busy ? words.sending : words.submit}
                                     <Arrow direction="upRight" />
                                 </button>
 
-                                <p className="AddRev__note">
-                                    Recenze se zveřejní až po schválení.
+                                <p className="AddRev__note" {...editable(docId, "body", "text")}>
+                                    {words.note}
                                 </p>
                             </div>
                             </div>

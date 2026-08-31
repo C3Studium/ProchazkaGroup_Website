@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 
 import SplitText from "@/components/common/ui/SplitText";
 import { CURTAIN, ENTERS, group } from "@/components/common/ui/entrance";
+import { editable } from "@/cms/edit";
 
 // Uncovered rather than raised — the site's own gesture for a photograph (see
 // PHOTO in entrance.js), applied to a sentence. A line of type that fades up
@@ -41,7 +42,27 @@ const WIPE_LATE = {
 // site arrives — see entrance.js, which the advisor CTA, the questions block
 // and the footer all share. Nothing here is pinned and nothing is driven by the
 // scroll, because the whole point of what follows is that it holds still.
-export default function OfferOpen() {
+
+// What this section says with no CMS behind it. Three positions, each its own
+// element: the numeral, and the two halves of the sentence — which are two
+// stored strings rather than one `headline` with a break in it, because the
+// line breaks with a block child and the overlay reads a block child as a line
+// of its own rather than as a `<br>` inside one value.
+const SHIPPED = {
+    n: "03 — 06",
+    first: "Poradenství není produkt.",
+    second: "Je to plán, který někdo hlídá.",
+};
+
+/**
+ * @param {object} [copy] the `nabidka.predel` block, from `getPageContent`.
+ */
+export default function OfferOpen({ copy = {} }) {
+    const docId = copy.docId;
+    const n = copy.n || SHIPPED.n;
+    const first = copy.first || SHIPPED.first;
+    const second = copy.second || SHIPPED.second;
+
     return (
         <section className="OfferOpen">
             <motion.div
@@ -51,8 +72,12 @@ export default function OfferOpen() {
                 whileInView="shown"
                 viewport={ENTERS}
             >
-                <motion.p className="OfferOpen__n" variants={WIPE}>
-                    03 — 06
+                <motion.p
+                    {...editable(docId, "items.0.label", "text")}
+                    className="OfferOpen__n"
+                    variants={WIPE}
+                >
+                    {n}
                 </motion.p>
 
                 {/* A motion element, though it animates nothing itself.
@@ -60,14 +85,19 @@ export default function OfferOpen() {
                     plain h2 in the middle of the chain breaks it, and the two
                     halves below never hear that the section arrived. */}
                 <motion.h2 className="OfferOpen__line">
-                    <motion.span className="OfferOpen__line__part" variants={WIPE}>
-                        Poradenství není produkt.
+                    <motion.span
+                        {...editable(docId, "items.1.label", "text")}
+                        className="OfferOpen__line__part"
+                        variants={WIPE}
+                    >
+                        {first}
                     </motion.span>
                     <motion.span
+                        {...editable(docId, "items.2.label", "text")}
                         className="OfferOpen__line__part OfferOpen__line__soft"
                         variants={WIPE_LATE}
                     >
-                        Je to plán, který někdo hlídá.
+                        {second}
                     </motion.span>
                 </motion.h2>
 

@@ -25,6 +25,10 @@ import MediaLibrary from "@/cms/studio/media/MediaLibrary"
  * uploaded file is handed straight back as the pick, so uploading and choosing
  * are one gesture.
  */
-export default function MediaModule({ onPick, selectedId }) {
-  return <MediaLibrary mode="pick" onPick={onPick} selectedId={selectedId} />
+export default function MediaModule({ onPick, selectedId, accept = "image/*" }) {
+  // `accept` defaults to images because both callers are image surfaces. It is
+  // a parameter rather than a constant so a field type that accepts something
+  // else — `file`, with `accept: "*/*"` — reaches the same library without this
+  // file learning about it.
+  return <MediaLibrary mode="pick" onPick={onPick} selectedId={selectedId} accept={accept} />
 }

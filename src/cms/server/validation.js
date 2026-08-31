@@ -4,11 +4,16 @@
 // keeps the coupling to another build's module in one place — when the core's
 // surface shifts, one file changes — and it gives tests a single seam to stub.
 
-import { findType, getType, listTypes, validateDocument, validateValue } from '@/cms/core'
+import { findType, getType, listTypes, sameJson, validateDocument, validateValue } from '@/cms/core'
 
 import { invalid, notFound } from './errors.js'
 
 export { getType, findType, listTypes, validateValue }
+
+// Not validation, but Contract 1 all the same, and this file is where the
+// server reaches Contract 1. `documents.update()` asks it whether a body worth
+// storing as a draft actually differs from the published one.
+export { sameJson }
 
 // findType rather than getType: an unknown type name arriving from a request is
 // a 404 to answer, not an exception to catch.

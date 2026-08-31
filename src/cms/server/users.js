@@ -23,7 +23,20 @@ import { revokeSessionsForUser } from './auth.js'
 // of a response is never to fetch it.
 const FIELDS = 'id, email, name, role, created_at, updated_at, last_login_at, disabled_at, created_by'
 
-const ROLES = ['owner', 'editor']
+/**
+ * The roles this screen may hand out — `admin` is deliberately absent.
+ *
+ * Admin is decided by CMS_ADMIN_EMAIL (server/auth.js effectiveRole), not by a
+ * column, so accepting it here would let somebody store a value the server then
+ * ignores: the row would read admin and every request would still answer
+ * member. A role that can be saved and does nothing is worse than one that
+ * cannot be saved.
+ *
+ * `owner` and `member` carry identical permissions today — owner is the title a
+ * client sees on their own site. Kept as separate values so it can be given
+ * meaning later without revisiting every account.
+ */
+const ROLES = ['owner', 'member']
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -81,11 +94,15 @@ export const listUsers = async () => {
     const { data, error } = await db()
         .from('cms_user')
         .select(FIELDS)
-        // Owners first, then alphabetically. Descending because 'owner' sorts
-        // after 'editor' and the people who can change things belong at the top.
+        // The administrator first, then alphabetically. ASCENDING, and the
+        // direction is load-bearing: with the roles renamed to admin/owner/
+        // member the alphabet happens to put admin first, where the person who
+        // can change things belongs. It sorted descending while the roles were
+        // owner/editor, which put the same person at the top for the same
+        // reason — the rename inverted which direction does that.
         // A staff list is read to find a person, and it is short enough that
         // paging it would be noise.
-        .order('role', { ascending: false })
+        .order('role', { ascending: true })
         .order('email', { ascending: true })
 
     if (error) throw serverError('Načtení uživatelů selhalo')
@@ -105,7 +122,7 @@ export const listUsers = async () => {
  * response is not cached (handlers/http.js sets no-store), and no later request
  * can retrieve it. If it is lost, the owner creates a new one.
  */
-export const createUser = async (actor, { email, name, role = 'editor', password }) => {
+export const createUser = async (actor, { email, name, role = 'member', password }) => {
     const address = normaliseEmail(email)
     if (!EMAIL_RE.test(address)) {
         throw invalid('Zadejte platnou e-mailovou adresu', { email: 'Neplatný formát' })

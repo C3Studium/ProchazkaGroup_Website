@@ -48,3 +48,6 @@ local.env
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# samostatna knihovna, ma vlastni repozitar
+VALECMS/

@@ -1623,7 +1623,14 @@ function failureText(error, recovered) {
         ? "Tento blok nemáte oprávnění upravovat."
         : code === "invalid"
           ? "Upravte text tak, aby prošel, a uložte ho znovu."
-          : "Zkuste to prosím znovu."
+          : // A 409 means somebody else typed into THIS field while this edit
+            // was open, and it is the one code where "Zkusit znovu" is the
+            // wrong advice: retrying would put this text over theirs, which is
+            // the overwrite the server just refused. *Vrátit uloženou verzi* is
+            // beside this message and holds exactly what they wrote.
+            code === "conflict"
+            ? "Někdo jiný toto pole mezitím změnil. Podívejte se na uloženou verzi (Vrátit uloženou verzi) a rozhodněte se, co má zůstat."
+            : "Zkuste to prosím znovu."
   const lost = recovered ? "" : " Uloženou verzi se navíc nepodařilo načíst."
   return `Neuloženo: ${reason || "neznámá chyba"}. Váš text zůstal na stránce.${lost} ${next}`
 }

@@ -743,7 +743,12 @@ const indexOf = (node) => Array.prototype.indexOf.call(node.parentNode.childNode
  * is never the typography; it is what a contentEditable leaves behind when a
  * space is typed with nothing after it yet.
  */
-const NO_BREAK = /^[\u00a0\u202f]$/
+// Does this run of whitespace carry a non-breaking space? Not "is it exactly
+// one" — the anchors used to say that, and they are why `Kde nás\u00a0 najdete`
+// lost its typography on the first save while `Kontakt\u00a0| 8-16` kept it. A
+// contentEditable produces `\u00a0 ` and ` \u00a0` on its own, so the mixed run
+// is the common shape, not the exotic one.
+const NO_BREAK = /[\u00a0\u202f]/
 
 /**
  * A break is not whitespace to be collapsed.
@@ -757,7 +762,13 @@ const NO_BREAK = /^[\u00a0\u202f]$/
 export function normaliseText(text) {
   return String(text)
     .split(BREAK)
-    .map((line) => line.replace(/\s+/g, (run) => (NO_BREAK.test(run) ? run : " ")).replace(/^\s+|\s+$/g, ""))
+    // A run carrying a non-breaking space collapses TO one, rather than being
+    // kept verbatim: the ordinary spaces beside it are the editor's artefact,
+    // the non-breaking one is the typography. Same rule as `plainText` in
+    // server/site/read.js, so a value means the same thing on both paths.
+    .map((line) =>
+      line.replace(/\s+/g, (run) => (NO_BREAK.test(run) ? "\u00a0" : " ")).replace(/^\s+|\s+$/g, ""),
+    )
     .join(BREAK)
     .replace(/^\n+|\n+$/g, "")
 }

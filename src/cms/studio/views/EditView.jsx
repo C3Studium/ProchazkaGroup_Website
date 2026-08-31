@@ -1,21 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useRouter } from "next/router"
+import { useStudioRouter } from "../../runtime/navigation.jsx"
 
-import { DOC_ATTR, EDITABLE_SELECTOR, FIELD_ATTR, HREF_ATTR } from "@/cms/edit/attrs"
-import { commitPendingEdit } from "@/cms/edit/overlay/commit"
+import { DOC_ATTR, EDITABLE_SELECTOR } from "../../edit/attrs.js"
+import { commitPendingEdit } from "../../edit/overlay/commit.js"
 
-import { DevicePicker, PagePicker, ZoomControls } from "../preview/FrameControls"
-import Stage from "../preview/Stage"
-import { safePath, useFrameSurface } from "../preview/useFrameSurface"
-import { useCore, usePort, useRevision } from "../context/StudioProvider"
-import { useToast } from "../context/ToastProvider"
-import { hrefs } from "../lib/routes"
-import { plural } from "../lib/format"
-import { previewOf } from "../lib/documents"
-import Icon from "../ui/Icon"
-import { Button } from "../ui/controls"
-import { Modal } from "../ui/Modal"
-import { ErrorState, Spinner } from "../ui/feedback"
+import { DevicePicker, PagePicker, ZoomControls } from "../preview/FrameControls.jsx"
+import Stage from "../preview/Stage.jsx"
+import { safePath, useFrameSurface } from "../preview/useFrameSurface.js"
+import { useCore, usePort, useRevision } from "../context/StudioProvider.jsx"
+import { useToast } from "../context/ToastProvider.jsx"
+import { hrefs } from "../lib/routes.js"
+import { plural } from "../lib/format.js"
+import { bodyOf, changedFields, hasUnpublishedChanges, previewOf } from "../lib/documents.js"
+import { publishOutcome } from "../lib/publishing.js"
+import Icon from "../ui/Icon.jsx"
+import { Button } from "../ui/controls.jsx"
+import { Modal } from "../ui/Modal.jsx"
+import { ErrorState, Spinner } from "../ui/feedback.jsx"
 import preview from "../preview/preview.module.scss"
 import styles from "./EditView.module.scss"
 
@@ -108,9 +109,13 @@ import styles from "./EditView.module.scss"
  *   guessing, no "everything with a draft in the CMS".
  *
  *   The edges are shown before anything happens. The confirm step names each
- *   block and the fields of it that are on this page. This is the only action in
- *   the whole mode that the public can see and the only one *Zrušit* does not
- *   undo, so it is the only one that asks.
+ *   block and the fields in it that differ from what is on the site. This is the
+ *   only action in the whole mode that the public can see and the only one
+ *   *Zrušit* does not undo, so it is the only one that asks.
+ *
+ *   The set is only what would actually change. A block whose draft repeats what
+ *   is published is not offered, because publishing it would do nothing and
+ *   listing it teaches an editor that the confirmation is noise.
  *
  *   Nothing to publish says so. A button that is silently inert reads as broken.
  */
@@ -165,7 +170,7 @@ const releaseSession = () => {
 }
 
 export default function EditView() {
-    const router = useRouter()
+    const router = useStudioRouter()
 
     // Nothing read from the URL may be rendered until this is true. The Studio is
     // client-only, so its subtree is never server-rendered and cannot mismatch —
@@ -261,6 +266,7 @@ export default function EditView() {
     }, [frame])
 
     const editable = useEditableCount(frame.frameRef, frame.loadedAt)
+    const audit = useAnnotationAudit(frame.frameRef, frame.loadedAt, sitePath || "/")
 
     /* ------------------------------------------------------------- náhled -- */
 
@@ -306,7 +312,11 @@ export default function EditView() {
                     {previewing ? "Náhled konceptu" : "Úpravy zapnuté"}
                 </span>
 
-                <span className={preview.spacer} />
+                {/* Also the line break, on a phone held upright: given the whole
+                    row it folds the head in the one place a fold says something
+                    — what this page is, then what can be done to it. See
+                    `.headSpacer`. */}
+                <span className={`${preview.spacer} ${styles.headSpacer}`} />
 
                 {/* Counted off the framed document rather than off what the server
                     said it sent. "Nothing is clickable" and "nothing was loaded"
@@ -321,6 +331,20 @@ export default function EditView() {
                         ? "…"
                         : plural(editable, "upravitelný prvek", "upravitelné prvky", "upravitelných prvků")}
                 </span>
+
+                {/* Only when there is something to say. This is a developer's
+                    warning on an editor's screen, and one that appears on every
+                    load is one that gets read as chrome — the console carries
+                    the detail, this carries the fact that there is any. */}
+                {audit ? (
+                    <span
+                        className={styles.audit}
+                        title="Anotace, které míří na pole, jaké stránka nečte nebo typ nemá. Podrobnosti jsou v konzoli."
+                    >
+                        <Icon name="warning" size={13} />
+                        {plural(audit, "vadná anotace", "vadné anotace", "vadných anotací")}
+                    </span>
+                ) : null}
 
                 {/* Both page-level actions, in the top bar as asked. The device
                     and zoom clusters below describe the stage; these two describe
@@ -417,6 +441,21 @@ export default function EditView() {
                 </button>
             </div>
 
+            {/* What this screen is on a phone, said once rather than discovered.
+                The frame below fits a desktop page at a quarter size there and
+                tapping a paragraph at that scale is not a thing anyone can do;
+                the two actions in the head are, and they are the reason to open
+                this on a phone at all. Always rendered, shown by CSS at one
+                width — a notice that depends on JavaScript having measured the
+                window is a notice the server and the client disagree about. */}
+            <p className={styles.stackedNote}>
+                <Icon name="info" size={13} />
+                <span>
+                    Na telefonu je tohle jen náhled — klikací úpravy potřebují větší displej.{" "}
+                    <strong>Publikovat</strong> a <strong>Otevřít v okně</strong> fungují i tady.
+                </span>
+            </p>
+
             {/* One line, always on screen, saying which of the two states the
                 page below is in and what that means. The refusal replaces it
                 rather than sitting beside it: an editor whose Náhled did not
@@ -501,27 +540,24 @@ export default function EditView() {
  * another page in front of the public, and the editor would have no way to see
  * that it had.
  *
- * The field paths come along because they are what makes the confirm step
- * readable. "Texty na webu" twice tells an editor nothing; "Texty na webu —
- * items.0.label, image" is the block they were just typing into.
+ * What it does NOT do any more is decide which fields to name. It used to
+ * return every annotated path on the element, changed or not, and the dialog
+ * printed them as the block's "changed fields" — so a typo fix in one heading
+ * confirmed a list of six documents naming fields nobody had touched. Which
+ * documents are on the page is a question only the page can answer; what
+ * changed in them is a question only the two bodies can answer, and
+ * `changedFields` asks it.
  */
 function annotatedDocs(frameWindow) {
     const doc = frameWindow?.document
     if (!doc) return []
 
-    const found = new Map()
+    const found = new Set()
     for (const element of doc.querySelectorAll(`[${DOC_ATTR}]`)) {
         const id = element.getAttribute(DOC_ATTR)
-        if (!id) continue
-        if (!found.has(id)) found.set(id, new Set())
-        // Either half of a link annotation names a field worth listing; a
-        // whole-document annotation names none, and shows as the document alone.
-        for (const attr of [FIELD_ATTR, HREF_ATTR]) {
-            const field = element.getAttribute(attr)
-            if (field) found.get(id).add(field)
-        }
+        if (id) found.add(id)
     }
-    return [...found].map(([id, fields]) => ({ id, fields: [...fields] }))
+    return [...found]
 }
 
 /**
@@ -554,15 +590,21 @@ function usePublishSet(frameRef, previewing) {
         try {
             const annotated = annotatedDocs(frameRef.current?.contentWindow)
             const loaded = await Promise.all(
-                annotated.map(async (block) => ({ ...block, document: await port.get({ id: block.id }) })),
+                annotated.map(async (id) => ({ id, document: await port.get({ id }) })),
             )
-            // `draft` is the whole test. A document that has never been published
-            // keeps its body there too, so this is "has something the public has
-            // not seen", which is exactly what the button offers to change.
+            // The test is that the draft SAYS SOMETHING ELSE, not that a draft
+            // row exists. Those two differed on a tenth of the store — 10 of 43
+            // drafts were identical to their published body — and this dialog
+            // offered every one of them, so a one-word typo fix asked an editor
+            // to confirm publishing six documents, three of which would have
+            // changed nothing at all. A document that has never been published
+            // still qualifies: its empty `data` differs from its body, which is
+            // exactly "the public has not seen this".
             const drafts = loaded
-                .filter((block) => block.document?.draft)
+                .filter((block) => hasUnpublishedChanges(block.document))
                 .map((block) => ({
                     ...block,
+                    fields: changedFields(block.document),
                     title: previewOf(core.getType(block.document.type), block.document).title,
                     typeTitle: core.getType(block.document.type)?.title || block.document.type,
                     firstPublish: block.document.status !== "published",
@@ -581,9 +623,11 @@ function usePublishSet(frameRef, previewing) {
         // is not a transaction and cannot be made one here; the blocks that went
         // through stay through, and the dialog says which did not.
         const failures = []
+        const reports = []
         for (const block of blocks) {
             try {
-                await port.publish({ id: block.id })
+                const published = await port.publish({ id: block.id })
+                reports.push(published?.revalidation)
             } catch (error) {
                 failures.push({ block, error })
             }
@@ -601,13 +645,26 @@ function usePublishSet(frameRef, previewing) {
             return
         }
 
-        toast.success(`Publikováno: ${blocks.length}`, {
-            description: "Bloky z této stránky jsou na webu.",
-        })
+        // The blocks are published either way; what changes is whether the page
+        // an editor is looking at has been re-rendered with them yet. Publishing
+        // several blocks of one page produces several reports naming the same
+        // routes, and `publishOutcome` folds them into one sentence.
+        const outcome = publishOutcome(reports)
+        const title = `Publikováno: ${blocks.length}`
+        if (outcome.ok) toast.success(title, { description: outcome.description })
+        else toast.error(title, { description: outcome.description, duration: 12000 })
         setState({ status: "idle", blocks: [], error: null })
     }, [bump, port, state.blocks, toast])
 
     return { state, open, close, confirm, previewing }
+}
+
+const FIELD_SUMMARY_LIMIT = 4
+
+const fieldSummary = (fields) => {
+    const shown = fields.slice(0, FIELD_SUMMARY_LIMIT)
+    const rest = fields.length - shown.length
+    return `${shown.join(", ")}${rest ? ` a ${plural(rest, "další", "další", "dalších")}` : ""}`
 }
 
 const fieldErrors = (error) => (Array.isArray(error?.fields) ? error.fields : [])
@@ -633,8 +690,8 @@ function PublishDialog({ state, close, confirm, previewing }) {
                 }
             >
                 <p className={styles.publishNote}>
-                    Žádný blok na této stránce nemá rozpracovaný koncept — všechno, co je tady
-                    vidět, už na webu je.
+                    Žádný blok na této stránce nemá úpravy, které by na webu ještě nebyly —
+                    všechno, co je tady vidět, už na webu je.
                 </p>
             </Modal>
         )
@@ -693,9 +750,18 @@ function PublishDialog({ state, close, confirm, previewing }) {
                                     <span className={styles.publishFirst}>poprvé</span>
                                 ) : null}
                             </span>
+                            {/* The fields that actually differ from what is
+                                published, capped: a list long enough to wrap
+                                three times has stopped being evidence. A block
+                                being published for the first time differs in
+                                every field it has, which is a list that says
+                                nothing the „poprvé" mark above has not already
+                                said better — so it gets the mark and no list. */}
                             <span className={styles.publishMeta}>
                                 {block.typeTitle}
-                                {block.fields.length ? ` · ${block.fields.join(", ")}` : ""}
+                                {!block.firstPublish && block.fields.length
+                                    ? ` · ${fieldSummary(block.fields)}`
+                                    : ""}
                             </span>
                             {failure ? (
                                 <span className={styles.publishError}>
@@ -727,6 +793,155 @@ function PublishDialog({ state, close, confirm, previewing }) {
             ) : null}
         </Modal>
     )
+}
+
+/**
+ * Does every annotation on the framed page still point at something?
+ *
+ * ---------------------------------------------------------------------------
+ * Why here and not in the site layer
+ *
+ * The check needs an annotation and the configuration in the same place, and
+ * there is exactly one such place. A `data-cms-*` attribute does not exist
+ * during any server render — `editable()` is armed from an effect, which is what
+ * keeps it out of public HTML by construction (see `@/cms/edit/mode`) — so the
+ * site layer never sees one, and a check there could only re-derive what a
+ * component *ought* to be annotating, which is a second statement of the fact
+ * that produced the bug in the first place.
+ *
+ * The framed document has the real attributes, the real document ids and the
+ * real stored bodies behind them. This view already reads all three: it counts
+ * the annotations above and loads their documents for Publikovat. So the check
+ * costs one extra `get` per document on a page an editor opened anyway, and it
+ * runs where a developer changing a component is already looking at their work.
+ *
+ * ---------------------------------------------------------------------------
+ * Why it watches rather than reads once
+ *
+ * Two things add annotations to a page after it has loaded, and both matter
+ * here. The attributes themselves appear one render *after* hydration, which is
+ * the same reason `useEditableCount` polls; and sections mount when a reader
+ * asks for them — /o-nas keeps four history panels behind a held button, which
+ * is sixteen annotations that exist only once somebody has scrolled to the foot
+ * of the page and opened them. A check that read once would report those as
+ * absent rather than as unchecked, which is the quieter half of the same failure
+ * it exists to stop.
+ *
+ * So it re-reads on a slow interval and re-audits only when the set of addresses
+ * has actually changed. On a settled page that is one pass over the annotated
+ * elements every two seconds and nothing else — next to the overlay's per-frame
+ * rect reads it is not measurable — and it means a fast refresh of the component
+ * being worked on is re-checked without reloading the frame.
+ *
+ * ---------------------------------------------------------------------------
+ * Development only, and loaded on demand
+ *
+ * `@/cms/audit` reaches `cms.config.js` and the schemas. It is behind an
+ * `import()` inside the NODE_ENV branch so that a production build of the Studio
+ * neither downloads nor evaluates any of it, on the same terms the popup and the
+ * media library are lazy — most sessions are an editor changing a headline, and
+ * this is not for them.
+ */
+const AUDIT_INTERVAL_MS = 2000
+
+function useAnnotationAudit(frameRef, loadedAt, route) {
+    const port = usePort()
+    const core = useCore()
+    const [findings, setFindings] = useState(0)
+
+    useEffect(() => {
+        if (process.env.NODE_ENV === "production") return undefined
+        if (!loadedAt) return undefined
+        setFindings(0)
+
+        let live = true
+        let running = false
+        // What was audited last time, as one string. The comparison is against
+        // the ADDRESSES rather than against their number: a fast refresh that
+        // changes a path leaves the count where it was.
+        let audited = null
+        let modules = null
+
+        const load = async () => {
+            modules = modules || Promise.all([import("../../audit/index.js"), import("../../site/config.js")])
+            return modules
+        }
+
+        const pass = async () => {
+            if (!live || running) return
+            let doc
+            try {
+                doc = frameRef.current?.contentWindow?.document
+            } catch {
+                // Same-origin by construction; a document mid-navigation can
+                // still refuse the read, and the next load brings another window.
+                return
+            }
+            if (!doc) return
+
+            running = true
+            try {
+                const [audit, site] = await load()
+                if (!live) return
+
+                const annotations = audit.fromDocument(doc)
+                const signature = annotations
+                    .map((entry) => `${entry.doc}|${entry.addresses.map((one) => one.path).join(",")}`)
+                    .join(";")
+                if (signature === audited) return
+                audited = signature
+                if (!annotations.length) return
+
+                // One `get` per document, not per annotation: a page names a
+                // dozen documents through a hundred elements.
+                const ids = [...new Set(annotations.map((entry) => entry.doc))]
+                const loaded = await Promise.all(
+                    ids.map(async (id) => {
+                        const document = await port.get({ id }).catch(() => null)
+                        if (!document) return [id, null]
+                        const body = bodyOf(document)
+                        return [id, { type: document.type, key: body.key || null, body }]
+                    }),
+                )
+                if (!live) return
+
+                const documents = new Map(loaded)
+                const result = audit.auditPage({
+                    route,
+                    pages: audit.pagesFor(site.default, route),
+                    annotations,
+                    documentFor: (id) => documents.get(id) || null,
+                    typeFor: (name) => core.getType(name) || null,
+                })
+
+                const [head, ...rest] = audit.reportLines({ route, ...result })
+                // The head every time the set changes, so a developer can tell a
+                // silent check from one that is not running; the findings as
+                // warnings, because they are the only part that asks for anything.
+                if (result.findings.length) {
+                    console.warn(head)
+                    for (const line of rest) console.warn(line)
+                } else {
+                    console.info(head)
+                }
+                setFindings(result.findings.length)
+            } catch {
+                // A frame mid-navigation, or a chunk that did not load. Neither
+                // is a finding about anybody's annotations.
+            } finally {
+                running = false
+            }
+        }
+
+        pass()
+        const timer = setInterval(pass, AUDIT_INTERVAL_MS)
+        return () => {
+            live = false
+            clearInterval(timer)
+        }
+    }, [core, frameRef, loadedAt, port, route])
+
+    return findings
 }
 
 /**

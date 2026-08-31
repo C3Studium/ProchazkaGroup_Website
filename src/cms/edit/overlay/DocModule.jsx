@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 
-import { useCore, usePort, useRevision } from "@/cms/studio/context/StudioProvider"
+import { useCore, usePort, useRevision, useAuth } from "@/cms/studio/context/StudioProvider"
 import { useToast } from "@/cms/studio/context/ToastProvider"
 import FieldRenderer from "@/cms/studio/fields/FieldRenderer"
 import { useAsync } from "@/cms/studio/hooks/useAsync"
@@ -36,6 +36,17 @@ import styles from "./sheet"
  * rests on, and a Publikovat inside a popup over the page would quietly end it.
  * Publishing stays where the thing being published is the thing on screen.
  *
+ * Neither does *Zahodit koncept*, and that one is worth the paragraph because it
+ * would pass the test above: `discardDraft` writes `draft` and names no other
+ * column, so it changes nothing a visitor can see. The rule this surface is
+ * really protecting is the other one — everything it does can be done again.
+ * Every write here is `port.update`, and an editor who mistypes into a form
+ * retypes it. Discard is the one draft write that cannot be taken back, and the
+ * place for it is the screen that already carries every whole-document action an
+ * editor has to be careful with, one click away, where the confirmation naming
+ * what disappears has room to be read. A second such place over the page would
+ * be a second place to be careful.
+ *
  * Validation is the document editor's, for the same reason as the inputs:
  * `port.update` validates the whole body server-side and answers 422, so
  * checking here is about telling the editor which field before the round trip,
@@ -69,7 +80,9 @@ export default function DocModule({ docId, typeName, onSaved, onClose }) {
   const type = core.getType(doc?.type || typeName)
   const mismatch = doc?.type && typeName && doc.type !== typeName ? doc.type : null
 
-  const groups = useMemo(() => fieldGroups(type), [type])
+  const { role } = useAuth()
+
+  const groups = useMemo(() => fieldGroups(type, role), [type, role])
   const activeGroup = groups.find((entry) => entry.name === group) || defaultGroup(groups)
 
   const validation = useMemo(
@@ -98,7 +111,13 @@ export default function DocModule({ docId, typeName, onSaved, onClose }) {
     }
     setBusy(true)
     try {
-      const saved = await port.update({ id: docId, data: buffer })
+      // Version-checked like the Studio's own editor: this popup sends a WHOLE
+      // body, so without it a form left open would revert whatever a colleague
+      // wrote in the meantime — including through the overlay one element away.
+      // There is no resolve dialog here and there should not be one: the popup
+      // is a few fields the editor can see, and `reload` puts the stored version
+      // in front of them. The refusal's own sentence says to do that.
+      const saved = await port.update({ id: docId, data: buffer, baseVersion: doc?.updatedAt })
       baseline.current = bodyOf(saved)
       setBuffer(bodyOf(saved))
       setTouched(new Set())

@@ -1,4 +1,4 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
+@use "../../styles/viewport" as *;
 // Studio design system.
 //
 // Named `.module.scss` on purpose. `scripts/sync-styles.js` globs every stylesheet
@@ -115,6 +115,10 @@ $s16: 64px;
 // header, toolbar, rows and empty states all line up on it.
 $gutter: 32px;
 $gutter-sm: 20px;
+// A phone held upright. The queue's three tab counts are 337px of text at this
+// size; 16px a side is what leaves them all on screen at 375 without the strip
+// having to be scrolled to read the number the editor came for.
+$gutter-ph: 16px;
 
 // --------------------------------------------------------------- metrics --
 $radius: 3px;
@@ -127,6 +131,62 @@ $row: 52px;
 $fast: 110ms;
 $mid: 170ms;
 $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
+
+// ------------------------------------------------------------- the bands --
+//
+// Two stops for the whole admin, and both are named rather than typed.
+//
+// There used to be one number — `max-width: 900px` — written by hand in twelve
+// stylesheets, and it was wrong twice over. It was wrong for a phone in
+// landscape, which is 932px across and therefore got the *desktop* layout: a
+// 240px navigation rail out of 932px on a screen 430px tall. And it was the only
+// stop there was, so a 390px phone got the tablet layout and every toolbar on it
+// ran off the side of a workspace that clips.
+//
+// `below-with-phone()` and the `ph` stop are the library's own — see
+// ../../styles/_viewport.scss for why width alone cannot answer this.
+
+/// Tablet, phone, and the phone in landscape. The navigation is a rail of icons
+/// and the gutter halves; a screen still lays its content out in rows.
+///
+/// The landscape half is `phs` out of the system's own table, which is what
+/// brings 932×430 in here instead of leaving it with the desktop.
+@mixin compact {
+  @include below-with-phone(sm) {
+    @content;
+  }
+}
+
+/// A phone held upright — 390×844, 375×667, and nothing wider than 560px.
+///
+/// The band where rows of controls stop fitting side by side at any gutter, so
+/// they wrap or stack instead. Deliberately narrower than `compact`: at 768px
+/// and at 932px a toolbar still fits on one line, and stacking it there would
+/// spend vertical space — which on a landscape phone is the scarce one — to fix
+/// a problem that screen does not have.
+///
+/// Every rule under this must come after the `compact` rule it refines; they
+/// carry the same specificity and both are true here.
+@mixin stacked {
+  @include below(ph) {
+    @content;
+  }
+}
+
+/// The queue's own stop, and the only one in the Studio the site's table has no
+/// name for: the width at which four columns of review row stop being four
+/// columns. It is not a device — it is where 18px + 210px of identity + a
+/// readable measure + a pair of buttons stops fitting — so it is named here,
+/// once, rather than written as a number into ModerationView.
+///
+/// `below(md)` rather than the 1180 that used to be typed there. The site's `md`
+/// stop is 1200px, twenty pixels away, and a second number that close to a named
+/// one is a number that will be read as the same stop and edited as if it were.
+@mixin queue-narrow {
+  @include below(md) {
+    @content;
+  }
+}
 
 // ---------------------------------------------------------------- mixins --
 
@@ -331,4 +391,17 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
   --st-fast: #{$fast};
   --st-mid: #{$mid};
   --st-ease: #{$ease};
+
+  /* The one edge every screen shares, so it folds in one place rather than in
+     each of the eleven stylesheets that used to restate `var(--st-s5)` under
+     their own copy of the 900px query. */
+  @include compact {
+    --st-gutter: #{$gutter-sm};
+  }
+
+  /* After `compact`, never before: both are one declaration on the same
+     element and both are true on a phone held upright. */
+  @include stacked {
+    --st-gutter: #{$gutter-ph};
+  }
 }

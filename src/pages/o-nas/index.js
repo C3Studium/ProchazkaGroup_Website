@@ -12,7 +12,7 @@ import QnaContact from "@/components/pages/index/QnaContact"
 import Head from "next/head"
 import { AnimatePresence } from "framer-motion"
 import { useCallback, useEffect, useState } from "react"
-import { getAboutContent, getAssistant, getContactContent, getFooterContent, readEditable, readPublished } from "@/cms/server/site"
+import { getAboutContent, getAssistant, getContactContent, getFooterContent, readerFor, viewOf } from "@/cms/server/site"
 
 // ISR, on the same terms as the homepage (src/pages/index.js): three
 // scroll-driven sections over copy an editor changes a few times a year, so the
@@ -21,7 +21,7 @@ import { getAboutContent, getAssistant, getContactContent, getFooterContent, rea
 const REVALIDATE_SECONDS = 600
 
 /**
- * Unlike the homepage, this page reads `context.draftMode`.
+ * Unlike the homepage, this page reads Next's preview cookie.
  *
  * The homepage may not, and `@/cms/server/site/homepage.js` states the guarantee
  * that buys — which is why the Studio frames it at /studio/preview/home instead
@@ -32,26 +32,29 @@ const REVALIDATE_SECONDS = 600
  * this page would buy back the hydration bug that arrangement was built to
  * remove.
  *
- * `context.draftMode` is true exactly when the request carries the bypass cookie
- * that /api/studio/edit sets for a signed-in editor, and Next turns off static
- * generation for those requests. So this runs per request, against the database,
- * for an editor only; a visitor gets the statically generated page and no
- * document id in its props.
+ * `viewOf(context)` reads that cookie and answers with one of three things: the
+ * published site, the draft, or the site as it stood at a chosen moment. Next
+ * turns off static generation for a request carrying the cookie, so all three
+ * run per request, against the database, for a signed-in editor only; a visitor
+ * gets the statically generated page, the published bodies and no document id in
+ * its props. The moment cannot arrive any other way — there is no query
+ * parameter to type. See @/cms/server/site/archive.js.
  */
 export async function getStaticProps(context) {
-  const draft = Boolean(context.draftMode)
+  const view = viewOf(context)
 
   // Cannot reject — every read inside answers with empty rather than throwing,
   // so a missing table or an unreachable database yields a page identical to
   // the one that shipped rather than a build failure. See src/cms/server/site.
   const [content, footer, contact, assistant] = await Promise.all([
-    getAboutContent({ draft }),
-    getFooterContent({ draft }),
-    getContactContent({ draft }),
+    getAboutContent(view),
+    getFooterContent(view),
+    getContactContent(view),
     // The same read the rest of this page uses. Without it she is read published
     // even for an editor, which means no document id and a contact sheet nothing
-    // on it can be clicked in — measured that way on /recenze before this.
-    getAssistant({ read: draft ? readEditable : readPublished }),
+    // on it can be clicked in — measured that way on /recenze before this — and,
+    // in the Archive, today's assistant beside March's page.
+    getAssistant({ read: readerFor(view) }),
   ])
 
   return {

@@ -1,8 +1,8 @@
 import Link from "next/link"
 import { useAuth, usePort, useRevision, useTypes } from "../context/StudioProvider"
 import { useAsync } from "../hooks/useAsync"
-import { PENDING, QUEUE_FILTERS } from "../lib/moderation"
-import { previewOf, stateOf } from "../lib/documents"
+import { PENDING, queueQuery } from "../lib/moderation"
+import { STATE_LABELS, previewOf, stateOf } from "../lib/documents"
 import { form, formatRelative, truncate } from "../lib/format"
 import { hrefs } from "../lib/routes"
 import { Button } from "../ui/controls"
@@ -29,7 +29,7 @@ export default function OverviewView() {
   const { revision } = useRevision()
 
   const { data: pending, loading: pendingLoading } = useAsync(
-    () => port.list({ type: "review", filters: QUEUE_FILTERS[PENDING], sort: [{ field: "submittedAt", direction: "desc" }], perPage: 12 }),
+    () => port.list({ type: "review", perPage: 12, ...queueQuery(PENDING) }),
     [port, revision],
   )
 
@@ -104,7 +104,12 @@ export default function OverviewView() {
                   {(recent?.rows || []).map((doc) => {
                     const type = types.find((entry) => entry.name === doc.type)
                     const preview = previewOf(type, doc)
-                    const state = stateOf(doc)
+                    // The state's own name and the state's own tone, from the
+                    // one table that holds them. This row used to spell out
+                    // "na webu" / "změny" / "koncept" itself, so the same
+                    // document was called three things on three screens — the
+                    // exact re-derivation lib/documents.js says never happens.
+                    const state = STATE_LABELS[stateOf(doc)]
                     return (
                       <li key={doc.id}>
                         <Link href={hrefs.editor(doc.type, doc.id)} className={styles.recentRow}>
@@ -112,8 +117,8 @@ export default function OverviewView() {
                             <span className={styles.recentTitle}>{preview.title}</span>
                             <span className={styles.recentType}>{type?.title || doc.type}</span>
                           </span>
-                          <Badge tone={state === "published" ? "positive" : state === "edited" ? "warning" : "neutral"} dot>
-                            {state === "published" ? "na webu" : state === "edited" ? "změny" : "koncept"}
+                          <Badge tone={state.tone} dot title={state.hint}>
+                            {state.label}
                           </Badge>
                           <span className={styles.recentTime}>{formatRelative(doc.updatedAt)}</span>
                         </Link>

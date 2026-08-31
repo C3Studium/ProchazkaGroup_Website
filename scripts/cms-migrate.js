@@ -90,7 +90,32 @@ const readEnvFile = () => {
 
 const env = { ...readEnvFile(), ...process.env }
 
+// Which project the writes go to — see cms.database.js. Applied to this local
+// copy rather than to process.env, because that copy is what everything below
+// reads. It rewrites only the three canonical names, so the LEGACY_SUPABASE_*
+// override for the READ side above it still decides where the old rows come
+// from.
+require('./../cms.database.js').applyDatabaseEnv(env)
+
 const supabaseUrl = () => String(env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
+
+// Where the OLD tables are read from.
+//
+// Normally the same project the documents are written to — legacy rows and
+// cms_document side by side, which is what this script was written for. But a
+// rehearsal wants the live data in a THROWAWAY project: read the real rows,
+// write them somewhere nothing depends on, and try the whole CMS against it
+// before touching production. That needs the two halves pointed at different
+// places, so the read side takes an override and falls back to the single-
+// project spelling when there is none.
+//
+// The override changes only where reads GO. It cannot make this script write to
+// the legacy project: `legacyRequest` is GET-only and `cmsRequest` never reads
+// these two variables.
+const legacyUrl = () =>
+    String(env.LEGACY_SUPABASE_URL || env.NEXT_PUBLIC_SUPABASE_URL || '').replace(/\/+$/, '')
+
+const legacyKey = () => env.LEGACY_SUPABASE_ANON_KEY || env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 
 const deaccent = (value) =>
     String(value).normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
@@ -188,10 +213,10 @@ const canonical = (value) => {
  */
 const legacyRequest = async (table) => {
     if (!LEGACY_TABLES.includes(table)) throw new Error(`Nepovolená tabulka: ${table}`)
-    const key = env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-    if (!key) throw new Error('Chybí NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    const key = legacyKey()
+    if (!key) throw new Error('Chybí NEXT_PUBLIC_SUPABASE_ANON_KEY (nebo LEGACY_SUPABASE_ANON_KEY)')
 
-    const response = await fetch(`${supabaseUrl()}/rest/v1/${table}?select=*`, {
+    const response = await fetch(`${legacyUrl()}/rest/v1/${table}?select=*`, {
         method: 'GET',
         headers: { apikey: key, Authorization: `Bearer ${key}` },
     })
@@ -562,7 +587,15 @@ const printPlan = (plan, options) => {
 
     console.log('')
     console.log(c.bold('  cms-migrate — plán'))
-    console.log(c.dim(`  ${supabaseUrl()}`))
+    // Both ends, always — when they differ, that IS the thing to check before
+    // typing --write, and a plan that printed one URL would hide it.
+    const ref = (url) => (String(url).split('//')[1] || '').split('.')[0] || '?'
+    if (legacyUrl() === supabaseUrl()) {
+        console.log(c.dim(`  ${supabaseUrl()}`))
+    } else {
+        console.log(c.dim(`  čte  z ${ref(legacyUrl())}  ${legacyUrl()}`))
+        console.log(c.dim(`  píše do ${ref(supabaseUrl())}  ${supabaseUrl()}`))
+    }
     console.log(c.dim(`  režim: ${options.write ? c.red('ZÁPIS') : c.green('dry run (nic se nezapíše)')}`))
     console.log('')
 
@@ -775,8 +808,9 @@ const parseArgs = (argv) => {
 const main = async () => {
     const options = parseArgs(process.argv.slice(2))
 
-    if (!supabaseUrl() || !env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    if (!supabaseUrl() || !legacyKey() || !legacyUrl()) {
         console.error(c.red('  Chybí NEXT_PUBLIC_SUPABASE_URL nebo NEXT_PUBLIC_SUPABASE_ANON_KEY (.env).'))
+        console.error(c.dim('  Pro čtení z jiného projektu: LEGACY_SUPABASE_URL + LEGACY_SUPABASE_ANON_KEY.'))
         process.exit(1)
     }
 

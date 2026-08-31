@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion, useReducedMotion, useScroll, useSpring, useTransform } from "framer-motion";
 
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
+import { editable } from "@/cms/edit";
 import { CHAIN } from "./content";
 
 // The offer.
@@ -76,7 +77,14 @@ function useMatches(query) {
     return matches;
 }
 
-export default function OfferGrid() {
+/**
+ * @param {object[]} [blocks] one entry per rung of `CHAIN`, in the same order,
+ *   from `getPageContent`. A rung the CMS does not hold stays exactly as it
+ *   shipped — the same pairing-by-position /cookies' sections make, and for the
+ *   same reason: how many rungs there are is the layout's (`PLAN` above is
+ *   written against their indices), what each one says is the CMS's.
+ */
+export default function OfferGrid({ blocks = [] }) {
     const ref = useRef(null);
     const stacked = useMatches(STACKED);
     // Not "no motion": the rows still arrive, and the rules still draw
@@ -98,6 +106,27 @@ export default function OfferGrid() {
     // motion: it is a position in a document, not an effect.
     const walked = useTransform(gone, (v) => `${Math.max(0, Math.min(1, v)) * 100}%`);
 
+    // `kind`, `side`, `photo` and `position` are the arrangement and stay here:
+    // a head is not a box, and the three photographs carry a crop measured for
+    // the cell they are cut into. What a rung SAYS is the block's.
+    const chain = useMemo(
+        () =>
+            CHAIN.map((rung, index) => {
+                const block = blocks[index];
+                if (!block) return rung;
+                return {
+                    ...rung,
+                    n: block.n || rung.n,
+                    title: block.title || rung.title,
+                    ...(rung.kind === "head"
+                        ? { lead: block.body || rung.lead }
+                        : { body: block.body || rung.body }),
+                    docId: block.docId,
+                };
+            }),
+        [blocks],
+    );
+
     return (
         <section className="OfferWall" ref={ref}>
             <Depth progress={gone} still={still} />
@@ -115,7 +144,7 @@ export default function OfferGrid() {
             </div>
 
             {PLAN.map((row, i) => (
-                <Row key={i} row={row} stacked={stacked} still={still} />
+                <Row key={i} row={row} chain={chain} stacked={stacked} still={still} />
             ))}
         </section>
     );
@@ -164,7 +193,7 @@ function Depth({ progress, still }) {
     );
 }
 
-function Row({ row, stacked, still }) {
+function Row({ row, chain, stacked, still }) {
     return (
         <motion.div
             className="OfferWall__row"
@@ -180,7 +209,7 @@ function Row({ row, stacked, still }) {
             {row.cells.map(([i, w]) => (
                 <Cell
                     key={CHAIN[i].n}
-                    rung={CHAIN[i]}
+                    rung={chain[i]}
                     width={w}
                     of={row.cells.length}
                     stacked={stacked}
@@ -326,8 +355,12 @@ function Cell({ rung, width, of, stacked, still }) {
                 style={{ width: `${width * 100}%`, y: copyY }}
                 variants={RISE}
             >
-                <p className="OfferWall__n">{rung.n}</p>
-                <h2 className="OfferWall__title">{rung.title}</h2>
+                <p {...editable(rung.docId, "items.0.label", "text")} className="OfferWall__n">
+                    {rung.n}
+                </p>
+                <h2 {...editable(rung.docId, "title", "text")} className="OfferWall__title">
+                    {rung.title}
+                </h2>
                 <motion.span
                     className="OfferWall__head__rule"
                     variants={{
@@ -336,7 +369,9 @@ function Cell({ rung, width, of, stacked, still }) {
                     }}
                     aria-hidden="true"
                 />
-                <p className="OfferWall__lead">{rung.lead}</p>
+                <p {...editable(rung.docId, "body", "text")} className="OfferWall__lead">
+                    {rung.lead}
+                </p>
             </motion.header>
         );
     }
@@ -392,9 +427,24 @@ function Cell({ rung, width, of, stacked, still }) {
             <span className="OfferWall__block__scrim" aria-hidden="true" />
 
             <motion.div className="OfferWall__block__copy" style={{ y: copyY }}>
-                <p className="OfferWall__block__n">{rung.n}</p>
-                <h3 className="OfferWall__block__title">{rung.title}</h3>
-                <p className="OfferWall__block__body">{rung.body}</p>
+                <p
+                    {...editable(rung.docId, "items.0.label", "text")}
+                    className="OfferWall__block__n"
+                >
+                    {rung.n}
+                </p>
+                <h3
+                    {...editable(rung.docId, "title", "text")}
+                    className="OfferWall__block__title"
+                >
+                    {rung.title}
+                </h3>
+                <p
+                    {...editable(rung.docId, "body", "text")}
+                    className="OfferWall__block__body"
+                >
+                    {rung.body}
+                </p>
             </motion.div>
         </motion.article>
     );

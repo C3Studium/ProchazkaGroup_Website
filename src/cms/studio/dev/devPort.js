@@ -15,7 +15,9 @@
 // Pure — the core and errors.js, nothing else — and therefore browser-safe in
 // the same way `httpDataPort.js` is, despite living under `server/`. Shared so
 // the stub cannot accept a field path or a value that production would refuse.
+import { sameJson } from "@/cms/core"
 import { patchBody } from "@/cms/server/fieldPatch"
+import { REJECTION_FIELDS, REJECTION_REASONS } from "@/cms/schemas/review"
 
 import { DEV_PASSWORD, seedAssets, seedDocuments, seedUsers } from "./seed"
 
@@ -43,6 +45,10 @@ export class CmsError extends Error {
 
 const wait = (ms = LATENCY) => new Promise((resolve) => setTimeout(resolve, ms))
 const clone = (value) => (value == null ? value : JSON.parse(JSON.stringify(value)))
+// Said once, so the five methods that refuse cannot drift apart.
+const ARCHIVE_UNAVAILABLE =
+  "Archiv čte revize ze serveru a vývojový port žádné nemá. Vypněte NEXT_PUBLIC_CMS_DEV_PORT."
+
 const now = () => new Date().toISOString()
 const uid = (prefix) => `${prefix}-${Math.random().toString(36).slice(2, 10)}`
 
@@ -124,6 +130,21 @@ function matchesSearch(doc, search) {
 const isSet = (value) => value !== undefined && value !== null && value !== ""
 
 /**
+ * One field of one document, on the same three roots `server/query.js` resolves.
+ *
+ * A bare name is the body an editor is working on — which is what every filter
+ * in the Studio meant before any of them needed to be specific. `data.x` and
+ * `draft.x` name one of the two halves explicitly, and the moderation queues do
+ * need that: a rejection stamp is written into `draft`, and asking for it on
+ * `data` would match nothing at all against the real port.
+ */
+function fieldOf(doc, key) {
+  if (key.startsWith("data.")) return doc.data?.[key.slice(5)]
+  if (key.startsWith("draft.")) return doc.draft?.[key.slice(6)]
+  return bodyOf(doc)[key]
+}
+
+/**
  * Implements the declarative filter grammar described in lib/moderation.js.
  * Predicate functions are deliberately not supported — the real port is an HTTP
  * boundary and a filter that cannot be serialised would work here and nowhere
@@ -145,12 +166,16 @@ function matchesFilters(doc, filters) {
     if (key === "archived") return Boolean(doc.archivedAt) === Boolean(expected)
     if (key === "ids") return expected.includes(doc.id)
 
-    const actual = bodyOf(doc)[key]
+    const actual = fieldOf(doc, key)
 
     if (expected && typeof expected === "object" && "op" in expected) {
       const { op, value } = expected
       if (op === "eq") return actual === value
       if (op === "neq") return actual !== value
+      // `is`/`isNot` against null, because `neq` cannot ask it in SQL and the
+      // real port therefore does not offer it either — query.js says why.
+      if (op === "is") return value === null ? actual == null : actual === value
+      if (op === "isNot") return value === null ? actual != null : actual !== value
       if (op === "exists") return isSet(actual) === Boolean(value)
       if (op === "in") return Array.isArray(value) && value.includes(actual)
       if (op === "contains") return String(actual ?? "").toLowerCase().includes(String(value).toLowerCase())
@@ -165,8 +190,8 @@ function matchesFilters(doc, filters) {
 }
 
 function compare(a, b, field, direction) {
-  const left = bodyOf(a)[field]
-  const right = bodyOf(b)[field]
+  const left = fieldOf(a, field)
+  const right = fieldOf(b, field)
   const sign = direction === "desc" ? -1 : 1
 
   // Empty values sort last in both directions — an editor scanning for the
@@ -346,12 +371,29 @@ export function createDevPort({ signedIn = false } = {}) {
       return clone(doc)
     },
 
-    async update({ id, data }) {
+    /**
+     * `baseVersion` is checked here for the same reason `sameJson` is: a stub
+     * that accepted a stale write the server refuses would let the resolve
+     * dialog be developed against a backend that never opens it.
+     *
+     * The order matches the server's exactly, and the order is the rule: a body
+     * that stores nothing is answered, not refused, so pressing Uložit twice
+     * cannot produce a conflict.
+     */
+    async update({ id, data, baseVersion = null }) {
       await wait()
       requireSession()
       const doc = find(id)
-      // Edits always land in `draft`; `data` only moves on publish.
-      doc.draft = clone(data)
+      // Edits always land in `draft`; `data` only moves on publish. A body that
+      // repeats what is already published stores no draft at all — same rule and
+      // same comparison as src/cms/server/documents.js, so the stub cannot make
+      // a state the real server would not.
+      const draft = sameJson(data, doc.data) ? null : clone(data)
+      if (sameJson(draft, doc.draft)) return clone(doc)
+      if (baseVersion != null && baseVersion !== doc.updatedAt) {
+        throw new CmsError("conflict", "Někdo jiný obsah mezitím změnil. Načtěte jej znovu.")
+      }
+      doc.draft = draft
       doc.updatedAt = now()
       persist()
       return clone(doc)
@@ -415,11 +457,37 @@ export function createDevPort({ signedIn = false } = {}) {
       await wait()
       requireSession()
       const doc = find(id)
-      // The body must survive going private, so it moves back into `draft`.
-      doc.draft = clone(doc.draft ?? doc.data ?? {})
-      doc.data = {}
+      // Only the envelope moves, matching src/cms/server/documents.js. This used
+      // to empty `data` into `draft`, which read as "the body must survive going
+      // private" — it survives either way, because an editor reads `draft ?? data`
+      // — and it made the stub disagree with the server about the one thing
+      // discardDraft() depends on: after a withdrawal the last published body is
+      // still there to go back to.
       doc.status = "draft"
       doc.publishedAt = null
+      doc.updatedAt = now()
+      persist()
+      return clone(doc)
+    },
+
+    /**
+     * Throw the draft away, matching src/cms/server/documents.js: `draft` is
+     * cleared and `data`, `status` and `publishedAt` are not named. Both
+     * refusals are here too, because a stub that accepted what the server
+     * refuses would let a bug through in the one direction that matters.
+     */
+    async discardDraft({ id }) {
+      await wait()
+      requireSession()
+      const doc = find(id)
+      if (!doc.draft) throw new CmsError("conflict", "Dokument nemá rozpracovaný koncept.")
+      if (!Object.keys(doc.data || {}).length) {
+        throw new CmsError(
+          "conflict",
+          "Není k čemu se vrátit — tento dokument ještě nebyl publikovaný. Použijte archiv nebo smazání.",
+        )
+      }
+      doc.draft = null
       doc.updatedAt = now()
       persist()
       return clone(doc)
@@ -446,6 +514,45 @@ export function createDevPort({ signedIn = false } = {}) {
       await wait()
       requireSession()
       const doc = find(id)
+      doc.archivedAt = null
+      doc.updatedAt = now()
+      persist()
+      return clone(doc)
+    },
+
+    /**
+     * Moderation's pair, matching src/cms/server/documents.js: a rejection is an
+     * archive plus three stamps in `draft`, and it never deletes. `rejectedBy` is
+     * the signed-in name because the real one takes it from the session — a stub
+     * that let the caller supply it would be teaching the wrong contract.
+     */
+    async reject({ id, reason }) {
+      await wait()
+      const session = requireSession()
+      if (!REJECTION_REASONS.some((entry) => entry.value === reason)) {
+        throw new CmsError("invalid", "Neplatný důvod zamítnutí.")
+      }
+      const doc = find(id)
+      if (doc.status === "published") {
+        throw new CmsError("conflict", "Publikovanou recenzi nelze zamítnout — nejdřív ji stáhněte z webu.")
+      }
+      if (doc.archivedAt) throw new CmsError("conflict", "Recenze je už zamítnutá nebo v archivu.")
+
+      const at = now()
+      doc.draft = { ...clone(doc.draft ?? doc.data ?? {}), rejectedAt: at, rejectedBy: session?.name || session?.email || null, rejectedReason: reason }
+      doc.archivedAt = at
+      doc.updatedAt = at
+      persist()
+      return clone(doc)
+    },
+
+    async requeue({ id }) {
+      await wait()
+      requireSession()
+      const doc = find(id)
+      const body = clone(doc.draft ?? doc.data ?? {})
+      for (const field of REJECTION_FIELDS) delete body[field]
+      doc.draft = body
       doc.archivedAt = null
       doc.updatedAt = now()
       persist()
@@ -481,15 +588,23 @@ export function createDevPort({ signedIn = false } = {}) {
         return clone(asset)
       },
 
-      async list({ page = 1, perPage = 24, search } = {}) {
+      /**
+       * `archived` is the same tri-state the document listing uses and the real
+       * media repository grew when removal became archival: `false` (the
+       * default) is the library, `true` is what has left it, `"all"` is every
+       * file that was ever in it — which is the Archive's Média subpage's whole
+       * subject.
+       */
+      async list({ page = 1, perPage = 24, search, archived = false } = {}) {
         await wait(80)
         requireSession()
         const needle = (search || "").trim().toLowerCase()
         const rows = store.assets.filter(
           (asset) =>
-            !needle ||
-            asset.filename?.toLowerCase().includes(needle) ||
-            asset.alt?.toLowerCase().includes(needle),
+            (archived === "all" || (archived ? asset.archivedAt : !asset.archivedAt)) &&
+            (!needle ||
+              asset.filename?.toLowerCase().includes(needle) ||
+              asset.alt?.toLowerCase().includes(needle)),
         )
         const start = (page - 1) * perPage
         return { rows: clone(rows.slice(start, start + perPage)), total: rows.length }
@@ -505,13 +620,69 @@ export function createDevPort({ signedIn = false } = {}) {
         return clone(asset)
       },
 
+      /**
+       * Still called `remove`, and it ARCHIVES.
+       *
+       * The name is Contract 2's and the behaviour is server/media.js's: since
+       * the Archive landed, nothing outside it destroys a file. This mock used
+       * to splice the asset out of the array, which made it the one remaining
+       * place in the codebase where a file could be destroyed without going
+       * through the Archive — invisible today, because `NEXT_PUBLIC_CMS_DEV_PORT`
+       * is off, and a nasty surprise the day somebody turns it on. A mock that
+       * disagrees with the thing it stands in for is worse than no mock.
+       *
+       * Idempotent, like the real one: archiving an archived file is not an
+       * error, it is a no-op with the original date kept.
+       */
       async remove(id) {
         await wait()
         requireSession()
-        const index = store.assets.findIndex((entry) => entry.id === id)
-        if (index === -1) throw new CmsError("not_found", "Soubor neexistuje.")
-        store.assets.splice(index, 1)
+        const asset = store.assets.find((entry) => entry.id === id)
+        if (!asset) throw new CmsError("not_found", "Soubor neexistuje.")
+        asset.archivedAt = asset.archivedAt || now()
         persist()
+        return clone(asset)
+      },
+
+      async restore(id) {
+        await wait()
+        requireSession()
+        const asset = store.assets.find((entry) => entry.id === id)
+        if (!asset) throw new CmsError("not_found", "Soubor neexistuje.")
+        asset.archivedAt = null
+        persist()
+        return clone(asset)
+      },
+    },
+
+    /**
+     * The Archive is NOT mocked, and refuses rather than pretending.
+     *
+     * Everything it shows is `cms_document_revision` and `cms_media_archive`,
+     * which are written by the server's four document transitions — a browser
+     * mock has no transitions to record and no history to answer with. A stub
+     * returning empty lists would make the Archive look like a feature that
+     * works and holds nothing, which is the one impression a record must never
+     * give. So each method says what is missing and why.
+     *
+     * `purge` is the important one: the only hard delete in the system must not
+     * have a second implementation that skips the server's two refusals.
+     */
+    history: {
+      async revisions() {
+        throw new CmsError("server", ARCHIVE_UNAVAILABLE)
+      },
+      async revision() {
+        throw new CmsError("server", ARCHIVE_UNAVAILABLE)
+      },
+      async media() {
+        throw new CmsError("server", ARCHIVE_UNAVAILABLE)
+      },
+      async plan() {
+        throw new CmsError("server", ARCHIVE_UNAVAILABLE)
+      },
+      async purge() {
+        throw new CmsError("server", ARCHIVE_UNAVAILABLE)
       },
     },
 
@@ -646,6 +817,35 @@ export function createDevPort({ signedIn = false } = {}) {
       },
     },
 
+    /**
+     * Settings has no stub, and refuses in words rather than throwing a
+     * TypeError three frames deep.
+     *
+     * Everything the settings portal reports is a fact about the SERVER —
+     * which environment variables are set, which persistence is live, which
+     * sessions exist in cms_session, which API keys were issued. This port is
+     * a browser stub with no server behind it, so an answer here would be an
+     * invented one, and an invented answer on a screen whose whole purpose is
+     * "tell me the real state of the system" is worse than no screen at all.
+     */
+    settings: notInDevPort([
+      "status",
+      "probe",
+      "keys.list",
+      "keys.create",
+      "keys.revoke",
+      "sessions.list",
+      "sessions.revoke",
+      "sessions.revokeAll",
+      // The widget's appearance is the one setting that IS stored rather than
+      // read off the environment, so a stub could in principle answer it. It
+      // refuses with the rest anyway: the value it would hand back would live
+      // only in this browser, and the screen would report a corner that the
+      // public site — which reads the real endpoint — does not use.
+      "widget.read",
+      "widget.save",
+    ]),
+
     /** Dev-only escape hatch used by the "reset data" control in the shell. */
     __reset() {
       const sessionUserId = store.sessionUserId
@@ -657,6 +857,28 @@ export function createDevPort({ signedIn = false } = {}) {
 
   devPort = port
   return port
+}
+
+/**
+ * Build a namespace of methods that all refuse with the same sentence, from a
+ * list of dotted paths. One CmsError per call site so the Studio's normal
+ * error surfaces (ErrorState, the toast) show a person what happened, which a
+ * missing method would not.
+ */
+function notInDevPort(paths) {
+  const root = {}
+  for (const path of paths) {
+    const segments = path.split(".")
+    const name = segments.pop()
+    const owner = segments.reduce((node, key) => (node[key] ??= {}), root)
+    owner[name] = async () => {
+      throw new CmsError(
+        "server",
+        "Nastavení není dostupné v dev portu — potřebuje server. Nastavte NEXT_PUBLIC_CMS_DEV_PORT=0.",
+      )
+    }
+  }
+  return root
 }
 
 function measure(url) {

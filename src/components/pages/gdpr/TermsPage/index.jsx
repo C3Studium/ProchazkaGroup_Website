@@ -6,11 +6,13 @@ import { motion } from "framer-motion";
 import { PrivacySections } from "@/constants/cookiesTerms";
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
 import { useGlobalContext } from "@/context/LoadProvider";
+import { editable } from "@/cms/edit";
 
 // The privacy page, restated in the site's own grammar: dark ground, open
 // layout, hairlines that articulate rather than enclose. Every word of the
-// legal text still comes from PrivacySections — this file owns none of it —
-// and every section keeps the id it always had, so old #anchors keep landing.
+// legal text comes from the CMS over PrivacySections — this file owns none of
+// it — and every section keeps the id it always had, so old #anchors keep
+// landing whatever an editor retitles the section to.
 //
 // The shape is the BenefitJourney / FirstTime one: an oversized ghost numeral
 // marks each section, ONE vertical spine stands at the content column's left
@@ -23,6 +25,28 @@ import { useGlobalContext } from "@/context/LoadProvider";
 // disclosure at the head of the page: one tappable row that names the section
 // you are in, opening onto the full nine. See STACKED_MQ below and the
 // `stacked` mixin in styles.scss — the two have to say the same thing.
+
+// Copy comes from the CMS (the `ochrana-soukromi.*` siteCopy blocks — see
+// cms.config.js). These are the words the page ships with and what every field
+// falls back to on its own, so an empty CMS, an unreachable database or a block
+// that fills in nothing but its lead renders exactly this page.
+//
+// The nine sections are still `PrivacySections`, which also owns the anchor each
+// one hangs on: an id is an address rather than copy, and #rights has to keep
+// landing whatever an editor retitles that section to.
+const HERO = {
+    tag: "GDPR",
+    // The words beside the tag. They are a bare text node with no element of
+    // their own, so they are the block's `title` and are edited in the form —
+    // see the eyebrow below.
+    words: "Ochrana soukromí",
+    heading: ["Vše o ochraně,", "použití vašich údajů", "a informací."],
+    lead: "Detaily a všechny podrobné informace",
+    indexLabel: "Obsah",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
 
 const ord = (i) => String(i + 1).padStart(2, "0");
 
@@ -51,9 +75,33 @@ const linkify = (text) =>
         ),
     );
 
-export default function TermsContent() {
+export default function TermsContent({ hero = {}, sections: blocks }) {
     const { gate } = useGlobalContext();
     const go = gate === "go";
+
+    // The head, field by field, over the words above.
+    const head = {
+        tag: say(hero.tag, HERO.tag),
+        words: say(hero.words, HERO.words),
+        heading: HERO.heading.map((line, i) => say(hero.heading?.[i], line)),
+        lead: say(hero.lead, HERO.lead),
+        indexLabel: say(hero.indexLabel, HERO.indexLabel),
+    };
+
+    // The nine sections, merged onto the nine the page owns BY POSITION — the
+    // key list in cms.config.js is declared in this order, and the id stays the
+    // component's own. Truncated to them for the same reason /o-nas's history is:
+    // a tenth block would not appear at the end of the page, it would appear
+    // without an index row or an anchor to reach it by.
+    const sections = PrivacySections.map((section, i) => {
+        const block = blocks?.[i] || null;
+        return {
+            ...section,
+            title: say(block?.heading, section.title),
+            content: say(block?.body, section.content),
+            docId: block?.docId,
+        };
+    });
     const [activeSection, setActiveSection] = useState(PrivacySections[0].id);
     const sectionRefs = useRef([]);
 
@@ -192,7 +240,7 @@ export default function TermsContent() {
     };
 
     const activeTitle =
-        PrivacySections.find((s) => s.id === activeSection)?.title ?? PrivacySections[0].title;
+        sections.find((s) => s.id === activeSection)?.title ?? sections[0].title;
 
     return (
         <section className="TermsPage">
@@ -203,17 +251,35 @@ export default function TermsContent() {
                 initial="hidden"
                 animate={go ? "shown" : undefined}
             >
+                {/* The tag is an <em> and can carry its own annotation. The
+                    words beside it are a bare text node — giving them a <span>
+                    would change the markup this page's stylesheet is written
+                    against — so they are the block's `title`, edited in the
+                    Studio's form. */}
                 <motion.p className="TermsPage__eyebrow" variants={rise}>
-                    <em>GDPR</em> Ochrana soukromí
+                    {/* The separating space rides INSIDE the expression: as a
+                        literal it would be a second text child, and React marks
+                        the boundary between two adjacent text children with a
+                        `<!-- -->` it does not need here. Written this way the
+                        markup is byte for byte what it was. */}
+                    <em {...editable(hero.docId, "items.0.label", "text")}>{head.tag}</em>{` ${head.words}`}
                 </motion.p>
+                {/* Three lines, three elements, three fields. The stylesheet
+                    sets these spans as blocks, so the break between them is the
+                    arrangement rather than a character — and a field can only be
+                    written by one element. */}
                 <motion.h1 className="TermsPage__title" variants={rise}>
-                    <span>Vše o ochraně,</span>
-                    <span>použití vašich údajů</span>
-                    <span>a informací.</span>
+                    {head.heading.map((line, i) => (
+                        <span key={i} {...editable(hero.docId, `items.${i + 1}.label`, "text")}>{line}</span>
+                    ))}
                 </motion.h1>
                 <motion.span className="TermsPage__rule" variants={drawX(0.08)} aria-hidden="true" />
-                <motion.p className="TermsPage__lead" variants={rise}>
-                    Detaily a všechny podrobné informace
+                <motion.p
+                    className="TermsPage__lead"
+                    variants={rise}
+                    {...editable(hero.docId, "items.4.label", "text")}
+                >
+                    {head.lead}
                 </motion.p>
             </motion.header>
 
@@ -221,7 +287,7 @@ export default function TermsContent() {
                 {/* ── the index: sticky beside the text, tracking it ── */}
                 <nav
                     className={`TermsPage__index${open ? " is-open" : ""}`}
-                    aria-label="Obsah"
+                    aria-label={head.indexLabel}
                 >
                     <motion.div
                         className="TermsPage__index__inner"
@@ -230,8 +296,17 @@ export default function TermsContent() {
                         whileInView="shown"
                         viewport={ENTERS}
                     >
-                        <motion.p className="TermsPage__index__label" variants={rise}>
-                            Obsah
+                        {/* The same field as the disclosure's label below —
+                            one word in two compositions. Annotated here, where
+                            it is the one that is on screen beside the text; the
+                            stacked layout's copy is hidden at this width and an
+                            affordance nobody can see is not one. */}
+                        <motion.p
+                            className="TermsPage__index__label"
+                            variants={rise}
+                            {...editable(hero.docId, "items.5.label", "text")}
+                        >
+                            {head.indexLabel}
                         </motion.p>
 
                         {/* Stacked only — the stylesheet hides it beside the
@@ -245,14 +320,23 @@ export default function TermsContent() {
                             aria-controls="TermsPage-index-list"
                             onClick={() => setOpen((o) => !o)}
                         >
-                            <span className="TermsPage__index__toggle__label">Obsah</span>
+                            <span className="TermsPage__index__toggle__label">{head.indexLabel}</span>
                             <span className="TermsPage__index__toggle__now">{activeTitle}</span>
                             <span className="TermsPage__index__toggle__mark" aria-hidden="true" />
                         </motion.button>
 
+                        {/* The rows are NOT annotated, and the omission is
+                            deliberate: each prints a section's heading a second
+                            time, and a field can be written by one element — two
+                            elements carrying the same address would be two
+                            affordances for one value, whichever the overlay
+                            picked up second. The heading is edited where it is
+                            read, in the section, and an edit shows up here the
+                            moment the page re-renders because it is the same
+                            string. */}
                         <div className="TermsPage__index__reveal" ref={revealRef}>
                             <ol className="TermsPage__index__list" id="TermsPage-index-list">
-                                {PrivacySections.map((section, i) => (
+                                {sections.map((section, i) => (
                                     <motion.li key={section.id} variants={rise}>
                                         <a
                                             href={`#${section.id}`}
@@ -284,7 +368,7 @@ export default function TermsContent() {
                         aria-hidden="true"
                     />
 
-                    {PrivacySections.map((section, i) => (
+                    {sections.map((section, i) => (
                         <motion.article
                             key={section.id}
                             className="TermsPage__section"
@@ -297,11 +381,19 @@ export default function TermsContent() {
                             <motion.span className="TermsPage__ord" variants={rise} aria-hidden="true">
                                 {ord(i)}
                             </motion.span>
-                            <motion.h2 id={section.id} variants={rise}>
+                            <motion.h2
+                                id={section.id}
+                                variants={rise}
+                                {...editable(section.docId, "title", "text")}
+                            >
                                 {section.title}
                             </motion.h2>
                             {section.content ? (
-                                <motion.p className="TermsPage__body" variants={rise}>
+                                <motion.p
+                                    className="TermsPage__body"
+                                    variants={rise}
+                                    {...editable(section.docId, "body", "text")}
+                                >
                                     {linkify(section.content)}
                                 </motion.p>
                             ) : null}

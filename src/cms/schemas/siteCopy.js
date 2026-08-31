@@ -39,10 +39,57 @@
 // lowercase letters and digits, joined by a dot or a hyphen — which accepts
 // every key in the fixtures and both keys the visual editing surfaces name.
 
-import { defineField, defineType } from '@/cms/core'
+import { defineField, defineType } from '../core/index.js'
+import site from '../site/config.js'
+
+/**
+ * Stránky, které si o texty říkají — každá hodnota `copy` z konfigurace webu
+ * a hodnota globálů, pod jedním jménem každá.
+ *
+ * Prázdný seznam je poctivá odpověď na konfiguraci, kde žádná stránka `copy`
+ * nedeklaruje: dokud stránka o texty neřekne, nemá blok kam patřit.
+ */
+const PAGE_OPTIONS = (() => {
+    const seen = new Map()
+    for (const page of site?.pages || []) {
+        if (page?.copy && !seen.has(page.copy)) seen.set(page.copy, page.title || page.copy)
+    }
+    const globals = site?.globals?.copy
+    if (globals && !seen.has(globals)) seen.set(globals, 'Napříč webem')
+    return [...seen].map(([value, title]) => ({ value, title }))
+})()
 
 import { HIGHLIGHT } from './marks.js'
-import { QNA_PAIR_FIELDS } from './qna.js'
+
+/**
+ * A question and its answer — the pair, declared once.
+ *
+ * The FAQ exists in two shapes and they are the same two fields:
+ * a document per question (this type), and the homepage's block, where the five
+ * questions are an array on one siteCopy document so that one `list` popup can
+ * open the whole thing (EDIT-SURFACES, round four §6). Exporting the pair is
+ * what keeps that from becoming two declarations of "a Q&A" that agree until
+ * somebody widens one of them — `defineField` is idempotent, so the same frozen
+ * descriptors are safe to hand to a second type.
+ *
+ * The bounds are the document's own and are deliberately not relaxed for the
+ * array: a question too short to be a question is one wherever it is stored.
+ */
+export const QNA_PAIR_FIELDS = Object.freeze([
+    defineField({
+        name: 'question',
+        title: 'Otázka',
+        type: 'string',
+        validation: (rule) => rule.required().min(5).max(300),
+    }),
+    defineField({
+        name: 'answer',
+        title: 'Odpověď',
+        type: 'text',
+        options: { rows: 8 },
+        validation: (rule) => rule.required().min(10).max(3000),
+    }),
+])
 
 export default defineType({
     name: 'siteCopy',
@@ -67,18 +114,16 @@ export default defineType({
             name: 'page',
             title: 'Stránka',
             type: 'select',
-            options: {
-                list: [
-                    { value: 'index', title: 'Domov' },
-                    { value: 'o-nas', title: 'O nás' },
-                    { value: 'nabidky', title: 'Partneři' },
-                    { value: 'benefit-program', title: 'Benefit program' },
-                    { value: 'recenze', title: 'Recenze' },
-                    { value: 'kontakt', title: 'Kontakt' },
-                    { value: 'global', title: 'Napříč webem' },
-                ],
-            },
-            initialValue: 'index',
+            // Volby se čtou z konfigurace webu, ne z pevného seznamu.
+            //
+            // `page` je to, podle čeho `getSiteCopy` filtruje bloky jedné route,
+            // takže seznam musí odpovídat tomu, co stránky deklarují jako `copy`.
+            // Napsaný natvrdo popisoval jeden konkrétní web a v jiném projektu
+            // znamenal, že vlastní stránku nejde naplnit textem: select odmítne
+            // hodnotu, která v něm není, hláškou "Neplatná volba" — a nikdo
+            // nehledá příčinu v knihovně.
+            options: { list: PAGE_OPTIONS },
+            initialValue: PAGE_OPTIONS[0]?.value ?? 'index',
             validation: (rule) => rule.required(),
         }),
         defineField({
@@ -115,6 +160,33 @@ export default defineType({
             options: { rows: 4, mark: HIGHLIGHT.name },
             description: 'Jeden prvek na stránce, jehož řádky jsou zalomené natvrdo. Enter = nový řádek. Text mezi hvězdičkami se zvýrazní.',
             validation: (rule) => rule.max(400),
+        }),
+        /**
+         * Zvýrazněný konec nadpisu, jako vlastní pole.
+         *
+         * Doteď byla zvýrazněná část schovaná uvnitř `headline` mezi hvězdičkami.
+         * Fungovalo to, ale editor neměl kde ji upravit samostatně a nebylo kam
+         * napsat druhou variantu — a přesně to je tu potřeba: „už přes JEDNU
+         * DEKÁDU" se má střídat s „už přes 12 LET".
+         *
+         * Takže dvě pole místo jednoho řetězce: `headline` nese text a `accent`
+         * jeho zvýrazněný konec. Jedna položka = obarvený span jako dřív, víc
+         * položek = psací animace, která mezi nimi přepíná. Komponenta rozhodne
+         * podle počtu, ne podle přepínače, který by šlo zapomenout přepnout.
+         *
+         * Připojuje se NA KONEC nadpisu. Zvýraznění uprostřed nebo na začátku —
+         * což jsou tři popisky v `index.offers` — zůstává hvězdičkám: „rozděl na
+         * dvě části" u nich nedává smysl, protože části jsou tři.
+         */
+        defineField({
+            name: 'accent',
+            title: 'Zvýrazněný konec',
+            type: 'array',
+            of: [{ type: 'string' }],
+            description:
+                'Připojí se na konec textu se zalomením a zvýrazní se. Jedna položka = barevný text. ' +
+                'Dvě a více = psací animace, která je střídá.',
+            validation: (rule) => rule.max(6),
         }),
         defineField({
             name: 'body',

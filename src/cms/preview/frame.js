@@ -85,8 +85,41 @@ export const HOST_PATH = "/studio/preview"
  */
 export const EDIT_HOST_PATH = "/studio/edit"
 
-/** The documents allowed to frame an editor. Both are Studio-only addresses. */
-const HOST_PATHS = [HOST_PATH, EDIT_HOST_PATH]
+/**
+ * The Archive, inside the Studio shell (`/studio/archive`).
+ *
+ * A third host and — unlike the second — a host that must never edit. The
+ * Archive frames the site rendered "as of T" (src/cms/server/site/archive.js),
+ * and ARCHIVE.md's settled position is that it is a record rather than a
+ * workbench: nothing in it can be changed, and restoring an old version is a
+ * separate, deliberate action that writes to a DRAFT so the way back also passes
+ * through approval.
+ *
+ * It is named here rather than left unnamed for two reasons, and the first is
+ * the one that decides it. `frameHost()` answers *which document is framing me*,
+ * and three things already branch on that answer — the way back into the Studio
+ * hides itself inside any frame (@/cms/manage), the curtain is skipped on the
+ * workbench, and `isEditFrame()` refuses a frame it does not recognise. A host
+ * missing from this list is not "safely inert"; it is a host those three answer
+ * about wrongly. The second reason is that saying it here is what makes the
+ * refusal below a statement rather than an omission.
+ */
+export const ARCHIVE_HOST_PATH = "/studio/archive"
+
+/** The documents allowed to frame a page of this site. All Studio-only. */
+const HOST_PATHS = [HOST_PATH, EDIT_HOST_PATH, ARCHIVE_HOST_PATH]
+
+/**
+ * The subset of those hosts in which `?edit=1` means anything.
+ *
+ * `isEditFrame()` used to read "framed by any host at all", which was the same
+ * set. Adding the Archive made the two different, and the difference is the
+ * point: a page framed by the Archive is old content, so an attribute that
+ * offered to edit it would offer to write March's words back over today's. The
+ * list NARROWS the check rather than widening it — the warning on `isEditFrame`
+ * below is about entries added *here*, not about entries added above.
+ */
+const EDITING_HOST_PATHS = [HOST_PATH, EDIT_HOST_PATH]
 
 /**
  * The homepage's stand-in. The one route in the project that may read drafts,
@@ -155,18 +188,84 @@ export const sitePathFromFrame = (pathname) => {
  * is no, which is the right answer — an editor's surface has no business
  * appearing in someone else's iframe.
  *
- * The list is two entries long and both are addresses only a signed-in editor
- * reaches. Widening it is the one change that could turn `?edit=1` back into
- * eight characters anyone can type, so a new entry needs the same argument these
- * two have.
+ * `EDITING_HOST_PATHS` is two entries long and both are addresses only a
+ * signed-in editor reaches. Widening THAT list is the one change that could turn
+ * `?edit=1` back into eight characters anyone can type, so a new entry needs the
+ * same argument these two have. The Archive deliberately is not one of them.
  */
 export const isEditFrame = () => {
     if (typeof window === "undefined") return false
     if (new URLSearchParams(window.location.search).get(EDIT_PARAM) !== EDIT_VALUE) return false
+    return EDITING_HOST_PATHS.includes(frameHost())
+}
+
+/**
+ * Which of the Studio's two hosts is showing this document, or null.
+ *
+ * The half of `isEditFrame()` that is about *who is asking* rather than *what
+ * the URL claims*, pulled out because a second question needs it and needs it
+ * without the flag. A cross-origin parent throws on the location read and the
+ * answer is null, which is the right answer.
+ */
+export const frameHost = () => {
+    if (typeof window === "undefined") return null
     try {
-        if (window.self === window.top) return false
-        return HOST_PATHS.includes(normalise(window.parent.location.pathname))
+        if (window.self === window.top) return null
+        const parent = normalise(window.parent.location.pathname)
+        return HOST_PATHS.includes(parent) ? parent : null
     } catch {
-        return false
+        return null
     }
 }
+
+/**
+ * Is this document inside the *editing* surface, as opposed to the preview?
+ *
+ * The two hosts frame the same URLs through the same `frameUrl()`, and until now
+ * nothing told them apart from inside — `?edit=1` says "the Studio is framing
+ * me", which both of them are. This is the distinction, and the difference it
+ * makes is the site's opening curtain:
+ *
+ *   `/studio/preview`  is the faithfulness surface. A visitor gets the curtain,
+ *                      so the preview must show it. Nothing changes there.
+ *   `/studio/edit`     is a workbench. The frame reloads on every page switch,
+ *                      every Obnovit and every draft/published toggle, and
+ *                      replaying a 2.5s entrance each time is a tax on the work.
+ *
+ * Asked of the parent rather than carried on the frame's URL, and that is the
+ * decision, not an accident of convenience:
+ *
+ *   - The framed page's URL is a **public** URL. A parameter on it would be a
+ *     parameter a visitor can type, and a second thing `/o-nas` answers to.
+ *   - `_document` cannot read it where it would matter. `<html data-preload>` is
+ *     stamped there, and `_document.getInitialProps` sees `ctx.query` only on a
+ *     per-request render — `/o-nas` and the published side of
+ *     `/studio/preview/home` are statically generated, so their document HTML is
+ *     built once with no query and served for every one. That reads correct in
+ *     dev, where everything is per-request, and does nothing in production.
+ *   - The flag would have to be spent on `useFrameSurface`'s frame URL, which is
+ *     what `editing` already feeds — and `editing` flips in place when an editor
+ *     takes Náhled. Anything that reaches the frame through its `src` reloads the
+ *     document and loses the scroll position that toggle exists to keep.
+ *
+ * Who is framing cannot be typed, cannot go stale against a static build, and
+ * cannot be forgotten by a caller, because there is no caller to forget it.
+ */
+export const isEditSurfaceFrame = () => frameHost() === EDIT_HOST_PATH
+
+/**
+ * Is this document being replayed as it was, rather than shown as it is?
+ *
+ * The Archive's counterpart to `isEditSurfaceFrame()`, asked of the parent for
+ * the same three reasons set out above it: the framed page's URL is a public
+ * URL and must not grow a parameter a visitor can type; `_document` cannot read
+ * a query on a statically generated page; and who is framing cannot go stale.
+ *
+ * Note what this is NOT for. The moment being replayed does not travel this way
+ * and cannot: it lives in Next's signed preview-data cookie, issued only by
+ * /api/studio/asof (see src/cms/server/site/archive.js `viewOf`). This answers
+ * the browser-side question — "am I inside the record" — for anything that
+ * should present itself differently there, and it answers it without the page
+ * carrying a claim of its own.
+ */
+export const isArchiveFrame = () => frameHost() === ARCHIVE_HOST_PATH

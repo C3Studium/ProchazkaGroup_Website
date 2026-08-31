@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     AnimatePresence,
     MotionConfig,
@@ -7,6 +7,7 @@ import {
     useSpring,
 } from "framer-motion";
 
+import { editable, editableLines } from "@/cms/edit";
 import { CookiesSections } from "@/constants/cookiesTerms";
 import CookiesModem from "@/components/modems/Cookies";
 import CornerButton from "@/components/common/ui/CornerButton";
@@ -30,6 +31,12 @@ import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
 // exactly as before — same props, same AnimatePresence — and only given an
 // overlay shell from this page's stylesheet; its internals are its own.
 //
+// The words are the CMS's when it has any and the component's when it has not,
+// and the unit is the SECTION — one document per heading-plus-paragraph, never a
+// field per sentence. This is a legal notice: it is amended by changing a clause
+// in the middle of a paragraph, and eleven boxes is not that. See the /cookies
+// entry in `cms.config.js`, which says what is annotated here and what is not.
+//
 // MotionConfig reducedMotion="user" strips the transforms from every entrance
 // for readers who asked for that — things land, near instantly — without
 // branching the first render on a media query. The two travelling lights are
@@ -45,13 +52,52 @@ const DRAW_X = {
 
 const ord = (i) => String(i + 1).padStart(2, "0");
 
-export default function CookiesContent() {
+// What the page says when the CMS says nothing — every string it shipped with,
+// in one place, so the fallbacks below read as the document they are rather
+// than as defaults scattered through the markup. `cms.config.js` seeds these
+// verbatim; changing one here without changing it there makes the page say two
+// different things depending on whether a query answered.
+const SHIPPED = {
+    title: ["Co jsou cookies", "a jak je používáme."],
+    lead: "Zde si můžete nastavit, ke kterým budeme mít přístup.",
+    index: "Obsah",
+    manage: "Chcete si přenastavit vaše cookies?",
+    cta: "Nastavit",
+};
+
+/**
+ * @param {object} [content] this route's blocks, from `getPageContent("/cookies")`.
+ *   Absent, empty or half-read is the ordinary case rather than an error: every
+ *   line below falls back to the copy the component ships with, so an empty CMS
+ *   and an unreachable database both render the page that was here before any
+ *   of this existed.
+ */
+export default function CookiesContent({ content }) {
     const { gate } = useGlobalContext();
     const go = gate === "go";
     const [activeSection, setActiveSection] = useState(CookiesSections[0].id);
     const [isOpen, setIsOpen] = useState(false);
     const sectionRefs = useRef([]);
     const bodyRef = useRef(null);
+
+    const { hero = {}, index = {}, manage = {} } = content || {};
+
+    // The ten sections: their ids and their order are the component's, their
+    // words the CMS's when it has any.
+    //
+    // Paired by POSITION and not by name, which is the same bargain /o-nas's
+    // history panels make: `id` is the anchor the index links to (`#about`), so
+    // it has to survive an editor retitling the section it names. A block the
+    // CMS does not hold leaves that section exactly as it shipped.
+    const sections = useMemo(() => {
+        const blocks = content?.sections || [];
+        return CookiesSections.map((section, i) => ({
+            ...section,
+            title: blocks[i]?.heading || section.title,
+            content: blocks[i]?.body || section.content,
+            docId: blocks[i]?.docId,
+        }));
+    }, [content]);
 
     // The left rule the sections hang from is also the page's progress: it
     // draws downwards as the reading column goes by, and is done when the
@@ -120,17 +166,33 @@ export default function CookiesContent() {
                     <motion.p className="CookiesContent__eyebrow" variants={RISE}>
                         <em>§</em> Zásady cookies
                     </motion.p>
-                    <motion.h1 className="CookiesContent__title" variants={RISE}>
-                        Co jsou cookies
-                        <span>a jak je používáme.</span>
+                    {/* Two stored strings edited as ONE block, because the two
+                        lines are a text node and a span rather than one value
+                        with a `<br />` in it: `editableLines` reads a block
+                        child as a line and writes line *i* back to
+                        `items.i.label`. Annotating them separately is not
+                        available — the first line has no element of its own,
+                        and giving it one would change the markup this page's
+                        stylesheet is written against. */}
+                    <motion.h1
+                        className="CookiesContent__title"
+                        variants={RISE}
+                        {...editableLines(hero.docId, "items.*.label")}
+                    >
+                        {hero.heading?.[0] || SHIPPED.title[0]}
+                        <span>{hero.heading?.[1] || SHIPPED.title[1]}</span>
                     </motion.h1>
                     <motion.span
                         className="CookiesContent__rule"
                         variants={DRAW_X}
                         aria-hidden="true"
                     />
-                    <motion.p className="CookiesContent__lead" variants={RISE}>
-                        Zde si můžete nastavit, ke kterým budeme mít přístup.
+                    <motion.p
+                        className="CookiesContent__lead"
+                        variants={RISE}
+                        {...editable(hero.docId, "body", "text")}
+                    >
+                        {hero.lead || SHIPPED.lead}
                     </motion.p>
                 </motion.header>
 
@@ -145,11 +207,22 @@ export default function CookiesContent() {
                         viewport={ENTERS}
                     >
                         <div className="CookiesContent__index__inner">
-                            <motion.p className="CookiesContent__index__label" variants={RISE}>
-                                Obsah
+                            <motion.p
+                                className="CookiesContent__index__label"
+                                variants={RISE}
+                                {...editable(index.docId, "title", "text")}
+                            >
+                                {index.label || SHIPPED.index}
                             </motion.p>
+                            {/* The index is deliberately NOT annotated. It
+                                prints the same ten headings the sections below
+                                do, and a field can be written by one element —
+                                two elements carrying `cookies.sekce.03 · title`
+                                would be two affordances for one value. Edited on
+                                the section, it changes here on the next
+                                render. */}
                             <ul>
-                                {CookiesSections.map((section, i) => {
+                                {sections.map((section, i) => {
                                     const isActive = activeSection === section.id;
                                     return (
                                         <motion.li key={section.id} variants={RISE}>
@@ -188,7 +261,7 @@ export default function CookiesContent() {
                             aria-hidden="true"
                         />
 
-                        {CookiesSections.map((section, i) => (
+                        {sections.map((section, i) => (
                             <motion.article
                                 key={section.id}
                                 id={section.id}
@@ -211,9 +284,25 @@ export default function CookiesContent() {
                                 >
                                     {ord(i)}
                                 </motion.span>
-                                <motion.h2 variants={RISE}>{section.title}</motion.h2>
+                                {/* A section is one document: its heading and
+                                    its body, edited where they are read. The
+                                    numeral above is `ord(i)` and is not stored —
+                                    it is the section's position, which an editor
+                                    changes by changing the order in the code
+                                    that also owns the anchors. */}
+                                <motion.h2
+                                    variants={RISE}
+                                    {...editable(section.docId, "title", "text")}
+                                >
+                                    {section.title}
+                                </motion.h2>
                                 {section.content && (
-                                    <motion.p variants={RISE}>{section.content}</motion.p>
+                                    <motion.p
+                                        variants={RISE}
+                                        {...editable(section.docId, "body", "text")}
+                                    >
+                                        {section.content}
+                                    </motion.p>
                                 )}
                             </motion.article>
                         ))}
@@ -236,12 +325,25 @@ export default function CookiesContent() {
                     <motion.p className="CookiesContent__eyebrow" variants={RISE}>
                         <em>§</em> Správa předvoleb
                     </motion.p>
-                    <motion.h2 className="CookiesContent__manage__title" variants={RISE}>
-                        Chcete si přenastavit vaše cookies?
+                    <motion.h2
+                        className="CookiesContent__manage__title"
+                        variants={RISE}
+                        {...editable(manage.docId, "title", "text")}
+                    >
+                        {manage.heading || SHIPPED.manage}
                     </motion.h2>
                     <motion.div className="CookiesContent__manage__cta" variants={RISE}>
-                        <CornerButton onClick={() => setIsOpen(true)}>
-                            Nastavit
+                        {/* Words only, and `editable` rather than
+                            `editableLink`: this is a real <button> — it opens
+                            the preference modem instead of going anywhere — so
+                            there is no target to retarget and nowhere to store
+                            one. CornerButton forwards the attributes onto the
+                            element itself, so the button gains no wrapper. */}
+                        <CornerButton
+                            onClick={() => setIsOpen(true)}
+                            {...editable(manage.docId, "items.0.label", "text")}
+                        >
+                            {manage.cta || SHIPPED.cta}
                         </CornerButton>
                     </motion.div>
                 </motion.div>

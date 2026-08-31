@@ -1,10 +1,20 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 .shell {
   display: flex;
   flex: 1;
   min-width: 0;
+}
+
+/* The navigation turns into a strip across the top (Sidebar.module.scss), so the
+   axis this lays out on turns with it. `min-height: 0` because the workspace
+   below is the thing that scrolls, and a flex child without it refuses to shrink
+   past its content — which on the queue is eight thousand pixels of reviews. */
+@include t.stacked {
+  .shell {
+    flex-direction: column;
+    min-height: 0;
+  }
 }
 
 /* `position: relative` so a view can dock something over its own body — the

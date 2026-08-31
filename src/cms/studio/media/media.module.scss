@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 .library {
@@ -140,13 +139,36 @@
 
 /* Missing alt text is a real defect, so it uses the accent — the one hue in the
    Studio that means "this wants your attention" — rather than its own yellow. */
+/* A button now, not a label: it filters the grid down to the files it counts.
+   The reset that follows is what stops a <button> inheriting the browser's own
+   font and chrome in the middle of a toolbar of ours. */
 .altWarning {
   display: flex;
   gap: 6px;
   align-items: center;
+  padding: 4px 8px;
+  font-family: inherit;
   font-size: var(--st-text-small);
   color: var(--st-accent);
   white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--st-radius);
+
+  &:hover {
+    background: var(--st-accent-soft);
+  }
+
+  &[data-active="true"] {
+    background: var(--st-accent-soft);
+    border-color: var(--st-accent-line);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--st-accent);
+    outline-offset: 1px;
+  }
 }
 
 .libraryBody {
@@ -222,7 +244,11 @@
     border-color var(--st-fast) var(--st-ease),
     box-shadow var(--st-fast) var(--st-ease);
 
-  img {
+  // `video` alongside `img`: the library holds the site's .mp4 clips and draws
+  // them with a <video> element, which without this sits at its intrinsic size
+  // and blows the tile open.
+  img,
+  video {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -326,7 +352,8 @@
   border: 1px solid var(--st-line);
   border-radius: var(--st-radius);
 
-  img {
+  img,
+  video {
     display: block;
     width: 100%;
     max-height: 220px;
@@ -394,7 +421,7 @@
   border-top: 1px solid var(--st-line);
 }
 
-@media (max-width: 900px) {
+@include t.compact {
   .libraryBar,
   .grid {
     padding-right: var(--st-s5);
@@ -404,4 +431,97 @@
   .detail {
     width: 260px;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * Filtry a použití — MediaLibrary.jsx
+ *
+ * Ani jedno není uložená taxonomie: složka je cesta souboru, použití je odpověď
+ * na dotaz nad dokumenty. Viz server/mediaUsage.js.
+ * ------------------------------------------------------------------------- */
+
+.filterSelect {
+  max-width: 190px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  cursor: pointer;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  &:hover {
+    color: var(--st-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--st-accent);
+    outline-offset: 1px;
+  }
+}
+
+.usage {
+  margin: var(--st-s3) 0 0;
+}
+
+.usageList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    padding: 4px 8px;
+    font-size: var(--st-text-small);
+    background: var(--st-sunken);
+    border-radius: var(--st-radius);
+  }
+}
+
+.usageWhere {
+  flex: none;
+  color: var(--st-ink-3);
+}
+
+.usageWhat {
+  overflow: hidden;
+  color: var(--st-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ne varování barvou nebezpečí: nepoužitý soubor není chyba, je to informace,
+   podle které se dá rozhodnout o archivaci. */
+.usageNone {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: var(--st-s3) 0 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* Označeno v režimu výběru.
+ *
+ * Neonová oranžová `#ff6a00` je barva *vybranosti* v celém CMS — definuje ji
+ * edit/overlay/overlay.module.scss jako `--cms-pick` a stojí za ní měření proti
+ * 31 tisícům pixelů podkladů webu. Ten token sem nedosáhne (je nastavený na
+ * kořeni rámu se stránkou), takže je tu ta samá hodnota znovu; komentář je to,
+ * co je drží pohromadě.
+ *
+ * Odlišené od `.tileSelected`, které znamená něco jiného: „tohle je v poli
+ * uložené teď". Označení je „tohle se chystám vzít". */
+.tileMarked .thumb {
+  border-color: #ff6a00;
+  box-shadow: 0 0 0 2px #ff6a00;
+}
+
+.tileMarked .tileName {
+  color: #ff6a00;
 }

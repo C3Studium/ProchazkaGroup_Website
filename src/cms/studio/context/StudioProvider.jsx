@@ -98,7 +98,14 @@ export function AuthProvider({ children }) {
   const value = useMemo(
     () => ({
       ...state,
-      isOwner: state.user?.role === "owner",
+      // The developer's account. `owner` is a client's title, not a permission —
+      // see server/auth.js effectiveRole() — so everything gated on "may
+      // administer this CMS" asks for admin.
+      isAdmin: state.user?.role === "admin",
+      // The role itself, for the field-level rules — a field says which roles
+      // may write it (core/defineField.js editRoles) and the renderer has to be
+      // able to answer that, not just "am I the admin".
+      role: state.user?.role || null,
       refresh,
       // The server answers a successful sign-in with the user, so the gate can
       // hand over immediately rather than making a second round trip to find

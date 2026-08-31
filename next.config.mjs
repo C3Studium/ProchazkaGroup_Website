@@ -1,6 +1,36 @@
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
+// The CMS's own HTTP policy, owned by the library rather than by this file —
+// see src/cms/nextConfig.mjs, which also records why it is a config
+// contribution and not a middleware. `.mjs` because Node loads this config as
+// a real ES module: a `.js` sibling in a package with no "type" field is
+// reparsed with a MODULE_TYPELESS_PACKAGE_JSON warning on every dev start and
+// every build.
+import { cmsHeaders } from './src/cms/nextConfig.mjs';
+
+// Which Supabase project this run talks to — see cms.database.js.
+//
+// It has to happen HERE, and this early. Next loads .env before it evaluates
+// this file and inlines every NEXT_PUBLIC_* into the client bundle after it, so
+// this is the one window where rewriting those names still reaches both the
+// server and the browser. Doing it in a module the app imports would be too
+// late: the value is already compiled in by then.
+//
+// It also has to happen above `supabaseStorageHosts()` below, which reads the
+// resolved URL to decide which host next/image will load photos from.
+import cmsDatabase from './cms.database.js';
+
+const database = cmsDatabase.applyDatabaseEnv();
+
+// Printed on every dev start and every build, deliberately. "Which database am
+// I looking at" is the question behind most of the confusion this switch can
+// cause, and an answer nobody has to go looking for is worth four lines.
+console.log(
+  `  CMS databáze: ${cmsDatabase.describeDatabase(database)}` +
+    (database.applied ? '' : '  (nenakonfigurováno — beze změny)')
+);
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -35,6 +65,18 @@ const supabaseStorageHosts = () => {
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Belt and braces on top of the process.env rewrite above: `env` is inlined
+  // by name, so the browser cannot end up with a value from a .env that was
+  // read after the switch ran. Only set when there is something to set —
+  // an undefined here would compile to a literal `undefined` in the bundle.
+  ...(database.applied
+    ? {
+        env: {
+          NEXT_PUBLIC_SUPABASE_URL: database.url,
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: database.anonKey,
+        },
+      }
+    : {}),
   turbopack: {
     root: __dirname,
   },
@@ -103,18 +145,21 @@ const nextConfig = {
    * not theorised. A preview that renders the navigation differently from the
    * site is a preview of something else.
    *
-   * These two lines stay, and neither is a rewrite:
-   *  - the header, because /studio/preview is a route a crawler could reach;
+   * These two things stay, and neither is a rewrite:
+   *  - the noindex header, because /studio/preview is a route a crawler could
+   *    reach. It is no longer written here: it now comes from cmsHeaders(),
+   *    which covers the whole Studio and the CMS API rather than the preview
+   *    alone — /studio and /studio/edit were measured carrying no header at all,
+   *    holding nothing back but a meta tag no crawler of /api/cms/* would parse;
    *  - the tracing include above, because the navigator reads src/pages at
    *    request time and a readdir is invisible to the standalone tracer.
    */
   async headers() {
-    return [
-      {
-        source: '/studio/preview/:path*',
-        headers: [{ key: 'X-Robots-Tag', value: 'noindex, nofollow' }],
-      },
-    ];
+    // Nothing of this site's own goes in this array. Every entry describes the
+    // CMS's routes, so the CMS is what defines them; a public route acquiring a
+    // header here would be a bug on the public site, which is why the sources
+    // are prefixes of /studio and /api/cms and are asserted to be nothing else.
+    return [...cmsHeaders()];
   },
 
   /**

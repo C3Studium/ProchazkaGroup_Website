@@ -24,9 +24,60 @@
 
 import { defineField, defineType } from '@/cms/core'
 
+/**
+ * Why a rejection is refused publication and never deleted.
+ *
+ * Rejecting used to call `remove()`. These are consumer reviews, and the Omnibus
+ * amendment to zákona o ochraně spotřebitele requires a business publishing them
+ * to be able to account for how it handles them — and specifically not to
+ * suppress the unfavourable ones. A deleted review proves nothing in either
+ * direction. A rejected one, kept with who / when / why, is what shows the queue
+ * was not cherry-picked. So `reject` archives (server/documents.js) and stamps
+ * the three fields below.
+ *
+ * NOT ONE OF THESE REASONS IS ABOUT WHETHER THE REVIEW IS FLATTERING. That is
+ * the whole point of a closed list: every value here is about whether the
+ * submission is a real, publishable review, and there is deliberately no entry
+ * an editor could reach for to mean "this one is negative". A free-text box
+ * would have collected exactly that sentence and been unanswerable besides —
+ * migrations/0007's header makes the same argument about `reason`.
+ */
+export const REJECTION_REASONS = Object.freeze([
+    { value: 'spam', title: 'Spam nebo test', hint: 'Nesmyslný text, zkouška formuláře, reklama.' },
+    { value: 'offensive', title: 'Urážlivé nebo nevhodné', hint: 'Vulgarita, útok na osobu, nenávistný obsah.' },
+    { value: 'notClient', title: 'Není od klienta', hint: 'Pisatel není klient nebo recenze není o naší službě.' },
+    { value: 'duplicate', title: 'Duplicita', hint: 'Stejná recenze už ve frontě nebo na webu je.' },
+    { value: 'personalData', title: 'Osobní údaje v textu', hint: 'Jméno třetí osoby, číslo smlouvy, kontakt.' },
+    { value: 'other', title: 'Jiný důvod', hint: 'Nic z výše uvedeného.' },
+])
+
+export const isRejectionReason = (value) =>
+    REJECTION_REASONS.some((reason) => reason.value === value)
+
+/** The three fields a rejection writes, and the only ones `requeue` clears. */
+/**
+ * Kdo smí přepsat, co zákazník napsal.
+ *
+ * Správce a majitel. Člen recenze moderuje — schválí je, nebo zamítne — a to je
+ * jiná činnost než je přepisovat: text je cizí výpověď, ne obsah webu. Pole ze
+ * skupiny „moderace" (`approved`, `rejectedAt`…) tím dotčena nejsou, jinak by
+ * schvalování nešlo právě těm lidem, kteří ho mají na starost.
+ *
+ * Zamčeno, ne skryto — `editRoles` řídí zápis, ne zobrazení. Kdo schvaluje,
+ * musí si text přečíst.
+ */
+const CONTENT_ROLES = ['admin', 'owner']
+
+export const REJECTION_FIELDS = Object.freeze(['rejectedAt', 'rejectedBy', 'rejectedReason'])
+
 export default defineType({
     name: 'review',
     title: 'Recenze',
+    // Nikdo kromě správce nezaloží recenzi ručně. Recenze je výpověď zákazníka;
+    // kdo ji umí napsat, umí napsat i doporučení a podepsat pod ně cizí jméno.
+    // Schvalovat, zamítat a archivovat smí dál i majitel a člen — brání se
+    // autorství, ne moderaci.
+    createRoles: ['admin'],
     icon: 'star',
     groups: [
         { name: 'obsah', title: 'Obsah', default: true },
@@ -38,6 +89,7 @@ export default defineType({
             title: 'Jméno klienta',
             type: 'string',
             group: 'obsah',
+            editRoles: CONTENT_ROLES,
             validation: (rule) => rule.required().min(2).max(120),
         }),
         defineField({
@@ -45,6 +97,7 @@ export default defineType({
             title: 'Poradce',
             type: 'string',
             group: 'obsah',
+            editRoles: CONTENT_ROLES,
             // A string rather than a reference, because the live table is keyed
             // by name and the public site renders that name directly. The
             // public submission route checks it against published consultants,
@@ -59,6 +112,7 @@ export default defineType({
             title: 'Text recenze',
             type: 'text',
             group: 'obsah',
+            editRoles: CONTENT_ROLES,
             options: { rows: 6 },
             validation: (rule) => rule.required().min(10).max(2000),
         }),
@@ -67,6 +121,7 @@ export default defineType({
             title: 'Kategorie',
             type: 'select',
             group: 'obsah',
+            editRoles: CONTENT_ROLES,
             options: {
                 list: [
                     { value: 'poradce', title: 'Poradce' },
@@ -107,6 +162,41 @@ export default defineType({
             group: 'moderace',
             readOnly: true,
         }),
+        // --- rejection ------------------------------------------------------
+        //
+        // Written by server/documents.js `reject()` and cleared by `requeue()`;
+        // read-only here because they are the record of a decision, not a form.
+        // The machine-readable half of the same event is a row in
+        // cms_document_revision (`reason = 'reject'`, with `changed_by`), which
+        // is append-only — these three are what an editor reads on the screen,
+        // that one is what nobody can rewrite afterwards.
+        defineField({
+            name: 'rejectedAt',
+            title: 'Zamítnuto',
+            type: 'datetime',
+            group: 'moderace',
+            readOnly: true,
+            description: 'Vyplní se automaticky při zamítnutí. Prázdné = recenze zamítnutá není.',
+        }),
+        defineField({
+            name: 'rejectedBy',
+            title: 'Zamítl(a)',
+            type: 'string',
+            group: 'moderace',
+            readOnly: true,
+            // The name as it was at the moment of the decision, not a reference:
+            // "kdo to zamítl" has to stay answerable after that person's account
+            // is gone, and the uuid lives on the revision for the machine.
+            description: 'Jméno v době rozhodnutí.',
+        }),
+        defineField({
+            name: 'rejectedReason',
+            title: 'Důvod zamítnutí',
+            type: 'select',
+            group: 'moderace',
+            readOnly: true,
+            options: { list: REJECTION_REASONS.map(({ value, title }) => ({ value, title })) },
+        }),
         defineField({
             name: 'source',
             title: 'Původ',
@@ -123,9 +213,16 @@ export default defineType({
             initialValue: 'studio',
         }),
     ],
+    // The subtitle carries the moderation state because this is what the archive
+    // list and the "smazat natrvalo" confirmation print — a rejected review has
+    // to be findable there by something other than the customer's name.
     preview: (doc) => ({
         title: doc?.customerName || 'Bez jména',
-        subtitle: `${doc?.consultantName || '—'} · ${doc?.approved ? 'schváleno' : 'čeká na schválení'}`,
+        subtitle: `${doc?.consultantName || '—'} · ${
+            doc?.rejectedAt
+                ? `zamítnuto${doc?.rejectedBy ? ` — ${doc.rejectedBy}` : ''}`
+                : doc?.approved ? 'schváleno' : 'čeká na schválení'
+        }`,
         media: null,
     }),
     orderings: [

@@ -46,13 +46,18 @@ export function IconButton({ icon, label, size = 15, className = "", tone, ...re
   )
 }
 
-export function Checkbox({ checked, indeterminate, onChange, label, disabled, ...rest }) {
+// `aria-label` goes on the input rather than on the wrapping label: a checkbox
+// with no visible text — every row of the moderation queue — otherwise reaches a
+// screen reader as "zaškrtávací políčko" and nothing else, and an aria-label on
+// a <label> element is not part of the input's accessible name.
+export function Checkbox({ checked, indeterminate, onChange, label, disabled, "aria-label": ariaLabel, ...rest }) {
   return (
     <label className={`${styles.checkbox} ${disabled ? styles.disabled : ""}`} {...rest}>
       <input
         type="checkbox"
         checked={Boolean(checked)}
         disabled={disabled}
+        aria-label={label ? undefined : ariaLabel}
         onChange={(event) => onChange?.(event.target.checked)}
         ref={(node) => {
           // Indeterminate is a DOM property, not an attribute — React cannot set it.

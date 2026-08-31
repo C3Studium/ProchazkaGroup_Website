@@ -11,9 +11,14 @@
     "start": "node scripts/run-next-with-storefront-env.js start --hostname 0.0.0.0",
     "build:next": "node scripts/run-next-with-storefront-env.js build",
     "lint": "next lint",
+    "cms:audit": "node scripts/cms-audit.js",
+    "cms:seed": "node scripts/cms-seed.mjs",
     "analyze": "ANALYZE=true next build",
     "postbuild": "next-sitemap",
-    "dev:email": "email dev --dir ./src/modules/resend/emails --port 3002"
+    "dev:email": "email dev --dir ./src/modules/resend/emails --port 3002",
+    "dev:apptest": "pnpm run sync:styles && node scripts/run-with-env.js --env .env.apptest --env .env.test dev -p 3700",
+    "build:apptest": "pnpm run sync:styles && node scripts/run-with-env.js --env .env.apptest --env .env.test build",
+    "start:apptest": "node scripts/run-with-env.js --env .env.apptest --env .env.test start -p 3700"
   },
   "dependencies": {
     "@babel/core": "^7.28.5",
@@ -43,6 +48,7 @@
     "next-sitemap": "^4.2.3",
     "npm": "^11.7.0",
     "ogl": "^1.0.11",
+    "pg": "^8.23.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-flag-icons": "^1.0.6",

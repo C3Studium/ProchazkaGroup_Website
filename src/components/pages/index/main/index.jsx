@@ -6,6 +6,7 @@ import CornerButton from "@/components/common/ui/CornerButton";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import Arrow, { SCROLL_NUDGE } from "@/components/common/ui/Arrow";
 import Lines, { hasLines } from "@/components/common/ui/lines";
+import AccentText, { hasAccent } from "@/components/common/ui/accentText";
 import { useEffect, useRef } from "react";
 import { trackEvent } from "@/hooks/trackEvent";
 import { useGlobalContext } from "@/context/LoadProvider";
@@ -27,12 +28,17 @@ const FALLBACK_PHOTO = {
 // in it because this is the fallback — it is not decoded, it IS the decoded
 // value, and spelling it this way is the only version of it that cannot drift
 // from what the mark's decoder would have produced.
+// Bez zvýrazněného konce — ten je teď vlastní hodnota, viz FALLBACK_ACCENT.
 const FALLBACK_HEADING = [
     [["Budujeme pro lidi", false]],
     [["stabilní a kvalitní", false]],
     [["finanční poradenství", false]],
-    [["už přes", false], ["jednu dekádu", true]],
+    [["už přes", false]],
 ];
+
+// Dvě znění téhož: psací animace mezi nimi přepíná. Jedna položka by byla jen
+// obarvený text, jak to bylo dřív — viz components/common/ui/accentText.
+const FALLBACK_ACCENT = ["jednu dekádu", "12 let"];
 
 const FALLBACK_SCROLL_HINT = "Scroll down";
 const FALLBACK_BADGE = { label: "Nahlášení pojistného", href: "https://www.pojistnehlaseni.cz/" };
@@ -98,6 +104,9 @@ export default function MainIntro({ scrollTarget, copy = {} }) {
     const heading = {
         mark: copy.heading?.mark,
         lines: hasLines(copy.heading?.lines) ? copy.heading.lines : FALLBACK_HEADING,
+        // Vlastní pole, ne runy uvnitř nadpisu. Prázdné pole znamená „blok ho
+        // nemá", ne „je prázdný", takže se sáhne po tom, co web veze s sebou.
+        accent: hasAccent(copy.headingAccent) ? copy.headingAccent : FALLBACK_ACCENT,
     };
 
     const { scrollYProgress } = useScroll({
@@ -184,6 +193,11 @@ export default function MainIntro({ scrollTarget, copy = {} }) {
                     transition={{ duration: 0.8, ease: ENTER_CURTAIN, delay: 0.03 }}
                 >
                     <Lines lines={heading.lines} markClass="highlighted" />
+                    {/* Mezera patří sem, ne na konec posledního řádku: uložená
+                        hodnota končí slovem, a mezera na jejím konci by se při
+                        editaci na stránce ztratila hned prvním uložením. */}
+                    {hasAccent(heading.accent) ? " " : null}
+                    <AccentText accent={heading.accent} docId={docId} markClass="highlighted" />
                 </motion.span>
             </motion.h1>
 

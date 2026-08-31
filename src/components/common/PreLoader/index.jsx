@@ -16,6 +16,10 @@
 import { animate, motion, motionValue, useAnimationFrame, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { useGlobalContext } from "@/context/LoadProvider";
+// Who, if anyone, is framing this document. Already in the public bundle —
+// `_app`'s edit arming imports the same module — so this costs nothing to a
+// visitor. See the bypass below.
+import { isEditSurfaceFrame } from "@/cms/preview/frame";
 import { NavPages } from "@/constants/common";
 
 export const CURTAIN = [0.22, 1, 0.36, 1];
@@ -407,10 +411,22 @@ export default function Preloader() {
     // Activation: freeze scroll, take the viewport, build the clock.
     useEffect(() => {
         if (!document.documentElement.hasAttribute("data-preload")) return;
-        // Test bypass: ?nopl=1 drops the curtain immediately (responsive /
-        // visual verification would otherwise pay the full 9s on every load).
+        // Two ways past the curtain, one code path.
+        //
+        //   ?nopl=1                 test bypass (responsive / visual verification
+        //                           would otherwise pay the full 9s per load).
+        //   the editing surface     the Studio's /studio/edit reloads its frame on
+        //                           every page switch, every Obnovit and every
+        //                           draft/published toggle, and 2.5s of entrance
+        //                           each time is a tax on the work. /studio/preview
+        //                           is NOT bypassed: a visitor sees the curtain, so
+        //                           the surface whose job is faithfulness shows it.
+        //
+        // Both drop the attribute and flip the gate by hand, because the gate was
+        // read off that attribute one render ago (see LoadProvider) and nothing
+        // else would ever release the heroes.
         try {
-            if (new URLSearchParams(window.location.search).has("nopl")) {
+            if (new URLSearchParams(window.location.search).has("nopl") || isEditSurfaceFrame()) {
                 document.documentElement.removeAttribute("data-preload");
                 setGate("go");
                 return;

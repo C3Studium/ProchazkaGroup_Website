@@ -59,6 +59,22 @@ data under GDPR, world-readable today. The CMS must not reproduce this:
 - Studio mutations require an authenticated session; the server checks it.
 - Migrated reviews drop the IP columns unless there is a stated lawful basis.
 
+The site's own anon-key write helpers are gone (`src/hooks/supabaseClient.js`,
+`useReviewForm.js`, `useFetchDatabase.js`, all deleted, all with zero
+importers). A production build of this branch puts the anon key in 0 of 98
+client chunks. That removed the caller, not the permission — and not the past:
+the site deployed today still serves the key and the compiled hook in
+`/_next/static/chunks/124-*.js`. The key keeps insert/update on the legacy
+tables until `server/migrations/0004_legacy_lockdown.sql` is run by hand against
+the live project, and should be rotated afterwards. That file is destructive and
+waits for a human.
+
+Note the default the CMS ships with: `cms_document.data` is granted whole to
+anon for published rows, so a field added to a schema is public the moment it is
+published. `consultant.data` carries telephone numbers and e-mail addresses on
+that basis and is meant to. Anything that must not be public needs its own
+column, not a corner of `data`.
+
 ## Layout
 
     src/cms/
@@ -117,7 +133,8 @@ One object, injected into the Studio. No other data access exists in the UI.
   update({ id, data }) => doc,          // full body; server diffs
   remove({ id }) => void,
   publish({ id }) => doc,               // draft -> published
-  unpublish({ id }) => doc,
+  unpublish({ id }) => doc,             // off the site; both bodies kept
+  discardDraft({ id }) => doc,          // draft -> null; the site does not move
   media: {
     upload(file, { alt }) => asset,     // { id, url, width, height, mime, alt }
     list({ page, perPage, search }) => { rows, total },
@@ -169,6 +186,14 @@ failure. `code` is one of `unauthorized` `forbidden` `not_found` `invalid`
 An editor always edits `draft ?? data`. Publishing copies `draft` into `data`,
 clears `draft`, stamps `publishedAt`. The public site reads `data` only, and
 only where `status = "published"`.
+
+`draft` is non-null exactly when there is something the public has not seen. A
+body identical to `data` is not stored as a draft (`update()` drops it) and an
+existing one can be thrown away (`discardDraft()`), which is the way back out of
+a draft that does not go through the one irreversible action in the system.
+Discarding writes `draft` and nothing else — not `data`, not `status`, not
+`published_at` — so it changes no page, writes no revision and regenerates
+nothing, exactly like every other draft write.
 
 ## Content types this project needs
 

@@ -1,6 +1,11 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { registerInput, registerKind } from "../registry"
+import { usePort } from "../../context/StudioProvider"
+import { useToast } from "../../context/ToastProvider"
+import CropEditor from "@/cms/edit/overlay/CropEditor"
+import { Modal } from "../../ui/Modal"
 import MediaPicker from "../../media/MediaPicker"
+import { isCroppableImage, resolveCropTarget } from "../../media/cropTarget"
 import { Button, IconButton } from "../../ui/controls"
 import Icon from "../../ui/Icon"
 import styles from "./inputs.module.scss"
@@ -16,6 +21,7 @@ import styles from "./inputs.module.scss"
  */
 function AssetInput({ value, onChange, readOnly, assetKind = "image", title }) {
   const [picking, setPicking] = useState(false)
+  const [cropping, setCropping] = useState(false)
   const isImage = assetKind === "image"
 
   // A migration can leave a bare URL string where an object is expected; render
@@ -70,6 +76,14 @@ function AssetInput({ value, onChange, readOnly, assetKind = "image", title }) {
               <Button size="sm" variant="ghost" icon="image" onClick={() => setPicking(true)}>
                 Vyměnit
               </Button>
+              {/* Between the two, because that is the order of the decisions:
+                  is this the right picture, is it framed right, do I want it at
+                  all. Only for a raster — a PDF in a file field has no crop. */}
+              {isCroppableImage(asset) ? (
+                <Button size="sm" variant="ghost" icon="fit" onClick={() => setCropping(true)}>
+                  {asset.crop ? "Upravit ořez" : "Upravit"}
+                </Button>
+              ) : null}
               <Button size="sm" variant="ghost" icon="trash" onClick={() => onChange(null)}>
                 Odebrat
               </Button>
@@ -86,7 +100,81 @@ function AssetInput({ value, onChange, readOnly, assetKind = "image", title }) {
         onClose={() => setPicking(false)}
         onChange={onChange}
       />
+
+      <CropDialog
+        open={cropping}
+        asset={asset}
+        onClose={() => setCropping(false)}
+        onChange={onChange}
+      />
     </div>
+  )
+}
+
+/**
+ * The crop, in a dialog over the form.
+ *
+ * It writes the library row — one asset, same id, original kept
+ * (server/media.js crop()) — and then hands the updated asset back to the
+ * field, exactly as picking one does. Without that second half the row would
+ * change and this field would go on showing the URL it was saved with; see
+ * src/cms/MEDIA.md on why a crop applies where it was applied.
+ */
+function CropDialog({ open, asset, onClose, onChange }) {
+  const port = usePort()
+  const toast = useToast()
+  const [busy, setBusy] = useState(false)
+  const [target, setTarget] = useState(null)
+  const [problem, setProblem] = useState(null)
+
+  // The value may be a bare path or a legacy object with no id; the row it
+  // points at is what can be cropped. See media/cropTarget.js.
+  useEffect(() => {
+    if (!open) return
+    let live = true
+    setTarget(null)
+    setProblem(null)
+    resolveCropTarget(port, asset)
+      .then((found) => {
+        if (!live) return
+        if (found) setTarget(found)
+        else setProblem("Tenhle soubor není v knihovně médií, takže ho nejde oříznout.")
+      })
+      .catch((failure) => live && setProblem(failure?.message || "Soubor se nepodařilo najít"))
+    return () => {
+      live = false
+    }
+  }, [open, port, asset])
+
+  if (!open) return null
+
+  const apply = async (rect) => {
+    setBusy(true)
+    try {
+      const updated = await port.media.crop(target.id, rect)
+      // The whole asset back into the field, which also upgrades a bare path or
+      // a legacy object to the shape the picker writes.
+      onChange(updated)
+      onClose()
+      toast.success(rect ? "Ořez uložen" : "Původní obrázek obnoven")
+    } catch (failure) {
+      toast.error("Ořez se nepodařilo uložit", { description: failure?.message })
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Modal open title="Oříznout obrázek" onClose={onClose} size="xl">
+      {problem ? (
+        <p className={styles.assetMissing}>
+          <Icon name="warning" size={12} />
+          {problem}
+        </p>
+      ) : target ? (
+        <CropEditor asset={target} busy={busy} onCancel={onClose} onApply={apply} onReset={() => apply(null)} />
+      ) : null}
+    </Modal>
   )
 }
 
@@ -95,6 +183,10 @@ function Picker({ open, isImage, title, selectedId, onClose, onChange }) {
     <MediaPicker
       open={open}
       selectedId={selectedId}
+      // An image field must not be offered the library's three .mp4 clips: the
+      // value would be a valid asset object and the public page would render a
+      // broken <img>. See MediaLibrary's matchesAccept.
+      accept={isImage ? "image/*" : null}
       title={isImage ? `Vyberte obrázek${title ? `: ${title}` : ""}` : "Vyberte soubor"}
       onClose={onClose}
       // The whole asset, unmodified — the port owns its shape, not this input.

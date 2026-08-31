@@ -48,6 +48,17 @@ export const createSupabaseStorage = ({ client, bucket }) => {
             }
         },
 
+        /**
+         * The stored bytes. `download` returns a Blob; the callers here are all
+         * server-side and want a Buffer, so the conversion belongs in the
+         * driver rather than in every one of them.
+         */
+        async get(key) {
+            const { data, error } = await files().download(key)
+            if (error) throw mapStorageError(error, 'Načtení souboru selhalo')
+            return Buffer.from(await data.arrayBuffer())
+        },
+
         async remove(keys) {
             const list = Array.isArray(keys) ? keys : [keys]
             if (!list.length) return

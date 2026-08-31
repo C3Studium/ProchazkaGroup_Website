@@ -1,15 +1,50 @@
 import Head from "next/head"
 
-import { footerStaticProps } from "@/cms/server/site"
-
-// The only content on this route today is the patička, which `_app` renders
-// and which therefore has to travel on this page's props. One shared
-// implementation rather than a copy per page — see @/cms/server/site/footer.
-export const getStaticProps = footerStaticProps
+import { getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
 
 import CookiesContent from "@/components/pages/cookies/CookiesPage"
 
-export default function CookiesPage() {
+// ISR, on the same terms as /o-nas and the homepage: a legal notice an editor
+// changes a few times a year, and `revalidate` is what lets a publish reach the
+// public site without a deploy.
+const REVALIDATE_SECONDS = 600
+
+/**
+ * This page's own reader, in place of the shared `footerStaticProps` it used
+ * while it had no copy of its own.
+ *
+ * `viewOf(context)` reads Next's signed preview cookie and answers with one of
+ * three things — the published site, the draft, or the site as it stood at a
+ * chosen moment. A visitor carries no cookie and therefore gets the statically
+ * generated page, the published bodies and no document id in its props; the
+ * moment cannot arrive any other way, because there is no query parameter to
+ * type. Same arrangement as /o-nas, and the note there explains why this route
+ * is framed at its own URL rather than at a mirror.
+ *
+ * Cannot reject: every read inside answers with empty rather than throwing, so
+ * an absent table or an unreachable database yields the page the component
+ * ships with rather than a build failure. See @/cms/server/site/read.
+ */
+export async function getStaticProps(context) {
+    const view = viewOf(context)
+
+    const [content, footer, contact, assistant] = await Promise.all([
+        getPageContent("/cookies", view),
+        getFooterContent(view),
+        getContactContent(view),
+        // The same read the rest of this page uses. Read published even for an
+        // editor, she would arrive with no document id and the contact sheet
+        // would have nothing on it to click.
+        getAssistant({ read: readerFor(view) }),
+    ])
+
+    return {
+        props: { content, footer, contact, assistant },
+        revalidate: REVALIDATE_SECONDS,
+    }
+}
+
+export default function CookiesPage({ content }) {
     return (
         <>
             <Head>
@@ -82,7 +117,11 @@ export default function CookiesPage() {
                 </script>
             </Head>
             <main lang="cs">
-                <CookiesContent />
+                {/* `content` carries a `docId` per block only when this page is
+                    being rendered for the Studio's editing frame — see
+                    `f.docId()` in @/cms/site/fields. On the public page it is
+                    absent and every annotation helper answers with nothing. */}
+                <CookiesContent content={content} />
             </main>
         </>
     )

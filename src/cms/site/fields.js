@@ -8,7 +8,7 @@
 // of the old per-page files: turning one shaped block into the props a section
 // receives.
 //
-// A reader is `{ kind, read(block, ctx) }`. `block` is the shaped siteCopy
+// A reader is `{ kind, read(block, ctx), reads(block, ctx) }`. `block` is the shaped siteCopy
 // block `getSiteCopy` answers with — already normalised, so `image` is
 // `{src, alt}` and `bodyText` is the plain reading — or `null` when the CMS
 // holds nothing for that key. `ctx` carries `{ draft, type }`: whether editing
@@ -19,8 +19,32 @@
 // read.js arriving at its last mile: a page with no CMS behind it gets the same
 // empty strings the hand-written seams produced, and every section renders the
 // copy it ships with.
+//
+// ---------------------------------------------------------------------------
+// `reads` — the same fact, said as addresses
+//
+// `read` answers with a VALUE; `reads` answers with the **stored paths that
+// value came out of**, in the vocabulary a `data-cms-field` is written in:
+// `items.3.label`, `headline`, `body`, `questions`. Nothing on the render path
+// calls it. It exists so that a check can ask the one question that costs a
+// morning when nobody asks it — *is the address on this element still an address
+// this page reads* — without a second file restating what each reader does. That
+// second file is exactly how the bug it guards against happened: the pairs moved
+// out of `items[]` and the configuration was updated while a component kept
+// writing to `items.0.label`, which still existed, still validated, and was read
+// by nobody.
+//
+// Two of them depend on the block, and that is the whole reason `reads` takes
+// one rather than being a constant on the reader: `pairs` reads `questions` when
+// there are any and `items` when there are not, and `rawLines` reads its own
+// path when it is set and the fallback's when it is not. A static answer would
+// have to name both shapes, which would have declared the historical bug legal.
+//
+// `null` means "cannot say" — see `from`. A caller must treat it as unverifiable
+// rather than as empty, because empty reads as "this page reads nothing here".
+// `*` is one member of a list, the same spelling `@/cms/schemas/marks` uses.
 
-import { decodeLines, markAtPath } from '@/cms/schemas/marks'
+import { decodeLines, markAtPath } from '../schemas/marks.js'
 
 /**
  * "do not emit this key at all", as a value.
@@ -34,9 +58,12 @@ import { decodeLines, markAtPath } from '@/cms/schemas/marks'
  */
 export const OMIT = Symbol('cms.site.omit')
 
-const define = (kind, meta, read) => Object.freeze({ kind, ...meta, read })
+const define = (kind, meta, read, reads) => Object.freeze({ kind, ...meta, read, reads })
 
 const itemsOf = (block) => block?.items || []
+
+/** `[from, from + count)`, for the readers that address a run of positions. */
+const range = (from, count) => Array.from({ length: count }, (_, i) => from + i)
 
 /** Every label in order, empties kept — the position IS the address. */
 const labelsOf = (block) => itemsOf(block).map((item) => item.label || '')
@@ -52,7 +79,7 @@ const labelsOf = (block) => itemsOf(block).map((item) => item.label || '')
  * real content.
  */
 export const text = (path = 'title') =>
-    define('text', { path }, (block) => block?.[path] || '')
+    define('text', { path }, (block) => block?.[path] || '', () => [path])
 
 /**
  * The block's body WITHOUT its markup.
@@ -62,19 +89,22 @@ export const text = (path = 'title') =>
  * `<p>` is a bug you only see in the browser, so what travels is the plain
  * reading `getSiteCopy` computed alongside it.
  */
-export const plain = () => define('plain', { path: 'bodyText' }, (block) => block?.bodyText || '')
+// `reads` answers `body` and not `bodyText`: the plain reading is something
+// `getSiteCopy` computed, and `body` is the field an editor writes and an
+// element annotates.
+export const plain = () => define('plain', { path: 'bodyText' }, (block) => block?.bodyText || '', () => ['body'])
 
 /** `items[index].label`, or `''`. */
 export const label = (index) =>
-    define('label', { index }, (block) => itemsOf(block)[index]?.label || '')
+    define('label', { index }, (block) => itemsOf(block)[index]?.label || '', () => [`items.${index}.label`])
 
 /** `items[index].value`, or `''`. */
 export const value = (index) =>
-    define('value', { index }, (block) => itemsOf(block)[index]?.value || '')
+    define('value', { index }, (block) => itemsOf(block)[index]?.value || '', () => [`items.${index}.value`])
 
 /** `items[index].lead`, or `''` — the short ordinal some blocks carry. */
 export const lead = (index) =>
-    define('lead', { index }, (block) => itemsOf(block)[index]?.lead || '')
+    define('lead', { index }, (block) => itemsOf(block)[index]?.lead || '', () => [`items.${index}.lead`])
 
 /**
  * A run of labels.
@@ -96,7 +126,12 @@ export const labels = ({ from = 0, count, pad = false } = {}) =>
         if (!pad) return labelsOf(block).slice(from, from + count)
         const list = itemsOf(block)
         return Array.from({ length: count }, (_, i) => list[from + i]?.label || '')
-    })
+    },
+    // The declared RANGE, not the range the block happens to be long enough to
+    // fill. A run of named positions reads position three whether or not
+    // anything is stored there, and an element annotated on an empty one is
+    // right — that is the annotation an editor uses to put something there.
+    () => (count === undefined ? ['items.*.label'] : range(from, count).map((i) => `items.${i}.label`)))
 
 /**
  * Every label the block holds, EMPTIES DROPPED.
@@ -107,7 +142,7 @@ export const labels = ({ from = 0, count, pad = false } = {}) =>
  * hole. Anywhere the positions are named, use `labels` and keep the gaps.
  */
 export const labelsCompact = () =>
-    define('labelsCompact', {}, (block) => itemsOf(block).map((item) => item.label).filter(Boolean))
+    define('labelsCompact', {}, (block) => itemsOf(block).map((item) => item.label).filter(Boolean), () => ['items.*.label'])
 
 /**
  * A run of items, reduced to the named keys — the shape a stat row renders.
@@ -125,7 +160,10 @@ export const rows = ({ from = 0, count, pick = ['label'] } = {}) =>
             for (const key of pick) row[key] = item?.[key] || ''
             return row
         })
-    })
+    },
+    () => (count === undefined
+        ? pick.map((key) => `items.*.${key}`)
+        : range(from, count).flatMap((i) => pick.map((key) => `items.${i}.${key}`))))
 
 // --- links -------------------------------------------------------------------
 
@@ -141,7 +179,10 @@ export const link = (index, { keys = ['label', 'href'] } = {}) =>
     define('link', { index, keys }, (block) => {
         const item = itemsOf(block)[index]
         return { [keys[0]]: item?.label || '', [keys[1]]: item?.value || '' }
-    })
+    },
+    // `keys` renames the two halves on the way OUT; what is read is still one
+    // item's label and value, and those are the addresses an element carries.
+    () => [`items.${index}.label`, `items.${index}.value`])
 
 // --- images ------------------------------------------------------------------
 
@@ -161,17 +202,28 @@ export const link = (index, { keys = ['label', 'href'] } = {}) =>
  * an editor actually wrote on the asset, refuse the title standing in for one.
  * A dateline is not a description of a picture.
  */
-export const image = ({ path = 'image', alt = 'inherit' } = {}) =>
-    define('image', { path, alt }, (block) => {
+export const image = ({ path = 'image', alt = 'inherit', sizes = null } = {}) =>
+    define('image', { path, alt, sizes }, (block) => {
         const picture = block?.[path]
         if (!picture) return null
-        if (alt === 'none') return { src: picture.src, alt: '' }
+        // Jak velký se obrázek vykreslí, se deklaruje TADY, ne u assetu.
+        //
+        // Soubor má jednu skutečnou velikost; použití jich má tolik, kolikrát
+        // je použitý. Totéž logo je 200 px v patičce a 50 px v navigaci, a
+        // stejná fotka je 2560 px v hlavičce a 100 px v seznamu. Uložit to
+        // k assetu znamená zvolit jednu z nich a druhou zkazit.
+        //
+        // Není to ani nastavení pro editora: `sizes` říká prohlížeči, kterou
+        // variantu má stáhnout, ne jak má stránka vypadat. Vzhled zůstává v CSS.
+        const framed = sizes ? { ...picture, sizes } : picture
+        if (alt === 'none') return { ...framed, alt: '' }
         if (alt === 'own') {
             const own = picture.alt && picture.alt !== block?.title ? picture.alt : ''
-            return { ...picture, alt: own }
+            return { ...framed, alt: own }
         }
-        return picture
-    })
+        return framed
+    },
+    () => [path])
 
 // --- hand-broken and marked copy ---------------------------------------------
 
@@ -197,7 +249,35 @@ export const lines = (path = 'headline') =>
             lines: decoded,
             ...(ctx.draft && block?.id && mark.name ? { mark: mark.name } : {}),
         }
-    })
+    },
+    () => [path])
+
+/**
+ * The accented tail of a heading, as its own value.
+ *
+ * The half of a headline that is painted in the accent colour, kept apart from
+ * the half that is not. One entry is a coloured span; several are the same span
+ * typing itself out and swapping — "už přes JEDNU DEKÁDU" becoming "už přes 12
+ * LET" and back.
+ *
+ * Why a field of its own rather than the asterisks the rest of the marked copy
+ * uses: a mark inside a string can say WHICH words are accented and nothing
+ * else. It has nowhere to put a second wording, and an editor who wants to
+ * change just the accent has to find it inside a paragraph and keep the pairing
+ * intact. Two values, two inputs.
+ *
+ * Always the tail. An accent at the front or in the middle is three parts, not
+ * two, and those keep the mark convention — `index.offers` has three of them.
+ *
+ * @returns {string[]} the alternatives, in order; empty when the block has none
+ */
+export const accent = (path = 'accent') =>
+    define('accent', { path }, (block) => {
+        const stored = block?.[path]
+        if (!Array.isArray(stored)) return typeof stored === 'string' && stored.trim() ? [stored.trim()] : []
+        return stored.map((entry) => String(entry ?? '').trim()).filter(Boolean)
+    },
+    () => [path])
 
 /**
  * The raw lines of a hand-broken value — the string cut at its breaks, nothing
@@ -213,7 +293,12 @@ export const rawLines = (path = 'headline', { fallback = null } = {}) =>
         const stored = block?.[path]
         if (stored) return String(stored).split('\n')
         return fallback ? fallback.read(block, ctx) : []
-    })
+    },
+    // Which of the two addresses is live depends on the store, exactly as the
+    // read does. Naming both unconditionally would say the old positional
+    // addresses are still read on a block that has moved off them — which is
+    // the shape of the bug this whole facility exists to catch.
+    (block, ctx) => (block?.[path] ? [path] : [path, ...(fallback?.reads?.(block, ctx) || [])]))
 
 /**
  * Every marked label of the block, decoded into the runs a component renders.
@@ -231,14 +316,18 @@ export const markedLabels = ({ path = 'items' } = {}) =>
         return itemsOf(block)
             .map((item) => mark.decode(item.label))
             .filter((parts) => parts.length)
-    })
+    },
+    () => [`${path}.*.label`])
 
 /** The name of the mark a field declares, draft-only. What the overlay reads. */
 export const markName = (path) =>
     define('markName', { path }, (block, ctx) => {
         const mark = markAtPath(ctx.type, path)
         return ctx.draft && block?.id && mark.name ? mark.name : OMIT
-    })
+    },
+    // A field's declaration about itself, not a value read out of the document.
+    // Nothing on the page can be annotated with it, so it addresses nothing.
+    () => [])
 
 // --- pairs -------------------------------------------------------------------
 
@@ -256,7 +345,16 @@ export const pairs = ({ prefer = 'questions', fallback = 'items', keys = ['q', '
         const named = block?.[prefer] || []
         if (named.length) return named.map((pair) => ({ [keys[0]]: pair.question, [keys[1]]: pair.answer }))
         return itemsOf(block).map((item) => ({ [keys[0]]: item.label || '', [keys[1]]: item.value || '' }))
-    })
+    },
+    // ONE of the two arrays, decided the way `read` decides it. This is the
+    // reader the historical bug was standing on: a block whose pairs live in
+    // `questions` reads nothing at `items.0.label`, and answering with both
+    // shapes here would make that annotation look correct forever.
+    //
+    // The array itself rather than its leaves, because the whole of it is read:
+    // an element may address the array (`questions`), one member (`questions.3`)
+    // or a member's field, and all three are on the branch this names.
+    (block) => [block?.[prefer]?.length ? prefer : fallback])
 
 /**
  * WHICH of those two arrays the block is actually stored in, draft-only.
@@ -266,7 +364,10 @@ export const pairs = ({ prefer = 'questions', fallback = 'items', keys = ['q', '
  */
 export const pairsField = ({ prefer = 'questions', fallback = 'items' } = {}) =>
     define('pairsField', { prefer, fallback }, (block, ctx) =>
-        ctx.draft && block?.id ? (block[prefer]?.length ? prefer : fallback) : OMIT)
+        ctx.draft && block?.id ? (block[prefer]?.length ? prefer : fallback) : OMIT,
+    // The NAME of a field, which is a fact about the block rather than content
+    // out of it. `pairs` above already declares the branch that is read.
+    () => [])
 
 // --- provenance --------------------------------------------------------------
 
@@ -283,10 +384,13 @@ export const pairsField = ({ prefer = 'questions', fallback = 'items' } = {}) =>
  * shape it produces is readable off the page's own configuration.
  */
 export const docId = () =>
-    define('docId', {}, (block, ctx) => (ctx.draft && block?.id ? block.id : OMIT))
+    define('docId', {}, (block, ctx) => (ctx.draft && block?.id ? block.id : OMIT),
+    // Provenance, not content: it is the document's own identity travelling
+    // beside the words. Nothing on the page addresses it as a field.
+    () => [])
 
 /** A constant. Rare, and better than a component hardcoding one. */
-export const constant = (literal) => define('constant', { literal }, () => literal)
+export const constant = (literal) => define('constant', { literal }, () => literal, () => [])
 
 /**
  * The escape hatch: an arbitrary pure function of the block.
@@ -302,10 +406,16 @@ export const from = (read, { draftOnly = false } = {}) =>
     define('from', { draftOnly }, (block, ctx) => {
         if (draftOnly && !(ctx.draft && block?.id)) return OMIT
         return read(block, ctx)
-    })
+    },
+    // A lambda's addresses cannot be recovered from the lambda. `null` rather
+    // than `[]`, so a check reads it as "this block cannot be verified" and says
+    // so, instead of reading it as "this block reads nothing" and calling every
+    // element on it broken.
+    () => null)
 
 /** The namespace the config is written against. */
 export const f = Object.freeze({
+    accent,
     constant,
     docId,
     from,

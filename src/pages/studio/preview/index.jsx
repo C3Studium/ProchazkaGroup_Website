@@ -1,5 +1,7 @@
 import Head from "next/head"
+import { PagesNavigation } from "@/cms/runtime/pagesNavigation.jsx"
 
+import { studioChrome } from "@/cms"
 import PreviewHost from "@/cms/studio/preview/PreviewHost"
 import { listSitePages } from "@/cms/server/pages"
 import { getHomepageContent } from "@/cms/server/site"
@@ -69,14 +71,22 @@ function summarise(content) {
   }
 }
 
-export default function StudioPreview({ mode, generatedAt, sources, pages }) {
+function StudioPreview({ mode, generatedAt, sources, pages }) {
   return (
     <>
       <Head>
         <title>Náhled — Studio</title>
         <meta name="robots" content="noindex, nofollow" />
       </Head>
-      <PreviewHost mode={mode} generatedAt={generatedAt} sources={sources} pages={pages} />
+      <PagesNavigation>
+        <PreviewHost mode={mode} generatedAt={generatedAt} sources={sources} pages={pages} />
+      </PagesNavigation>
     </>
   )
 }
+
+/**
+ * The host document, not the previewed one: Studio chrome, so it is served the
+ * bare shell. The page under glass is a separate document loaded by the iframe
+ * and keeps the site's shell in full — see ./home. */
+export default studioChrome(StudioPreview)

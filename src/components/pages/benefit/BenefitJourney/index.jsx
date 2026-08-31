@@ -5,6 +5,7 @@ import { useRef } from "react";
 import { motion, useScroll, useSpring, useTransform } from "framer-motion";
 
 import { CURTAIN, ENTERS, PHOTO, RISE, group } from "@/components/common/ui/entrance";
+import { editable } from "@/cms/edit";
 
 // 02 — Jak to funguje.
 //
@@ -24,6 +25,28 @@ import { CURTAIN, ENTERS, PHOTO, RISE, group } from "@/components/common/ui/entr
 // Nothing here is pinned and nothing follows the scroll except the drifts.
 // Each row arrives once, the way every section on this site arrives — see
 // entrance.js — and is then still for as long as anyone wants to read it.
+
+// Copy comes from the CMS — `benefit-program.kroky` for the head and one block
+// per step (see cms.config.js). What is written here is what the section ships
+// with and what every field falls back to on its own, so an empty CMS or an
+// unreachable database renders exactly this section.
+//
+// How many steps there are is NOT an editor's decision. Each row's height, the
+// side its photograph takes and the x its baseline draws from are PLAN below,
+// and the thread between two rows is drawn from the NEXT row's plan — a fourth
+// step arriving from a database would have no plan to stand on. Same rule
+// /o-nas's showcase follows.
+const HEAD = {
+    // The `<em>` of the eyebrow. Its words are `items.0.label` and have no
+    // element of their own — see the eyebrow below.
+    ord: "02",
+    eyebrow: "Jak to funguje",
+    title: "Tři kroky",
+    lead: "Program má tři kroky a jdou v tomhle pořadí — žádný se nedá přeskočit.",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
 
 const STEPS = [
     {
@@ -83,7 +106,37 @@ const PLAN = [
 // side its baseline draws from.
 const copySide = (plan) => (plan.side === "right" ? "left" : "right");
 
-export default function BenefitJourney() {
+export default function BenefitJourney({ head = {}, steps: blocks }) {
+    const said = {
+        ord: say(head.ord, HEAD.ord),
+        title: say(head.title, HEAD.title),
+        lead: say(head.lead, HEAD.lead),
+        docId: head.docId,
+    };
+
+    // The three steps, merged onto the three the page owns BY POSITION — the key
+    // list in cms.config.js is declared in this order, and PLAN below is indexed
+    // by the same position.
+    const steps = STEPS.map((step, i) => {
+        const block = blocks?.[i] || null;
+        return {
+            ...step,
+            n: say(block?.n, step.n),
+            label: say(block?.label, step.label),
+            title: say(block?.title, step.title),
+            body: say(block?.body, step.body),
+            note: say(block?.note, step.note),
+            // `position` is the crop, which is layout rather than content and
+            // stays the component's. `alt: 'own'` in the configuration refuses
+            // the block's title as a stand-in alt, so an unwritten alt arrives
+            // empty and the shipped one stands.
+            photo: block?.photo?.src
+                ? { ...step.photo, src: block.photo.src, alt: say(block.photo.alt, step.photo.alt) }
+                : step.photo,
+            docId: block?.docId,
+        };
+    });
+
     return (
         <section className="BenefitJourney">
             <motion.header
@@ -93,11 +146,26 @@ export default function BenefitJourney() {
                 whileInView="shown"
                 viewport={ENTERS}
             >
+                {/* The `<em>` has an element and carries its own annotation.
+                    The words beside it are a bare text node sharing this
+                    paragraph with it, so they are `items.0.label` and are edited
+                    in the Studio's form — the arrangement /ochrana-soukromi's
+                    eyebrow already uses.
+
+                    The separating space rides INSIDE the expression: as a
+                    literal it would be a second text child, and React marks the
+                    boundary between two adjacent text children with a `<!-- -->`
+                    it does not need here. Written this way the markup is byte
+                    for byte what it was. */}
                 <motion.p className="BenefitJourney__eyebrow" variants={RISE}>
-                    <em>02</em> Jak to funguje
+                    <em {...editable(said.docId, "items.0.lead", "text")}>{said.ord}</em>{` ${say(head.eyebrow, HEAD.eyebrow)}`}
                 </motion.p>
-                <motion.h2 className="BenefitJourney__title" variants={RISE}>
-                    Tři kroky
+                <motion.h2
+                    className="BenefitJourney__title"
+                    variants={RISE}
+                    {...editable(said.docId, "title", "text")}
+                >
+                    {said.title}
                 </motion.h2>
                 <motion.span
                     className="BenefitJourney__rule"
@@ -107,12 +175,16 @@ export default function BenefitJourney() {
                     }}
                     aria-hidden="true"
                 />
-                <motion.p className="BenefitJourney__lead" variants={RISE}>
-                    Program má tři kroky a jdou v tomhle pořadí — žádný se nedá přeskočit.
+                <motion.p
+                    className="BenefitJourney__lead"
+                    variants={RISE}
+                    {...editable(said.docId, "body", "text")}
+                >
+                    {said.lead}
                 </motion.p>
             </motion.header>
 
-            {STEPS.map((step, i) => (
+            {steps.map((step, i) => (
                 <Row
                     key={step.id}
                     step={step}
@@ -166,6 +238,7 @@ function Row({ step, ord, plan, drop }) {
                 frame around it: on desktop it bleeds a little taller than the
                 row, which is what says "open" instead of "cell". */}
             <motion.div
+                {...editable(step.docId, "image", "image")}
                 className="BenefitJourney__shot"
                 style={{ width: `${plan.photo * 100}%` }}
                 variants={PHOTO}
@@ -195,16 +268,31 @@ function Row({ step, ord, plan, drop }) {
                 <motion.span className="BenefitJourney__ord" variants={RISE} aria-hidden="true">
                     {ord}
                 </motion.span>
+                {/* The dotted number is a bare text node beside the `<span>`,
+                    so it has no element to click: it is `items.0.lead` and is
+                    edited in the form. The label does have one. */}
                 <motion.p className="BenefitJourney__n" variants={RISE}>
-                    {step.n} <span>{step.label}</span>
+                    {step.n} <span {...editable(step.docId, "items.0.label", "text")}>{step.label}</span>
                 </motion.p>
-                <motion.h3 className="BenefitJourney__statement" variants={RISE}>
+                <motion.h3
+                    className="BenefitJourney__statement"
+                    variants={RISE}
+                    {...editable(step.docId, "title", "text")}
+                >
                     {step.title}
                 </motion.h3>
-                <motion.p className="BenefitJourney__body" variants={RISE}>
+                <motion.p
+                    className="BenefitJourney__body"
+                    variants={RISE}
+                    {...editable(step.docId, "body", "text")}
+                >
                     {step.body}
                 </motion.p>
-                <motion.p className="BenefitJourney__note" variants={RISE}>
+                <motion.p
+                    className="BenefitJourney__note"
+                    variants={RISE}
+                    {...editable(step.docId, "items.1.label", "text")}
+                >
                     {step.note}
                 </motion.p>
             </motion.div>

@@ -14,10 +14,12 @@ import {
     useTransform,
 } from "framer-motion";
 
+import { editable, editableLink } from "@/cms/edit";
 import Arrow from "@/components/common/ui/Arrow";
 import { coverGround } from "@/components/common/ui/pageGround";
 import CornerButton from "@/components/common/ui/CornerButton";
 import GridDistortion from "@/components/common/ui/GridDistortion";
+import Lines, { hasLines } from "@/components/common/ui/lines";
 import { useGlobalContext } from "@/context/LoadProvider";
 
 // The hero is the first statistics band seen from close up, and scrolling is
@@ -32,6 +34,33 @@ import { useGlobalContext } from "@/context/LoadProvider";
 // viewport. The source is backgrounds/family.webp, which is misnamed: it is
 // the wallet, and it is the photo the first statistics band was designed on.
 const HERO_PHOTO = "/assets/backgrounds/wallet_2000.webp";
+
+// What this section says when the CMS says nothing — every string it shipped
+// with, gathered so the fallbacks read as the copy they are rather than as
+// defaults scattered through the markup. `seedNabidka.js` holds these verbatim;
+// changing one here without changing it there makes the page say two different
+// things depending on whether a query answered.
+//
+// The heading is written as the DECODED value — one entry per line, each a run
+// of `[text, marked]` — for the reason MainIntro's is: this is the fallback, so
+// it is not decoded, it IS the decoded value, and spelling it this way is the
+// only version that cannot drift from what the mark's decoder would produce.
+const FALLBACK_EYEBROW = "Nabídka";
+const FALLBACK_HEADING = [
+    [["Nemáte na vaše", false]],
+    [["finance", false], ["prostor?", true]],
+];
+const FALLBACK_LEAD =
+    "Každý den, kdy vaše dluhy nebo inflace rostou, ztrácíte peníze, které už nikdy neuvidíte.";
+const FALLBACK_CTA = "Spojit se hned";
+const FALLBACK_SCROLL = "Scroll";
+
+// The photograph is deliberately NOT read from the CMS, and this is the one
+// place that can say why: it is the first frame of the section below. StatRail's
+// first cell draws the identical bitmap, unoptimised, from the same path, and
+// the pin change between the two is invisible only while they agree. One of the
+// two is a component constant either way (see HANDOFF at the foot of this file),
+// so an editable copy here would be a picker that silently tears the handover.
 
 // The resting aperture, in percentages of the pinned viewport. Percent rather
 // than vh/vw because framer interpolates clip-path by walking the numbers in
@@ -220,7 +249,11 @@ const T = {
     copyDelay: 0.7,
 };
 
-export default function OfferHero() {
+/**
+ * @param {object} [copy] the `nabidka.hero` block, from `getPageContent`.
+ *   `copy.docId` arrives only inside the Studio's editing frame.
+ */
+export default function OfferHero({ copy = {} }) {
     const sectionRef = useRef(null);
     const reduced = useReducedMotion();
     const { gate } = useGlobalContext();
@@ -230,6 +263,19 @@ export default function OfferHero() {
     // picture has to be standing behind it. Copy, rules and marks wait for
     // "go" as before.
     const ground = gate !== "hold";
+
+    const docId = copy.docId;
+    const eyebrow = copy.eyebrow || FALLBACK_EYEBROW;
+    // The mark and the lines are resolved apart, for the reason MainIntro's
+    // are: the mark is the FIELD's declaration and holds whether or not the
+    // value arrived, and this fallback carries an accented run of its own.
+    const heading = {
+        mark: copy.heading?.mark,
+        lines: hasLines(copy.heading?.lines) ? copy.heading.lines : FALLBACK_HEADING,
+    };
+    const lead = copy.lead || FALLBACK_LEAD;
+    const cta = copy.cta || FALLBACK_CTA;
+    const scrollHint = copy.scrollHint || FALLBACK_SCROLL;
     // Read when the entry starts, deliberately NOT a dependency: the gate
     // moves ground -> go while the aperture is mid-open, and restarting the
     // effect there would stop the animation to re-arm it with a delay.
@@ -709,15 +755,28 @@ export default function OfferHero() {
                         }
                     )}
                 >
+                    {/* The eyebrow's words are the block's `title` and are
+                        edited in the form, not here: they are a bare text node
+                        sharing this paragraph with the tick, so annotating the
+                        paragraph would store the tick as part of the copy and
+                        drop its <span> on the first save. Same refusal
+                        /ochrana-soukromi's GDPR eyebrow makes. */}
                     <motion.p className="OfferHero__eyebrow" variants={RISE}>
                         <span className="OfferHero__eyebrow__tick" />
-                        Nabídka
+                        {eyebrow}
                     </motion.p>
 
-                    <motion.h1 className="OfferHero__title" variants={RISE}>
-                        Nemáte na vaše
-                        <br />
-                        finance <span className="OfferHero__title__accent">prostor?</span>
+                    {/* One element holding two lines and one accented run. The
+                        break is `\n` in the store and the accent is the mark
+                        the field declares, so `mark` travels with `docId` and
+                        the run carries the declared class beside this
+                        section's own — see @/components/common/ui/lines. */}
+                    <motion.h1
+                        {...editable(docId, "headline", "text", heading.mark)}
+                        className="OfferHero__title"
+                        variants={RISE}
+                    >
+                        <Lines lines={heading.lines} markClass="OfferHero__title__accent" />
                     </motion.h1>
 
                     <div className="OfferHero__lead">
@@ -726,13 +785,23 @@ export default function OfferHero() {
                             smallest type on the screen and the greeting above
                             it was the largest, which had the hierarchy exactly
                             backwards. */}
-                        <motion.p className="OfferHero__lead__text" variants={RISE}>
-                            Každý den, kdy vaše dluhy nebo inflace rostou, ztrácíte peníze,
-                            které už nikdy neuvidíte.
+                        <motion.p
+                            {...editable(docId, "body", "text")}
+                            className="OfferHero__lead__text"
+                            variants={RISE}
+                        >
+                            {lead}
                         </motion.p>
                         <motion.div className="OfferHero__lead__action" variants={RISE}>
-                            <CornerButton href="/kontakt">
-                                Spojit se hned
+                            {/* Words only. The target is a path on this site,
+                                which is the site's own routing rather than
+                                content — see `editableLink`'s three shapes and
+                                the same call on /o-nas's cards. */}
+                            <CornerButton
+                                {...editableLink(docId, { text: "items.0.label" })}
+                                href="/kontakt"
+                            >
+                                {cta}
                                 <span className="cornerButton__arrow">
                                     <Arrow direction="upRight" />
                                 </span>
@@ -741,7 +810,7 @@ export default function OfferHero() {
                     </div>
 
                     <motion.div className="OfferHero__hint" variants={RISE}>
-                        <span>Scroll</span>
+                        <span {...editable(docId, "items.1.label", "text")}>{scrollHint}</span>
                         <Arrow direction="down" />
                     </motion.div>
                 </motion.div>

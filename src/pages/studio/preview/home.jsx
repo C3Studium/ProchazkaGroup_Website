@@ -1,7 +1,9 @@
 import Head from "next/head"
+import { PagesNavigation } from "@/cms/runtime/pagesNavigation.jsx"
 
+import { siteChrome } from "@/cms"
 import Home from "@/pages/index"
-import { getFooterContent, getHomepageContent } from "@/cms/server/site"
+import { getFooterContent, getHomepageContent, viewOf } from "@/cms/server/site"
 
 /**
  * The homepage, under glass.
@@ -46,17 +48,20 @@ import { getFooterContent, getHomepageContent } from "@/cms/server/site"
  * true in the preview and false in production.
  */
 export async function getStaticProps(context) {
-  const draft = Boolean(context.draftMode)
+  // Draft mode OR a moment in the Archive — the two arrive on the same cookie
+  // and `viewOf` tells them apart. This route is the homepage's stand-in for
+  // both, and for the same reason: `src/pages/index.js` reads neither.
+  const view = viewOf(context)
 
   // Cannot reject — every read inside answers with empty rather than throwing.
   // See src/cms/server/site/read.js and draft.js.
   const [content, footer] = await Promise.all([
-    getHomepageContent({ draft }),
+    getHomepageContent(view),
     // The patička is rendered by _app under this route as under every other, so
     // the draft copy of it has to travel with this page's props or the one page
     // the Studio frames as a mirror would be the one page whose footer is not
     // editable.
-    getFooterContent({ draft }),
+    getFooterContent(view),
   ])
 
   return {
@@ -70,7 +75,7 @@ export async function getStaticProps(context) {
   }
 }
 
-export default function PreviewHome({ content }) {
+function PreviewHome({ content }) {
   return (
     <>
       {/* The homepage, and nothing else. An `EditSurface` wrapper stood here and
@@ -95,3 +100,15 @@ export default function PreviewHome({ content }) {
     </>
   )
 }
+
+/**
+ * The one route under /studio that is a page of the **site**, declared as one.
+ *
+ * `_app` would otherwise have to guess from the path, and every way of guessing
+ * gets this route wrong: it is the homepage, it is what the iframe frames, and
+ * the entire claim the preview makes is that it is faithful. So it takes the
+ * full site shell — shader, curtain, cursor, Lenis, navbar, patička — exactly as
+ * `/` does, and the fact that its URL begins with `/studio` decides nothing.
+ * See @/cms/shell.
+ */
+export default siteChrome(PreviewHome)

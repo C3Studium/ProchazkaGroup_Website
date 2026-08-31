@@ -18,6 +18,11 @@ export { getType, listTypes } from "./registry.js"
 export { validateDocument, emptyDocument } from "./validate.js"
 export { FIELD_TYPES } from "./fieldTypes.js"
 
+// Not part of the spec's seven, and pure like the rest of the folder: the one
+// answer to "do these two document bodies say the same thing", asked by the
+// server before it stores a draft and by the Studio before it offers one.
+export { canonicalJson, sameJson } from "./body.js"
+
 // The rest of the surface, all additive.
 export { findType, hasType, clearTypes } from "./registry.js"
 export { validateValue, emptyValue } from "./validate.js"

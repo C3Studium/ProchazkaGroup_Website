@@ -1,0 +1,464 @@
+@use "../../styles/viewport" as *;
+@use "../styles/tokens.module" as t;
+
+/* Sections separated by whitespace and a hairline, rows on the page gutter —
+   the same grammar as the user list and the document list. No cards for the
+   facts: a fact is a row, and boxing forty of them would turn a status screen
+   into a dashboard nobody reads. The two links at the bottom ARE cards, because
+   they are doors to other screens rather than information. */
+
+.body {
+  /* The view body already scrolls; this only stops the last section from
+     ending flush against the bottom edge. */
+  padding-bottom: var(--st-s16);
+}
+
+.sections {
+  display: flex;
+  flex-direction: column;
+}
+
+.section {
+  padding: var(--st-s8) var(--st-gutter) var(--st-s10);
+  border-bottom: 1px solid var(--st-line-soft);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* ------------------------------------------------------------ jump nav --- */
+
+.jump {
+  display: flex;
+  gap: var(--st-s1);
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.jumpItem {
+  padding: 5px 10px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+  white-space: nowrap;
+  cursor: pointer;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: var(--st-radius);
+  transition:
+    color var(--st-fast) var(--st-ease),
+    border-color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    border-color: var(--st-line);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(1px);
+  }
+}
+
+/* ---------------------------------------------------------------- facts -- */
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  margin-top: var(--st-s5);
+}
+
+/* Three parts on one line at width, stacked below it: the name of the setting,
+   what it is, and the sentence explaining why that matters. The note is the
+   part that earns the screen — a boolean with no explanation is trivia. */
+.fact {
+  display: grid;
+  grid-template-columns: 260px 200px 1fr;
+  gap: var(--st-s4);
+  align-items: baseline;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--st-line-soft);
+
+  &:last-child {
+    border-bottom: 0;
+  }
+}
+
+.factLabel {
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink-2);
+  overflow-wrap: anywhere;
+}
+
+.factValue {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  min-width: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+  overflow-wrap: anywhere;
+}
+
+.factNote {
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-ink-4);
+}
+
+.note_accent {
+  color: var(--st-accent);
+}
+
+.note_danger {
+  color: var(--st-danger);
+}
+
+.mono {
+  font-family: var(--st-mono);
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+}
+
+.prose {
+  max-width: 68ch;
+  margin: var(--st-s4) 0 0;
+  font-size: var(--st-text-small);
+  line-height: 1.65;
+  color: var(--st-ink-3);
+
+  code {
+    padding: 1px 4px;
+    font-family: var(--st-mono);
+    font-size: 0.94em;
+    color: var(--st-ink-2);
+    background: var(--st-sunken);
+    border: 1px solid var(--st-line-soft);
+    border-radius: 2px;
+  }
+}
+
+.checked {
+  padding-top: var(--st-s3);
+  margin: 0;
+  font-size: var(--st-text-tiny);
+  letter-spacing: 0.02em;
+  color: var(--st-ink-4);
+}
+
+/* ----------------------------------------------------------------- rows -- */
+
+.rows {
+  padding: 0;
+  margin: var(--st-s5) 0 0;
+  list-style: none;
+}
+
+.row {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  min-height: 52px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--st-line-soft);
+  transition: background var(--st-fast) var(--st-ease);
+}
+
+/* A revoked key is dimmed rather than removed: "we turned that one off in
+   March" is the next question after "which keys are live". */
+.rowOff {
+  .rowName,
+  .rowMeta {
+    opacity: 0.5;
+  }
+}
+
+.rowMain {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.rowName {
+  @include t.truncate;
+
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.rowMeta {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.rowState {
+  flex: none;
+  width: 140px;
+}
+
+.rowActions {
+  display: flex;
+  flex: none;
+  gap: var(--st-s1);
+}
+
+.rowsFoot {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  padding-top: var(--st-s3);
+}
+
+/* Marking the session you are sitting in matters for the same reason marking
+   your own row does on the user screen: its button is the one that can log you
+   out of the page you are standing on. */
+.you {
+  padding: 1px 5px;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-accent);
+  background: var(--st-accent-soft);
+  border-radius: 2px;
+}
+
+/* ---------------------------------------------------------------- cards -- */
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--st-s4);
+  margin-top: var(--st-s5);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s3);
+  align-items: flex-start;
+  padding: var(--st-s5);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+.cardTitle {
+  @include t.eyebrow;
+}
+
+.cardText {
+  flex: 1;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.6;
+  color: var(--st-ink-3);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink-2);
+  }
+}
+
+/* -------------------------------------------------------------- dialogs -- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s5);
+}
+
+.input {
+  @include t.control;
+}
+
+.failure {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  padding: 10px 12px;
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-danger);
+  background: var(--st-danger-soft);
+  border: 1px solid var(--st-danger-line);
+  border-radius: var(--st-radius);
+
+  svg {
+    flex: none;
+    margin-top: 1px;
+  }
+}
+
+.issuedIntro {
+  margin: 0 0 var(--st-s4);
+  font-size: var(--st-text-body);
+  line-height: 1.6;
+  color: var(--st-ink-2);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
+  }
+}
+
+.secretRow {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  margin-bottom: var(--st-s4);
+}
+
+/* The token, once. Monospaced and selectable, because the fallback when the
+   clipboard is refused is a person dragging over it. */
+.secret {
+  flex: 1;
+  padding: 10px 12px;
+  overflow-x: auto;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+  white-space: nowrap;
+  user-select: all;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-accent-line);
+  border-radius: var(--st-radius);
+}
+
+.issuedWarning {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  margin: 0 0 var(--st-s4);
+  font-size: var(--st-text-small);
+  line-height: 1.55;
+  color: var(--st-ink-3);
+
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--st-accent);
+  }
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.usageLabel {
+  @include t.eyebrow;
+
+  margin: 0 0 var(--st-s2);
+}
+
+.usage {
+  padding: 10px 12px;
+  margin: 0 0 var(--st-s4);
+  overflow-x: auto;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  line-height: 1.6;
+  color: var(--st-ink-2);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+}
+
+/* Narrow windows drop the middle column into the stack rather than squeezing
+   three columns of prose, exactly as the user list drops its context columns. */
+@include below-px(1100) {
+  .fact {
+    grid-template-columns: 240px 1fr;
+
+    .factNote {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@include t.compact {
+  .section {
+    padding: var(--st-s6) var(--st-s5) var(--st-s8);
+  }
+
+  .fact {
+    grid-template-columns: 1fr;
+    gap: var(--st-s1);
+  }
+
+  .rowState {
+    display: none;
+  }
+}
+
+/* --------------------------------------------------- odkaz na správu ----- */
+
+/* The only editable section on this screen, so it borrows the fact grammar for
+   its rows — label, control, note — rather than inventing a form layout that
+   would read as a different screen halfway down. */
+
+.colorRow {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+}
+
+/* The native swatch, sized to a control rather than left at the browser's
+   default, which is a 50×25 box with a chrome border on every platform. */
+.color {
+  width: 34px;
+  height: 30px;
+  padding: 2px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  background: transparent;
+  cursor: pointer;
+
+  &::-webkit-color-swatch-wrapper {
+    padding: 0;
+  }
+
+  &::-webkit-color-swatch {
+    border: 0;
+    border-radius: 2px;
+  }
+}
+
+.hex {
+  /* 9 characters of hex plus the control's own padding. Measured: 12ch clipped
+     the last digit of an eight-digit value in the mono face. */
+  width: 15ch;
+  font-family: var(--st-mono);
+}
+
+/* A control needs more room than a word. Used by the manage-widget rows, whose
+   values are a segmented control, a colour pair and two switches. */
+.factWide {
+  grid-template-columns: 260px minmax(0, 400px) 1fr;
+}
+
+.saveRow {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  margin-top: var(--st-s5);
+}
+
+.savedNote {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}

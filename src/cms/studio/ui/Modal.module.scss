@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 .scrim {
@@ -6,6 +5,13 @@
   inset: 0;
   z-index: 50;
   display: grid;
+  /* DEFINITE tracks. With `auto` the grid area is sized by the panel, so the
+     panel's own `max-height: 100%` resolves against a box the panel defines —
+     circular, so it caps nothing. Measured on the crop dialog at 1280×660: the
+     panel came out 720px tall in a 660px window and its footer sat off-screen.
+     `minmax(0, 1fr)` fills the scrim, which the viewport defines, so the cap
+     finally has something real to resolve against. Applies to every dialog. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
   padding: var(--st-s8);
   background: var(--st-overlay);

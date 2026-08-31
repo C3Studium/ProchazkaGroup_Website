@@ -33,8 +33,22 @@ export function normalizeCore(core) {
  * Groups become the editor's tabs. A type with no declared groups gets one
  * implicit tab so the editor never renders a lone tab strip for a single group.
  */
-export function fieldGroups(type) {
-  const fields = type?.fields || []
+/**
+ * Can this role see the field at all?
+ *
+ * The same rule FieldRenderer applies, in one place, because the tab strip has
+ * to ask it too: hiding every field of a group but leaving its tab produces an
+ * empty screen that reads as a fault rather than as a permission.
+ */
+export const fieldVisibleTo = (field, role) => {
+  if (!role) return true
+  if (field.viewRoles && !field.viewRoles.includes(role)) return false
+  return true
+}
+
+export function fieldGroups(type, role = null) {
+  const all = type?.fields || []
+  const fields = role ? all.filter((field) => fieldVisibleTo(field, role)) : all
   const declared = type?.groups || []
 
   if (!declared.length) {
@@ -57,6 +71,11 @@ export function fieldGroups(type) {
   const claimed = new Set(groups.flatMap((group) => group.fields.map((field) => field.name)))
   const orphans = fields.filter((field) => !claimed.has(field.name))
   if (orphans.length) groups.push({ name: "_other", title: "Ostatní", fields: orphans })
+
+  // The filter below was already here and already does what a role-hidden group
+  // needs: with `fields` narrowed above, a group whose every field is hidden
+  // arrives empty and drops out. The consultant's Zařazení is the case — a
+  // member sees none of what is in it, so for a member it is not a tab.
 
   return groups.filter((group) => group.fields.length > 0)
 }

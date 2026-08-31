@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../../studio/styles/tokens.module" as t;
 
 /* The colour of *being selected*, and it is deliberately not `--st-accent`.
@@ -762,4 +761,183 @@ $pick-inner: rgba(255, 255, 255, 0.82);
   margin: 0;
   font-size: var(--st-text-small);
   color: var(--st-danger);
+}
+
+/* ---------------------------------------------------------------------------
+ * Cropping — CropEditor.jsx
+ *
+ * The frame is drawn over the picture rather than clipping it, because the
+ * whole point of showing the ORIGINAL is that an editor can see what they are
+ * about to leave out and drag back to it. The surround is dimmed, not hidden.
+ * ------------------------------------------------------------------------- */
+
+.cropPane {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  /* Never taller than what it is inside. Without this the pane is sized by its
+     content and the modal's own `max-height: 100%` has nothing to push back
+     against. */
+  max-height: 100%;
+  overflow: hidden;
+}
+
+.cropFrame {
+  position: relative;
+  display: grid;
+  flex: none;
+  /* DEFINITE tracks, not `auto`.
+   *
+   * With auto tracks the grid area is sized BY the picture, so `max-width: 100%`
+   * and `max-height: 100%` on the picture resolve against a box the picture
+   * itself defines — circular, so they resolve to nothing and the image is laid
+   * out at its natural size. Measured: a 5516² photo came out 1018px wide
+   * inside a 390px phone viewport.
+   *
+   * `minmax(0, 1fr)` makes both tracks fill the frame, which has a definite
+   * height below, so the percentages finally have something real to resolve
+   * against and the picture is scaled to fit whatever screen it is on. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+
+  /* DEFINITE height, not a maximum — and that distinction is the whole bug.
+   *
+   * With `max-height` the frame's height stays `auto`, so `max-height: 100%` on
+   * the picture inside resolves to nothing and the picture is drawn at full
+   * width whatever the frame says. Worse, the modal can squeeze the frame
+   * below even that: measured at 1440×900 the frame came out 499px tall while
+   * the picture was 522px, which `overflow: hidden` quietly clipped — and the
+   * crop box, sized from the picture, put both bottom handles 39px BELOW the
+   * frame where no click could reach them. That is what "the corners collapse
+   * and only come right after you drag the middle" was.
+   *
+   * A definite height gives the percentage something to resolve against, so the
+   * picture always fits and the handles are always inside. */
+  height: min(56vh, 520px);
+  padding: var(--st-s4);
+  overflow: hidden;
+  background: var(--st-sunken);
+  /* A frame being dragged should not select the caption underneath it, and on a
+     touch screen it should not scroll the popup either. */
+  touch-action: none;
+  user-select: none;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    -webkit-user-drag: none;
+  }
+
+  /* Phones, and short laptops held sideways. Less height to give away, so the
+     canvas gives some back rather than the buttons disappearing. */
+  @media (max-width: 640px), (max-height: 620px) {
+    height: min(40vh, 300px);
+    padding: var(--st-s3);
+  }
+}
+
+.cropShade {
+  position: absolute;
+  background: rgb(0 0 0 / 55%);
+  pointer-events: none;
+}
+
+.cropBox {
+  position: absolute;
+  cursor: move;
+  /* A finger dragging the frame must not be read as a pan. `touch-action` is
+     not inherited, so the frame's own declaration does nothing for these two —
+     which is why a corner could be dragged with a mouse and not with a thumb. */
+  touch-action: none;
+  /* Literal colours, not tokens, for the same reason the shade above is a
+     literal black: these sit on an editor's photograph, not on the Studio's
+     surface, so they have to read against an arbitrary image rather than
+     against either theme. Orange is the CMS's colour of *being selected*. */
+  outline: 1px solid #ff6a00;
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 45%);
+
+  /* Thirds, the composition guide every crop tool draws. Two gradients rather
+     than four elements: this layer must never take a pointer event away from
+     the box it sits in. */
+  &::after {
+    position: absolute;
+    inset: 0;
+    content: "";
+    background:
+      linear-gradient(to right, transparent calc(33.333% - 0.5px), rgb(255 255 255 / 35%) calc(33.333% - 0.5px) calc(33.333% + 0.5px), transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px), rgb(255 255 255 / 35%) calc(66.666% - 0.5px) calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px)),
+      linear-gradient(to bottom, transparent calc(33.333% - 0.5px), rgb(255 255 255 / 35%) calc(33.333% - 0.5px) calc(33.333% + 0.5px), transparent calc(33.333% + 0.5px), transparent calc(66.666% - 0.5px), rgb(255 255 255 / 35%) calc(66.666% - 0.5px) calc(66.666% + 0.5px), transparent calc(66.666% + 0.5px));
+    pointer-events: none;
+  }
+}
+
+.cropHandle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  touch-action: none;
+
+  /* A finger is not a mouse pointer. The visible square stays the same size —
+     it is a mark, not a target — and the reach around it grows instead, which
+     is what `::before` is for. */
+  &::before {
+    position: absolute;
+    inset: -10px;
+    content: "";
+  }
+  /* Neonová oranžová — táž barva „vybranosti" jako všude jinde v CMS
+     (`--cms-pick` v hlavičce tohohle souboru). Bílé rohy mizely na bílém
+     pozadí fotky, a portrét na bílém je většina toho, co se tu ořezává. */
+  background: #ff6a00;
+  border: 1px solid rgb(0 0 0 / 45%);
+  border-radius: 2px;
+
+  &[data-corner="nw"] { top: -7px; left: -7px; cursor: nwse-resize; }
+  &[data-corner="ne"] { top: -7px; right: -7px; cursor: nesw-resize; }
+  &[data-corner="sw"] { bottom: -7px; left: -7px; cursor: nesw-resize; }
+  &[data-corner="se"] { bottom: -7px; right: -7px; cursor: nwse-resize; }
+}
+
+.cropBar {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  padding: var(--st-s3) var(--st-s4);
+  border-top: 1px solid var(--st-line);
+
+  /* On a phone the five ratios and the readout do not fit on one line, and a
+     bar that scrolls sideways hides the presets nobody would then find. */
+  @media (max-width: 640px) {
+    gap: 4px;
+    padding: var(--st-s2) var(--st-s3);
+  }
+}
+
+.cropRatio {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  &:hover:not(:disabled) {
+    color: var(--st-ink);
+  }
+
+  &[data-active="true"] {
+    color: var(--st-ink);
+    background: var(--st-sunken);
+    border-color: var(--st-ink-3);
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.5;
+  }
 }

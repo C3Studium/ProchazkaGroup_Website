@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from "react"
-import { useRouter } from "next/router"
+import { useStudioRouter } from "../../runtime/navigation.jsx"
 
-import DeviceBar from "./DeviceBar"
-import PageRail from "./PageRail"
-import Stage from "./Stage"
-import { safePath, useFrameSurface } from "./useFrameSurface"
+import DeviceBar from "./DeviceBar.jsx"
+import PageRail from "./PageRail.jsx"
+import Stage from "./Stage.jsx"
+import { safePath, useFrameSurface } from "./useFrameSurface.js"
 import styles from "./preview.module.scss"
 
 /**
@@ -39,7 +39,7 @@ import styles from "./preview.module.scss"
  */
 
 export default function PreviewHost({ mode, generatedAt, sources, pages }) {
-    const router = useRouter()
+    const router = useStudioRouter()
 
     // Nothing read from the URL may be rendered until this is true. `isReady` is
     // not enough on its own: on a static route with no dynamic segment it is
@@ -107,12 +107,11 @@ export default function PreviewHost({ mode, generatedAt, sources, pages }) {
     /**
      * The host takes the viewport, the way the Studio does.
      *
-     * `_app.js` wraps every page in a navbar, a footer, a cursor and a WebGL
-     * canvas, and it is not this build's file to edit. The stylesheet hides them
-     * (they are hidden rather than covered, so the shader stops burning frames
-     * behind an opaque layer and the chrome leaves the tab order); the scroll lock
-     * and Lenis are done here, because both must hold in a browser without
-     * `:has()` and Lenis drives `window` regardless of what CSS says.
+     * Nothing of the site is mounted around it to hide — `_app` asks `@/cms`
+     * which shell this route wants and the host is a Studio route — so this is
+     * only the scroll lock the host needs for itself. The Lenis call is guarded
+     * and stays for the same reason it does in Studio.jsx: the library does not
+     * get to assume what its host mounts.
      */
     useEffect(() => {
         const root = document.documentElement

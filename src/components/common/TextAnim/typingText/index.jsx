@@ -84,14 +84,22 @@ export const TextType = ({
           timeout = setTimeout(() => { }, pauseDuration);
         } else {
           timeout = setTimeout(() => {
-            setDisplayedText(prev => prev.slice(0, -1));
+            // Mazání odvozené z délky, ne z předchozí hodnoty — ze stejného
+            // důvodu jako psaní výš.
+            setDisplayedText(prev => processedText.slice(0, Math.max(0, prev.length - 1)));
           }, deletingSpeed);
         }
       } else {
         if (currentCharIndex < processedText.length) {
           timeout = setTimeout(
             () => {
-              setDisplayedText(prev => prev + processedText[currentCharIndex]);
+              // Odvozeno z indexu, ne přičtením znaku k předchozímu stavu.
+              // Přičítání není idempotentní: když se efekt zopakuje — a
+              // v Reactu se ve vývojovém režimu opakuje záměrně — přidá se
+              // znak dvakrát nebo z jiné pozice a slovo se rozsype. Pozorováno
+              // jako „jeenu dekádu" místo „jednu dekádu". Řez ze zdroje dá
+              // stejný výsledek, kolikrát se provede.
+              setDisplayedText(processedText.slice(0, currentCharIndex + 1));
               setCurrentCharIndex(prev => prev + 1);
             },
             variableSpeed ? getRandomSpeed() : typingSpeed

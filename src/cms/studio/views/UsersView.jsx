@@ -10,12 +10,25 @@ import Icon from "../ui/Icon"
 import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout"
 import styles from "./UsersView.module.scss"
 
+/**
+ * The roles this screen can hand out — and `admin` is deliberately not one.
+ *
+ * Admin is whoever `CMS_ADMIN_EMAIL` says (server/auth.js effectiveRole), so
+ * offering it here would be offering something this screen cannot actually
+ * grant: the row would say admin and the server would still answer member.
+ *
+ * `owner` and `member` carry the same permissions today. Owner is the title a
+ * client sees on their own site; keeping it as a separate value now is what
+ * makes it possible to give it meaning later without touching every account.
+ */
 const ROLES = [
-  { value: "owner", title: "Vlastník" },
-  { value: "editor", title: "Redaktor" },
+  { value: "owner", title: "Majitel" },
+  { value: "member", title: "Člen" },
 ]
 
-const roleTitle = (role) => ROLES.find((entry) => entry.value === role)?.title || role
+const ROLE_TITLES = { admin: "Správce", owner: "Majitel", member: "Člen" }
+
+const roleTitle = (role) => ROLE_TITLES[role] || role
 
 /**
  * Who can get in. Owners only — the Studio does not route an editor here and
@@ -40,7 +53,7 @@ export default function UsersView() {
   const [busyId, setBusyId] = useState(null)
 
   const rows = data?.rows || []
-  const activeOwners = rows.filter((row) => row.role === "owner" && !row.disabledAt).length
+  const activeOwners = rows.filter((row) => row.role === "admin" && !row.disabledAt).length
 
   const bump = () => setRevision((current) => current + 1)
 
@@ -109,7 +122,7 @@ export default function UsersView() {
                 // The last active owner cannot be demoted, disabled or deleted.
                 // Disabling the controls says so before the click; the server
                 // and a database trigger say so after it.
-                locked={row.role === "owner" && !row.disabledAt && activeOwners <= 1}
+                locked={row.role === "admin" && !row.disabledAt && activeOwners <= 1}
                 onRole={(role) =>
                   mutate(row.id, () => port.auth.users.updateRole({ id: row.id, role }), `Role změněna na „${roleTitle(role)}".`)
                 }
@@ -319,7 +332,7 @@ function InviteDialog({ open, onClose, onCreate }) {
         </FieldShell>
 
         <FieldShell label="Role" error={state.fields.role}>
-          <Select value={form.role} options={ROLES} onChange={(value) => set("role")(value || "editor")} />
+          <Select value={form.role} options={ROLES} onChange={(value) => set("role")(value || "member")} />
         </FieldShell>
 
         <FieldShell

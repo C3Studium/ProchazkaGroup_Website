@@ -5,6 +5,8 @@ import { RiPhoneLine, RiMailLine, RiFacebookLine, RiInstagramLine } from "@remix
 import { ARRIVE_TO } from "@/components/pages/aboutUs/aboutStack";
 import { FALLBACK_ROSTER, dial } from "@/constants/roster";
 import { PHONE_LANDSCAPE, usePhoneOrTabletUpright } from "@/helpers/usePhone";
+import LikeButton from "@/components/common/ui/LikeButton";
+import { useReactions } from "@/components/common/ui/LikeButton/useReactions";
 import { editable, editableDoc, editableLink, isEditMode } from "@/cms/edit";
 
 // The heading comes from the CMS (siteCopy "o-nas.colleagues" — see
@@ -53,6 +55,10 @@ const fromCms = (person) => ({
     srcAlt: person.portraitAlt?.src || null,
     tel: person.phone,
     docId: person.docId,
+    // Only for the like button. `id` is the document's, `likes` the count the
+    // page was built with — see cms.config.js `colleague`.
+    id: person.id,
+    likes: person.likes,
 });
 
 // ── the phone, held upright ──
@@ -255,6 +261,19 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
             .map((entry) => ({ ...entry, cms: editableDoc(entry.docId, "consultant") })),
         [cmsRoster, editing],
     );
+
+    /**
+     * „Líbí se" u kolegy.
+     *
+     * Nevázané na žádnou recenzi — přičítá jeho vlastní počet, přesně jak bylo
+     * zadáno. Jeden dotaz na celý roster, ne na právě vybraného člověka: panel
+     * se přepíná klikem a ptát se při každém přepnutí by byl dotaz za každé
+     * jméno.
+     *
+     * Fallback roster ze `@/constants/roster` id nemá, takže se tlačítko u něj
+     * nevykreslí — a to je správně: bez dokumentu není co počítat.
+     */
+    const likes = useReactions("consultant", roster.map((person) => person.id));
 
     const [selected, setSelected] = useState(0);
     // Clamped rather than reset: the roster can get shorter — somebody is
@@ -601,6 +620,19 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                                 <RiPhoneLine size={20} />
                             </a>
                         </li>
+                        {/* Vedle telefonu a schválně stejného tvaru — jiná
+                            ikona, jiná funkce. Není vázaný na žádnou recenzi:
+                            přičítá kolegovi obecný počet. */}
+                        {person.id ? (
+                            <li>
+                                <LikeButton
+                                    liked={likes.isLiked(person.id)}
+                                    count={likes.countOf(person.id, person.likes || 0)}
+                                    label={`Líbí se mi: ${person.name}`}
+                                    onToggle={() => likes.toggle(person.id)}
+                                />
+                            </li>
+                        ) : null}
                         {/* Targets only, which is the shape `editableLink` gives
                             an element with no words on it: `items.N.value` is
                             ABOUT_LINKS in @/cms/server/site/aboutUs. The

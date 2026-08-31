@@ -23,16 +23,15 @@ import site from '@/cms/site/config'
 import { pageFor, resolvePage } from '@/cms/site'
 import { HOMEPAGE_COPY_KEYS } from '@/cms/visualEditing'
 
+import { readerFor } from './archive.js'
 import { getApprovedReviews, getAssistant, getConsultants, getPartners, getSiteCopy } from './content.js'
-import { readEditable } from './draft.js'
-import { readPublished } from './read.js'
 
 /**
  * Which schema type a block's `type` name means.
  *
  * The modules are imported DIRECTLY rather than looked up in the core's
  * registry, the same way the seam this file replaced reached for `siteCopy` and
- * the way `content.js` reaches for `consultantFullName`. Two reasons, and the
+ * the way `content.js` reaches for `displayNameOf`. Two reasons, and the
  * second is the load-bearing one:
  *
  *   - this is a pure read of a frozen field descriptor, and the registry is the
@@ -62,7 +61,8 @@ const typeNamed = (name) => TYPES[name] || null
  *
  * `read` is threaded rather than chosen inside, because it is the single switch
  * the Studio's preview flips: draft mode swaps `readPublished` for
- * `readEditable` and the shaping runs unchanged over unpublished bodies.
+ * `readEditable`, the Archive swaps in a moment-bound `readAt`, and the shaping
+ * runs unchanged over whichever bodies come back.
  */
 const SOURCE_READERS = Object.freeze({
     partner: (options, read) => getPartners({ ...options, read }),
@@ -88,11 +88,22 @@ const report = (message) => {
  * as fast as its slowest read; each one already swallows its own failure, so
  * `Promise.all` cannot reject here.
  *
- * `draft` is the Studio preview's only lever, and it changes exactly one thing:
+ * `draft` and `at` are the only levers, and they change exactly one thing each:
  * which reader the shaping runs over. A public page calls this with no options
- * and therefore cannot ever reach a draft, no matter what the preview does — the
- * switch is the caller's, and the only caller that flips it is `getStaticProps`
- * on /studio/preview, guarded by `context.draftMode`.
+ * and therefore cannot ever reach a draft or an old version, no matter what the
+ * Studio does — the switch is the caller's, and the callers that flip it take
+ * their answer from `viewOf(context)`, which reads Next's signed preview cookie
+ * and nothing a visitor can type. See ./archive.js.
+ *
+ * `at` wins over `draft` when both are set, because the cookie that carries a
+ * moment carries draft mode's flag underneath it; the ordering lives in
+ * `readerFor` so no caller has to know that.
+ *
+ * The list limits a moment is replayed with are TODAY'S — `cms.config.js` is
+ * code and no revision records what it said. `getArchiveMoment` returns the
+ * limits being applied so the screen can name them; there is no way to recover
+ * the true ones from the database, and pretending otherwise is the failure this
+ * whole design is written against.
  *
  * An unconfigured route answers `{}` rather than throwing. Every section on this
  * site owns its own fallback, so `{}` is a page that renders the copy it ships
@@ -100,16 +111,16 @@ const report = (message) => {
  * route somebody added a file for and has not described yet.
  *
  * @param {string} route
- * @param {{ draft?: boolean }} [options]
+ * @param {{ draft?: boolean, at?: string|null }} [options]
  */
-export const getPageContent = async (route, { draft = false } = {}) => {
+export const getPageContent = async (route, { draft = false, at = null } = {}) => {
     const page = pageFor(site, route)
     if (!page) {
         report(`route "${route}" není v cms.config.js — stránka se vykreslí s obsahem zabudovaným v komponentách.`)
         return {}
     }
 
-    const read = draft ? readEditable : readPublished
+    const read = readerFor({ draft, at })
     const names = Object.keys(page.sources)
 
     const [copy, ...lists] = await Promise.all([
@@ -130,6 +141,10 @@ export const getPageContent = async (route, { draft = false } = {}) => {
         sources[name] = lists[index]
     })
 
+    // `draft` and not `draft || at`: the flag decides whether the shapes carry
+    // document ids for the editing overlay, and the archive is a record with
+    // nothing to edit. Passing it here would put `data-cms-*` into a document
+    // that must never be armed.
     return resolvePage(page, { copy, sources, draft, typeNamed })
 }
 

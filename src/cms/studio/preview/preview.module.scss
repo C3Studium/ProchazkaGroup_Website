@@ -1,13 +1,13 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 /* The preview host.
 
-   Same situation as PreviewPanel had and the Studio still has: this mounts on a
-   public page, under the site's global stylesheet, so it declares the Studio's
-   tokens for itself and resets the box model for its own subtree. It is the same
-   token set, not a second one — every colour, size and duration below is a
-   `var(--st-*)` fed from src/cms/studio/styles/_tokens.module.scss.
+   Same situation as the Studio's own root: `globals.scss` is imported by `_app`
+   for every route including this one, so the host declares the Studio's tokens
+   for itself and resets the box model for its own subtree rather than inheriting
+   the site's. It is the same token set, not a second one — every colour, size and
+   duration below is a `var(--st-*)` fed from
+   src/cms/studio/styles/_tokens.module.scss.
 
    `.module.scss` is not a preference. scripts/sync-styles.js globs every
    stylesheet under src/ and concatenates the non-module ones into the site's
@@ -19,8 +19,10 @@
 
   position: fixed;
   inset: 0;
-  /* Above the site's own stacking — the navbar tops out at 165 and the cursor at
-     155 — and level with the Studio's overlay, which never coexists with this. */
+  /* Level with the Studio's own root, which never coexists with this. The site's
+     stacking is no longer a competitor — none of it is mounted here — but the
+     number stays: the framed page inside brings its own, and the overlay's popup
+     is numbered against this one. */
   z-index: 2147483000;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
@@ -71,30 +73,15 @@
   }
 }
 
-/* The only rules emitted outside the subtree, and they exist because `_app.js`
-   wraps every page in a marketing navbar, a footer, a cursor and a WebGL canvas,
-   and that file is not this build's to edit.
+/* This answers the objection in SPEC.md that an iframe would mean two WebGL
+   contexts. Five `display: none !important` overrides used to stand here to make
+   it one: hiding the outer shader took its IntersectionObserver out of
+   intersection, which dropped react-three-fiber to `frameloop: "demand"` and left
+   the context allocated but idle. It is now none and one, not two and one —
+   `_app` asks `@/cms` which shell a route wants and the host is not given the
+   site's, so no outer canvas is ever created and the frame's is the only one.
 
-   Hidden rather than covered, and this is the load-bearing part of the whole
-   feature: `display: none` on the shader is what takes its IntersectionObserver
-   out of intersection, which drops react-three-fiber to `frameloop: "demand"` and
-   leaves the outer WebGL context allocated but idle. The context inside the
-   iframe is then the only one rendering — which is the answer to the objection in
-   SPEC.md that an iframe would mean two.
-
-   Anchored on `:has(.host)` rather than written as bare `:global` rules: CSS
-   Modules requires every selector to carry a local class, and this way they
-   switch themselves off the moment the host unmounts. Scroll locking is done from
-   JS instead, since it must hold in a browser without `:has()`. */
-body:has(.host) :global(.neural-tunnel--page),
-body:has(.host) :global(.cursorGrid--page),
-body:has(.host) :global(.navbar__container),
-body:has(.host) :global(.SiteFooter),
-body:has(.host) :global(.cursor) {
-  display: none !important;
-}
-
-/* And one more, for the same reason and in the same place: the overlay portals
+   One rule does still reach outside the subtree: the overlay portals
    its media library into *this* document (see @/cms/edit/overlay/Overlay), on a
    layer numbered for the framed page's document, where nothing competes with it.
    Here it competes with `.host` above, which is opaque and higher — measured
@@ -665,7 +652,7 @@ body:has(.host) :global([data-cms-overlay]) {
 /* The rail is the first thing to go: the frame is the tool and the navigator is
    how you change what is in it, so on a small screen the bar's page name and the
    browser's own back button are enough to keep working. */
-@media (max-width: 900px) {
+@include t.compact {
   .main {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -676,5 +663,35 @@ body:has(.host) :global([data-cms-overlay]) {
 
   .stage {
     padding: var(--st-s3);
+  }
+}
+
+/* A phone held upright. The bar already wraps; what it could not do was fit its
+   widest child. `.select` is `width: auto` capped at 260px, and a select sizes
+   to its longest option — "Úvodní stránka — /" is wider than the 358px line it
+   has to sit on once the picker's own label is beside it. The cap becomes the
+   line rather than a number.
+
+   The stage keeps its padding and its scroll. It is a viewport emulator and it
+   is honest about that at this width — see `.stackedNote` in EditView. */
+@include t.stacked {
+  .select {
+    max-width: 100%;
+  }
+
+  /* Obnovit, and the zoom pair. 30px square under a thumb, on a bar whose other
+     controls are 30px tall text chips that are at least wide. */
+  .icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .chip,
+  .exit {
+    height: 40px;
+  }
+
+  .bar {
+    padding: var(--st-s2) var(--st-gutter);
   }
 }

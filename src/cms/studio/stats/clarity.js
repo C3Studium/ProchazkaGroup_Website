@@ -32,10 +32,19 @@
 
 import { DEFAULT_RANGES } from "./statsSource"
 
-/** Read from the tag already installed in `_document.js`. */
-export const CLARITY_PROJECT_ID = "rxdayutukb"
+/**
+ * Projekt, ke kterému tag na webu patří.
+ *
+ * Z prostředí, ne napevno: jedno konkrétní ID zapsané v knihovně by v jiném
+ * projektu odkazovalo na cizí nástěnku. `NEXT_PUBLIC_`, protože odkaz se
+ * vykresluje v prohlížeči — a ID projektu není tajemství, tag ho stejně nese
+ * v adrese skriptu.
+ */
+export const CLARITY_PROJECT_ID = process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID || ""
 
-export const CLARITY_DASHBOARD_URL = `https://clarity.microsoft.com/projects/view/${CLARITY_PROJECT_ID}/dashboard`
+export const CLARITY_DASHBOARD_URL = CLARITY_PROJECT_ID
+  ? `https://clarity.microsoft.com/projects/view/${CLARITY_PROJECT_ID}/dashboard`
+  : "https://clarity.microsoft.com/"
 
 /** Whether the tag actually loaded in this browser — ad blockers routinely eat it. */
 export const clarityTagPresent = () => typeof window !== "undefined" && typeof window.clarity === "function"
@@ -62,47 +71,150 @@ const METRIC_LABELS = {
   DeadClickCount: "Mrtvé kliky",
   ExcessiveScroll: "Nadměrné scrollování",
   QuickbackClick: "Rychlé návraty",
-  ErrorClickCount: "Chyby skriptů",
+  ErrorClickCount: "Chyby při kliku",
+  ScriptErrorCount: "Chyby skriptů",
 }
 
-/**
- * Clarity returns `[{ metricName, information: [{...}] }]`. This flattens it
- * into the panel's tiles/breakdowns without the panel knowing anything about
- * Clarity — which is the property that makes the source swappable.
- */
-export function toStatsPayload(raw) {
-  const metrics = Array.isArray(raw) ? raw : []
-  const byName = (name) => metrics.find((metric) => metric.metricName === name)?.information?.[0] || {}
+/** Rozměry, na které se ptáme, a jak se jmenují v odpovědi. */
+const DIMENSION_TABS = [
+  { id: "Country", title: "Regiony", empty: "Clarity zatím nemá dost dat na rozpad podle zemí." },
+  { id: "Browser", title: "Prohlížeče", empty: "Zatím bez rozpadu podle prohlížečů." },
+  { id: "Device", title: "Zařízení", empty: "Zatím bez rozpadu podle zařízení." },
+]
 
-  const traffic = byName("Traffic")
-  const engagement = byName("EngagementTime")
+/** Chování, které Clarity počítá jako problém. Jedna záložka pro všechno. */
+const BEHAVIOUR = ["RageClickCount", "DeadClickCount", "ErrorClickCount", "ScriptErrorCount", "QuickbackClick", "ExcessiveScroll"]
+
+/**
+ * Clarity vrací `[{ metricName, information: [{...}] }]`. Tohle z toho udělá
+ * dlaždice a záložky, aniž by o Clarity věděla obrazovka — což je ta vlastnost,
+ * kvůli které se zdroj dá vyměnit.
+ *
+ * Rozměry (země, prohlížeč, zařízení) přicházejí jako další klíče uvnitř
+ * `information`; jeden dotaz je nese všechny naráz, protože každý zvlášť by byl
+ * další z deseti denních dotazů.
+ */
+/**
+ * Sekundy na dvojici hodnota + jednotka. Pevná jednotka lhala v obou směrech:
+ * aktivní čas ukazoval „282s" místo čtyř a půl minuty a celkový čas pod minutu
+ * spadl na „0 min".
+ */
+const duration = (seconds) => {
+  if (!seconds && seconds !== 0) return { value: null }
+  const whole = Math.round(seconds)
+  if (whole < 60) return { value: whole, unit: "s" }
+  const pad = (part) => String(part).padStart(2, "0")
+  if (whole < 3600) return { value: `${Math.floor(whole / 60)}:${pad(whole % 60)}`, unit: "min" }
+  return { value: `${Math.floor(whole / 3600)}:${pad(Math.floor((whole % 3600) / 60))}`, unit: "h" }
+}
+
+export function toStatsPayload(raw) {
+  const metrics = Array.isArray(raw?.metrics) ? raw.metrics : Array.isArray(raw) ? raw : []
+  const of = (name) => metrics.find((metric) => metric.metricName === name)?.information || []
+
+  // S rozměry vrací Clarity metriky ROZPADLÉ po kombinacích (země × prohlížeč ×
+  // zařízení) a žádný souhrnný řádek nepřidá. Číst první řádek by znamenalo číst
+  // jednu náhodnou kombinaci — v ostrých datech to byla „USA / Chrome" s nulou,
+  // zatímco skutečný provoz seděl o tři řádky níž.
+  const sum = (rows, key) => rows.reduce((total, row) => total + (Number(row[key]) || 0), 0)
+
+  const traffic = of("Traffic")
+  const engagement = of("EngagementTime")
+  const scroll = of("ScrollDepth")
+
+  // Klíč rozměrů, aby šly řádky jedné metriky spárovat s řádky jiné. Clarity
+  // je vrací zvlášť za každou metriku a nic je nespojuje.
+  const dimensionKey = (row) => `${row.Country}|${row.Browser}|${row.Device}`
+  const sessionsBy = new Map(traffic.map((row) => [dimensionKey(row), Number(row.totalSessionCount) || 0]))
+
+  // Vážený průměr přes rozpadlé řádky. Prostý průměr by dal dvěma tabletovým
+  // návštěvám stejnou váhu jako deseti desktopovým — v ostrých datech to
+  // zvedlo hloubku scrollu ze skutečných 53 % na 72 %.
+  const weightedAverage = (rows, key) => {
+    let value = 0
+    let weight = 0
+    for (const row of rows) {
+      const sessionCount = sessionsBy.get(dimensionKey(row)) ?? 1
+      value += (Number(row[key]) || 0) * sessionCount
+      weight += sessionCount
+    }
+    if (weight) return value / weight
+    // Bez rozměrů vrací Clarity jediný řádek, který už průměrem je.
+    return rows.length ? sum(rows, key) / rows.length : null
+  }
+
+  const sessions = sum(traffic, "totalSessionCount")
+  const bots = sum(traffic, "totalBotSessionCount")
+  const totalTime = sum(engagement, "totalTime")
+  // Součet aktivního času dělený relacemi. Samotný součet jako „průměr na
+  // relaci" byl špatně popsaný údaj: rostl s návštěvností, ne se zaujetím.
+  const activeTime = sessions ? sum(engagement, "activeTime") / sessions : null
+  const depth = scroll.length ? weightedAverage(scroll, "averageScrollDepth") : null
 
   const tiles = [
-    { id: "sessions", label: "Relace", value: number(traffic.totalSessionCount), hint: "Počet návštěv webu" },
-    { id: "users", label: "Návštěvníci", value: number(traffic.distinctUserCount), hint: "Unikátní zařízení" },
-    { id: "pages", label: "Zobrazení stránek", value: number(traffic.pagesViews) },
-    {
-      id: "time",
-      label: "Aktivní čas",
-      value: engagement.activeTime ? Math.round(Number(engagement.activeTime) / 60) : null,
-      unit: "min",
-      hint: "Průměr na relaci",
-    },
-  ]
+    { id: "sessions", label: "Relace", value: sessions, hint: "Skutečné návštěvy, bez robotů" },
+    // Roboti se ukazují zvlášť, ne schovaní v součtu: když jich je sedmkrát víc
+    // než lidí, je to údaj o webu, ne šum k zamlčení.
+    { id: "bots", label: "Roboti", value: bots, hint: "Vyhledávače a scrapery" },
+    { id: "active", label: "Aktivní čas", ...duration(activeTime), hint: "Průměr na relaci" },
+    { id: "total", label: "Celkový čas", ...duration(totalTime) },
+    { id: "scroll", label: "Hloubka scrollu", value: depth === null ? null : Math.round(depth), unit: "%", hint: "Kam se čtenář dostane" },
+  ].filter((tile) => tile.value !== null && tile.value !== 0 || tile.id === "sessions")
 
-  const breakdowns = metrics
-    .filter((metric) => ["RageClickCount", "DeadClickCount", "ErrorClickCount", "QuickbackClick"].includes(metric.metricName))
-    .map((metric) => ({
-      id: metric.metricName,
-      title: METRIC_LABELS[metric.metricName] || metric.metricName,
-      rows: (metric.information || []).slice(0, 6).map((entry) => ({
-        label: entry.url || entry.name || "—",
-        value: number(entry.subTotal ?? entry.sessionsCount),
-      })),
-    }))
-    .filter((breakdown) => breakdown.rows.length > 0)
+  // Rozpady. Řadí se podle lidských relací, ne podle unikátních zařízení —
+  // to druhé počítá i roboty a seznam prohlížečů by pak vedl HeadlessChrome.
+  const dimensionTabs = DIMENSION_TABS.map(({ id, title, empty }) => ({
+    id,
+    title,
+    empty,
+    rows: traffic
+      .filter((entry) => entry[id])
+      .reduce((rows, entry) => {
+        const found = rows.find((row) => row.label === entry[id])
+        const value = Number(entry.totalSessionCount) || 0
+        if (found) found.value += value
+        else rows.push({ label: entry[id], value })
+        return rows
+      }, [])
+      .filter((row) => row.value > 0)
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 12),
+  })).filter((tab) => tab.rows.length > 0)
 
-  return { tiles, breakdowns }
+  // Chování: procento relací, kterých se problém týkal. Absolutní počet by tu
+  // nic neřekl — deset zuřivých kliků z deseti relací a z deseti tisíc jsou
+  // dvě různé zprávy.
+  const behaviour = {
+    id: "behaviour",
+    title: "Chování",
+    empty: "Zatím bez zaznamenaných problémů — což je dobrá zpráva.",
+    rows: metrics
+      .filter((metric) => BEHAVIOUR.includes(metric.metricName))
+      .map((metric) => {
+        const rows = metric.information || []
+        const percent = rows.length
+          ? rows.reduce((total, row) => total + (Number(row.sessionsWithMetricPercentage) || 0), 0) / rows.length
+          : 0
+        return { label: METRIC_LABELS[metric.metricName] || metric.metricName, value: `${Math.round(percent)} %` }
+      })
+      .filter((row) => row.value !== "0 %"),
+  }
+
+  const tabs = [...dimensionTabs, ...(behaviour.rows.length ? [behaviour] : [])]
+
+  return {
+    configured: raw?.configured !== false,
+    note:
+      raw?.configured === false
+        ? "Chybí CLARITY_API_TOKEN. Vygeneruj ho v Clarity → Settings → Data Export a vlož do prostředí; měření na webu už běží, jen se nečte."
+        : null,
+    tiles,
+    tabs,
+    breakdowns: tabs,
+    cachedAt: raw?.cachedAt ?? null,
+    fromCache: Boolean(raw?.fromCache),
+    remaining: raw?.remaining ?? null,
+  }
 }
 
 const number = (value) => {

@@ -1,15 +1,15 @@
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/router"
-import { useAuth, usePort, useRevision, useStudio, useTypes } from "../context/StudioProvider"
-import { useAsync } from "../hooks/useAsync"
-import { hrefs, isActive, parseRoute, previewFrom } from "../lib/routes"
-import { PENDING, QUEUE_FILTERS } from "../lib/moderation"
-import { initials } from "../lib/format"
-import Icon from "../ui/Icon"
-import { IconButton } from "../ui/controls"
-import PasswordDialog from "./PasswordDialog"
-import { usePersistedFlag } from "./persist"
+import { useStudioRouter } from "../../runtime/navigation.jsx"
+import { useAuth, usePort, useRevision, useStudio, useTypes } from "../context/StudioProvider.jsx"
+import { useAsync } from "../hooks/useAsync.js"
+import { hrefs, isActive, parseRoute, previewFrom } from "../lib/routes.js"
+import { PENDING, queueQuery } from "../lib/moderation.js"
+import { initials } from "../lib/format.js"
+import Icon from "../ui/Icon.jsx"
+import { IconButton } from "../ui/controls.jsx"
+import PasswordDialog from "./PasswordDialog.jsx"
+import { usePersistedFlag } from "./persist.js"
 import styles from "./Sidebar.module.scss"
 
 const COLLAPSED_KEY = "cms.studio.sidebar.collapsed"
@@ -30,18 +30,18 @@ const COLLAPSED_KEY = "cms.studio.sidebar.collapsed"
  * because at that width the choice is not really available.
  */
 export default function Sidebar() {
-  const router = useRouter()
+  const router = useStudioRouter()
   const types = useTypes()
   const port = usePort()
   const { config } = useStudio()
   const { revision } = useRevision()
-  const { user, isOwner, signOut } = useAuth()
+  const { user, isAdmin, signOut } = useAuth()
   const [changingPassword, setChangingPassword] = useState(false)
   const [collapsed, setCollapsed] = usePersistedFlag(COLLAPSED_KEY, false)
 
   // The queue badge is the one number the client wants without navigating.
   const { data: pending } = useAsync(
-    () => port.list({ type: "review", perPage: 1, filters: QUEUE_FILTERS[PENDING] }),
+    () => port.list({ type: "review", perPage: 1, ...queueQuery(PENDING) }),
     [port, revision],
   )
 
@@ -139,10 +139,33 @@ export default function Sidebar() {
           </li>
           <NavItem href={hrefs.media()} icon="image" label="Knihovna médií" asPath={router.asPath} />
           <NavItem href={hrefs.stats()} icon="chart" label="Statistiky" asPath={router.asPath} />
-          {/* Owners only. Hiding it is a courtesy — /studio/users renders an
-              explanation for an editor who types the URL, and the server
-              refuses the calls behind it either way. */}
-          {isOwner ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" asPath={router.asPath} /> : null}
+          {/* In Nástroje, first of the owner-only three, and the position is the
+              argument moderation already won: the archive is a job somebody
+              opens the tool to do, not a content type — so it does not belong in
+              Obsah, whose rows are generated from the schema list. It sits at
+              the top of the owner-only cluster because it is about content, the
+              way everything above it in Nástroje is, while Uživatelé and
+              Nastavení are about people and configuration.
+
+              `clock` rather than `archive`: the archive icon already means
+              something else in this admin — "Do archivu" on a document row,
+              which takes it off the site and leaves it in the database. Two
+              different archives sharing one glyph is exactly the confusion this
+              screen exists to remove. */}
+          {isAdmin ? <NavItem href={hrefs.archive()} icon="clock" label="Archiv" asPath={router.asPath} /> : null}
+          {/* Owners only, both of them. Hiding them is a courtesy — each route
+              renders an explanation for an editor who types the URL, and the
+              server refuses the calls behind them either way.
+
+              Uživatelé keeps its own row rather than being folded into
+              Nastavení: it is the screen the client already knows where to
+              find, and it is opened far more often than the rest of the portal.
+              Nastavení links to it, so the two are one click apart in the
+              direction that is actually travelled. */}
+          {isAdmin ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" asPath={router.asPath} /> : null}
+          {isAdmin ? (
+            <NavItem href={hrefs.settings()} icon="settings" label="Nastavení" asPath={router.asPath} />
+          ) : null}
         </ul>
       </div>
 

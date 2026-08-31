@@ -43,6 +43,20 @@ export function defineType(config) {
     fieldsByName,
     groups: normalizeGroups(config.groups, fields, config.name),
     orderings: normalizeOrderings(config.orderings, config.name),
+    /**
+     * Which roles may create a document of this type. `null` means everyone.
+     *
+     * The case it exists for is `review`: a review is a customer's statement,
+     * and an editor able to write one is an editor able to write a testimonial
+     * and sign a stranger's name to it. Moderating what arrives is the job;
+     * authoring it is not.
+     *
+     * Only creation. Approving, rejecting and archiving stay open to whoever
+     * the role rules elsewhere allow — see AUTH.md.
+     */
+    createRoles: Array.isArray(config.createRoles) && config.createRoles.length
+        ? Object.freeze([...new Set(config.createRoles.map(String))])
+        : null,
     preview: buildPreview(config.preview, fields),
   }
 

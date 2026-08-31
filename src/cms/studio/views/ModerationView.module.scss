@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 /* The queue is the screen this client lives in, so it is the one screen built
@@ -123,6 +122,23 @@
   color: var(--st-ink-3);
 }
 
+/* Who rejected it and when. Danger ink, because this is the one line on the row
+   that says a decision was taken against the person who wrote the text above. */
+.rejected {
+  display: flex;
+  gap: 4px;
+  align-items: flex-start;
+  margin-top: 2px;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-danger);
+}
+
+.rejectedIcon {
+  flex: none;
+  margin-top: 2px;
+}
+
 .flags {
   display: flex;
   flex-direction: column;
@@ -190,6 +206,84 @@
   }
 }
 
+/* --------------------------------------------------------------- reason -- */
+
+/* The armed row. It replaces the two decision buttons in place rather than
+   opening a layer over them: the question is "why", the evidence is the review
+   text one column to the left, and a popover that covered it would be asking
+   the editor to answer from memory. */
+.picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  width: 260px;
+  padding: var(--st-s3);
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-lg);
+}
+
+.pickerTitle {
+  margin: 0;
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink-2);
+}
+
+.reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+}
+
+.reason {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  width: 100%;
+  padding: 7px var(--st-s2);
+  font-family: inherit;
+  font-size: var(--st-text-body);
+  color: var(--st-ink);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-radius: var(--st-radius);
+  transition: background var(--st-fast) var(--st-ease);
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(255, 252, 247, 0.07);
+  }
+}
+
+/* Inside a row the list is tighter; in the bulk dialog it is the whole body. */
+.reasonsCompact .reason {
+  padding: 5px var(--st-s2);
+  font-size: var(--st-text-small);
+}
+
+/* The digit is the shortcut, printed where the hand expects to find it. */
+.reasonKey {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-micro);
+  color: var(--st-ink-3);
+  border: 1px solid var(--st-line-strong);
+  border-radius: 3px;
+}
+
+.reasonLabel {
+  min-width: 0;
+}
+
 /* -------------------------------------------------------------- bulk bar -- */
 
 /* Floats over the queue instead of taking a band off the bottom of it: the bar
@@ -238,7 +332,7 @@
 
 /* Narrow: the identity rail folds above the text rather than squeezing it, and
    the decision moves under both. Reading width is the last thing to give. */
-@media (max-width: 1180px) {
+@include t.queue-narrow {
   .shortcuts {
     display: none;
   }
@@ -270,13 +364,36 @@
   }
 }
 
-@media (max-width: 900px) {
-  .row {
-    padding: var(--st-s5);
+/* There is no `compact` block here any more. It set the row's padding and the
+   bulk dock's inset to 20px, which is what `--st-gutter` now folds to at that
+   width for every screen at once — see `declare` in the token module. Both rules
+   above already read the token, so restating it here would only be a second copy
+   to keep in step.
+
+   A phone held upright.
+
+   The reject picker is the one control here that is a fixed width — 260px, set
+   so the five reasons read as a list rather than as five buttons. It starts at
+   the reading column, which at this gutter is 46px in, and 46 + 260 clears 375
+   by nothing at all. Capping it at the column it lives in is the difference
+   between "tight" and "the last reason is off the screen".
+
+   The bulk bar is the other fixed shape: it centres itself in the dock and its
+   five controls do not fit on one 358px line, so it wraps and stops centring —
+   a bar that centres a wrapped second row reads as two unrelated bars. */
+@include t.stacked {
+  .picker {
+    width: 100%;
+    max-width: 320px;
+  }
+
+  .bulkBar {
+    flex-wrap: wrap;
+    row-gap: var(--st-s2);
+    padding: var(--st-s2) var(--st-s3);
   }
 
   .bulkDock {
-    right: var(--st-s5);
-    left: var(--st-s5);
+    justify-content: stretch;
   }
 }

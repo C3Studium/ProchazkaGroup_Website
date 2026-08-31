@@ -12,6 +12,7 @@ import {
 } from "framer-motion";
 
 import { ENTERS, RISE, group } from "@/components/common/ui/entrance";
+import { editable } from "@/cms/edit";
 import { YEARS, CURVES, VIEW, RULES, lineOf, areaOf, readAt, upAt, yearAt } from "./content";
 
 // The page's last word, and the only thing on it you can take hold of.
@@ -51,7 +52,28 @@ const DRIVE = [0.08, 0.68];
 // is keyed to.
 const BUILD = [0, 0.06];
 
-export default function Divergence() {
+// What the board says with no CMS behind it.
+//
+// The three legends under it are absent on purpose: each is `<i />` and its word
+// in one `<span>`, so the word has no element of its own — annotating the span
+// would store the swatch as part of the copy and drop it on the first save. They
+// name the three series the chart draws, which is the component's own data.
+const SHIPPED = {
+    n: "07",
+    title: "Stejné peníze, dvakrát",
+    lead: "Sto korun odložených dnes. Táhněte za linku a projděte si těch dvacet let rok po roce.",
+    note: "Ilustrativní čísla",
+};
+
+/**
+ * @param {object} [copy] the `nabidka.graf` block, from `getPageContent`.
+ */
+export default function Divergence({ copy = {} }) {
+    const docId = copy.docId;
+    const n = copy.n || SHIPPED.n;
+    const title = copy.title || SHIPPED.title;
+    const lead = copy.lead || SHIPPED.lead;
+    const note = copy.note || SHIPPED.note;
     const section = useRef(null);
     const board = useRef(null);
 
@@ -232,15 +254,26 @@ export default function Divergence() {
                 viewport={ENTERS}
             >
                 <header className="Divergence__head">
-                    <motion.p className="Divergence__n" variants={RISE}>
-                        07
+                    <motion.p
+                        {...editable(docId, "items.0.label", "text")}
+                        className="Divergence__n"
+                        variants={RISE}
+                    >
+                        {n}
                     </motion.p>
-                    <motion.h2 className="Divergence__title" variants={RISE}>
-                        Stejné peníze, dvakrát
+                    <motion.h2
+                        {...editable(docId, "title", "text")}
+                        className="Divergence__title"
+                        variants={RISE}
+                    >
+                        {title}
                     </motion.h2>
-                    <motion.p className="Divergence__lead" variants={RISE}>
-                        Sto korun odložených dnes. Táhněte za linku a projděte si těch
-                        dvacet let rok po roce.
+                    <motion.p
+                        {...editable(docId, "body", "text")}
+                        className="Divergence__lead"
+                        variants={RISE}
+                    >
+                        {lead}
                     </motion.p>
                 </header>
 
@@ -324,7 +357,12 @@ export default function Divergence() {
                     <span className="Divergence__key">
                         <i className="Divergence__key__ours" /> S naším servisem
                     </span>
-                    <span className="Divergence__note">Ilustrativní čísla</span>
+                    <span
+                        {...editable(docId, "items.1.label", "text")}
+                        className="Divergence__note"
+                    >
+                        {note}
+                    </span>
                 </motion.footer>
             </motion.div>
         </section>

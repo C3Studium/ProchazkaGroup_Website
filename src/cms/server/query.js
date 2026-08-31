@@ -18,7 +18,16 @@ export const PUBLIC_DOCUMENT_COLUMNS =
     'id, type, status, data, published_at, created_at, updated_at, archived_at'
 
 export const MEDIA_COLUMNS =
-    'id, bucket, path, url, mime, size_bytes, width, height, alt, created_at, updated_at, created_by'
+    'id, bucket, path, url, mime, size_bytes, width, height, alt, created_at, updated_at, created_by, archived_at, source_path, source_url, crop'
+
+// migrations/0007. The revision carries `type` itself because it outlives the
+// document it describes — there is no foreign key back to cms_document, and the
+// migration's header says why neither available one is right.
+export const REVISION_COLUMNS =
+    'id, document_id, type, body, status, archived_at, changed_at, changed_by, reason, build_id'
+
+export const MEDIA_ARCHIVE_COLUMNS =
+    'media_id, uploaded_at, archived_at, first_published_at'
 
 export const MAX_PER_PAGE = 100
 export const DEFAULT_PER_PAGE = 20
@@ -339,5 +348,59 @@ export const toAsset = (row) => {
         alt: row.alt || '',
         filename: filenameFromPath(row.path),
         createdAt: row.created_at ?? null,
+        // Orthogonal to everything above, exactly as `archivedAt` is on a
+        // document: an archived asset is a complete, readable asset that is no
+        // longer offered in the library. Every revision that referenced it still
+        // resolves — which is the whole reason removal became archival.
+        archivedAt: row.archived_at ?? null,
+        // Present only on a cropped row (migrations/0010). `source` is where the
+        // untouched original still is, so the crop tool can offer a wider frame
+        // than the current file contains; `crop` is the rectangle, in the
+        // original's own pixels, that produced what `url` points at.
+        source: row.source_url ? { path: row.source_path ?? null, url: row.source_url } : null,
+        crop: row.crop ?? null,
+    }
+}
+
+/**
+ * One transition, as the Archive reads it.
+ *
+ * `body` is the published body the document was left with, and `status` /
+ * `archivedAt` are the state it was left in — that triple is what makes "what
+ * was published at time T" answerable from this table alone.
+ */
+export const toRevision = (row) => {
+    if (!row) return null
+    return {
+        id: row.id,
+        documentId: row.document_id,
+        type: row.type,
+        body: row.body || {},
+        status: row.status,
+        archivedAt: row.archived_at ?? null,
+        changedAt: row.changed_at ?? null,
+        changedBy: row.changed_by ?? null,
+        reason: row.reason,
+        buildId: row.build_id ?? null,
+    }
+}
+
+/**
+ * The archive's dates for one file.
+ *
+ * `firstPublishedAt` is null until a published revision mentions the file, and
+ * null is a real answer rather than a missing one: it means no revision this
+ * system has recorded ever contained it. For a file that was already on the
+ * site when the archive was switched on, that stays null until the next
+ * publish of a document mentioning it — the history could not be reconstructed
+ * backwards and is not guessed at.
+ */
+export const toMediaArchive = (row) => {
+    if (!row) return null
+    return {
+        mediaId: row.media_id,
+        uploadedAt: row.uploaded_at ?? null,
+        archivedAt: row.archived_at ?? null,
+        firstPublishedAt: row.first_published_at ?? null,
     }
 }

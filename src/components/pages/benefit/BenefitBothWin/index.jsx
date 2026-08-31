@@ -8,6 +8,7 @@ import TextPressure from "@/components/common/ui/TextPressure";
 import { CURTAIN, ENTERS } from "@/components/common/ui/entrance";
 import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
 import { usePhone } from "@/helpers/usePhone";
+import { editable } from "@/cms/edit";
 
 // 05 — the doubt, and 06 — how to get in. Two movements of one section, built
 // from the grammars this site already speaks rather than from panels:
@@ -28,6 +29,41 @@ import { usePhone } from "@/helpers/usePhone";
 // The vertical axis then continues down — the WhoWeAre handoff, kept inside
 // one component — into 06, where the same drawn-rule grammar splits the two
 // ways in: two tiles that trade the row under the pointer, each a button.
+
+// Copy comes from the CMS — `benefit-program.otazka` for the doubt and its
+// answer, `benefit-program.prihlaseni` for the way in (see cms.config.js).
+// These are the words the two sections ship with and what every field falls
+// back to on its own, so an empty CMS renders exactly this page.
+const DOUBT = {
+    // The `<em>` of the eyebrow. The words beside it are a bare text node in the
+    // same paragraph and have no element of their own — see the eyebrow below.
+    ord: "05",
+    eyebrow: "Otázka, kterou si položí každý",
+    // TextPressure sets this a character at a time, so the words on screen are
+    // markup the component generates rather than a text node anything can
+    // annotate. It is edited in the Studio's form.
+    question: "Prodávám tím své známé?",
+    themLabel: "Ten, koho doporučíte",
+    themBody: "Dostane schůzku a plán jako každý náš klient. Nic neplatí a nic si nemusí koupit.",
+    youLabel: "Vy, kdo doporučujete",
+    youBody: "Poukaz dostanete až ve chvíli, kdy se z doporučení stane klient. Ne za jméno. Za výsledek.",
+    both: "Obojí platí zároveň. Jinak by ten program nedával smysl.",
+};
+
+const ENROLL = {
+    ord: "07",
+    eyebrow: "Jak se přihlásit",
+    title: "Do programu se nedá přihlásit zvenčí. Je pro naše klienty.",
+    clientQ: "Už jste klient?",
+    clientBig: "Mám poradce",
+    clientCap: "Řekněte si o vstup na příští schůzce",
+    newQ: "Ještě ne?",
+    newBig: "První schůzka",
+    newCap: "Začněte vlastním finančním plánem",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
 
 // Rules draw, words rise — each on its own beat of a shared clock, so the
 // sequence reads in the order the lines cause each other.
@@ -78,7 +114,19 @@ function useMedia(query) {
 // pointerenter with no pointerleave and a hover-driven state latches forever.
 const FINE = "(hover: hover) and (pointer: fine)";
 
-export default function BenefitBothWin() {
+export default function BenefitBothWin({ copy = {} }) {
+    const doc = copy.docId;
+    const said = {
+        ord: say(copy.ord, DOUBT.ord),
+        eyebrow: say(copy.eyebrow, DOUBT.eyebrow),
+        question: say(copy.question, DOUBT.question),
+        themLabel: say(copy.themLabel, DOUBT.themLabel),
+        themBody: say(copy.themBody, DOUBT.themBody),
+        youLabel: say(copy.youLabel, DOUBT.youLabel),
+        youBody: say(copy.youBody, DOUBT.youBody),
+        both: say(copy.both, DOUBT.both),
+    };
+
     return (
         <section className="BenBothWin">
             {/* 05 — the doubt, on its own stage with air around it */}
@@ -88,8 +136,15 @@ export default function BenefitBothWin() {
                 whileInView="shown"
                 viewport={ENTERS}
             >
+                {/* The `<em>` carries its own annotation; the words beside it
+                    are a bare text node sharing this paragraph with it, so they
+                    are `items.0.label` and are edited in the form. The
+                    separating space rides INSIDE the expression — as a literal
+                    it would be a second text child, and React marks the boundary
+                    between two adjacent text children with a `<!-- -->` the
+                    markup does not need. */}
                 <motion.p className="BenBothWin__eyebrow" variants={riseAt(0)}>
-                    <em>05</em> Otázka, kterou si položí každý
+                    <em {...editable(doc, "items.0.lead", "text")}>{said.ord}</em>{` ${said.eyebrow}`}
                 </motion.p>
                 {/* One line at every width, deliberately. Breaking it in two on
                     a phone and setting each half larger reads better and was
@@ -102,7 +157,7 @@ export default function BenefitBothWin() {
                     and stayed that way. A wordmark that never wraps must be
                     measured once, on a layout that has settled. */}
                 <motion.div className="BenBothWin__question" variants={UNCOVER}>
-                    <TextPressure text="Prodávám tím své známé?" size={5.5} />
+                    <TextPressure text={said.question} size={5.5} />
                 </motion.div>
             </motion.div>
 
@@ -124,18 +179,16 @@ export default function BenefitBothWin() {
                 />
 
                 <motion.div className="BenBothWin__side BenBothWin__side--them">
-                    <motion.h3 className="BenBothWin__label" variants={riseAt(0.95)}>Ten, koho doporučíte</motion.h3>
-                    <motion.p variants={riseAt(1.05)}>
-                        Dostane schůzku a plán jako každý náš klient.
-                        Nic neplatí a nic si nemusí koupit.
+                    <motion.h3 className="BenBothWin__label" variants={riseAt(0.95)} {...editable(doc, "items.1.label", "text")}>{said.themLabel}</motion.h3>
+                    <motion.p variants={riseAt(1.05)} {...editable(doc, "items.1.value", "text")}>
+                        {said.themBody}
                     </motion.p>
                 </motion.div>
 
                 <motion.div className="BenBothWin__side BenBothWin__side--you">
-                    <motion.h3 className="BenBothWin__label" variants={riseAt(1.1)}>Vy, kdo doporučujete</motion.h3>
-                    <motion.p variants={riseAt(1.2)}>
-                        Poukaz dostanete až ve chvíli, kdy se z doporučení
-                        stane klient. Ne za jméno. Za výsledek.
+                    <motion.h3 className="BenBothWin__label" variants={riseAt(1.1)} {...editable(doc, "items.2.label", "text")}>{said.youLabel}</motion.h3>
+                    <motion.p variants={riseAt(1.2)} {...editable(doc, "items.2.value", "text")}>
+                        {said.youBody}
                     </motion.p>
                 </motion.div>
 
@@ -143,8 +196,8 @@ export default function BenefitBothWin() {
                     className="BenBothWin__rule BenBothWin__rule--answerClose"
                     variants={drawX(1.4, 1.0)}
                 />
-                <motion.p className="BenBothWin__both" variants={riseAt(1.75)}>
-                    Obojí platí zároveň. Jinak by ten program nedával smysl.
+                <motion.p className="BenBothWin__both" variants={riseAt(1.75)} {...editable(doc, "body", "text")}>
+                    {said.both}
                 </motion.p>
             </motion.div>
 
@@ -232,7 +285,20 @@ function CallLink({ phone, tel }) {
     );
 }
 
-export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorFormCopy = {} }) {
+export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorFormCopy = {}, copy = {} }) {
+    const doc = copy.docId;
+    const said = {
+        ord: say(copy.ord, ENROLL.ord),
+        eyebrow: say(copy.eyebrow, ENROLL.eyebrow),
+        title: say(copy.title, ENROLL.title),
+        clientQ: say(copy.clientQ, ENROLL.clientQ),
+        clientBig: say(copy.clientBig, ENROLL.clientBig),
+        clientCap: say(copy.clientCap, ENROLL.clientCap),
+        newQ: say(copy.newQ, ENROLL.newQ),
+        newBig: say(copy.newBig, ENROLL.newBig),
+        newCap: say(copy.newCap, ENROLL.newCap),
+    };
+
     // The two cards are a QUESTION now. Answering one replaces them with the
     // thing that actually helps that person: a client gets the phone line and
     // one sentence — no form to fill for somebody who already has an advisor —
@@ -294,12 +360,12 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                 />
 
                 <motion.div className="BenBothWin__joinHead">
+                    {/* The eyebrow, on the same terms as the doubt's above. */}
                     <motion.p className="BenBothWin__eyebrow" variants={riseAt(0.75)}>
-                        <em>07</em> Jak se přihlásit
+                        <em {...editable(doc, "items.0.lead", "text")}>{said.ord}</em>{` ${said.eyebrow}`}
                     </motion.p>
-                    <motion.h2 variants={riseAt(0.9)}>
-                        Do programu se nedá přihlásit zvenčí.
-                        Je pro naše klienty.
+                    <motion.h2 variants={riseAt(0.9)} {...editable(doc, "title", "text")}>
+                        {said.title}
                     </motion.h2>
                 </motion.div>
 
@@ -346,10 +412,10 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                     animate={{ scale: reach === 0 ? 1.08 : 1 }}
                                     transition={FORK_SPRING}
                                 >
-                                    <span className="BenBothWin__forkCard__q">Už jste klient?</span>
-                                    <span className="BenBothWin__forkCard__big">Mám poradce</span>
-                                    <span className="BenBothWin__forkCard__cap">
-                                        Řekněte si o vstup na příští schůzce
+                                    <span className="BenBothWin__forkCard__q" {...editable(doc, "items.1.lead", "text")}>{said.clientQ}</span>
+                                    <span className="BenBothWin__forkCard__big" {...editable(doc, "items.1.label", "text")}>{said.clientBig}</span>
+                                    <span className="BenBothWin__forkCard__cap" {...editable(doc, "items.1.value", "text")}>
+                                        {said.clientCap}
                                     </span>
                                     {/* `data-cursor-label` says "Vybrat" inside
                                         the ring the custom cursor draws, and a
@@ -378,10 +444,10 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                     animate={{ scale: reach === 1 ? 1.08 : 1 }}
                                     transition={FORK_SPRING}
                                 >
-                                    <span className="BenBothWin__forkCard__q">Ještě ne?</span>
-                                    <span className="BenBothWin__forkCard__big">První schůzka</span>
-                                    <span className="BenBothWin__forkCard__cap">
-                                        Začněte vlastním finančním plánem
+                                    <span className="BenBothWin__forkCard__q" {...editable(doc, "items.2.lead", "text")}>{said.newQ}</span>
+                                    <span className="BenBothWin__forkCard__big" {...editable(doc, "items.2.label", "text")}>{said.newBig}</span>
+                                    <span className="BenBothWin__forkCard__cap" {...editable(doc, "items.2.value", "text")}>
+                                        {said.newCap}
                                     </span>
                                     {/* `data-cursor-label` says "Vybrat" inside
                                         the ring the custom cursor draws, and a
@@ -411,7 +477,15 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                             {/* The choice stays present as a switch — the QnA
                                 block's gesture in this section's clothing: two
                                 caps words on one hairline, the active one lit
-                                and underlined by a drawn accent. */}
+                                and underlined by a drawn accent.
+
+                                Not annotated, and not fed from the block above
+                                either. The first of the two REPRINTS the tile's
+                                own words, and a field is written by one element;
+                                the second is the switch's own shorter phrasing of
+                                the other tile. Both are mounted from component
+                                state, so no server render — and therefore no
+                                deliberate scan — ever reaches them. */}
                             <div className="BenBothWin__switch" role="tablist" aria-label="Jak se přihlásit">
                                 {[
                                     ["client", "Mám poradce"],

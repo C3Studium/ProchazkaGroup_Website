@@ -1,7 +1,7 @@
 import Head from "next/head"
 
 import AdvisorCard from "@/components/pages/advisor/AdvisorCard"
-import { getConsultants, getAssistant, getContactContent, getFooterContent, readEditable, readPublished } from "@/cms/server/site"
+import { getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
 
 // One page per published consultant, and it exists to collect a review for that
 // one person — this is the address behind the QR code on their business card,
@@ -35,13 +35,23 @@ export async function getStaticProps({ params, ...context }) {
     // getStaticProps instead of taking `footerStaticProps`. Without it the
     // patička and the contact sheet carry no document id inside the Studio's
     // editing frame, so nothing on either can be clicked.
-    const draft = Boolean(context?.draftMode)
-    const read = draft ? readEditable : readPublished
+    // Published, draft or a moment in the archive — one call decides. See
+    // @/cms/server/site/archive.js.
+    const view = viewOf(context)
+    const read = readerFor(view)
 
-    const [consultants, footer, contact, assistant] = await Promise.all([
-        getConsultants({ kind: 'consultant' }),
-        getFooterContent({ draft }),
-        getContactContent({ draft }),
+    const [content, consultants, footer, contact, assistant] = await Promise.all([
+        // The card's framing — the ask over the form, the office's city, the
+        // words on the send button. ONE block behind every consultant's page,
+        // declared under `page: 'recenze'` in cms.config.js: editing it once
+        // moves all ten, and `server/revalidate.js` regenerates all ten.
+        getPageContent("/recenze/[slug]", view),
+        // `read` here too: the card IS the consultant, so a page framed at a
+        // moment must find the person as they were described then. Without it
+        // this route is the one page in the Archive showing today's content.
+        getConsultants({ kind: 'consultant', read }),
+        getFooterContent(view),
+        getContactContent(view),
         getAssistant({ read }),
     ])
 
@@ -50,10 +60,10 @@ export async function getStaticProps({ params, ...context }) {
     // belongs to anybody has to 404, not render an empty card.
     if (!advisor) return { notFound: true, revalidate: REVALIDATE_SECONDS }
 
-    return { props: { advisor, footer, contact, assistant }, revalidate: REVALIDATE_SECONDS }
+    return { props: { advisor, content, footer, contact, assistant }, revalidate: REVALIDATE_SECONDS }
 }
 
-export default function AdvisorPage({ advisor }) {
+export default function AdvisorPage({ advisor, content }) {
     const title = `Recenze — ${advisor.name} | Procházka Group`
     const description = `Napište recenzi na ${advisor.name}, finančního poradce Procházka Group.`
     const url = `https://prochazkagroup.cz/recenze/${advisor.slug}`
@@ -95,7 +105,7 @@ export default function AdvisorPage({ advisor }) {
                 </script>
             </Head>
             <main lang="cs" key={`advisor-${advisor.slug}`}>
-                <AdvisorCard advisor={advisor} />
+                <AdvisorCard advisor={advisor} copy={content?.card} />
             </main>
         </>
     )

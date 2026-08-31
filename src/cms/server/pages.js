@@ -19,19 +19,9 @@
 import fs from 'node:fs'
 import path from 'node:path'
 
-import site from '@/cms/site/config'
+import { discoverRoutes } from './routes.js'
 
-const PAGES_DIR = path.join(process.cwd(), 'src', 'pages')
-
-// Not routes of the site: the API surface, the admin, and the framework's own
-// entry points. `studio` also has to go — the preview listing itself is a hall
-// of mirrors, and the mirror rewrite would happily render one inside the other.
-const SKIP_DIRS = new Set(['api', 'studio'])
-
-// Nothing an editor navigates to on purpose.
-const SKIP_ROUTES = new Set(['/404', '/500', '/_error'])
-
-const PAGE_FILE = /\.(jsx?|tsx?)$/
+import site from '../site/config.js'
 
 /**
  * The page's own <title>, when it is a plain string.
@@ -58,13 +48,22 @@ const TITLE = /<title>\s*(?:\{\s*[`'"])?([^<>{}`'"$]*)/
 // navigator from another, so it goes.
 const BRAND = /procházka\s*group|ovb\s*allfinanz/i
 
-const titleOf = (file) => {
-    let source = ''
-    try {
-        source = fs.readFileSync(file, 'utf8')
-    } catch {
-        return null
-    }
+/**
+ * Does this page regenerate?
+ *
+ * `getStaticProps` is what makes a route ISR, and ISR is what on-demand
+ * revalidation has anything to say to: a page without one is prerendered at
+ * build time from nothing but its own markup, `res.revalidate` has no cache
+ * entry to replace, and asking for one is an error rather than a no-op.
+ * /kontakt is exactly that page today — a `<Head>` and an empty `<main>`, no
+ * reader, no patička of its own.
+ *
+ * Read off the source, like the title, and for the same reason: the alternative
+ * is a second list of which routes are static, kept in step by hand.
+ */
+const REGENERATES = /\bgetStaticProps\b/
+
+const titleOf = (source) => {
     const raw = TITLE.exec(source)?.[1]
     if (!raw) return null
     const part = raw
@@ -82,46 +81,31 @@ const fromSlug = (segment) =>
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(' ')
 
-const walk = (dir, segments, out) => {
-    let entries = []
-    try {
-        entries = fs.readdirSync(dir, { withFileTypes: true })
-    } catch {
-        return out
-    }
+/**
+ * Stránky webu i s tím, co o nich Studio potřebuje vědět.
+ *
+ * Které routy existují, odpovídá `./routes.js` — jedno místo pro obě konvence
+ * Next.js a pro dynamické segmenty, které tenhle soubor dřív přeskakoval.
+ * Tady se k nim jen dočte to, co se pozná až ze zdrojáku stránky: jak se
+ * jmenuje a jestli se přegeneruje.
+ */
+const collect = (root) => {
+    const { routes } = discoverRoutes(root)
 
-    for (const entry of entries) {
-        // A dynamic segment cannot be previewed without being told which
-        // document to fill it with, and nothing in the tool knows that yet.
-        if (entry.name.startsWith('[') || entry.name.startsWith('_')) continue
+    return routes.map((entry) => {
+        let source = ''
+        try { source = fs.readFileSync(entry.file, 'utf8') } catch { source = '' }
 
-        if (entry.isDirectory()) {
-            if (segments.length === 0 && SKIP_DIRS.has(entry.name)) continue
-            walk(path.join(dir, entry.name), [...segments, entry.name], out)
-            continue
-        }
-
-        if (!entry.isFile() || !PAGE_FILE.test(entry.name)) continue
-
-        const base = entry.name.replace(PAGE_FILE, '')
-        const parts = base === 'index' ? segments : [...segments, base]
-        const route = `/${parts.join('/')}`.replace(/\/+$/, '') || '/'
-        if (SKIP_ROUTES.has(route)) continue
-
-        const file = path.join(dir, entry.name)
-        out.push({
-            path: route,
-            // The homepage's title is a keyword line rather than a name, and the
-            // Studio has always called this page "Úvodní stránka".
-            label: route === '/' ? 'Úvodní stránka' : titleOf(file) || fromSlug(parts[parts.length - 1]),
-            // Nested routes are folded into one collapsible row by the navigator:
-            // twelve consultant pages listed flat bury the eight that are the
-            // site.
+        const parts = entry.route === '/' ? [] : entry.route.slice(1).split('/')
+        return {
+            path: entry.route,
+            label: entry.route === '/' ? 'Úvodní stránka' : titleOf(source) || fromSlug(parts[parts.length - 1]),
+            regenerates: REGENERATES.test(source),
+            // Podle čeho se seskupuje v seznamu — první segment, pokud nějaký je.
             group: parts.length > 1 ? parts[0] : null,
-        })
-    }
-
-    return out
+            dynamic: entry.dynamic,
+        }
+    })
 }
 
 // One warning per mismatch per process. A route in the configuration with no
@@ -163,6 +147,12 @@ const join = (routes, site) => {
 
     for (const page of site.pages) {
         if (found.has(page.route)) continue
+        // A `[segment]` route is not missing, it is not walkable: `walk` skips
+        // dynamic files deliberately, because a template cannot be previewed
+        // without being told which document to fill it with. Reporting it as an
+        // absent file would be a warning on every render for a page that is
+        // there — and would put a row in the navigator that opens nothing.
+        if (page.route.includes('[')) continue
         report(`cms.config.js popisuje route "${page.route}", ke které v src/pages není soubor.`)
         // Listed anyway, and flagged. Dropping it is how a typo in a route stays
         // invisible: the Studio would show a shorter list and nothing would say
@@ -188,18 +178,18 @@ let cached = null
  * grouped routes after the flat ones.
  *
  * @returns {{ path: string, label: string, group: string | null,
- *             configured: boolean, missing?: true }[]}
+ *             regenerates: boolean, configured: boolean, missing?: true }[]}
  */
 export const listSitePages = () => {
     if (cached && process.env.NODE_ENV === 'production') return cached
 
-    const pages = walk(PAGES_DIR, [], [])
+    const pages = collect(process.cwd())
 
     // Never answer with nothing. An empty navigator reads as "this tool is
     // broken"; the homepage alone reads as "that is all it found", which is at
     // least true and still leaves the preview working.
     const list = join(
-        pages.length ? pages : [{ path: '/', label: 'Úvodní stránka', group: null }],
+        pages.length ? pages : [{ path: '/', label: 'Úvodní stránka', group: null, regenerates: true }],
         site,
     )
 
@@ -214,3 +204,20 @@ export const listSitePages = () => {
     cached = list
     return list
 }
+
+/**
+ * The static routes a publish can regenerate — every walked page that declares
+ * `getStaticProps`, and nothing else.
+ *
+ * This is the "everywhere" of `@/cms/site/deps`: the patička is under every
+ * route, and which routes those are is a fact about `src/pages` rather than
+ * about the configuration, so it is answered here. The dynamic ones are not in
+ * it — they have no single address — and `server/revalidate.js` adds them from
+ * the documents they are built from.
+ *
+ * @returns {string[]}
+ */
+export const listRegeneratingRoutes = () =>
+    listSitePages()
+        .filter((entry) => entry.regenerates && !entry.missing)
+        .map((entry) => entry.path)

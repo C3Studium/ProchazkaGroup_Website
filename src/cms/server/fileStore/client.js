@@ -56,6 +56,39 @@ import { persist, tables } from './store.js'
 
 const now = () => new Date().toISOString()
 
+/**
+ * The next value of a `touch` column, and it is never the value it already has.
+ *
+ * `updated_at` stopped being decoration when `documents.update()` started using
+ * it as the version an optimistic write is checked against. A version that can
+ * repeat is not a version: two writes in the same millisecond would leave the
+ * column where it was, the second writer's compare-and-swap would match, and
+ * the first writer's work would be gone with nothing anywhere saying so — the
+ * exact silence the check exists to end.
+ *
+ * `Date.prototype.toISOString` renders milliseconds and this store completes a
+ * write in microseconds, so the collision is not theoretical: measured on 300
+ * concurrent patchField pairs against the previous line, 31 of them lost a
+ * field to it. With this, 0.
+ *
+ * The microsecond digits Postgres has and JavaScript does not are borrowed for
+ * the tie-break, which keeps the string in the shape a timestamptz round-trips
+ * to and keeps it sorting correctly — the Studio's default ordering reads this
+ * column. Postgres needs none of this: `now()` is transaction time at
+ * microsecond resolution, so two transactions have to begin inside one
+ * microsecond to collide.
+ */
+const nextTouch = (previous) => {
+    const next = now()
+    if (!previous || next > previous) return next
+    // `…:05.123Z` -> `…:05.123001Z`, and once more if that is taken too.
+    const base = String(previous).replace(/Z$/, '')
+    const [head, micro = '000'] = base.includes('.')
+        ? [base.slice(0, base.indexOf('.') + 4), base.slice(base.indexOf('.') + 4)]
+        : [`${base}.000`, '000']
+    return `${head}${String(Number(micro || 0) + 1).padStart(3, '0')}Z`
+}
+
 const clone = (value) => (value == null ? value : JSON.parse(JSON.stringify(value)))
 
 /* --------------------------------------------------------------- schema --- */
@@ -80,14 +113,25 @@ const DOCUMENT_ANON_GRANT = [
     'id', 'type', 'data', 'status', 'published_at', 'created_at', 'updated_at', 'archived_at',
 ]
 
-const MEDIA_COLUMNS = [
-    'id', 'bucket', 'path', 'url', 'mime', 'size_bytes', 'width', 'height', 'alt',
-    'created_at', 'updated_at', 'created_by',
+const REVISION_COLUMNS = [
+    'id', 'document_id', 'type', 'body', 'status', 'archived_at',
+    'changed_at', 'changed_by', 'reason', 'build_id',
 ]
 
-const MEDIA_ANON_GRANT = [
-    'id', 'bucket', 'path', 'url', 'mime', 'width', 'height', 'alt', 'created_at',
+const MEDIA_COLUMNS = [
+    'id', 'bucket', 'path', 'url', 'mime', 'size_bytes', 'width', 'height', 'alt',
+    'created_at', 'updated_at', 'created_by', 'archived_at',
 ]
+
+// migrations/0007 adds `archived_at` to the grant for the same reason 0003 added
+// it to cms_document's: a column outside the grant cannot be named in a WHERE
+// clause, so a public read that ever filters archived files out has to be able
+// to write the filter. Nothing reads cms_media as anon today.
+const MEDIA_ANON_GRANT = [
+    'id', 'bucket', 'path', 'url', 'mime', 'width', 'height', 'alt', 'created_at', 'archived_at',
+]
+
+const MEDIA_ARCHIVE_COLUMNS = ['media_id', 'uploaded_at', 'archived_at', 'first_published_at']
 
 const USER_COLUMNS = [
     'id', 'email', 'password_hash', 'name', 'role',
@@ -98,6 +142,13 @@ const SESSION_COLUMNS = [
     'id', 'user_id', 'token_hash', 'created_at', 'expires_at', 'revoked_at',
     'user_agent', 'ip_hash',
 ]
+
+const API_KEY_COLUMNS = [
+    'id', 'name', 'token_hash', 'created_at', 'created_by',
+    'last_used_at', 'revoked_at',
+]
+
+const SETTING_COLUMNS = ['key', 'value', 'updated_at', 'updated_by']
 
 // `lower(coalesce(data #>> '{}', '') || ' ' || coalesce(draft #>> '{}', ''))`.
 // JSON.stringify is not byte-identical to jsonb's own text rendering (Postgres
@@ -138,13 +189,86 @@ const SCHEMA = {
         ],
     },
 
+    // migrations/0007. Append-only from the application's side: `record()` in
+    // server/revisions.js inserts and nothing updates, which is why there is no
+    // `touch` column here — a revision that could be edited would not be a
+    // record of anything.
+    //
+    // No anon grant, and that is the whole access story rather than a detail:
+    // the table holds every body that was EVER published, including what
+    // somebody later withdrew (ARCHIVE.md, "Kdo tam smí"), so `anonGrant: []`
+    // is the same revoke cms_user and cms_session carry.
+    //
+    // A store written before this table existed simply has no key in the
+    // snapshot — `#rows()` creates the array on first use, so STORE_VERSION does
+    // not move and nobody's documents are reseeded to add a table that starts
+    // empty anyway.
+    cms_document_revision: {
+        columns: REVISION_COLUMNS,
+        anonGrant: [],
+        defaults: () => ({
+            id: randomUUID(),
+            body: {},
+            archived_at: null,
+            changed_at: now(),
+            changed_by: null,
+            build_id: null,
+        }),
+        unique: [],
+        checks: [
+            {
+                // The two column constraints from 0007, transcribed. `reason` is
+                // the transition's name and not free text; a typo in a caller
+                // must fail here rather than land a row the archive cannot
+                // explain.
+                name: 'cms_document_revision_status_check',
+                test: (row) => row.status === 'draft' || row.status === 'published',
+            },
+            {
+                name: 'cms_document_revision_reason_check',
+                test: (row) => [
+                    'publish', 'unpublish', 'archive', 'restore', 'reject', 'requeue',
+                ].includes(row.reason),
+            },
+        ],
+    },
+
     cms_media: {
         columns: MEDIA_COLUMNS,
         anonGrant: MEDIA_ANON_GRANT,
         anonRows: () => true,
         touch: 'updated_at',
-        defaults: () => ({ id: randomUUID(), alt: '', created_at: now(), updated_at: now() }),
+        defaults: () => ({
+            id: randomUUID(),
+            alt: '',
+            created_at: now(),
+            updated_at: now(),
+            // migrations/0007. NULL is "in the library"; media.js `archive()`
+            // is what sets it, and nothing sets it back except `restore()`.
+            archived_at: null,
+        }),
         unique: [{ columns: ['bucket', 'path'] }],
+        checks: [],
+    },
+
+    // migrations/0007. The dates the Archive's Media subpage needs and cms_media
+    // cannot answer — above all `first_published_at`, which is not a fact about
+    // the upload but about the first published revision that mentions it, and is
+    // therefore written by server/mediaArchive.js when a revision is recorded.
+    //
+    // `media_id` is the primary key, so there is no `id` default and `unique`
+    // carries what the column declaration carries in SQL — the same shape
+    // cms_setting has for the same reason.
+    //
+    // The cascade the migration declares (`on delete cascade` from cms_media) is
+    // NOT implemented here: this store cascades exactly one relationship and
+    // adding a second silently would hide the fact that the only caller,
+    // media.hardDelete(), clears these rows itself.
+    cms_media_archive: {
+        columns: MEDIA_ARCHIVE_COLUMNS,
+        anonGrant: [],
+        defaults: () => ({ uploaded_at: null, archived_at: null, first_published_at: null }),
+        unique: [{ columns: ['media_id'] }],
         checks: [],
     },
 
@@ -183,6 +307,51 @@ const SCHEMA = {
                 // stored the real token fails here instead of silently working.
                 name: 'cms_session_token_hash_is_digest',
                 test: (row) => SHA256_HEX.test(String(row.token_hash ?? '')),
+            },
+        ],
+    },
+
+    // migrations/0005. Same shape and the same tripwire as cms_session,
+    // because it is the same idea: a token this server issued, held only as a
+    // digest. A store written before this table existed simply has no key in
+    // the snapshot — `#rows()` below creates the array on first use, so the
+    // STORE_VERSION does not move and nobody's documents are reseeded to add a
+    // table that starts empty anyway.
+    cms_api_key: {
+        columns: API_KEY_COLUMNS,
+        anonGrant: [],
+        defaults: () => ({
+            id: randomUUID(),
+            created_at: now(),
+            last_used_at: null,
+            revoked_at: null,
+        }),
+        unique: [{ columns: ['token_hash'] }],
+        checks: [
+            {
+                name: 'cms_api_key_token_hash_is_digest',
+                test: (row) => SHA256_HEX.test(String(row.token_hash ?? '')),
+            },
+        ],
+    },
+
+    // migrations/0006. Owner-chosen configuration, as opposed to the
+    // environment facts settings.js reports. `key` is the primary key rather
+    // than a uuid, so there is no `id` default here and `unique` carries the
+    // constraint the column declaration carries in SQL. A store written before
+    // this table existed simply has no key in the snapshot — `#rows()` creates
+    // the array on first use, so STORE_VERSION does not move and nobody's
+    // documents are reseeded to add a table that starts empty.
+    cms_setting: {
+        columns: SETTING_COLUMNS,
+        anonGrant: [],
+        touch: 'updated_at',
+        defaults: () => ({ value: {}, updated_at: now(), updated_by: null }),
+        unique: [{ columns: ['key'] }],
+        checks: [
+            {
+                name: 'cms_setting_key_format',
+                test: (row) => /^[a-z][a-z0-9_.]{0,63}$/.test(String(row.key ?? '')),
             },
         ],
     },
@@ -629,7 +798,7 @@ class FileQuery {
                 // The BEFORE UPDATE trigger. `documents.update()` names only
                 // `draft` and `updated_by`; without this the Studio's default
                 // ordering — updated_at desc — would never move.
-                if (schema.touch) next[schema.touch] = now()
+                if (schema.touch) next[schema.touch] = nextTouch(row[schema.touch])
                 const problem = assertConstraints(this.table, rows, next)
                 if (problem) return { data: null, error: problem, count: null }
                 Object.assign(row, next)

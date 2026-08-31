@@ -61,6 +61,21 @@ const discoverStyles = () =>
 
 const isCssModule = (file) => /\.module\.(s?css)$/i.test(file)
 
+// The CMS owns its own responsive stops.
+//
+// `ensureShortcuts` below prepends the host's shortcut API to every stylesheet
+// it finds, and it re-prepends on every build — which is why removing that
+// import from a file by hand does not stay removed. That is right for the
+// site's own styles and wrong for src/cms, which is meant to be liftable into
+// another project: a directory whose files are rewritten by this repo's build
+// script cannot be copied anywhere. It declares its stops in
+// src/cms/styles/_viewport.scss instead, with the same values.
+//
+// Scoped to the shortcut injection only. Discovery still sees these files, and
+// the manifest still ignores them for the reason it ignores every CSS Module.
+const cmsRoot = path.join(root, "src", "cms")
+const ownsItsStyles = (file) => !path.relative(cmsRoot, file).startsWith("..")
+
 const shortcutPathFor = (file) => {
   const relativePath = toPosix(
     path.relative(path.dirname(file), path.join(systemDir, "_shortcuts.scss"))
@@ -173,15 +188,17 @@ async function main() {
   // the global Sass manifest removes Next.js' hashed isolation and lets generic
   // module names (for example `productChapter`) override live page components.
   const globalStyles = files.filter((file) => !isCssModule(file))
+  const managed = files.filter((file) => !ownsItsStyles(file))
   const shortcutChanges = (
-    await Promise.all(files.map((file) => ensureShortcuts(file)))
+    await Promise.all(managed.map((file) => ensureShortcuts(file)))
   ).filter(Boolean).length
   const manifestChanged = await regenerateManifest(globalStyles)
   const globalsChanged = await ensureGlobalsEntry()
 
   console.log(
     [
-      `Synced ${files.length} style files (${globalStyles.length} global emitters)`,
+      `Synced ${files.length} style files (${globalStyles.length} global emitters, `
+        + `${files.length - managed.length} owned by the CMS)`,
       `${shortcutChanges} shortcut path${
         shortcutChanges === 1 ? "" : "s"
       } updated`,

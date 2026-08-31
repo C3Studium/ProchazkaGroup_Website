@@ -21,7 +21,7 @@ function BooleanInput({ value, onChange, readOnly, title, layout }) {
  * five options, past which a radio group stops being scannable — and hands that
  * down as `ui.layout`. Re-deciding here would put the threshold in two places.
  */
-function SelectInput({ value, onChange, id, readOnly, choices = [], multiple, layout, placeholder }) {
+function SelectInput({ value, onChange, id, readOnly, choices = [], multiple, layout, placeholder, required }) {
   if (multiple) {
     const selected = Array.isArray(value) ? value : []
     return (
@@ -54,7 +54,14 @@ function SelectInput({ value, onChange, id, readOnly, choices = [], multiple, la
             className={`${styles.choice} ${value === choice.value ? styles.choiceActive : ""}`}
             // Clicking the active option clears it, which is the only way to
             // empty an optional select without a separate "×" control.
-            onClick={() => onChange(value === choice.value ? null : choice.value)}
+            //
+            // A REQUIRED field is the exception. There the same click emptied
+            // the only valid answer and nothing said so until publish refused
+            // the document — a dead end reached by clicking what was already
+            // right. Required fields keep their value.
+            onClick={() =>
+              onChange(value === choice.value ? (required ? value : null) : choice.value)
+            }
           >
             {choice.title}
           </button>
@@ -70,7 +77,8 @@ function SelectInput({ value, onChange, id, readOnly, choices = [], multiple, la
       onChange={onChange}
       options={choices}
       disabled={readOnly}
-      placeholder={placeholder || "— vyberte —"}
+      // Prázdná volba jen tam, kde je prázdno platná odpověď.
+      placeholder={required ? placeholder : placeholder || "— vyberte —"}
     />
   )
 }

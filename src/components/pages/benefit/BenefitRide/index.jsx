@@ -12,6 +12,7 @@ import {
 } from "framer-motion";
 
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
+import { editable } from "@/cms/edit";
 
 // A sprung number as a vh length. Tiny, but it keeps the select-between-raw-
 // and-sprung pattern readable where it is used.
@@ -37,6 +38,27 @@ const useTransformTemplateVh = (mv) => useTransform(mv, (v) => `${v.toFixed(3)}v
 // full colour and the detail line is given room, nothing resizes.
 
 // ── the data ────────────────────────────────────────────────────────────
+
+// The three strings on this section that are words rather than arithmetic.
+// They come from the CMS over `benefit-program.cesta` (see cms.config.js) and
+// fall back to what is written here, so an empty CMS renders exactly this
+// section.
+//
+// Everything else on screen is COMPUTED and is deliberately absent from the
+// CMS: the heading is "Cesta za" plus the sum of TIERS below, the destination's
+// figure is that same sum, each level marker is "Úroveň" plus its own number,
+// and the invitation under the heading ends in a different sentence per input
+// device. Storing any of them would be storing a value the page recomputes on
+// the next render — an editor would change it, publish, and watch it change
+// back. They stay where the arithmetic is.
+const COPY = {
+    ord: "03",
+    destLabel: "Celkem v poukazech",
+    destNote: "Poukazy, ne hotovost. Vyplácí se po uzavření smlouvy doporučeným klientem.",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
 
 const TIERS = [
     { amount: 500, brands: "Kaufland nebo Shell" },
@@ -454,7 +476,7 @@ function RulerTick({ ride, at }) {
 
 const RULER = Array.from({ length: 30 }, (_, i) => (i + 0.5) / 30);
 
-export default function BenefitRide() {
+export default function BenefitRide({ copy = {} }) {
     const sectionRef = useRef(null);
 
     // Both preferences read the hydration-safe way: state that starts as the
@@ -603,15 +625,22 @@ export default function BenefitRide() {
                 whileInView="shown"
                 viewport={ENTERS}
             >
-                <motion.span className="BenefitRide__dest__label" variants={RISE}>
-                    Celkem v poukazech
+                <motion.span
+                    className="BenefitRide__dest__label"
+                    variants={RISE}
+                    {...editable(copy.docId, "items.1.label", "text")}
+                >
+                    {say(copy.destLabel, COPY.destLabel)}
                 </motion.span>
                 <motion.span className="BenefitRide__dest__value" variants={RISE}>
                     {czk(TOTAL)}
                 </motion.span>
-                <motion.span className="BenefitRide__dest__note" variants={RISE}>
-                    Poukazy, ne hotovost. Vyplácí se po uzavření smlouvy
-                    doporučeným klientem.
+                <motion.span
+                    className="BenefitRide__dest__note"
+                    variants={RISE}
+                    {...editable(copy.docId, "items.2.label", "text")}
+                >
+                    {say(copy.destNote, COPY.destNote)}
                 </motion.span>
             </motion.div>
         </div>
@@ -660,8 +689,12 @@ export default function BenefitRide() {
                     whileInView="shown"
                     viewport={ENTERS}
                 >
-                    <motion.p className="BenefitRide__eyebrow" variants={RISE}>
-                        03
+                    <motion.p
+                        className="BenefitRide__eyebrow"
+                        variants={RISE}
+                        {...editable(copy.docId, "items.0.label", "text")}
+                    >
+                        {say(copy.ord, COPY.ord)}
                     </motion.p>
                     <motion.h2 className="BenefitRide__title" id="BenefitRide__title" variants={RISE}>
                         Cesta za {czk(TOTAL)}

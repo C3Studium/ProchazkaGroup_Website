@@ -27,11 +27,11 @@ export default function StatsView() {
   const { user } = useAuth()
   const sources = listStatsSources()
   const [sourceId, setSourceId] = useState(sources[0]?.id || null)
-  const [range, setRange] = useState("7")
+  const [range, setRange] = useState("1")
 
   const source = sources.find((entry) => entry.id === sourceId) || sources[0] || null
   const ranges = source?.ranges || DEFAULT_RANGES
-  const days = ranges.find((entry) => entry.id === range)?.days || 7
+  const days = ranges.find((entry) => entry.id === range)?.days || 1
 
   useEffect(() => {
     // Admin sessions should not pollute the site's own behaviour data.
@@ -84,8 +84,112 @@ export default function StatsView() {
         ) : (
           <Panel payload={data} title={source.title} description={source.description} />
         )}
+
+        {/* Skóre stránky vidí jen správce — je to hodnocení práce vývojáře,
+            ne obsahu, a owner ani člen s ním nic neudělají. Server to hlídá
+            taky; tohle jen neukazuje tlačítko, které by vrátilo 403. */}
+        {user?.role === "admin" ? <PageSpeedPanel port={port} /> : null}
       </ViewBody>
     </>
+  )
+}
+
+/**
+ * Skóre stránky z Lighthouse — výkon, SEO, přístupnost, správné postupy.
+ *
+ * Měří se na tlačítko, ne při otevření obrazovky: Google stránku doopravdy
+ * načte a odsimuluje, což trvá deset až třicet sekund. Spouštět to při každém
+ * zobrazení by z obrazovky udělalo čekárnu.
+ */
+function PageSpeedPanel({ port }) {
+  const [strategy, setStrategy] = useState("mobile")
+  // Adresa je pole, ne pevná hodnota z prostředí. Při vývoji je NEXT_PUBLIC_SITE_URL
+  // localhost, na který Google nedosáhne — a bez možnosti ji přepsat by tlačítko
+  // na vývojářském stroji nešlo použít vůbec.
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL || ""
+  const [url, setUrl] = useState(/localhost|127\.0\.0\.1/.test(fromEnv) ? "" : fromEnv)
+  const [state, setState] = useState({ status: "idle", data: null, error: null })
+
+  const measure = async () => {
+    setState({ status: "loading", data: null, error: null })
+    try {
+      setState({ status: "done", data: await port.stats.pagespeed({ strategy, url: url || undefined }), error: null })
+    } catch (error) {
+      setState({ status: "error", data: null, error })
+    }
+  }
+
+  const tone = (value) => (value == null ? "" : value >= 90 ? styles.scoreGood : value >= 50 ? styles.scoreOk : styles.scoreBad)
+
+  return (
+    <div className={styles.panel}>
+      <SectionHead
+        title="Skóre stránky"
+        hint="Jak je na tom web sám o sobě — rychlost v prohlížeči a SEO. Vidí jen správce."
+      />
+
+      <div className={styles.tiles} style={{ marginBottom: "0.75rem" }}>
+        <Segmented
+          options={[{ id: "mobile", title: "Mobil" }, { id: "desktop", title: "Počítač" }]}
+          value={strategy}
+          onChange={setStrategy}
+        />
+        <input
+          className={styles.urlInput}
+          type="url"
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          placeholder="https://vasweb.cz"
+          aria-label="Adresa, která se změří"
+        />
+        <Button variant="secondary" icon="refresh" onClick={measure} disabled={state.status === "loading" || !url}>
+          {state.status === "loading" ? "Měří se…" : "Změřit"}
+        </Button>
+      </div>
+
+      {state.status === "loading" ? (
+        <div className={styles.loading}>
+          <Spinner size={20} />
+        </div>
+      ) : state.status === "error" ? (
+        // Hláška ze serveru, ne obecná: ErrorState mapuje kód na ustálený text,
+        // což je správně u formulářů a špatně tady — „zkontrolujte vyplněné
+        // údaje" neřekne, že Google nedosáhne na localhost.
+        <ErrorState
+          compact
+          error={{ ...state.error, code: undefined, message: state.error?.message }}
+          onRetry={measure}
+        />
+      ) : state.data ? (
+        <>
+          <div className={styles.tiles}>
+            {state.data.scores.map((entry) => (
+              <div key={entry.id} className={styles.tile}>
+                <span className={styles.tileLabel}>{entry.label}</span>
+                <span className={`${styles.tileValue} ${tone(entry.value)}`}>
+                  {entry.value == null ? "—" : entry.value}
+                  <span className={styles.tileUnit}>/ 100</span>
+                </span>
+              </div>
+            ))}
+          </div>
+          {state.data.vitals?.length ? (
+            <table className={styles.table}>
+              <tbody>
+                {state.data.vitals.map((vital) => (
+                  <tr key={vital.id}>
+                    <td className={styles.cellLabel}>{vital.label}</td>
+                    <td className={styles.cellValue}>{vital.value}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : null}
+        </>
+      ) : (
+        <p className={styles.note}>Měří Google na svém stroji a u pomalé stránky to trvá i dvě minuty, tak běží až na vyžádání.</p>
+      )}
+    </div>
   )
 }
 
@@ -110,7 +214,12 @@ function TagStatus() {
 
 function Panel({ payload, title, description }) {
   const tiles = payload?.tiles || []
-  const breakdowns = payload?.breakdowns || []
+  const tabs = payload?.tabs || payload?.breakdowns || []
+  const [active, setActive] = useState(null)
+
+  // Vybraná záložka se drží jménem, ne pořadím: rozpad, který zrovna nemá data,
+  // ze seznamu vypadne a index by pak ukazoval na jiný.
+  const current = tabs.find((tab) => tab.id === active) || tabs[0] || null
 
   return (
     <div className={styles.panel}>
@@ -125,35 +234,46 @@ function Panel({ payload, title, description }) {
               {tile.unit ? <span className={styles.tileUnit}>{tile.unit}</span> : null}
             </span>
             <span className={styles.tileFoot}>
-              {typeof tile.delta === "number" ? (
-                <span className={tile.delta >= 0 ? styles.deltaUp : styles.deltaDown}>
-                  <Icon name={tile.delta >= 0 ? "chevronUp" : "chevronDown"} size={11} />
-                  {Math.abs(tile.delta)} %
-                </span>
-              ) : null}
               {tile.hint ? <span className={styles.tileHint}>{tile.hint}</span> : null}
             </span>
           </div>
         ))}
       </div>
 
-      {breakdowns.map((breakdown) => (
-        <section key={breakdown.id} className={styles.breakdown}>
-          <SectionHead title={breakdown.title} hint={breakdown.note} />
-          <table className={styles.table}>
-            <tbody>
-              {breakdown.rows.map((row, index) => (
-                <tr key={`${row.label}-${index}`}>
-                  <td className={styles.cellLabel} title={row.label}>
-                    {row.label}
-                  </td>
-                  <td className={styles.cellValue}>{typeof row.value === "number" ? formatNumber(row.value) : row.value}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {payload && payload.configured === false ? (
+        <EmptyState
+          compact
+          icon="chart"
+          title="Statistiky nejsou připojené"
+          description={payload.note}
+        />
+      ) : null}
+
+      {tabs.length ? (
+        <section className={styles.breakdown}>
+          <Segmented
+            value={current?.id}
+            onChange={setActive}
+            options={tabs.map((tab) => ({ id: tab.id, title: tab.title }))}
+          />
+          {current?.rows?.length ? (
+            <table className={styles.table}>
+              <tbody>
+                {current.rows.map((row, index) => (
+                  <tr key={`${row.label}-${index}`}>
+                    <td className={styles.cellLabel} title={row.label}>{row.label}</td>
+                    <td className={styles.cellValue}>
+                      {typeof row.value === "number" ? formatNumber(row.value) : row.value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p className={styles.note}>{current?.empty || "Zatím bez dat."}</p>
+          )}
         </section>
-      ))}
+      ) : null}
 
       {payload?.note ? <p className={styles.note}>{payload.note}</p> : null}
     </div>

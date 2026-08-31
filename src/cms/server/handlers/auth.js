@@ -13,6 +13,7 @@
 // hides the screen from editors, but that is a courtesy — this is the control.
 
 import { changeOwnPassword, getSessionUser, requireOwner, requireUser, signIn, signOut } from '../auth.js'
+import { sendInvite } from '../mail.js'
 import { createUser, deleteUser, listUsers, setUserDisabled, updateUserRole } from '../users.js'
 import { invalid } from '../errors.js'
 import { methodNotAllowed, readJson, sendJson } from './http.js'
@@ -31,10 +32,29 @@ const handleUsers = async (req, res, segments) => {
                 role: body.role,
                 password: body.password,
             })
+
+            /**
+             * Pozvánka — po založení, a nikdy proti němu.
+             *
+             * Účet už existuje a heslo už bylo vygenerováno, takže selhání pošty
+             * nesmí vrátit chybu: správce by ji přečetl jako „nezaložilo se to"
+             * a založil by účet znovu. `sendInvite` proto nevyhazuje a jen
+             * hlásí, jak dopadl — a ten výsledek jde do odpovědi, aby rozhraní
+             * mohlo říct nahlas, jestli má správce heslo předat sám.
+             *
+             * Bez nastaveného odesílatele se neposílá nic a nic se nerozbije.
+             * Viz server/mail.js.
+             */
+            const invite = await sendInvite({
+                to: result.user?.email,
+                name: result.user?.name,
+                role: result.user?.role,
+                invitedBy: actor?.name || '',
+            })
             // 201 with the generated password in the body. It is in a no-store
             // response over TLS to the owner who asked for it, and this is the
             // only time it exists outside a hash.
-            return sendJson(res, 201, result)
+            return sendJson(res, 201, { ...result, invite })
         }
         return methodNotAllowed(res, ['GET', 'POST'])
     }

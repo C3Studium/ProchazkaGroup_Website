@@ -1,28 +1,24 @@
-// This project's content types.
+// Every content type this installation knows.
 //
-// Importing a schema module registers it with the core (defineType has that
-// side effect), so importing this barrel once — from the Studio's entry point —
-// is what makes every type known to getType/listTypes. The array is exported
-// as well for anything that wants the set without relying on registration
-// order.
+// This used to be the list itself — seven imports and an array — which meant the
+// library carried one client's document types inside it. The list now lives in
+// cms.types.mjs at the repo root, where a site can change it without editing the
+// CMS, and this file is what the two registration points import.
 //
-// Adding a content type is a file here plus a line below. No migration: every
-// document is a row of JSONB in cms_document.
+// Importing it still has the side effect they rely on: reaching a type module
+// evaluates it, and evaluating it calls `defineType`, which registers. So a
+// single import of this barrel is what makes every type known to
+// `getType`/`listTypes`, exactly as before.
+//
+// What is left in this directory are the types that are mechanisms rather than
+// content — `siteCopy`, `review`, and the mark encoding in marks.js — because
+// the config system and the moderation queue are written against them.
 
-import assistant from './assistant.js'
-import consultant from './consultant.js'
-import offer from './offer.js'
-import partner from './partner.js'
-import qna from './qna.js'
-import review from './review.js'
-import siteCopy from './siteCopy.js'
+import { types } from '@/cms/site/types'
 
-export const schemas = [siteCopy, partner, consultant, assistant, review, offer, qna]
+export const schemas = types
 
-// Order matters only for the Studio's sidebar; it is the order an editor is
-// most likely to want, not alphabetical.
+// Order matters only for the Studio's sidebar; cms.types.mjs sets it.
 export const schemaNames = schemas.map((schema) => schema.name)
-
-export { siteCopy, partner, consultant, assistant, review, offer, qna }
 
 export default schemas

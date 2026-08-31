@@ -1,11 +1,13 @@
 import { useState } from "react"
 
 import { usePort } from "@/cms/studio/context/StudioProvider"
+import { isCroppableImage, resolveCropTarget } from "@/cms/studio/media/cropTarget"
 import { useAsync } from "@/cms/studio/hooks/useAsync"
 import { Button } from "@/cms/studio/ui/controls"
 import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
 
 import { bodyOfDoc, valueAt } from "./assets"
+import CropEditor from "./CropEditor"
 import MediaModule from "./MediaModule"
 import styles from "./sheet"
 
@@ -56,6 +58,53 @@ export default function ImageModule({ docId, field, onPick, onAlt, onRemove, onC
   const [alt, setAlt] = useState(null)
   const [confirming, setConfirming] = useState(false)
 
+  // The crop editor works on the LIBRARY row, not on the value stored in the
+  // document. The stored value was written when the picture was picked and
+  // knows nothing about a crop applied since; opening on it would treat a crop
+  // as an original and quietly crop the crop.
+  const [cropping, setCropping] = useState(null)
+  const [cropBusy, setCropBusy] = useState(false)
+  const [cropError, setCropError] = useState(null)
+
+  const openCrop = async (value) => {
+    setCropError(null)
+    try {
+      // The stored value may be a bare path or a legacy object with no id —
+      // 156 of 208 values in this store are one of those two. See
+      // studio/media/cropTarget.js.
+      const target = await resolveCropTarget(port, value)
+      if (!target) throw new Error("Tenhle soubor není v knihovně médií, takže ho nejde oříznout.")
+      setCropping(await port.media.get(target.id))
+    } catch (problem) {
+      setCropError(problem)
+    }
+  }
+
+  /**
+   * Apply, then hand the new asset to the field.
+   *
+   * Two writes, and they are not the same write. `media.crop` re-frames the
+   * library row — one row, same id, no second entry. `onPick` is the overlay's
+   * ordinary save path, and it is what makes THIS field show the new framing;
+   * without it the row would change and the page would go on rendering the URL
+   * it was saved with. Other places using the picture keep their framing until
+   * someone re-picks there, which is the same rule that keeps an old revision
+   * resolving to the picture it was published with.
+   */
+  const commitCrop = async (rect) => {
+    setCropBusy(true)
+    setCropError(null)
+    try {
+      const updated = await port.media.crop(cropping.id, rect)
+      setCropping(null)
+      onPick(updated)
+    } catch (problem) {
+      setCropError(problem)
+    } finally {
+      setCropBusy(false)
+    }
+  }
+
   const { data, error, loading, reload } = useAsync(async () => {
     const doc = await port.get({ id: docId })
     const value = valueAt(bodyOfDoc(doc), field)
@@ -74,6 +123,21 @@ export default function ImageModule({ docId, field, onPick, onAlt, onRemove, onC
 
   const current = data
   const altDirty = current ? alt !== (current.alt || "") : false
+
+  if (cropping) {
+    return (
+      <>
+        {cropError ? <ErrorState error={cropError} onRetry={() => setCropError(null)} /> : null}
+        <CropEditor
+          asset={cropping}
+          busy={cropBusy}
+          onCancel={() => setCropping(null)}
+          onApply={commitCrop}
+          onReset={() => commitCrop(null)}
+        />
+      </>
+    )
+  }
 
   return (
     <div className={styles.setPane}>
@@ -115,6 +179,13 @@ export default function ImageModule({ docId, field, onPick, onAlt, onRemove, onC
             <Button variant="ghost" size="sm" disabled={!altDirty} onClick={() => onAlt(alt)}>
               Uložit popis
             </Button>
+            {/* Only for a raster the server can decode. A PDF in an image field
+                is not something to offer a crop handle on. */}
+            {isCroppableImage(current) ? (
+              <Button variant="ghost" size="sm" onClick={() => openCrop(current)}>
+                {current.crop ? "Upravit ořez" : "Oříznout"}
+              </Button>
+            ) : null}
             <span className={styles.grow} />
             {/* Two steps, because this one empties the field and the picture is
                 the only thing on screen saying which field that is. */}

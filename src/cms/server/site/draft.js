@@ -29,6 +29,9 @@
 import { createDocumentRepository } from '../documents.js'
 import { getAdminClient } from '../supabaseAdmin.js'
 import { MAX_PER_PAGE } from '../query.js'
+// The predicate and the ordering are shared with the archive reader, which has
+// the same problem for the mirror-image reason — see ./bodies.js.
+import { matchesBody, sortBodies } from './bodies.js'
 import { DOCUMENT_ID } from './read.js'
 
 let repository = null
@@ -55,70 +58,6 @@ const report = (type, error) => {
 // Contract 3, one line: the editor's body is the draft if there is one, and the
 // last published body otherwise.
 const editableBody = (row) => row?.draft ?? row?.data ?? null
-
-/**
- * Read one value out of a body by the dotted path `content.js` uses in its
- * filters and sorts — `data.kind`, `data.order`. The `data.` head names the
- * document body in PostgREST terms and is stripped here, because by this point
- * the body in hand may have come from `draft` instead.
- */
-const valueAt = (body, field) => {
-    const segments = String(field).split('.')
-    const path = segments[0] === 'data' || segments[0] === 'draft' ? segments.slice(1) : segments
-    return path.reduce((node, key) => (node == null ? undefined : node[key]), body)
-}
-
-/**
- * Why filtering and sorting happen here rather than in the query.
- *
- * `content.js` filters on `data.kind`, `data.approved`, `data.page` — paths into
- * the *published* body. Sent to PostgREST unchanged they would ask the database
- * about `data->>kind` on a row whose kind an editor has just changed in `draft`,
- * and a partner switched from "local" to "financial" this morning would be
- * filtered by what it used to be. The whole point of the preview is to answer
- * "what does this look like with my edits", so the predicate has to run against
- * the same body the page will render.
- *
- * Deliberately narrow: bare-value equality only, which is every filter the site
- * layer actually passes. Anything richer is not silently ignored — it throws,
- * and the caller's try/catch turns it into an empty section plus a warning,
- * rather than a preview that quietly shows the wrong set.
- */
-const matches = (body, filters) =>
-    Object.entries(filters || {}).every(([field, expected]) => {
-        if (expected === undefined) return true
-        if (expected !== null && typeof expected === 'object') {
-            throw new Error(
-                `Filtr "${field}" používá operátor, který náhled neumí vyhodnotit nad rozpracovaným obsahem`
-            )
-        }
-        const actual = valueAt(body, field)
-        // Loose on purpose, and only here: `data.approved` is compared against
-        // `true` while a hand-written document may hold the string "true".
-        // content.js re-asserts the boolean afterwards either way.
-        return actual === expected || String(actual) === String(expected)
-    })
-
-const compare = (left, right, direction) => {
-    const sign = direction === 'desc' ? -1 : 1
-    if (left == null && right == null) return 0
-    if (left == null) return 1
-    if (right == null) return -1
-    if (typeof left === 'number' && typeof right === 'number') return (left - right) * sign
-    return String(left).localeCompare(String(right), 'cs') * sign
-}
-
-const sortBodies = (bodies, sort) => {
-    const entries = (Array.isArray(sort) ? sort : sort ? [sort] : []).filter(Boolean)
-    if (!entries.length) return bodies
-    return [...bodies].sort((a, b) => {
-        for (const { field, direction } of entries) {
-            const result = compare(valueAt(a, field), valueAt(b, field), direction)
-            if (result !== 0) return result
-        }
-        return 0
-    })
-}
 
 /**
  * The draft-mode counterpart of `readPublished`. Same signature, same promise:
@@ -154,7 +93,7 @@ export const readEditable = async ({ type, sort, filters, perPage = 50 } = {}) =
             // like it had one field.
             .filter((entry) => Object.keys(entry.body).length > 0)
             .map((entry) => ({ ...entry.body, [DOCUMENT_ID]: entry.id }))
-            .filter((body) => matches(body, filters))
+            .filter((body) => matchesBody(body, filters))
         return sortBodies(bodies, sort).slice(0, perPage)
     } catch (error) {
         report(type, error)

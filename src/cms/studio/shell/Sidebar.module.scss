@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 /* The rail is darker than the workspace so the light falls on the content. It
@@ -317,11 +316,101 @@
   }
 }
 
-.sidebar.collapsed {
+/* `:where` so the class costs nothing. The rail's rules land on `.sidebar .item`
+   either way, and the strip below has to be able to override them from a plain
+   `.sidebar .item` of its own — which a `.sidebar.collapsed .item` would outweigh
+   for anyone who happened to collapse the rail on a desktop before picking up a
+   phone. */
+.sidebar:where(.collapsed) {
   @include rail;
 }
 
-@media (max-width: 900px) {
+/* The rail again, laid on its side: a strip across the top of the workspace.
+   On a phone held upright the 60px rail is 15% of the screen, and the screen is
+   the review the editor is trying to read. Height is the cheaper axis here —
+   the workspace scrolls vertically anyway — so the navigation takes 52px of it
+   and gives the width back.
+
+   It stays a `<nav>` in the same place in the document, so nothing about the
+   reading or the focus order changes; only the axis does. A landscape phone
+   keeps the vertical rail, because there the scarce axis is the other one. */
+@mixin strip {
+  flex-direction: row;
+  align-items: stretch;
+  width: auto;
+  height: 52px;
+  border-right: 0;
+  border-bottom: 1px solid var(--st-line);
+
+  .head {
+    flex-direction: row;
+    justify-content: center;
+    padding: 0 var(--st-s3);
+  }
+
+  .scroll {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    min-width: 0;
+    padding-bottom: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    /* The bar is 52px tall and a horizontal scrollbar is 10 of them. The strip
+       scrolls by drag on the only devices it appears on. */
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  .group {
+    flex-direction: row;
+  }
+
+  /* 44px square. The vertical rail's rows are 34px tall, which is fine under a
+     mouse and under the minimum for a thumb. */
+  .item {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* The rail turns the group heading into a horizontal hairline between groups.
+     Turned with everything else, it is a vertical one. */
+  .groupLabel {
+    width: 1px;
+    height: 22px;
+    margin: 0 var(--st-s2);
+    align-self: center;
+  }
+
+  .footer {
+    display: flex;
+    align-items: center;
+    gap: var(--st-s1);
+    padding: 0 var(--st-s2);
+    border-top: 0;
+    border-left: 1px solid var(--st-line);
+  }
+
+  .user {
+    flex-direction: row;
+  }
+
+  /* `rail` above has already dropped the label to `font-size: 0`, which leaves
+     the icon and its 7px gap — a 27×12 target at the end of the bar. Square it
+     off to the same 44px the nav rows get; it is the only control in the strip
+     that was not already one. */
+  .siteLink {
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    padding: 0;
+  }
+}
+
+@include t.compact {
   .sidebar {
     @include rail;
   }
@@ -330,5 +419,13 @@
      sets it stops claiming it can. */
   .collapseToggle {
     display: none;
+  }
+}
+
+/* After the rail, never before it: both are one class deep and both are true on
+   a phone held upright, so this only wins on source order. */
+@include t.stacked {
+  .sidebar {
+    @include strip;
   }
 }

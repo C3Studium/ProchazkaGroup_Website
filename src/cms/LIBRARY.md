@@ -22,9 +22,57 @@ Measured, not estimated:
 
 So this is not a rewrite. It is one new layer, and the deletion of three.
 
+## The boundary — what `src/cms` is allowed to know
+
+Two seams, both files the SITE owns, both in `src/lib`:
+
+| file | what it declares |
+|---|---|
+| `src/lib/cms.config.js` | the pages — routes, the documents each holds, where fields land |
+| `src/lib/cms.types.mjs` | the content types this installation has, and their Studio order |
+
+Everything else under `src/cms` reaches them through exactly two modules —
+`site/config.js` and `site/types.js` — and nothing else in the library imports a
+path outside itself. That is checkable in one line, and worth checking after any
+change here:
+
+```bash
+grep -rnE "from ['"](\.\./){3,}" src/cms --include='*.js' --include='*.jsx'
+```
+
+Three answers is correct: `config.js` twice, `types.js` once. A fourth means the
+library has grown a dependency on this particular site.
+
+**Styles are part of the boundary.** `scripts/sync-styles.js` prepends the
+host's shortcut API to every stylesheet it manages and re-prepends on every
+build — so removing that import by hand does not stay removed. It skips
+`src/cms` (`ownsItsStyles`), and the library declares its own stops in
+`styles/_viewport.scss` with the same values the site uses. A directory whose
+files are rewritten by the host's build script cannot be lifted anywhere.
+
+**Which types are the library's own.** `siteCopy`, `review` and the mark
+encoding in `marks.js` stay in `schemas/`, because they are mechanisms rather
+than content: the config system is written against the first, the moderation
+queue against the second. The five that describe this business live in
+`src/content/types/`. When library code needs something only a site can answer —
+what a consultant's display name is, which type a review is about — it asks
+`site/types.js` (`displayNameOf`, `reviewSubjectType`) rather than importing a
+file that belongs to one client.
+
+**What is still not liftable**, measured after the two changes above:
+
+- the Studio's UI is Czech in 79 files, with no dictionary
+- 28 files assume the Pages Router (`getStaticProps`, `setPreviewData`,
+  `res.revalidate`)
+- there is no package boundary — `@/cms` is a `jsconfig.json` path in the host,
+  so installing it today means copying the directory
+- nothing here has yet run against a real Supabase; the store is the file-backed
+  dev one
+
+
 ## The config
 
-One file, `cms.config.js`, at the repo root. It declares pages, the blocks each
+One file, `src/lib/cms.config.js`. It declares pages, the blocks each
 page holds, and what each block's fields are. Everything else is derived.
 
 ```js

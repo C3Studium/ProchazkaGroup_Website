@@ -1,6 +1,12 @@
 // The offer, as one chain of blocks read downwards. The words are the old
 // design's own — short, because this part of the page is a list of what we do
 // and not an essay about it.
+//
+// This is also the FALLBACK for `nabidka.blok.*`: one CMS block per rung, paired
+// to this list by position, so a rung the CMS does not hold renders exactly what
+// is written here. `kind`, `side`, `photo` and `position` never come from the
+// CMS — they are the arrangement, and `PLAN` in ./index.jsx is written against
+// these indices, so how many rungs there are is a code change.
 
 const WALLET = { photo: "/assets/backgrounds/wallet_2000.webp", position: "center" };
 const DESK = { photo: "/assets/backgrounds/deskWork_2000.webp", position: "center 42%" };

@@ -28,9 +28,10 @@
 
 import { GLOBAL_COPY_KEYS } from '@/cms/visualEditing'
 
+// One place decides which of the three readers answers a call — published,
+// draft or a moment in the archive. See ./archive.js.
+import { readerFor, viewOf } from './archive.js'
 import { getAssistant, getSiteCopy } from './content.js'
-import { readEditable } from './draft.js'
-import { readPublished } from './read.js'
 
 export const FOOTER_KEY = GLOBAL_COPY_KEYS.footer
 export const GLOBAL_KEYS = GLOBAL_COPY_KEYS
@@ -96,11 +97,12 @@ export const CONTACT_LINES = Object.freeze({
 /**
  * The patička's copy, or an empty shape.
  *
- * Called by every page's `getStaticProps`. `draft` is the caller's switch on
- * exactly the terms `homepage.js` sets out: the public build calls it with no
- * arguments and therefore cannot reach a draft or carry a document id.
+ * Called by every page's `getStaticProps`. `draft` and `at` are the caller's
+ * switches on exactly the terms ./page.js sets out: the public build calls it
+ * with no arguments and therefore cannot reach a draft, an old version, or carry
+ * a document id.
  *
- * @param {{ draft?: boolean }} [options]
+ * @param {{ draft?: boolean, at?: string|null }} [options]
  */
 // Spread-or-nothing, exactly as aboutUs.js and homepage.js do it: the id is only
 // ever attached by the draft reader, so the public page cannot carry one.
@@ -116,8 +118,8 @@ const linkAt = (block, index) => {
     return { text: item?.label || '', href: item?.value || '' }
 }
 
-export const getFooterContent = async ({ draft = false } = {}) => {
-    const read = draft ? readEditable : readPublished
+export const getFooterContent = async ({ draft = false, at = null } = {}) => {
+    const read = readerFor({ draft, at })
     const copy = await getSiteCopy({ page: 'global', read })
     const block = copy[FOOTER_KEY] || null
     const claim = copy[GLOBAL_KEYS.footerClaim] || null
@@ -167,10 +169,10 @@ export const getFooterContent = async ({ draft = false } = {}) => {
  * (`assistant`) and opens as her own form — see `getAssistant` in ./content.js
  * and the `editableDoc` call in the component.
  *
- * @param {{ draft?: boolean }} [options]
+ * @param {{ draft?: boolean, at?: string|null }} [options]
  */
-export const getContactContent = async ({ draft = false } = {}) => {
-    const read = draft ? readEditable : readPublished
+export const getContactContent = async ({ draft = false, at = null } = {}) => {
+    const read = readerFor({ draft, at })
     const copy = await getSiteCopy({ page: 'global', read })
     const block = copy[GLOBAL_KEYS.contact] || null
 
@@ -213,7 +215,10 @@ const REVALIDATE_SECONDS = 600
  * alongside its own reader — see /o-nas.
  */
 export const footerStaticProps = async (context) => {
-    const draft = Boolean(context?.draftMode)
+    // One call, three readers. `viewOf` turns Next's preview cookie into either
+    // draft mode or an archived moment, and a request carrying neither — every
+    // public request — gets the published site. See ./archive.js.
+    const view = viewOf(context)
     // Three things travel with every page rather than one now: the patička, the
     // contact sheet's copy and the person it is addressed to. The sheet is
     // opened from the navigation and the navigation is mounted in _app — it has
@@ -221,9 +226,9 @@ export const footerStaticProps = async (context) => {
     // getStaticProps has to call all three alongside its own reader; see /o-nas
     // and /recenze.
     const [footer, contact, assistant] = await Promise.all([
-        getFooterContent({ draft }),
-        getContactContent({ draft }),
-        getAssistant({ read: draft ? readEditable : readPublished }),
+        getFooterContent(view),
+        getContactContent(view),
+        getAssistant({ read: readerFor(view) }),
     ])
     return { props: { footer, contact, assistant }, revalidate: REVALIDATE_SECONDS }
 }

@@ -9,13 +9,13 @@ import Divergence from "@/components/pages/nabidka/Divergence";
 import ReviewDrift from "@/components/pages/nabidka/ReviewDrift";
 import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
 import {
-    getApprovedReviews,
     getAssistant,
     getContactContent,
     getFooterContent,
     getHomepageContent,
-    readEditable,
-    readPublished,
+    getPageContent,
+    readerFor,
+    viewOf,
 } from "@/cms/server/site";
 
 // Not /nabidky — that route is the partner discounts page and has been for as
@@ -32,22 +32,37 @@ import {
 const REVALIDATE_SECONDS = 600;
 
 export async function getStaticProps(context) {
-    const draft = Boolean(context?.draftMode);
-    const read = draft ? readEditable : readPublished;
+    // One call, three readers: published, draft, or the site as it stood at a
+    // chosen moment. See @/cms/server/site/archive.js.
+    const view = viewOf(context);
+    const read = readerFor(view);
 
-    // The advisor block at the foot of this page is the homepage's own, words
-    // and consultants and all — read from the same place, so the two cannot
-    // come to say different things.
-    const [reviews, home, footer, contact, assistant] = await Promise.all([
-        getApprovedReviews({ limit: 40 }),
-        getHomepageContent(),
-        getFooterContent({ draft }),
-        getContactContent({ draft }),
+    // This page's own blocks AND the wall of reviews, in one round trip, from
+    // the entry `cms.config.js` already carried for this route — the `reviews`
+    // source it declared there is now read through it rather than beside it, so
+    // the limit is stated once.
+    //
+    // The advisor block at the foot is the homepage's own, words and consultants
+    // and all — read from the same place, so the two cannot come to say
+    // different things.
+    const [content, home, footer, contact, assistant] = await Promise.all([
+        // `read` and `view` on all five, where the first two used to be read
+        // published whoever was asking. Harmless for a visitor, wrong for both
+        // of the other readers: it put unpublished copy beside published
+        // reviews in the editor's preview, and it would put today's reviews
+        // beside March's advisor block in the Archive.
+        getPageContent("/nabidka", view),
+        getHomepageContent(view),
+        getFooterContent(view),
+        getContactContent(view),
         getAssistant({ read }),
     ]);
 
+    const { reviews = [], ...copy } = content || {};
+
     return {
         props: {
+            content: copy,
             // An id per review, because the wall keys its cards by one and the
             // store's rows do not carry one the client can see.
             reviews: reviews.map((review, index) => ({ id: `r${index}`, ...review })),
@@ -63,11 +78,18 @@ export async function getStaticProps(context) {
 }
 
 export default function NabidkaPage({
+    content = {},
     reviews = [],
     consultants = [],
     advisorsCopy = {},
     advisorFormCopy = {},
 }) {
+    // Every block below carries a `docId` only when this page is being rendered
+    // for the Studio's editing frame — see `f.docId()` in @/cms/site/fields. On
+    // the public page it is absent and every annotation helper answers nothing,
+    // and a block the CMS does not hold leaves its section exactly as it ships.
+    const { hero, rail, open, chain, chart, reviewsCopy } = content;
+
     return (
         <>
             <Head>
@@ -114,25 +136,25 @@ export default function NabidkaPage({
             </Head>
 
             <main lang="cs" key="nabidka">
-                <OfferHero />
-                <StatRail />
+                <OfferHero copy={hero} />
+                <StatRail copy={rail} close={rail?.close} cells={rail?.cells?.rows} />
                 {/* The band ends on the map, pointing right. The page turns
                     downwards here: a line of type to change the subject, then
                     the offer itself. Neither is pinned and neither is driven by
                     the scroll — this is the part of the page there is most to
                     read. See OfferOpen and OfferGrid. */}
                 <Seam from={0.5} to={0.06} bend={0.42} tall={16} />
-                <OfferOpen />
+                <OfferOpen copy={open} />
                 <Seam from={0.06} to={0.34} bend={0.55} tall={14} />
-                <OfferGrid />
+                <OfferGrid blocks={chain} />
                 {/* The argument the whole offer has been making, as one board
                     you can take hold of. See Divergence. */}
                 <Seam from={0.5} to={0.5} bend={0.4} tall={16} />
-                <Divergence />
+                <Divergence copy={chart} />
                 {/* And what it looks like from the other side. Next: the CTA
                     and the FAQ, and entry/exit animations tying these together
                     rather than leaving them stacked. */}
-                <ReviewDrift reviews={reviews} />
+                <ReviewDrift reviews={reviews} copy={reviewsCopy} />
                 {/* The homepage's own advisor block, on the same props. A page
                     that has just spent eight sections explaining the offer ends
                     where that one does: with somebody to ask.

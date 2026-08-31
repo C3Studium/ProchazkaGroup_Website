@@ -49,11 +49,21 @@ const report = (type, error) => {
  *
  * @returns {Promise<object[]>} the documents' `data` bodies, or `[]`.
  */
-export const readPublished = async ({ type, sort, filters, perPage = 50 } = {}) => {
+export const readPublished = async ({ type, sort, filters, perPage = 50, withIds = false } = {}) => {
     try {
         const { rows } = await documents().listPublished({ type, sort, filters, perPage })
         return rows
-            .map((row) => row?.data)
+            // `withIds` is OFF by default and deliberately so: a document id is
+            // an editing concern, and putting one into every published body
+            // would ship it in the `__NEXT_DATA__` of every page for no reader's
+            // benefit.
+            //
+            // Reviews are the one exception and they have earned it — a visitor
+            // pressing „líbí se" has to name which review, and a positional
+            // `r3` cannot survive a reorder or a second page of the wall. The id
+            // grants nothing on its own: /api/cms/reactions accepts only ids of
+            // documents that are already published and public.
+            .map((row) => (withIds && row?.data ? { ...row.data, [DOCUMENT_ID]: row.id } : row?.data))
             .filter((data) => data && typeof data === 'object')
     } catch (error) {
         report(type, error)
@@ -78,14 +88,43 @@ export const slugValue = (value) => {
     return typeof value === 'string' ? value : ''
 }
 
-/** A media asset, a bare URL string, or nothing -> `{ src, alt } | null`. */
+/**
+ * A media asset, a bare URL string, or nothing -> `{ src, url, alt } | null`.
+ *
+ * `src` and `url` are the same address under two names, and both are here on
+ * purpose. `src` is what a component puts in an `<img>`; `url` is what the
+ * asset itself calls it, and what every storage driver returns — Supabase
+ * hands back a bucket URL, an S3 or MinIO driver hands back its own. A reader
+ * that renamed the field forced anything working with storage to rename it
+ * back, and the rename was invisible until something asked for `url` and got
+ * `undefined`.
+ *
+ * `width` a `height` jsou skutečné rozměry souboru, ne přání, jak se má
+ * vykreslit. Měří je sharp při nahrání, takže je CMS zná — a jsou tu proto, že
+ * z nich prohlížeč spočítá poměr stran a rezervuje obrázku místo dřív, než se
+ * stáhne. Bez nich stránka pod obrázkem poskočí, jakmile dorazí. Velikost, ve
+ * které se má vykreslit, je něco jiného a deklaruje se u použití — viz `sizes`
+ * v `f.image`.
+ *
+ * Bare řetězec rozměry nemá a je to poctivá odpověď: o cizí adrese se nedá
+ * zjistit nic, aniž by se stáhla.
+ *
+ * Nic dalšího z assetu necestuje: tyhle props se serializují do stránky, takže
+ * pole, které nikdo nečte, jsou bajty na drátě při každém požadavku.
+ */
 export const imageValue = (value, fallbackAlt = '') => {
     if (!value) return null
     if (typeof value === 'string') {
-        return value ? { src: value, alt: fallbackAlt } : null
+        return value ? { src: value, url: value, alt: fallbackAlt } : null
     }
     if (typeof value === 'object' && value.url) {
-        return { src: String(value.url), alt: String(value.alt || fallbackAlt) }
+        const url = String(value.url)
+        const picture = { src: url, url, alt: String(value.alt || fallbackAlt) }
+        if (Number.isFinite(value.width) && Number.isFinite(value.height)) {
+            picture.width = value.width
+            picture.height = value.height
+        }
+        return picture
     }
     return null
 }

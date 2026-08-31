@@ -6,6 +6,16 @@ import Script from "next/script";
 // to a Supabase project the site no longer uses, which costs a DNS lookup and a
 // TLS handshake to a host nothing ever asks for. next.config.mjs derives the
 // image host the same way and for the same reason.
+// Stejný důvod jako u původu Supabase o řádek níž: identifikátor patří do
+// prostředí, ne do dvou souborů najednou. Studio ho čte pod týmž jménem, aby
+// odkaz na nástěnku Clarity mířil na tentýž projekt, který web měří — dvě
+// natvrdo psaná ID se rozejdou a nikdo si toho nevšimne.
+// Očištěno na znaky, které identifikátor Clarity smí mít. Hodnota se vsazuje
+// do textu inline skriptu, a tam by cokoli neočekávaného nebyla překlepnutá
+// konfigurace, ale cizí kód spuštěný na každé stránce.
+const clarityProjectId =
+  (process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID || "").replace(/[^a-zA-Z0-9]/g, "") || null;
+
 const supabaseOrigin = (() => {
   try {
     return new URL(process.env.NEXT_PUBLIC_SUPABASE_URL).origin;
@@ -70,15 +80,17 @@ export default function Document() {
         </Script>
 
         {/* Microsoft Clarity */}
-        <Script id="microsoft-clarity" strategy="afterInteractive">
-          {`
+        {clarityProjectId ? (
+          <Script id="microsoft-clarity" strategy="afterInteractive">
+            {`
             (function(c,l,a,r,i,t,y){
                 c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
                 t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
                 y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-            })(window, document, "clarity", "script", "rxdayutukb");
+            })(window, document, "clarity", "script", "${clarityProjectId}");
           `}
-        </Script>
+          </Script>
+        ) : null}
       </body>
     </Html>
   );

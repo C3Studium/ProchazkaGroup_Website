@@ -1,4 +1,3 @@
-@use "../../../styles/system/_shortcuts.scss" as *;
 @use "../styles/tokens.module" as t;
 
 /* The gate is a single column standing on the ground, not a card floating over
@@ -155,7 +154,7 @@
 
 /* Below the width where a rail would be worth its space, the gate is simply a
    centred column — the geometry it was echoing is not on screen either. */
-@media (max-width: 900px) {
+@include t.compact {
   .gate {
     align-items: center;
     padding: var(--st-s12) var(--st-s5) var(--st-s16);

@@ -5,6 +5,7 @@ import { useToast } from "@/cms/studio/context/ToastProvider"
 import { useAsync } from "@/cms/studio/hooks/useAsync"
 import { bodyOf, isArchived } from "@/cms/studio/lib/documents"
 import { formatRelative } from "@/cms/studio/lib/format"
+import { withdrawOutcome } from "@/cms/studio/lib/publishing"
 import { Button } from "@/cms/studio/ui/controls"
 import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
 
@@ -46,13 +47,15 @@ import styles from "./sheet"
  * ---------------------------------------------------------------------------
  * What is deliberately NOT here
  *
- * No form, no publish, no approve and no delete. Approving is a judgement made
- * against a queue of them and it belongs on the screen built for that; deleting
- * is what "zamítnout" does there, it is irreversible after the undo toast
- * expires, and a destructive button one stray click from a page an editor is
- * browsing is not a thing to add. The review's own words are shown, read-only,
- * because moderating means reading and a decision taken on a card the popup
- * covered up is a decision taken blind.
+ * No form, no publish, no approve and no reject. Approving is a judgement made
+ * against a queue of them and it belongs on the screen built for that; rejecting
+ * now has to name a reason from a fixed list (studio/lib/moderation.js), which
+ * is a question with no good answer one stray click from a page an editor is
+ * browsing. Nothing here deletes, and nothing anywhere does any more — that used
+ * to be what "zamítnout" meant on the queue screen and it is not what it means
+ * now. The review's own words are shown, read-only, because moderating means
+ * reading and a decision taken on a card the popup covered up is a decision
+ * taken blind.
  *
  * No `onClose` either: this body never closes itself. It reports the action it
  * took and the dispatch decides — today it closes the popup and says so on the
@@ -94,7 +97,12 @@ export default function ModerateModule({ docId, onModerated }) {
       const updated = await port[action]({ id: docId })
       setData(updated)
       bump()
-      toast.success(verb, { description: said })
+      // `said` is what the action means; the report is whether the site has
+      // caught up with it. Both, because the first without the second is the
+      // sentence this whole seam existed to stop printing.
+      const outcome = withdrawOutcome(updated?.revalidation)
+      if (outcome.ok) toast.success(verb, { description: `${said} ${outcome.description}`.trim() })
+      else toast.error(verb, { description: `${said} ${outcome.description}`.trim(), duration: 12000 })
       // The port call's own name, not the Czech sentence above it: the dispatch
       // reports the outcome on the control in the frame, where the popup may
       // already be gone, and a word it has to translate back is a word it can

@@ -65,6 +65,14 @@ import { CmsError } from '../errors.js'
 
 export const STORAGE_METHODS = Object.freeze([
     'put',
+    // Reading bytes back, which the port did without for as long as nothing
+    // needed them: an upload writes and the browser fetches the public URL, so
+    // the server never had to hold a stored file again. Cropping does — it
+    // decodes the ORIGINAL and re-encodes a window of it — and doing that by
+    // fetching the public URL from inside the server would make an editor's
+    // crop depend on the bucket being reachable from the deployment, which is
+    // a different question from whether the driver can read its own store.
+    'get',
     'remove',
     'publicUrl',
     'signedUrl',

@@ -16,7 +16,8 @@
 // readers would be four more places for the public site's behaviour to drift
 // away from what an editor was shown before they published.
 
-import { consultantFullName } from '@/cms/schemas/consultant'
+import { displayNameOf, reviewSubjectType } from '@/cms/site/types'
+import { countsFor } from '../reactions.js'
 
 import { documentId, imageValue, numberValue, plainText, readPublished, slugValue, stringValue } from './read.js'
 
@@ -75,6 +76,14 @@ export const getSiteCopy = async ({ page = 'index', read = readPublished } = {})
             // The block's one hand-broken element, verbatim: `stringValue`, not
             // `plainText`, because the breaks ARE the value. See siteCopy.js.
             headline: stringValue(data.headline),
+            // The accented tail of `headline`, as its own value — one entry is a
+            // coloured span, several are a typing animation swapping between
+            // them. Kept apart from the headline because a mark inside a string
+            // can say which words are accented and nothing else; it has nowhere
+            // to put a second wording. See `accent` in src/cms/site/fields.js.
+            accent: Array.isArray(data.accent)
+                ? data.accent.map((entry) => stringValue(entry)).filter(Boolean)
+                : [],
             body: stringValue(data.body),
             bodyText: plainText(data.body),
             image: imageValue(data.image, stringValue(data.title)),
@@ -170,9 +179,12 @@ export const getApprovedReviews = async ({ limit = 12, hashtag, read = readPubli
         },
         sort: { field: 'data.order', direction: 'asc' },
         perPage: limit,
+        // The one published read that carries ids — see read.js. Without it a
+        // card has no name to send when somebody agrees with it.
+        withIds: true,
     })
 
-    return rows
+    const reviews = rows
         .filter((data) => data.approved === true || data.approved === 'true')
         .map((data) => ({
             ...provenance(data),
@@ -184,6 +196,26 @@ export const getApprovedReviews = async ({ limit = 12, hashtag, read = readPubli
             order: numberValue(data.order, 0),
         }))
         .filter((review) => review.message)
+
+    /**
+     * `likes` above is the BASELINE — the count carried over from the old
+     * database — and what a reader should see is that plus every vote since.
+     * The votes live in `cms_reaction` rather than in the document, because
+     * publishing overwrites `data` and would throw them away; migrations/0012
+     * says it in full.
+     *
+     * One query for the whole page rather than one per card. Failure is
+     * swallowed: a wall that renders with slightly low numbers is better than a
+     * wall that does not render, and the counter is not what the page is for.
+     */
+    try {
+        const counts = await countsFor('review', reviews.map((review) => review.id))
+        for (const review of reviews) review.likes += counts.get(review.id) || 0
+    } catch (error) {
+        console.warn(`[cms] počty „líbí se" se nenačetly — ${String(error?.message || error)}`)
+    }
+
+    return reviews
 }
 
 // --- assistant --------------------------------------------------------------
@@ -235,7 +267,8 @@ export const getAssistant = async ({ read = readPublished } = {}) => {
  * asks for. See migrations/0003_cms_document_archive.sql.
  *
  * `name` is composed from the three stored parts by the schema's own
- * `consultantFullName`, so the string a component prints and the string the
+ * `displayName` (src/content/types/consultant.js), reached through
+ * `displayNameOf` — so the string a component prints and the string the
  * Studio shows in its list come from one function rather than two that agree
  * until someone edits one of them.
  *
@@ -249,11 +282,15 @@ export const getConsultants = async ({ kind, limit = 50, read = readPublished } 
         filters: kind ? { 'data.kind': kind } : undefined,
         sort: { field: 'data.order', direction: 'asc' },
         perPage: limit,
+        // The second published read that carries ids, for the same reason the
+        // reviews one does: a visitor pressing „líbí se" on a colleague has to
+        // name which colleague. See read.js.
+        withIds: true,
     })
 
-    return rows
+    const people = rows
         .map((data) => {
-            const name = consultantFullName(data)
+            const name = displayNameOf(reviewSubjectType, data)
             return {
                 ...provenance(data),
                 name,
@@ -283,4 +320,16 @@ export const getConsultants = async ({ kind, limit = 50, read = readPublished } 
         })
         .filter((consultant) => consultant.name)
         .sort((a, b) => a.order - b.order)
+
+    // Same arrangement as the reviews above: `likes` so far is the BASELINE
+    // carried over from the old database, and the votes since live in
+    // `cms_reaction` — see migrations/0012 for why they are not in the document.
+    try {
+        const counts = await countsFor('consultant', people.map((person) => person.id))
+        for (const person of people) person.likes += counts.get(person.id) || 0
+    } catch (error) {
+        console.warn(`[cms] počty „líbí se" u poradců se nenačetly — ${String(error?.message || error)}`)
+    }
+
+    return people
 }

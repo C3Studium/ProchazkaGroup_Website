@@ -25,10 +25,12 @@ import { getPageContent } from './page.js'
 /**
  * Everything /o-nas needs, in one round trip.
  *
- * `draft` is the caller's switch on exactly the terms ./page.js sets out: the
- * public build calls it with no arguments and therefore cannot reach a draft or
- * carry a document id.
+ * `draft` and `at` are the caller's switches on exactly the terms ./page.js sets
+ * out: the public build calls it with no arguments and therefore cannot reach a
+ * draft, an old version, or carry a document id. Forwarded rather than named,
+ * because this function is the route's name for `getPageContent` and nothing
+ * else.
  *
- * @param {{ draft?: boolean }} [options]
+ * @param {{ draft?: boolean, at?: string|null }} [options]
  */
 export const getAboutContent = (options) => getPageContent('/o-nas', options)

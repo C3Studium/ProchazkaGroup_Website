@@ -26,6 +26,10 @@ import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypt
 
 import { conflict, forbidden, invalid, serverError, unauthorized } from './errors.js'
 import { bootstrapAdmin, isProduction, sessionSecret } from './env.js'
+// Browser-safe and imported here only for the name, so the cookie the site
+// reads and the cookie this module writes cannot drift. Everything about what
+// that cookie may and may not be trusted for is in that file.
+import { HINT_COOKIE, HINT_VALUE } from '@/cms/manage/hint'
 import { clientKey, consume } from './rateLimit.js'
 import { decoyHash, hashPassword, needsRehash, passwordProblem, verifyPassword } from './password.js'
 import { getAdminClient } from './supabaseAdmin.js'
@@ -47,13 +51,35 @@ const SIGN_IN_FAILED = 'Nesprávný e-mail nebo heslo'
 
 /* ------------------------------------------------------------- cookie ---- */
 
-const cookieHeader = (value, maxAge) => {
-    const parts = [`${COOKIE}=${value}`, 'Path=/', 'HttpOnly', 'SameSite=Lax', `Max-Age=${maxAge}`]
+const cookieHeader = (name, value, maxAge, { httpOnly = true } = {}) => {
+    const parts = [`${name}=${value}`, 'Path=/', 'SameSite=Lax', `Max-Age=${maxAge}`]
+    if (httpOnly) parts.push('HttpOnly')
     // Secure would make the cookie unusable on http://localhost, so it follows
     // NODE_ENV rather than being unconditional.
     if (isProduction()) parts.push('Secure')
     return parts.join('; ')
 }
+
+/**
+ * The session cookie and the hint that shadows it, always written together.
+ *
+ * Two cookies in one Set-Cookie array rather than two `setHeader` calls, because
+ * the second call would replace the first — and a session issued without its
+ * hint, or a hint left behind by a cleared session, is precisely the drift this
+ * pairing exists to make impossible. Every place below that touches one touches
+ * both by construction: there is no way to call this and get only the session.
+ *
+ * The hint is NOT httpOnly, deliberately and singularly. It is the one thing in
+ * this module a script on a public page is allowed to read, it says nothing but
+ * "somebody signed in here", and it is worth exactly nothing to whoever forges
+ * it. src/cms/manage/hint.js holds that argument in full; it belongs there
+ * rather than here because the file that could be tempted to trust the cookie is
+ * the file that reads it.
+ */
+const sessionCookies = (token, maxAge) => [
+    cookieHeader(COOKIE, token, maxAge),
+    cookieHeader(HINT_COOKIE, token ? HINT_VALUE : '', maxAge, { httpOnly: false }),
+]
 
 const readCookies = (req) => {
     if (req.cookies) return req.cookies
@@ -93,7 +119,22 @@ const tokenFromCookie = (req) => {
 }
 
 export const clearSessionCookie = (res) => {
-    res.setHeader('Set-Cookie', cookieHeader('', 0))
+    res.setHeader('Set-Cookie', sessionCookies('', 0))
+}
+
+/**
+ * The digest of the token this request arrived holding, or null.
+ *
+ * The session screen needs to know which of the listed rows is the browser
+ * looking at it — to mark it, and to leave it alone when everything else is
+ * signed out. That is the only question outside this module that needs the
+ * digest, and it is answered with the digest rather than the token so nothing
+ * above this line ever holds a working credential. sessions.js compares it and
+ * drops it.
+ */
+export const currentSessionHash = (req) => {
+    const token = tokenFromCookie(req)
+    return token ? digest(token) : null
 }
 
 /* ------------------------------------------------------------ sessions --- */
@@ -123,7 +164,7 @@ const issueSession = async (req, res, userId) => {
 
     if (error) throw serverError('Přihlášení se nepodařilo dokončit')
 
-    res.setHeader('Set-Cookie', cookieHeader(`${token}.${sign(token)}`, Math.floor(SESSION_MS / 1000)))
+    res.setHeader('Set-Cookie', sessionCookies(`${token}.${sign(token)}`, Math.floor(SESSION_MS / 1000)))
     return { expiresAt }
 }
 
@@ -168,6 +209,26 @@ export const getSessionUser = async (req, res = null) => {
     const row = Array.isArray(data) ? data[0] : data
     if (!row) return null
 
+    // A valid session whose browser has no hint: write one and nothing else.
+    //
+    // The hint is written beside the session at sign-in and again on every
+    // slide — but a slide only happens once a session is a day old, so a
+    // browser that signed in before the hint existed, or signed in today, holds
+    // a perfectly good session and no hint, and the public site shows it
+    // nothing. That is not a rare edge: it was every existing session the day
+    // the widget shipped.
+    //
+    // Only the hint is rewritten. Calling `sessionCookies` here would reissue
+    // the session cookie with a fresh Max-Age too, which is a slide — and would
+    // quietly turn "extend once a day" into "extend on every request", the
+    // write rate SLIDE_AFTER_MS exists to prevent.
+    if (res && !readCookies(req)[HINT_COOKIE]) {
+        res.setHeader(
+            'Set-Cookie',
+            cookieHeader(HINT_COOKIE, HINT_VALUE, Math.floor(SESSION_MS / 1000), { httpOnly: false }),
+        )
+    }
+
     // Sliding expiry. Failure here is deliberately ignored: an editor mid-edit
     // should not be signed out because a housekeeping write lost a race.
     const remaining = new Date(row.expires_at).getTime() - Date.now()
@@ -176,13 +237,44 @@ export const getSessionUser = async (req, res = null) => {
             .from('cms_session')
             .update({ expires_at: new Date(Date.now() + SESSION_MS).toISOString() })
             .eq('id', row.session_id)
-        res.setHeader('Set-Cookie', cookieHeader(`${token}.${sign(token)}`, Math.floor(SESSION_MS / 1000)))
+        // The hint rides along on the same slide, so a browser in daily use
+        // never holds a hint older than the session it shadows.
+        res.setHeader('Set-Cookie', sessionCookies(`${token}.${sign(token)}`, Math.floor(SESSION_MS / 1000)))
     }
 
-    return { id: row.user_id, email: row.email, name: row.name || row.email, role: row.role }
+    return {
+        id: row.user_id,
+        email: row.email,
+        name: row.name || row.email,
+        role: effectiveRole(row.email, row.role),
+    }
 }
 
-/** A signed-in user of either role. Content editing needs nothing more. */
+/**
+ * Which role this account really has.
+ *
+ * The environment decides who the admin is, not the row. `CMS_ADMIN_EMAIL` is
+ * the developer's account, and reading it here means three things hold without
+ * anyone maintaining them: moving the variable to a different address moves
+ * admin with it, a row edited to `admin` in the database by hand grants nothing
+ * (the address has to match as well), and the developer cannot be locked out of
+ * their own CMS by a demotion.
+ *
+ * `owner` and `member` are returned as stored. They differ in nothing today —
+ * `owner` is the title a client sees on their own site, not a permission — and
+ * when they do differ it will be decided in this file rather than by scattering
+ * checks through the handlers.
+ */
+export const effectiveRole = (email, storedRole) => {
+    const admin = bootstrapAdmin()
+    if (admin && String(email || '').trim().toLowerCase() === admin.email) return 'admin'
+    return storedRole === 'admin' ? 'member' : storedRole || 'member'
+}
+
+/** Does this role carry the developer's powers? */
+export const isAdminRole = (role) => role === 'admin'
+
+/** A signed-in user of any role. Content editing needs nothing more. */
 export const requireUser = async (req, res = null) => {
     const user = await getSessionUser(req, res)
     if (!user) throw unauthorized()
@@ -195,11 +287,22 @@ export const requireUser = async (req, res = null) => {
  * `forbidden` rather than `unauthorized` so the Studio can tell "sign in" apart
  * from "you are signed in and this is not yours".
  */
-export const requireOwner = async (req, res = null) => {
+export const requireAdmin = async (req, res = null) => {
     const user = await requireUser(req, res)
-    if (user.role !== 'owner') throw forbidden('Tuto akci může provést jen vlastník')
+    if (!isAdminRole(user.role)) throw forbidden('Tuto akci může provést jen správce')
     return user
 }
+
+/**
+ * The old name, kept as an alias for one reason: `requireOwner` is imported by
+ * seven handlers and by server/index.js, and a rename that touches all of them
+ * in the same change as the role model itself makes the diff impossible to
+ * read. It means what it always meant — "the account that may administer this
+ * CMS" — and that account is now called admin.
+ *
+ * @deprecated Use requireAdmin.
+ */
+export const requireOwner = requireAdmin
 
 /* ------------------------------------------------------------ bootstrap -- */
 

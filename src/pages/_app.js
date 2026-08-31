@@ -7,11 +7,22 @@ import { LoadProvider } from "@/context/LoadProvider";
 import { CursorRefProvider } from "@/context/CursorRefProvider";
 import { PerformanceProvider } from "@/context/PerformanceProvider";
 import { CookiesProvider } from "@/context/CookiesProvider";
+// The seam. `@/cms` answers which shell a route wants and supplies the admin's;
+// the decision is a static property of the page component, so it reads the same
+// on the server pass and the first client pass. See @/cms/shell for why it is
+// not a path prefix — `/studio/preview/home` is a page of *this* site.
+import { StudioShell, usesStudioChrome } from "@/cms";
 // Visual editing, and the only line of it that is on a public route. It arms
 // `editable()` when this document is framed by the Studio's preview host and
 // does nothing at all otherwise — the overlay itself is mounted from the host's
 // bundle and is never downloaded here. See @/cms/edit/arm.
 import { useEditArming } from "@/cms/edit/arm";
+// The editor's way back into the Studio, so the client never types /studio into
+// an address bar. Mounted on every public route and worth almost nothing there:
+// it is a cookie check in an effect and a `dynamic()` that is never requested
+// unless the check passes. See @/cms/manage — and @/cms/manage/hint for why the
+// cookie it reads is a convenience and can never be a control.
+import ManageBadge from "@/cms/manage";
 // import Transition from "@/components/common/Transition";
 // import CookiesBar from "@/components/modems/CookiesBar";
 import { Analytics } from "@vercel/analytics/react";
@@ -43,7 +54,28 @@ import { Toaster } from "sonner";
 // import Footer from "@/components/common/footer";
 import SiteFooter from "@/components/common/SiteFooter";
 
-export default function App({ Component, pageProps }) {
+/**
+ * One decision, and nothing else.
+ *
+ * The two shells are sibling components rather than branches inside one, so the
+ * site's hooks — Lenis, the edit arming — are never called on an admin route,
+ * and switching between the two unmounts one shell wholesale rather than
+ * leaving half of it mounted behind an opaque layer.
+ */
+export default function App({ Component, pageProps, router }) {
+  if (usesStudioChrome(Component, router.pathname)) {
+    return (
+      <StudioShell>
+        <Component {...pageProps} />
+      </StudioShell>
+    );
+  }
+
+  return <SiteShell Component={Component} pageProps={pageProps} />;
+}
+
+/** The managed site: everything a visitor gets, on every route that is one. */
+function SiteShell({ Component, pageProps }) {
   useEditArming();
   const router = useRouter();
   const { pathname } = router;
@@ -208,6 +240,10 @@ export default function App({ Component, pageProps }) {
                 @/cms/server/site/footer. */}
             <SiteFooter {...(pageProps.footer || {})} />
             <Analytics />
+            {/* Last, so a fixed badge in a corner is painted over the page
+                rather than under it, and outside <Component> so switching pages
+                does not remount it. */}
+            <ManageBadge />
             <Toaster position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
           </CursorRefProvider>
         </LoadProvider>

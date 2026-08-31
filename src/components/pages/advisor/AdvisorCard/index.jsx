@@ -9,9 +9,29 @@ import GridDistortion from "@/components/common/ui/GridDistortion";
 import { useGlobalContext } from "@/context/LoadProvider";
 import MoreLink from "@/components/common/ui/MoreLink";
 import Arrow from "@/components/common/ui/Arrow";
+import { editable } from "@/cms/edit";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
-const OFFICE_CITY = "Písek";
+
+// What the card says when the CMS says nothing. `seedReviewsPage.js` was
+// generated out of these exact strings.
+//
+// Every one of them is the PAGE's and none is the person's: the city is where
+// the office is, not a fact about whoever was scanned, and the ask over the form
+// is the same ask on all ten cards. The `<h1>`, the motto and the two counts are
+// absent because they ARE the consultant — clicking one opens their document.
+//
+// The two field labels are absent for the reason AddReview's are: each is
+// `Vaše jméno<Req />&nbsp;|` in one `<span>`, so the asterisk and the rule are
+// elements inside the label rather than characters in it, and an in-place edit
+// would read them back as part of the word.
+const SHIPPED = {
+    city: "Písek",
+    heading: "Napište recenzi",
+    submit: "Odeslat recenzi",
+    sending: "Odesílám…",
+    note: "Recenze se zveřejní až po schválení.",
+};
 
 // Google's own review form for the office, and the only way a review of ours
 // can also become one of theirs.
@@ -52,19 +72,33 @@ const Req = () => <em className="AdvCard__req" aria-hidden="true">*</em>;
 // consultant is not chosen: the code that was scanned already said who, so the
 // name travels in the body and never appears as a field. And it posts to
 // /api/cms/reviews, the site's own public endpoint, which builds the stored body
-// itself and forces `approved: false` — the older `useReviewForm` hook writes to
-// Supabase, which is not where the wall at /recenze reads from.
+// itself and forces `approved: false`. It is now the only way to submit a
+// review: the `useReviewForm` hook that wrote to Supabase with the browser's
+// anon key is deleted, along with the client it wrote through.
 //
 // The phone number that stood here is gone. It is a real thing to want, but it
 // was a second call to action on a page that exists for one, and the number is
 // already on the card this was scanned from.
-export default function AdvisorCard({ advisor }) {
+//
+// @param {object} [copy] this page's own block, from
+//   `getPageContent("/recenze/[slug]")`. One block behind ten cards: it is
+//   declared under `page: 'recenze'`, so editing it once moves every
+//   consultant's page and a publish regenerates all of them.
+export default function AdvisorCard({ advisor, copy = {} }) {
     const { gate } = useGlobalContext();
     // The card is the page's only surface and the portrait lives inside it,
     // so both enter at "ground" — a photo opening inside a still-invisible
     // card would be no photo at all when the preloader's window opens. The
     // card has no separately-animated text children to hold back for "go".
     const ground = gate !== "hold";
+    const docId = copy.docId;
+    const words = {
+        city: copy.city || SHIPPED.city,
+        heading: copy.heading || SHIPPED.heading,
+        submit: copy.submit || SHIPPED.submit,
+        sending: copy.sending || SHIPPED.sending,
+        note: copy.note || SHIPPED.note,
+    };
     const [values, setValues] = useState({ customerName: "", message: "", website: "" });
     const [busy, setBusy] = useState(false);
     const [sent, setSent] = useState(false);
@@ -156,9 +190,22 @@ export default function AdvisorCard({ advisor }) {
                     </motion.div>
 
                     <div className="AdvCard__who">
+                        {/* The name is the consultant's own two fields and is
+                            not annotated here: it is one element holding a hard
+                            break between two SEPARATE stored values, so there is
+                            no single field for an in-place edit to write back
+                            to, and the person's form is where both live. The
+                            city under it is the office's and is the same on all
+                            ten cards, so it is this page's copy and carries its
+                            own address. */}
                         <h1 className="AdvCard__name">
                             {advisor.firstName}<br />{advisor.lastName}
-                            <span className="AdvCard__city">{OFFICE_CITY}</span>
+                            <span
+                                className="AdvCard__city"
+                                {...editable(docId, "items.0.label", "text")}
+                            >
+                                {words.city}
+                            </span>
                         </h1>
 
                         <div className="AdvCard__stats">
@@ -235,7 +282,10 @@ export default function AdvisorCard({ advisor }) {
                         <span className="corner corner--bl" />
                         <span className="corner corner--br" />
 
-                        <h2>Napište recenzi</h2>
+                        <h2 {...editable(docId, "title", "text")}>{words.heading}</h2>
+                        {/* Unannotated: "na" is a bare text node beside the
+                            consultant's own name, so the paragraph holds two
+                            things and neither of them alone. */}
                         <p className="AdvCard__form__for">
                             na <em>{advisor.name}</em>
                         </p>
@@ -279,16 +329,25 @@ export default function AdvisorCard({ advisor }) {
                             <MoreLink href="/ochrana-soukromi">více</MoreLink>
                         </p>
 
-                        <button type="submit" className="cornerButton AdvCard__submit" data-cursor="frame" disabled={busy}>
+                        {/* Two stored strings on one element, and the address
+                            is whichever it is showing — the same reading
+                            AddReview's send button takes. */}
+                        <button
+                            type="submit"
+                            className="cornerButton AdvCard__submit"
+                            data-cursor="frame"
+                            disabled={busy}
+                            {...editable(docId, busy ? "items.2.label" : "items.1.label", "text")}
+                        >
                             <span className="corner corner--tl" />
                             <span className="corner corner--tr" />
                             <span className="corner corner--bl" />
                             <span className="corner corner--br" />
-                            {busy ? "Odesílám…" : "Odeslat recenzi"}
+                            {busy ? words.sending : words.submit}
                             <span className="cornerButton__arrow"><Arrow direction="upRight" /></span>
                         </button>
 
-                        <p className="AdvCard__note">Recenze se zveřejní až po schválení.</p>
+                        <p className="AdvCard__note" {...editable(docId, "body", "text")}>{words.note}</p>
                     </form>
                 )}
             </motion.article>

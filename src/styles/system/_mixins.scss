@@ -99,31 +99,39 @@ $layer-v: (
   }
 }
 
-// Low-level landscape query. Layer ownership stays in h-layer().
+// The query text for a horizontal stop, as a string.
 //
 // Constraints are composed from whatever the stop declares rather than being hardcoded, so a
 // stop may specify any subset of them. The previous version always emitted both max-width and
 // min-height, which produced `(max-width: null)` for a stop that only constrains height.
-@mixin h($key) {
+//
+// A function rather than the body of h() because below-with-phone() has to place this exact
+// text beside another condition in one comma-separated media list, and a device-qualified stop
+// retyped by hand is precisely the drift this table exists to prevent.
+@function h-query($key) {
   $min: map.get(bp.$h, $key);
+  $constraints: map.get(bp.$h-constraints, $key);
+  $query: "(min-width: #{$min})";
 
-  @if $min == null {
-    @warn "Unknown horizontal breakpoint: #{$key}";
-  } @else {
-    $constraints: map.get(bp.$h-constraints, $key);
-    $query: "(min-width: #{$min})";
+  @if $constraints {
+    @each $feature in (max-width, min-height, max-height) {
+      $value: map.get($constraints, $feature);
 
-    @if $constraints {
-      @each $feature in (max-width, min-height, max-height) {
-        $value: map.get($constraints, $feature);
-
-        @if $value != null {
-          $query: "#{$query} and (#{$feature}: #{$value})";
-        }
+      @if $value != null {
+        $query: "#{$query} and (#{$feature}: #{$value})";
       }
     }
+  }
 
-    @media #{$query} and (orientation: landscape) {
+  @return "#{$query} and (orientation: landscape)";
+}
+
+// Low-level landscape query. Layer ownership stays in h-layer().
+@mixin h($key) {
+  @if map.get(bp.$h, $key) == null {
+    @warn "Unknown horizontal breakpoint: #{$key}";
+  } @else {
+    @media #{h-query($key)} {
       @content;
     }
   }
@@ -143,6 +151,10 @@ $layer-v: (
 // what the device work needs. Use below() to bring an existing max-width rule into the system.
 @mixin below($key) {
   $w: map.get(bp.$h, $key);
+
+  @if $w == null {
+    $w: map.get(bp.$h-max, $key);
+  }
 
   @if $w == null {
     $w: map.get(bp.$v, $key);
@@ -180,6 +192,42 @@ $layer-v: (
   @media (max-width: $q) {
     @content;
   }
+}
+
+/// below(), plus the phone that is too wide for it.
+///
+/// This is the one query a chrome-heavy surface actually wants, and no single width expresses
+/// it. A phone in landscape is 932px across — wider than `sm`, wider than every tablet stop in
+/// the table — so `below(sm)` gives it the desktop layout and `below(md)` would take the phone
+/// layout away from a real 1024px tablet. The header of _breakpoints.scss names this exact
+/// case; `phs` is the stop that answers it, and it is taken from the table here rather than
+/// retyped, so the height bound stays in one place.
+///
+/// Emitted as one comma-separated list, not two blocks, so the two halves cannot be separated
+/// by a later rule landing between them.
+@mixin below-with-phone($key) {
+  @media (max-width: #{width-of($key) - 0.02px}), #{h-query(phs)} {
+    @content;
+  }
+}
+
+/// The width a named stop stands at, wherever it is declared.
+@function width-of($key) {
+  $w: map.get(bp.$h, $key);
+
+  @if $w == null {
+    $w: map.get(bp.$h-max, $key);
+  }
+
+  @if $w == null {
+    $w: map.get(bp.$v, $key);
+  }
+
+  @if $w == null {
+    @error "Unknown breakpoint: #{$key}";
+  }
+
+  @return $w;
 }
 
 /// Orientation-agnostic min-width, for existing rules whose width does not sit on a stop.

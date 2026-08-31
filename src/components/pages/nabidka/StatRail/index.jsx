@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
     motion,
     useMotionTemplate,
@@ -20,6 +20,7 @@ import SplitText from "@/components/common/ui/SplitText";
 import OfferStrip, { useCoarsePointer } from "@/components/pages/nabidka/OfferStrip";
 import { coverGround } from "@/components/common/ui/pageGround";
 import { rootRamp } from "@/helpers/checkViewport";
+import { editable } from "@/cms/edit";
 
 // The three photographs the design was drawn on, all of which were already in
 // the repository under names that do not describe them: the wallet is
@@ -29,7 +30,7 @@ import { rootRamp } from "@/helpers/checkViewport";
 // The first is drawn `unoptimized`, and so is the hero's copy of it. Both have
 // to be the identical bitmap or the cut between the two sections shows, and
 // only one of them can reach Next's optimiser.
-const CELLS = [
+const SHIPPED_CELLS = [
     {
         figure: "8",
         photo: "/assets/backgrounds/wallet_2000.webp",
@@ -87,6 +88,35 @@ const CELLS = [
         frame: { x: 24, y: 30, scale: 1.34 },
     },
 ];
+
+// What the section's own copy says when the CMS says nothing. The three counts
+// above are the same statement in the other half of this file: `SHIPPED_CELLS`
+// is the fallback for `nabidka.realita.cisla`, one item per cell.
+//
+// `photo`, `position`, `alt`, `scrim` and `frame` are NOT in the CMS and are not
+// meant to be. The first photograph is the frame the hero parts on and has to
+// stay the identical bitmap (see HANDOFF in OfferHero); the other two carry a
+// crop and a framing measured for the box that cell is cut down to, so a picture
+// swapped without them would be a subject standing outside its own window.
+const SHIPPED_COPY = {
+    // The question the band is built round. Drawn by `Written`, which splits it
+    // per letter and puts no space between the words in the DOM — so it has no
+    // element that can be read back and it is edited in the form. It is the
+    // block's `title`, which is also the name an editor reads in the list.
+    title: "Jaká je dneska realita finanční situace domácností v ČR",
+    // The standing label at the foot. Its words are a bare text node between the
+    // tick and the source, so they too are edited in the form.
+    label: "Realita českých domácností",
+    source: "dle statistik ČNB",
+    kicker: "Dle statistik ČNB",
+};
+
+const SHIPPED_CLOSE = {
+    // The eyebrow's words: a bare text node sharing its paragraph with the tick.
+    eyebrow: "Co z toho plyne",
+    lead: "Vaše starosti s financemi nejsou jen čísla.",
+    body: "Jsou to roky života, které můžete ještě zachránit.",
+};
 
 // The composition is the statistic.
 //
@@ -234,8 +264,46 @@ const isStacked = (vw, vh) => vw < 900 && vh > 520;
 // of squares needs height, and there is none. See SECTIONS in OfferStrip.
 const modeFor = (vw, vh) => (vh <= 520 ? "short" : isStacked(vw, vh) ? "stacked" : "wide");
 
-export default function StatRail() {
+/**
+ * @param {object} [copy]   the `nabidka.realita` block — the band's own labels.
+ * @param {object} [close]  `nabidka.realita.zaver` — the statement it ends on.
+ *   Renamed on the way in: this file already has a `close`, which is how far the
+ *   band's own collapse has run, and one of the two would have shadowed the
+ *   other silently.
+ * @param {object[]} [cells] `nabidka.realita.cisla`, one row per count.
+ */
+export default function StatRail({ copy = {}, close: closing = {}, cells = [] }) {
     const sectionRef = useRef(null);
+
+    const docId = copy.docId;
+    const closeDocId = closing.docId;
+    const label = copy.label || SHIPPED_COPY.label;
+    const source = copy.source || SHIPPED_COPY.source;
+    const kicker = copy.kicker || SHIPPED_COPY.kicker;
+    const question = copy.title || SHIPPED_COPY.title;
+    const closeEyebrow = closing.eyebrow || SHIPPED_CLOSE.eyebrow;
+    const closeLead = closing.lead || SHIPPED_CLOSE.lead;
+    const closeBody = closing.body || SHIPPED_CLOSE.body;
+
+    // The counts, paired to the shipped cells BY POSITION — the same bargain
+    // /cookies' sections and /o-nas's history panels make. What a cell says is
+    // the CMS's; how many there are is the layout's, because the 8:3:1 frame and
+    // both of its cuts are computed from three.
+    const CELLS = useMemo(
+        () =>
+            SHIPPED_CELLS.map((cell, index) => {
+                const row = cells[index];
+                if (!row) return cell;
+                return {
+                    ...cell,
+                    figure: row.lead || cell.figure,
+                    note: row.label || cell.note,
+                    text: row.value || cell.text,
+                    short: row.note || cell.short,
+                };
+            }),
+        [cells],
+    );
 
     // Which geometry the cells are laid out on. Defaults to the wide one, which
     // is what the server renders; the real answer arrives a frame later and
@@ -578,10 +646,21 @@ export default function StatRail() {
 
                 </div>
 
+                {/* The words between the tick and the source are a bare text
+                    node sharing this paragraph with both, so only the source
+                    can carry an annotation — annotating the paragraph would
+                    store the two spans as copy and drop them on the first save.
+                    The words are the block's own `label` item and are edited in
+                    the form. */}
                 <motion.p className="StatRail__label" style={{ opacity: labelIn }}>
                     <span className="StatRail__label__tick" />
-                    Realita českých domácností
-                    <span className="StatRail__label__source">dle statistik ČNB</span>
+                    {label}
+                    <span
+                        {...editable(docId, "items.1.label", "text")}
+                        className="StatRail__label__source"
+                    >
+                        {source}
+                    </span>
                 </motion.p>
 
                 {/* Hung off a rule with a scale marked down it. The ticks say
@@ -605,14 +684,19 @@ export default function StatRail() {
 
                     <motion.div className="StatRail__head__body" style={{ y: headY }}>
                         <motion.p
+                            {...editable(docId, "items.2.label", "text")}
                             className="StatRail__head__label"
                             style={{ opacity: labelIn2 }}
                         >
-                            Dle statistik ČNB
+                            {kicker}
                         </motion.p>
+                        {/* Not annotated, and it cannot be: `Written` draws one
+                            <span> per word with no whitespace between them, so
+                            the element reads back as one welded string. It is
+                            the block's `title` and is edited in the form. */}
                         <h2 className="StatRail__head__title">
                             <Written
-                                text="Jaká je dneska realita finanční situace domácností v ČR"
+                                text={question}
                                 progress={progress}
                                 from={BEATS.headIn[0]}
                                 to={BEATS.headIn[1]}
@@ -651,11 +735,16 @@ export default function StatRail() {
                             style={{ opacity: eyebrowIn }}
                         >
                             <span className="StatRail__close__tick" aria-hidden="true" />
-                            Co z toho plyne
+                            {closeEyebrow}
                         </motion.p>
+                        {/* On the SplitText and not on the <h2>: the component
+                            forwards rest props onto its own wrapper for exactly
+                            this, and it keeps a real space between the words, so
+                            the element reads back as the sentence it draws. */}
                         <h2 className="StatRail__close__lead">
                             <SplitText
-                                text="Vaše starosti s financemi nejsou jen čísla."
+                                {...editable(closeDocId, "body", "text")}
+                                text={closeLead}
                                 progress={closeRide}
                                 from={0.06}
                                 to={0.62}
@@ -669,7 +758,8 @@ export default function StatRail() {
                         />
                         <p className="StatRail__close__body">
                             <SplitText
-                                text="Jsou to roky života, které můžete ještě zachránit."
+                                {...editable(closeDocId, "items.0.label", "text")}
+                                text={closeBody}
                                 progress={closeRide}
                                 from={0.34}
                                 to={0.96}
@@ -690,7 +780,8 @@ export default function StatRail() {
             </motion.div>
 
             {/* The whole set as sentences, for anything that is not looking at
-                the screen. */}
+                the screen. Never annotated: it reprints three values that are
+                already drawn above it, and a field is written by one element. */}
             <p className="StatRail__sr">
                 {CELLS.map((cell) => `${cell.figure} z 10 ${cell.text}. ${cell.note}`).join(" ")}
             </p>
