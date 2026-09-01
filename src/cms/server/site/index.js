@@ -51,7 +51,7 @@ export { getPageContent, getHomepageContent, parseHighlights, COPY_KEYS } from '
 // not a page: `_app` renders the patička under every route, so every page's
 // reader hands the same block down through `props.footer`. `aboutUs.js` is a
 // page and is next; see the note at the head of ./page.js.
-export { getAboutContent, ABOUT_KEYS, ABOUT_LINKS, PROMPT_LINES, SHOWCASE_VALUES } from './aboutUs.js'
+export { getAboutContent, ABOUT_KEYS } from './aboutUs.js'
 export {
     getFooterContent,
     getContactContent,

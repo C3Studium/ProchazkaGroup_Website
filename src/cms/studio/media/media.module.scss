@@ -525,3 +525,39 @@
 .tileMarked .tileName {
   color: #ff6a00;
 }
+
+/* Mřížka médií se řídí plochou, ne zlomem.
+   
+   `auto-fill` sloupce dopočítá sám; co se musí měnit, je JAK VELKÁ dlaždice
+   dává smysl. Na 13" notebooku je 150px minimum správné — víc dlaždic v řadě
+   znamená míň scrollování v okně, které ho má nejmíň. Na 27" je 150px opačná
+   chyba: šestnáct sloupců miniatur, ve kterých se obrázek nedá poznat. */
+@include t.wide {
+  /* Strop platí i tady. Bez něj je mřížka deset sloupců široká přes celou
+     obrazovku a hlavička nad ní má hledání úplně vlevo a Nahrát úplně vpravo,
+     dva tisíce pixelů od sebe — dvě věci, mezi kterými se chodí, na opačných
+     koncích stolu. */
+  .grid,
+  .libraryBar,
+  .pager {
+    max-width: var(--st-measure);
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+}
+
+@include t.ultra {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+/* Nízké okno: detail vpravo měl pevný strop náhledu, který na 640px sebral
+   třetinu panelu dřív, než se dostalo na pole. */
+@include t.short {
+  .detailPreview {
+    max-height: 150px;
+  }
+}

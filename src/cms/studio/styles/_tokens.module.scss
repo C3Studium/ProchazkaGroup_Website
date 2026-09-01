@@ -173,6 +173,58 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
   }
 }
 
+/// Malý notebook: 11" a 13", tedy 1280×800 a 1366×768.
+///
+/// Šířka není ten problém — 1280 je pořád desktop. Problém je VÝŠKA. 800px
+/// mínus lišta prohlížeče, panely a stavový řádek je kolem 640px, a Studio je
+/// navržené na 900+. Projeví se to tím, čeho je najednou málo: hlavička
+/// pohledu bere 96px, řádek 52px, a dialog s knihovnou médií se opře o obě
+/// hrany okna.
+///
+/// Vede se to podle výšky, ne podle šířky, protože 1920×1080 na 13" externím
+/// monitoru tenhle problém nemá a 1280×720 na 27" ho má. `min-width` odděluje
+/// notebook od telefonu na šířku, který má vlastní pásmo.
+@mixin short {
+  @media (min-width: 900px) and (max-height: 860px) {
+    @content;
+  }
+}
+
+/// Šířka notebooku: nad tabletem, pod stolním monitorem.
+///
+/// Rail 240px a dvakrát 32px okraje ubere z 1280px téměř třetinu, než se
+/// začne kreslit obsah.
+///
+/// Horní hranice je 1680, ne 1440. MacBook Air 13" hlásí 1440×900 a MacBook
+/// Pro 14" 1512; Windows notebook se škálováním 150 % hlásí 1536. Kdyby to
+/// končilo na 1440, minulo by pásmo přesně ty stroje, kvůli kterým vzniklo —
+/// 1440 je notebook, ne monitor.
+@mixin laptop {
+  @media (min-width: 900px) and (max-width: 1679.98px) {
+    @content;
+  }
+}
+
+/// Velký monitor — 27" na 2560px, nebo maximalizované okno na 1440p.
+///
+/// Tady se nic nezmenšuje, naopak. Riziko velké obrazovky není nedostatek
+/// místa, ale míra: seznam roztažený přes 2500px je řádek, který se čte
+/// otáčením hlavy, a oko ztratí sloupec dřív, než dojede na konec. Obsah
+/// dostane strop a okraje se rozšíří, aby ten strop nevypadal jako
+/// nedodělaná stránka přilepená vlevo.
+@mixin wide {
+  @media (min-width: 1800px) {
+    @content;
+  }
+}
+
+/// 4K a ultrawide. Totéž, o stupeň dál.
+@mixin ultra {
+  @media (min-width: 2400px) {
+    @content;
+  }
+}
+
 /// The queue's own stop, and the only one in the Studio the site's table has no
 /// name for: the width at which four columns of review row stop being four
 /// columns. It is not a device — it is where 18px + 210px of identity + a
@@ -279,9 +331,22 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
   }
 }
 
+/// Posuvník uvnitř Studia.
+///
+/// `scrollbar-gutter: stable` je tu kvůli Windows. Na macOS je posuvník
+/// překryvný — objeví se nad obsahem a zase zmizí, takže nic neposune. Na
+/// Windows je klasický a bere si 15px ŠÍŘKY: obsah se při jeho příchodu
+/// přeskládá, mřížka médií přepočítá sloupce a poslední sloupec se schová pod
+/// něj. `stable` to místo drží pořád, takže se nic nehýbe a nic se
+/// nepodsouvá.
+///
+/// `scrollbar-width` a `::-webkit-scrollbar` vedle sebe: od Chromium 121 platí
+/// ten první a druhý se ignoruje. Nechává se pro starší prohlížeče, ale barvu
+/// musí říct oba, jinak by se na nich rozešly.
 @mixin scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 252, 247, 0.14) transparent;
+  scrollbar-gutter: stable;
 
   &::-webkit-scrollbar {
     width: 10px;
@@ -388,6 +453,11 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
   --st-sidebar: #{$sidebar};
   --st-row: #{$row};
 
+  /* Strop čtecí šířky. `none` do 1800px, protože do té doby je obsah užší než
+     okno stejně; nad ním je to jediné, co drží seznamy čitelné. Čte ho
+     `.padded` a tabulky ve ViewLayout — na jednom místě, ne v každém pohledu. */
+  --st-measure: none;
+
   --st-fast: #{$fast};
   --st-mid: #{$mid};
   --st-ease: #{$ease};
@@ -403,5 +473,35 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
      element and both are true on a phone held upright. */
   @include stacked {
     --st-gutter: #{$gutter-ph};
+  }
+
+  /* Notebook. Rail i okraj o krok níž, ať zbyde na obsah — nic se nepřeskládá,
+     jen se přestane plýtvat vlevo. */
+  @include laptop {
+    --st-gutter: 24px;
+    --st-sidebar: 208px;
+  }
+
+  /* Nízké okno. Řádek a odsazení se stáhnou, aby se na obrazovku vešly
+     o dva řádky seznamu víc — což je na 640px viditelné výšky rozdíl mezi
+     "vidím data" a "vidím hlavičku". Písmo se NEZMENŠUJE: přečíst se to musí
+     pořád stejně, a zmenšené písmo na malém notebooku je únava, ne úspora. */
+  @include short {
+    --st-row: 44px;
+    --st-s8: 24px;
+    --st-s10: 32px;
+    --st-s16: 40px;
+  }
+
+  /* Velký monitor. Okraje se rozšíří a obsah dostane strop. */
+  @include wide {
+    --st-gutter: 48px;
+    --st-sidebar: 264px;
+    --st-measure: 1520px;
+  }
+
+  @include ultra {
+    --st-gutter: 64px;
+    --st-measure: 1760px;
   }
 }

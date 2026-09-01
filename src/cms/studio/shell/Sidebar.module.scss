@@ -429,3 +429,30 @@
     @include strip;
   }
 }
+
+/* Nízké okno. Rail je jediná věc, která je na obrazovce celá vždycky, takže
+   se na 640px viditelné výšky pozná hned: deset položek po 38px plus nadpisy
+   sekcí a patička s účtem je přesně tolik, že se poslední položka schová pod
+   hranu. Stáhne se odsazení, ne písmo. */
+@include t.short {
+  /* Hlavička railu — logo a jméno systému. Dvouřádkové jméno bere 40px
+     výšky navíc, které na 700px chybí dole. */
+  .head {
+    padding-block: var(--st-s3);
+  }
+
+  .item {
+    height: 32px;
+  }
+
+  /* 24px nad každým nadpisem sekce a jsou tři: Obsah, Nástroje, a mezera nad
+     první skupinou. Dohromady je to skoro dvě položky. */
+  .groupLabel {
+    padding-top: var(--st-s4);
+    padding-bottom: var(--st-s1);
+  }
+
+  .footer {
+    padding-block: var(--st-s2);
+  }
+}

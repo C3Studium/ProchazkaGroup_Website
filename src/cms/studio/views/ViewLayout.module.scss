@@ -115,7 +115,17 @@
   overscroll-behavior: contain;
 }
 
+/* Strop čtecí šířky a okraje kolem něj.
+   
+   `--st-measure` je `none` až do 1800px, takže do té doby se tady nic neděje.
+   Nad ním se obsah přestane roztahovat: řádek seznamu přes 2500px je řádek,
+   u kterého oko na cestě zprava doleva ztratí, ve kterém sloupci bylo.
+   
+   `margin-inline` a ne `margin: auto` na užší kontejner — hlavička a toolbar
+   sdílejí `--st-gutter` jako levou hranu a musí se s tělem potkat na téže
+   svislici. */
 .padded {
+  max-width: var(--st-measure);
   padding: var(--st-s8) var(--st-gutter) var(--st-s16);
 }
 
@@ -189,5 +199,33 @@
 
   .padded {
     padding-top: var(--st-s5);
+  }
+}
+
+/* Velký monitor: hlavička a toolbar drží stejný strop jako tělo, jinak by
+   titulek zůstal vlevo a obsah pod ním se odsunul doprostřed. */
+@include t.wide {
+  .header,
+  .toolbar {
+    max-width: var(--st-measure);
+  }
+}
+
+/* Nízké okno — 13" notebook. Hlavička brala 96px na výšku a je jedna ze tří
+   věcí, které jsou na obrazovce vždycky. Titulek se zmenší o stupeň a padding
+   se stáhne; dohromady je to necelých 40px, tedy skoro celý další řádek
+   seznamu. */
+@include t.short {
+  .header {
+    padding: var(--st-s5) var(--st-gutter) var(--st-s4);
+  }
+
+  .title {
+    font-size: var(--st-text-section);
+    letter-spacing: var(--st-track-section);
+  }
+
+  .toolbar {
+    height: 40px;
   }
 }

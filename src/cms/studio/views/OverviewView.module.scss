@@ -283,3 +283,17 @@
     display: none;
   }
 }
+
+/* Přehled bez fronty recenzí.
+   
+   Levý sloupec zmizel, takže pravý není "vedlejší" — je to celý obsah. Jeden
+   sloupec a ne dva prázdné: dvousloupcová mřížka, ve které je jedna buňka
+   prázdná, vypadá jako rozbité rozvržení, ne jako méně obsahu.
+   
+   Strop čtecí šířky sem patří taky. Bez něj by se seznam posledních úprav na
+   27" roztáhl přes celou obrazovku a datum by skončilo dva a půl tisíce pixelů
+   od názvu, který popisuje. */
+.gridSolo {
+  grid-template-columns: minmax(0, 1fr);
+  max-width: 1080px;
+}
