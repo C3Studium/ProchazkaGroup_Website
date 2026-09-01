@@ -4,7 +4,7 @@ import { useStudioRouter } from "../../runtime/navigation.jsx"
 import { useAuth, usePort, useRevision, useStudio, useTypes } from "../context/StudioProvider.jsx"
 import { useAsync } from "../hooks/useAsync.js"
 import { hrefs, isActive, parseRoute, previewFrom } from "../lib/routes.js"
-import { PENDING, queueQuery } from "../lib/moderation.js"
+import { PENDING, REVIEW_TYPE, queueQuery, reviewsManaged } from "../lib/moderation.js"
 import { initials } from "../lib/format.js"
 import Icon from "../ui/Icon.jsx"
 import { IconButton } from "../ui/controls.jsx"
@@ -40,9 +40,15 @@ export default function Sidebar() {
   const [collapsed, setCollapsed] = usePersistedFlag(COLLAPSED_KEY, false)
 
   // The queue badge is the one number the client wants without navigating.
+  //
+  // Vypnuté recenze znamenají, že se na ně ani NEPTÁ. Projekt, který je má
+  // v jiném nástroji, by na ten dotaz odpověděl chybou nebo prázdnem — a ptát
+  // se na číslo, které se nemá kam vypsat, je zbytečné volání při každém
+  // překreslení bočního menu.
+  const showReviews = reviewsManaged()
   const { data: pending } = useAsync(
-    () => port.list({ type: "review", perPage: 1, ...queueQuery(PENDING) }),
-    [port, revision],
+    () => (showReviews ? port.list({ type: REVIEW_TYPE, perPage: 1, ...queueQuery(PENDING) }) : Promise.resolve(null)),
+    [port, revision, showReviews],
   )
 
   const pendingCount = pending?.total || 0
@@ -84,15 +90,21 @@ export default function Sidebar() {
 
       <div className={styles.scroll}>
         <ul className={styles.group}>
-          <NavItem href={hrefs.overview()} icon="grid" label="Přehled" asPath={router.asPath} />
-          <NavItem
-            href={hrefs.moderation()}
-            icon="inbox"
-            label="Schvalování recenzí"
-            asPath={router.asPath}
-            count={pendingCount}
-            emphasis={pendingCount > 0}
-          />
+          <NavItem href={hrefs.overview()} icon="grid" label="Přehled" path={router.path} />
+          {/* Recenze jsou modul. Web, který je nemá — nebo je má v backendu,
+              jako e-shop na Meduse — dostane navigaci bez nich; druhá fronta ve
+              druhém nástroji znamená dvě místa, kde se schvaluje, a jedno z nich
+              se přehlédne. Zapíná se v konfiguraci: `reviews: false`. */}
+          {showReviews ? (
+            <NavItem
+              href={hrefs.moderation()}
+              icon="inbox"
+              label="Schvalování recenzí"
+              path={router.path}
+              count={pendingCount}
+              emphasis={pendingCount > 0}
+            />
+          ) : null}
           {/* Directly under moderation and above "Obsah", by the same argument
               moderation already won: this is not a content type, it is a job the
               client opens the tool to do. `monitor` rather than `eye` — the eye
@@ -102,7 +114,7 @@ export default function Sidebar() {
             href={hrefs.edit()}
             icon="monitor"
             label="Upravit kontent"
-            asPath={router.asPath}
+            path={router.path}
           />
         </ul>
 
@@ -114,7 +126,7 @@ export default function Sidebar() {
               href={hrefs.list(type.name)}
               icon={type.icon || "document"}
               label={type.title || type.name}
-              asPath={router.asPath}
+              path={router.path}
             />
           ))}
           {types.length === 0 ? <li className={styles.hint}>Žádné typy obsahu</li> : null}
@@ -137,8 +149,8 @@ export default function Sidebar() {
               <span className={styles.itemLabel}>Náhled webu</span>
             </a>
           </li>
-          <NavItem href={hrefs.media()} icon="image" label="Knihovna médií" asPath={router.asPath} />
-          <NavItem href={hrefs.stats()} icon="chart" label="Statistiky" asPath={router.asPath} />
+          <NavItem href={hrefs.media()} icon="image" label="Knihovna médií" path={router.path} />
+          <NavItem href={hrefs.stats()} icon="chart" label="Statistiky" path={router.path} />
           {/* In Nástroje, first of the owner-only three, and the position is the
               argument moderation already won: the archive is a job somebody
               opens the tool to do, not a content type — so it does not belong in
@@ -152,7 +164,7 @@ export default function Sidebar() {
               which takes it off the site and leaves it in the database. Two
               different archives sharing one glyph is exactly the confusion this
               screen exists to remove. */}
-          {isAdmin ? <NavItem href={hrefs.archive()} icon="clock" label="Archiv" asPath={router.asPath} /> : null}
+          {isAdmin ? <NavItem href={hrefs.archive()} icon="clock" label="Archiv" path={router.path} /> : null}
           {/* Owners only, both of them. Hiding them is a courtesy — each route
               renders an explanation for an editor who types the URL, and the
               server refuses the calls behind them either way.
@@ -162,9 +174,9 @@ export default function Sidebar() {
               find, and it is opened far more often than the rest of the portal.
               Nastavení links to it, so the two are one click apart in the
               direction that is actually travelled. */}
-          {isAdmin ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" asPath={router.asPath} /> : null}
+          {isAdmin ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" path={router.path} /> : null}
           {isAdmin ? (
-            <NavItem href={hrefs.settings()} icon="settings" label="Nastavení" asPath={router.asPath} />
+            <NavItem href={hrefs.settings()} icon="settings" label="Nastavení" path={router.path} />
           ) : null}
         </ul>
       </div>
@@ -197,8 +209,8 @@ export default function Sidebar() {
  * a row with no accessible name at all. Both values repeat the visible text, so
  * they cost nothing in the expanded state.
  */
-function NavItem({ href, icon, label, asPath, count, emphasis }) {
-  const active = isActive(href, asPath)
+function NavItem({ href, icon, label, path, count, emphasis }) {
+  const active = isActive(href, path)
 
   return (
     <li>

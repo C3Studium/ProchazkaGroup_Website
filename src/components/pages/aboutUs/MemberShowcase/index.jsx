@@ -52,7 +52,7 @@ const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
 // The copy and the three photographs come from the CMS — one siteCopy block per
 // card ("o-nas.showcase.*") plus one for the standing note ("o-nas.showcase").
-// See @/cms/server/site/aboutUs. Everything below is what the section shipped
+// See @/lib/site/aboutUs. Everything below is what the section shipped
 // with and what it falls back to when that returns nothing.
 //
 // The number of cards is NOT the CMS's to decide: the track is `TRACK_VW` wide
@@ -196,7 +196,7 @@ const MemberCard = ({ member, progress: ride, copyProgress: copyRide, from, span
                 {/* Words only. The target is a path on this site, which is the
                     site's own routing rather than content — see `editableLink`'s
                     three shapes. `items.0.label` is SHOWCASE_VALUES.cta in
-                    @/cms/server/site/aboutUs; all three cards carry the same
+                    @/lib/site/aboutUs; all three cards carry the same
                     field, so editing one moves all of them. */}
                 <CornerButton
                     {...editableLink(extrasDocId, { text: "items.0.label" })}

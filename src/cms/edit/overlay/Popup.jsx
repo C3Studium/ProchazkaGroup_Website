@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from "react"
 
-import * as core from "@/cms/core"
-import { StudioProvider } from "@/cms/studio/context/StudioProvider"
+import * as core from "../../core/index.js"
+import { StudioProvider } from "../../studio/context/StudioProvider.jsx"
 
-import { bodyFor, titleFor } from "./modules"
-import styles from "./sheet"
+import { bodyFor, titleFor } from "./modules.js"
+import styles from "./sheet.js"
 
 /**
  * The popup — one shell, a body per kind.
@@ -56,12 +56,8 @@ import styles from "./sheet"
  * both places, so this renders identically wherever it is portalled.
  */
 
-const useDevPort = process.env.NEXT_PUBLIC_CMS_DEV_PORT === "1"
-
 const loadPort = () =>
-  useDevPort
-    ? import("@/cms/studio/dev/devPort").then((module) => module.createDevPort())
-    : import("@/cms/server/httpDataPort").then((module) => module.createHttpDataPort())
+  import("../../server/httpDataPort.js").then((module) => module.createHttpDataPort())
 
 export default function Popup({
   kind,

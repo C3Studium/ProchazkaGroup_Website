@@ -58,17 +58,13 @@ const loadStudio = (booting) =>
 /**
  * Which port to hand the Studio.
  *
- * `NEXT_PUBLIC_CMS_DEV_PORT=1` swaps in the in-memory stub — the full Contract 2
  * surface over seeded fixtures, so the whole admin can be driven without a
  * database or a mail round-trip. It is behind an explicit flag rather than a
  * NODE_ENV check so a developer can also run the real port locally.
  */
-const useDevPort = process.env.NEXT_PUBLIC_CMS_DEV_PORT === "1"
 
 const loadPort = () =>
-  useDevPort
-    ? import("./dev/devPort.js").then((module) => module.createDevPort())
-    : import("../server/httpDataPort.js").then((module) => module.createHttpDataPort())
+  import("../server/httpDataPort.js").then((module) => module.createHttpDataPort())
 
 /**
  * The Studio, ready to be a page.
@@ -111,7 +107,6 @@ export const StudioClient = ({ title = "Studio", booting = title }) => {
 }
 
 export default StudioClient
-
 
 /**
  * The port is loaded asynchronously (its module is client-only), but the Studio
@@ -207,7 +202,7 @@ function Booting({ label }) {
         placeItems: "center",
         background: "#0a0e13",
         color: "#647585",
-        font: "300 13px/1 'Switzer-Variable', system-ui, sans-serif",
+        font: "300 13px/1 'ValeCMS Sans', system-ui, sans-serif",
         letterSpacing: "0.08em",
         textTransform: "uppercase",
       }}

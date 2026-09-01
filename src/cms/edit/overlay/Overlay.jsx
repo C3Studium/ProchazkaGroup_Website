@@ -2,7 +2,7 @@ import dynamic from "next/dynamic"
 import { useCallback, useEffect, useRef, useState } from "react"
 import { createPortal } from "react-dom"
 
-import { markNamed } from "@/cms/schemas/marks"
+import { markNamed } from "../../schemas/marks.js"
 
 import {
   ACTIONS_ATTR,
@@ -23,19 +23,22 @@ import {
   linePath,
   MARK_ATTR,
   TYPE_ATTR,
-} from "../attrs"
-import { anchor, isOnScreen } from "./anchor"
-import { imageValue } from "./assets"
-import { checkHref, isCreditLink } from "./href"
-import styles from "./sheet"
-import { applyStored, beginTextEdit, fieldValue } from "./text"
+} from "../attrs.js"
+import { anchor, isOnScreen } from "./anchor.js"
+import { imageValue } from "./assets.js"
+import { checkHref, isCreditLink } from "./href.js"
+import { keepScroll } from "./keepScroll.js"
+import { studioSurface } from "../../studio/styles/surface.js"
+import { reportFixedTrap } from "../../studio/lib/fixedTrap.js"
+import styles from "./sheet.js"
+import { applyStored, beginTextEdit, fieldValue } from "./text.js"
 
 // One popup, a body per kind, one async chunk. It is loaded when an editor first
 // opens one rather than with the overlay: it drags in the Studio's provider, its
 // toast surface, the media library and every field input, and most sessions
 // never leave the page. See Popup.jsx, and `overlay/modules.js` for the bodies
 // it picks between — this file names no body and imports none.
-const PopupModule = dynamic(() => import("./Popup"), { ssr: false })
+const PopupModule = dynamic(() => import("./Popup.jsx"), { ssr: false })
 
 /**
  * The kind table, and the one question it answers.
@@ -63,6 +66,15 @@ const GAP = 8
 /** The host's own document — where this code is running, and where the media
  *  library is drawn. Never the framed page; that is `doc` inside the component. */
 const hostDocument = () => (typeof document === "undefined" ? null : document)
+
+/**
+ * Kam popup patří.
+ *
+ * Dovnitř Studia, když tam jsme — je to jeho chrome, ne chrome stránky, takže
+ * má sdílet jeho stacking context i jeho styly. Mimo Studio (editace přímo na
+ * webu přes ManageBadge) žádná plocha není a `body` je jediná odpověď.
+ */
+const popupContainer = () => studioSurface() || hostDocument()?.body || null
 
 /**
  * Contract B — the overlay, drawn inside the frame.
@@ -157,6 +169,10 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
   const [markState, setMarkState] = useState(null)
 
   const rootRef = useRef(null)
+  // Odpojovače strážce scrollu — jeden pro každý kořen. Drží se v refu, ne ve
+  // stavu: mění se při každém připojení uzlu a překreslovat kvůli tomu nemá co.
+  const detachScroll = useRef(null)
+  const detachPopupScroll = useRef(null)
   const hoverBoxRef = useRef(null)
   const selectBoxRef = useRef(null)
   const controlRef = useRef(null)
@@ -960,7 +976,15 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
     <>
       {createPortal(
         <div
-          ref={rootRef}
+          ref={(node) => {
+            rootRef.current = node
+            // Odpojení předchozího a zapojení nového v jednom místě: `ref`
+            // jako funkce se volá s `null` při odchodu, takže úklid nemá kde
+            // uniknout.
+            detachScroll.current?.()
+            detachScroll.current = node ? keepScroll(node) : null
+            if (node) reportFixedTrap(node, "overlaye")
+          }}
           className={styles.root}
           // Both directions of the same number. CSS can multiply by a custom
           // property but dividing by one is a computed-value-time trick not worth
@@ -1124,9 +1148,13 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
           One portal for every kind that has a body, because there is one popup.
           `data-cms-popup`
           says which body is in it, for anyone reading the DOM. */}
-      {popup && host
+      {popup && popupContainer()
         ? createPortal(
             <div
+              ref={(node) => {
+                detachPopupScroll.current?.()
+                detachPopupScroll.current = node ? keepScroll(node) : null
+              }}
               className={styles.root}
               style={{ "--cms-zoom": 1, "--cms-inv": 1 }}
               data-cms-overlay="popup"
@@ -1157,7 +1185,7 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
                 }}
               />
             </div>,
-            host.body,
+            popupContainer(),
           )
         : null}
     </>

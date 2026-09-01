@@ -1,9 +1,27 @@
 @use "../styles/tokens.module" as t;
 
+/* Knihovna médií se vykresluje na dvou místech s velmi různou šířkou: jako
+   celá stránka Studia a uvnitř dialogu, který je nejvýš 1180px široký.
+   
+   `container-type: inline-size` je to, co ten rozdíl umí přečíst. Do 0.1.37
+   se řídila `@media`, tedy OKNEM — takže si v 1180px krabici na širokém
+   monitoru poskládala rozvržení pro celou obrazovku a přebytek zmizel pod
+   `overflow: hidden`. Nedosažitelně: přesně tak, jak vypadala uříznutá
+   spodní lišta s tlačítky.
+   
+   `min-width: 0` k tomu, protože flexový potomek se bez něj nescvrkne pod
+   šířku svého obsahu — a mřížka miniatur je široká vždycky. Sousední
+   `.dropZone` a `.setPane` ho mají odjakživa, tady vypadl.
+   
+   Pozor na jednu věc: `container-type: inline-size` dělá z prvku containing
+   block pro potomky s `position: fixed`. V knihovně žádný takový není
+   (`.dropOverlay` je `absolute`), ale nový sem nepatří — patřil by výš. */
 .library {
   display: flex;
   flex: 1;
+  min-width: 0;
   min-height: 0;
+  container-type: inline-size;
 }
 
 /* -------------------------------------------------------------- dropzone -- */
@@ -117,6 +135,11 @@
 /* ------------------------------------------------------------------ bar -- */
 
 .libraryBar {
+  /* Zalomí se, místo aby přetekla: v dialogu je pro ni o třetinu míň místa
+     než na celé stránce a hledání, dva filtry a Nahrát se na jeden řádek
+     nevejdou. */
+  flex-wrap: wrap;
+  min-width: 0;
   display: flex;
   flex: none;
   gap: var(--st-s3);
@@ -173,6 +196,10 @@
 
 .libraryBody {
   @include t.scrollbar;
+
+  /* Knihovna se vykresluje i uvnitř overlaye, tedy na stránce hostitele.
+     Bez tohohle se dojetí na konec mřížky propadne do rolování webu pod ní. */
+  overscroll-behavior: contain;
 
   flex: 1;
   min-height: 0;
@@ -337,6 +364,10 @@
 .detailBody {
   @include t.scrollbar;
 
+  /* Knihovna se vykresluje i uvnitř overlaye, tedy na stránce hostitele.
+     Bez tohohle se dojetí na konec mřížky propadne do rolování webu pod ní. */
+  overscroll-behavior: contain;
+
   flex: 1;
   min-height: 0;
   padding: var(--st-s5);
@@ -412,16 +443,27 @@
   }
 }
 
+/* Tři tlačítka — Vyřadit z knihovny, Oříznout, Uložit — v panelu širokém
+   320px. V písmu, ve kterém se to navrhovalo, je to těsné; v jakémkoli širším
+   to přeteče, a `overflow: hidden` na kořeni to ořízne až na hraně okna.
+   Odtud useknuté „Uložit".
+   
+   Zalomit je levnější než hádat, jak široké písmo hostitel má. */
 .detailFoot {
   display: flex;
   flex: none;
+  flex-wrap: wrap;
+  min-width: 0;
   gap: var(--st-s2);
   align-items: center;
   padding: var(--st-s3) var(--st-s3) var(--st-s3) var(--st-s5);
   border-top: 1px solid var(--st-line);
 }
 
-@include t.compact {
+/* Podle KONTEJNERU, ne podle okna. Tenhle blok platí, když je knihovna úzká —
+   ať už proto, že je úzké okno, nebo proto, že je v dialogu na širokém
+   monitoru. To druhé `@media` rozeznat neumí a byl to celý ten problém. */
+@container (max-width: 900px) {
   .libraryBar,
   .grid {
     padding-right: var(--st-s5);

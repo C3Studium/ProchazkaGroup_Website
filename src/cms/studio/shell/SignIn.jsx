@@ -1,8 +1,9 @@
 import { useState } from "react"
-import { useAuth, useStudio } from "../context/StudioProvider"
-import { Button, FieldShell, IconButton } from "../ui/controls"
-import Icon from "../ui/Icon"
+import { useAuth, useStudio } from "../context/StudioProvider.jsx"
+import { Button, FieldShell, IconButton } from "../ui/controls.jsx"
+import Icon from "../ui/Icon.jsx"
 import styles from "./SignIn.module.scss"
+import { brandSubtitle, brandFootnote } from "../../brand.js"
 
 /**
  * The gate. Email and password, one submit, one failure message.
@@ -55,7 +56,7 @@ export default function SignIn() {
           </span>
           <div>
             <h1 className={styles.title}>{config.title}</h1>
-            <p className={styles.subtitle}>Redakční systém Procházka Group</p>
+            <p className={styles.subtitle}>{brandSubtitle()}</p>
           </div>
         </div>
 
@@ -125,7 +126,7 @@ export default function SignIn() {
         </form>
       </div>
 
-      <p className={styles.footnote}>Procházka Group — interní nástroj</p>
+      <p className={styles.footnote}>{brandFootnote()}</p>
     </div>
   )
 }

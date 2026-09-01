@@ -10,13 +10,13 @@ import { useReactions } from "@/components/common/ui/LikeButton/useReactions";
 import { editable, editableDoc, editableLink, isEditMode } from "@/cms/edit";
 
 // The heading comes from the CMS (siteCopy "o-nas.colleagues" — see
-// @/cms/server/site/aboutUs), one item per line. These are the two lines the
+// @/lib/site/aboutUs), one item per line. These are the two lines the
 // section shipped with and what it falls back to.
 const FALLBACK_HEADING = ["Naši", "kolegové"];
 
 // The three icons under the portrait that go somewhere fixed. They are targets
 // and nothing else — an icon has no words on screen to edit — so they are read
-// out of `o-nas.links` (ABOUT_LINKS in @/cms/server/site/aboutUs names the
+// out of `o-nas.links` (ABOUT_LINKS in @/lib/site/aboutUs names the
 // positions this file spells as literals below).
 //
 // The fourth icon, the telephone, is deliberately not among them and is not a
@@ -635,7 +635,7 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                         ) : null}
                         {/* Targets only, which is the shape `editableLink` gives
                             an element with no words on it: `items.N.value` is
-                            ABOUT_LINKS in @/cms/server/site/aboutUs. The
+                            ABOUT_LINKS in @/lib/site/aboutUs. The
                             telephone above carries no annotation on purpose: it
                             is a field of the selected person's own document and
                             is edited in the popup the panel opens, not here. */}

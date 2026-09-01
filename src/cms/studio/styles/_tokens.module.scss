@@ -69,7 +69,13 @@ $danger-soft: rgba(222, 116, 102, 0.12);
 $danger-line: rgba(222, 116, 102, 0.42);
 
 // ------------------------------------------------------------------ type --
-$font: "Switzer-Variable", "Switzer-Regular", system-ui, -apple-system, sans-serif;
+// Písmo si Studio veze samo — viz ./font.js, který ho registruje do
+// dokumentu. Jméno rodiny je vlastní schválně: kdyby se jmenovalo "Inter",
+// převzal by ho hostitel, který má vlastní Inter jiné verze.
+//
+// Záložní řetězec pořád stojí za to. Než se soubor načte, kreslí se
+// systémovým, a `font-display: swap` znamená, že se to na okamžik uvidí.
+$font: "ValeCMS Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
 $mono: ui-monospace, "SF Mono", Menlo, monospace;
 
 // Fixed density: an admin is read at one distance and should not fluidly scale.
@@ -343,6 +349,37 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
 /// `scrollbar-width` a `::-webkit-scrollbar` vedle sebe: od Chromium 121 platí
 /// ten první a druhý se ignoruje. Nechává se pro starší prohlížeče, ale barvu
 /// musí říct oba, jinak by se na nich rozešly.
+/// Ostrov: dědičné vlastnosti, které si Studio nastavuje samo, ať mu je
+/// hostitel nepodstrčí.
+///
+/// Studio žije v dokumentu cizího webu, takže na něj dosáhne každé pravidlo
+/// se selektorem `*`, `body *` nebo `:where(...)`. Kořeny si odjakživa
+/// nastavovaly písmo a barvu — to jsou ale jen dvě z dědičných vlastností.
+/// Zbytek se dědil z hostitele: `body * { letter-spacing: .02em }` rozjede
+/// tabulky, `* { white-space: nowrap }` rozbije zalomení popisků, Tailwind
+/// preflight sáhne na tlačítka.
+///
+/// Není to izolace — tou by byl shadow DOM. Je to seznam vlastností, které
+/// se prokazatelně dědí a které Studio používá, prohlášený na jednom místě
+/// místo aby se na ně čekalo po jedné.
+@mixin island {
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-transform: none;
+  text-indent: 0;
+  text-align: start;
+  white-space: normal;
+  font-variant: normal;
+  font-style: normal;
+  list-style: none;
+  cursor: auto;
+  visibility: visible;
+  text-shadow: none;
+  // Prohlížeč tím vybírá výchozí barvy formulářových prvků a posuvníků.
+  // Světlý hostitel by uvnitř tmavého Studia nakreslil bílý select.
+  color-scheme: dark;
+}
+
 @mixin scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 252, 247, 0.14) transparent;
@@ -461,7 +498,18 @@ $ease: cubic-bezier(0.22, 0.7, 0.3, 1);
   --st-fast: #{$fast};
   --st-mid: #{$mid};
   --st-ease: #{$ease};
+}
 
+/// Responzivní část tokenů. Odděleně od `declare` schválně.
+///
+/// `declare` končilo `@media` bloky, takže cokoli, co v kořeni následovalo —
+/// a v obou kořenech následuje — byla DEKLARACE ZA VNOŘENÝM PRAVIDLEM. Sass
+/// na to v některých verzích upozorňuje při každém překladu, protože se to
+/// chová jinak, než jak to vypadá.
+///
+/// Rozdělením se to nedá napsat špatně: kořen zahrne `declare` nahoře, pak
+/// své vlastní deklarace, a tenhle mixin jako poslední řádek.
+@mixin declare-responsive {
   /* The one edge every screen shares, so it folds in one place rather than in
      each of the eleven stylesheets that used to restate `var(--st-s5)` under
      their own copy of the 900px query. */

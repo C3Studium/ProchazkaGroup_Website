@@ -33,8 +33,8 @@ const NavigationContext = createContext(null)
  * @property {string} path      Adresa včetně dotazu — to, co Pages Router zve `asPath`.
  * @property {string} pathname  Adresa bez dotazu.
  * @property {boolean} isReady  Zda už router zná adresu (Pages hydratuje později).
- * @property {(url: string) => void} push
- * @property {(url: string) => void} replace
+ * @property {(url: string, options?: {scroll?: boolean, shallow?: boolean}) => void} push
+ * @property {(url: string, options?: {scroll?: boolean, shallow?: boolean}) => void} replace
  * @property {(guard: () => boolean) => () => void} guard  Vrací odhlašovací funkci.
  */
 
@@ -66,8 +66,8 @@ export const withGuards = ({ go, replaceGo }) => {
     const api = useMemo(() => {
         const allowed = () => [...guards.current].every((guard) => guard() !== false)
         return {
-            push: (url) => { if (allowed()) go(url) },
-            replace: (url) => { if (allowed()) replaceGo(url) },
+            push: (url, options) => { if (allowed()) go(assertUrl(url, 'push'), options) },
+            replace: (url, options) => { if (allowed()) replaceGo(assertUrl(url, 'replace'), options) },
             guard: (fn) => {
                 guards.current.add(fn)
                 return () => guards.current.delete(fn)
@@ -78,4 +78,49 @@ export const withGuards = ({ go, replaceGo }) => {
     // Seznam se vrací taky: Pages Router se ho ptá i u přechodů, které nevyvolalo
     // Studio, a nemá se k němu dostávat obcházením.
     return { ...api, guards }
+}
+
+/**
+ * Adresa je vždycky řetězec — a tady se to hlídá.
+ *
+ * Pages Router bere i tvar `{ pathname, query }`, App Router ne: ten předá
+ * cokoli dostane rovnou svému `addPathPrefix`, kde to skončí na
+ * `path.startsWith is not a function`. Chyba nepojmenuje ani soubor, ani
+ * volajícího, a na Pages Routeru nenastane vůbec — takže projekt, na kterém se
+ * knihovna vyvíjí, ji neuvidí a projekt, který ji nasadí, dostane hlášku bez
+ * adresy. Proto se to zastaví tady, s větou, která říká kde.
+ */
+const assertUrl = (url, method) => {
+    if (typeof url === 'string') return url
+    throw new TypeError(
+        `Navigace Studia dostala do ${method}() ${url === null ? 'null' : typeof url} místo řetězce. ` +
+            'Objektový tvar `{ pathname, query }` umí jen Pages Router; ' +
+            'adresu složí `withQuery(router.path, { … })`.',
+    )
+}
+
+/**
+ * Tatáž adresa s jinými parametry dotazu.
+ *
+ * Skládá se z `router.path`, ne z `router.pathname` a `router.query`, a to
+ * schválně. Pages Router má v `pathname` vzor routy (`/studio/[[...path]]`)
+ * a v `query` i segmenty cesty; poskládat z nich adresu by dalo
+ * `/studio/[[...path]]?path=media`. `path` je skutečná adresa v obou
+ * routerech, takže se z ní dá vyjít bez rozlišování.
+ *
+ * Hodnota `null` nebo `undefined` parametr odebere, ostatní ho nastaví.
+ *
+ * @param {string} path                  `router.path`
+ * @param {Record<string, unknown>} changes
+ * @returns {string}
+ */
+export const withQuery = (path, changes) => {
+    const [base, search] = String(path || '/').split('?')
+    const query = new URLSearchParams(search)
+    for (const [key, value] of Object.entries(changes || {})) {
+        if (value === null || value === undefined) query.delete(key)
+        else query.set(key, String(value))
+    }
+    const rest = query.toString()
+    return rest ? `${base}?${rest}` : base
 }

@@ -24,7 +24,8 @@ import { pageFor, resolvePage } from '@/cms/site'
 import { HOMEPAGE_COPY_KEYS } from '@/cms/visualEditing'
 
 import { readerFor } from './archive.js'
-import { getApprovedReviews, getAssistant, getConsultants, getPartners, getSiteCopy } from './content.js'
+import { getSiteCopy } from './content.js'
+import { sourceReader } from './sources.js'
 
 /**
  * Which schema type a block's `type` name means.
@@ -51,25 +52,6 @@ const TYPES = Object.freeze({ siteCopy })
 
 const typeNamed = (name) => TYPES[name] || null
 
-/**
- * Which typed reader answers a source of a given type.
- *
- * The map is the whole of the coupling between a configuration and the site's
- * data access. Each entry is one of `content.js`'s shapers, which is where
- * every normalisation, filter and fallback the site depends on lives — a
- * configuration cannot bypass them, only name one.
- *
- * `read` is threaded rather than chosen inside, because it is the single switch
- * the Studio's preview flips: draft mode swaps `readPublished` for
- * `readEditable`, the Archive swaps in a moment-bound `readAt`, and the shaping
- * runs unchanged over whichever bodies come back.
- */
-const SOURCE_READERS = Object.freeze({
-    partner: (options, read) => getPartners({ ...options, read }),
-    review: (options, read) => getApprovedReviews({ ...options, read }),
-    consultant: (options, read) => getConsultants({ ...options, read }),
-    assistant: (options, read) => getAssistant({ ...options, read }),
-})
 
 // One warning per unknown route per process, on the same terms read.js reports
 // a missing table: a dev server rendering a page repeatedly should say this once.
@@ -127,9 +109,12 @@ export const getPageContent = async (route, { draft = false, at = null } = {}) =
         page.copy ? getSiteCopy({ page: page.copy, read }) : Promise.resolve({}),
         ...names.map((name) => {
             const { type, ...options } = page.sources[name]
-            const reader = SOURCE_READERS[type]
+            const reader = sourceReader(type)
             if (!reader) {
-                report(`typ "${type}" nemá čtečku; zdroj "${name}" na "${route}" zůstane prázdný.`)
+                report(
+                    `typ "${type}" nemá čtečku; zdroj "${name}" na "${route}" zůstane prázdný. ` +
+                        'Čtečky se přiřazují přes `registerSources` — viz server/site/sources.js.',
+                )
                 return Promise.resolve([])
             }
             return reader(options, read)

@@ -61,8 +61,8 @@ import {
     getConsultants,
     getPartners,
     getSiteCopy,
-} from '@/cms/server/site/content.js'
-import { getContactContent, getFooterContent, getHomepageContent, readerFor } from '@/cms/server/site'
+} from '@/lib/site'
+import { getContactContent, getFooterContent, getHomepageContent, readerFor } from '@/lib/site'
 
 import App from '@/pages/_app'
 import Home from '@/pages/index'

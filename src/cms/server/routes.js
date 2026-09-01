@@ -44,7 +44,7 @@ export const routesRoot = (root = process.cwd()) => {
 }
 
 /** `[slug]` a `[...vse]` jsou segmenty, které se dozví adresu až za běhu. */
-const isDynamic = (segment) => segment.startsWith('[')
+const isDynamic = (segment) => typeof segment === 'string' && segment.startsWith('[')
 
 /** Skupiny `(marketing)` route neovlivňují a soukromé `_slozky` se nevykreslují. */
 const isIgnoredDir = (name) =>
@@ -83,7 +83,12 @@ const walkApp = (dir, segments, out) => {
         if (entry.isDirectory()) {
             if (isIgnoredDir(entry.name)) continue
             // Skupina `(marketing)` route nemění — segment se do adresy nepočítá.
-            const next = /^\(.*\)$/.test(entry.name) ? segments : [...segments, entry.name]
+            // Totéž paralelní slot `@dashboard`: je to místo v layoutu, ne kus
+            // adresy. Bez tohohle se u účtu vypsalo osm rout jako
+            // `/[countryCode]/account/@dashboard/orders`, což není URL a nikdo
+            // to do konfigurace deklarovat nemá.
+            const invisible = /^\(.*\)$/.test(entry.name) || entry.name.startsWith('@')
+            const next = invisible ? segments : [...segments, entry.name]
             walkApp(full, next, out)
             continue
         }
@@ -101,6 +106,23 @@ const walkApp = (dir, segments, out) => {
  * @returns {{ router: 'pages'|'app'|null, rel: string|null,
  *             routes: Array<{ route: string, file: string, dynamic: boolean }> }}
  */
+/**
+ * Dynamický segment, kterým začíná KAŽDÁ routa, nebo null.
+ *
+ * `app/[countryCode]/…` u Medusy, `app/[locale]/…` u vícejazyčného webu.
+ * Adresa úvodní stránky pak není `/`, ale `/cz`, a to je rozdíl, na kterém
+ * stojí náhled: kdo deklaruje `/`, pošle rám na cestu, která neexistuje.
+ *
+ * Hledá se jen tehdy, když ho mají opravdu všechny — jedna routa mimo něj
+ * znamená, že to není prefix webu, ale obyčejná dynamická sekce.
+ */
+export const commonPrefix = (routes) => {
+    if (!routes.length) return null
+    const first = routes[0].route.split('/')[1]
+    if (!first || !isDynamic(first)) return null
+    return routes.every((entry) => entry.route.split('/')[1] === first) ? `/${first}` : null
+}
+
 export const discoverRoutes = (root = process.cwd()) => {
     const found = routesRoot(root)
     if (!found) return { router: null, rel: null, routes: [] }
@@ -108,5 +130,23 @@ export const discoverRoutes = (root = process.cwd()) => {
     const walk = found.router === 'app' ? walkApp : walkPages
     const routes = walk(found.dir, [], [])
     routes.sort((a, b) => (a.route === '/' ? -1 : b.route === '/' ? 1 : a.route.localeCompare(b.route, 'cs')))
-    return { router: found.router, rel: found.rel, routes }
+
+    // Paralelní sloty jsou jedna adresa, ne tři.
+    //
+    // `app/[countryCode]/account/@dashboard/page.tsx`, `.../@login/page.tsx`
+    // a `.../@verifyEmail/page.tsx` obsluhují `/cz/account` — slot je místo
+    // v layoutu, ne kus cesty. Segment se do routy nezapočítává (viz walkApp),
+    // takže z nich vyjde třikrát táž adresa a `valecms pages` nabízel
+    // deklarovat účet třikrát.
+    //
+    // Vyhrává kandidát BEZ slotu, ať `file` ukazuje na soubor, který se dá
+    // otevřít a přečíst — `@dashboard/page.tsx` je jen jedna ze tří větví.
+    const bySlot = (entry) => (entry.file.includes(`${path.sep}@`) ? 1 : 0)
+    const best = new Map()
+    for (const entry of routes) {
+        const held = best.get(entry.route)
+        if (!held || bySlot(entry) < bySlot(held)) best.set(entry.route, entry)
+    }
+
+    return { router: found.router, rel: found.rel, routes: [...best.values()] }
 }

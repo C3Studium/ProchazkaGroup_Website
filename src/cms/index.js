@@ -19,4 +19,7 @@ export {
   siteChrome,
   studioChrome,
   usesStudioChrome,
-} from "./shell"
+} from "./shell.jsx"
+
+// Obal `_app` — celé zapojení Studia jedním řádkem. Viz withStudio.jsx.
+export { withStudio } from './withStudio.jsx'

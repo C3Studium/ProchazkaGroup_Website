@@ -1,15 +1,15 @@
 import { useCallback, useMemo, useRef, useState } from "react"
-import { useAuth, usePort } from "../context/StudioProvider"
-import { useAsync } from "../hooks/useAsync"
-import { useToast } from "../context/ToastProvider"
-import { formatDateTime, formatRelative, plural } from "../lib/format"
-import { hrefs } from "../lib/routes"
-import { Button, FieldShell, IconButton, Segmented, Toggle } from "../ui/controls"
-import { Badge, EmptyState, ErrorState, SectionHead, SkeletonRows, Spinner } from "../ui/feedback"
-import { ConfirmDialog, Modal } from "../ui/Modal"
-import Icon from "../ui/Icon"
-import PasswordDialog from "../shell/PasswordDialog"
-import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout"
+import { useAuth, usePort } from "../context/StudioProvider.jsx"
+import { useAsync } from "../hooks/useAsync.js"
+import { useToast } from "../context/ToastProvider.jsx"
+import { formatDateTime, formatRelative, plural } from "../lib/format.js"
+import { hrefs } from "../lib/routes.js"
+import { Button, FieldShell, IconButton, Segmented, Toggle } from "../ui/controls.jsx"
+import { Badge, EmptyState, ErrorState, SectionHead, SkeletonRows, Spinner } from "../ui/feedback.jsx"
+import { ConfirmDialog, Modal } from "../ui/Modal.jsx"
+import Icon from "../ui/Icon.jsx"
+import PasswordDialog from "../shell/PasswordDialog.jsx"
+import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout.jsx"
 import styles from "./SettingsView.module.scss"
 
 /**
@@ -242,24 +242,6 @@ function EnvironmentSection() {
             note="Solí otisky IP adres. Bez něj limity fungují, ale otisk je nesolený."
           />
 
-          <Fact
-            label="NEXT_PUBLIC_CMS_DEV_PORT"
-            value={
-              data.devPort.enabled ? (
-                <Badge tone="danger" dot>
-                  zapnuto
-                </Badge>
-              ) : (
-                <Badge tone="neutral">vypnuto</Badge>
-              )
-            }
-            tone={data.devPort.enabled ? "danger" : "neutral"}
-            note={
-              data.devPort.enabled
-                ? `Studio běží na prohlížečové atrapě a dvě API cesty přeskakují kontrolu přihlášení: ${data.devPort.affects.join(", ")}. V produkci nikdy.`
-                : "Studio jede na serveru a obě API cesty kontrolují přihlášení."
-            }
-          />
         </div>
       ) : null}
     </Section>

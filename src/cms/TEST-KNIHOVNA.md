@@ -19,7 +19,7 @@ vrátil. Teď `src/cms` přeskakuje.
 
 **2. Typy obsahu.** Pět typů tohohle webu (`partner`, `consultant`,
 `assistant`, `offer`, `qna`) se přesunulo do `src/content/types/`. Seznam typů
-je nově v `src/lib/cms.types.mjs`. V knihovně zůstaly `siteCopy`, `review`
+je nově v `cms.types.mjs` v kořeni. V knihovně zůstaly `siteCopy`, `review`
 a `marks` — to nejsou obsah, ale mechanismy, na kterých stojí config a fronta
 recenzí.
 

@@ -4,7 +4,7 @@ import { PagesNavigation } from "@/cms/runtime/pagesNavigation.jsx"
 import { studioChrome } from "@/cms"
 import PreviewHost from "@/cms/studio/preview/PreviewHost"
 import { listSitePages } from "@/cms/server/pages"
-import { getHomepageContent } from "@/cms/server/site"
+import { getHomepageContent } from "@/lib/site"
 
 // Registers this project's content types so the rail can name the document an
 // editor came from ("Texty stránek" rather than "siteCopy"). Same import the

@@ -91,8 +91,8 @@ Studio je navíc v podstatě SPA. Pod App Routerem z něj bude jedna
 
 ### Co je hotové
 
-Hranice je dnes **tři importy ven** (`@/lib/cms.config.js` ×2,
-`@/lib/cms.types.mjs` ×1) a **nula vazeb v SCSS** — `src/cms/styles/_viewport.scss`
+Hranice je dnes **tři relativní importy ven** (`cms.config.js` ×2,
+`cms.types.mjs` ×1) a **nula vazeb v SCSS** — `src/cms/styles/_viewport.scss`
 má vlastní breakpointy a `sync-styles.js` do `src/cms` nesahá (`ownsItsStyles`).
 
 ### Pořadí fází

@@ -3,9 +3,11 @@
  *
  * The Studio is a library (see LIBRARY.md): a second project should be able to
  * adopt it without re-deriving the HTTP policy its admin needs. This module is
- * that seam. The host writes one line —
+ * that seam. A host that wraps its config in `withValeCms` gets these headers
+ * applied for it and need not know this module exists; a host that would rather
+ * do it by hand writes one line —
  *
- *   import { cmsHeaders } from './src/cms/nextConfig.mjs'
+ *   import { cmsHeaders } from '@c3studium/valecms/nextConfig.mjs'
  *   async headers() { return [...cmsHeaders(), ...ownHeaders] }
  *
  * — and everything the CMS wants said about its own routes is said here.

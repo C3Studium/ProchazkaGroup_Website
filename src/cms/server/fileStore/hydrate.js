@@ -1,23 +1,23 @@
-// Filling an empty file store — SERVER ONLY.
+// Založení prázdného úložiště na disku — JEN NA SERVERU.
 //
-// `src/cms/studio/dev/seed.js` already holds two thousand lines of realistic
-// content: reviews in both moderation states, thirteen consultants including an
-// archived one, partners of both kinds, offers, Q&A and the page copy. It is the
-// dataset the Studio was built against. Re-authoring any of it here would create
-// a second set of fixtures to keep in step with the first, so this module does
-// one thing: it translates those fixtures into database rows.
+// Dřív se sem vlévala osazovací data původního webu: poradci, recenze, texty
+// stránek. Byl to dataset, proti kterému se Studio vyvíjelo — a v knihovně
+// nemá co dělat. Kdo si ji nainstaluje, dostal cizí obsah do svého projektu
+// a nechápal odkud; přesně tak se to taky stalo.
 //
-// It is plain data with no imports of its own, so importing it on the server
-// costs nothing and drags nothing along.
+// Nová instalace tedy začíná prázdná. To je u redakčního systému správně:
+// obsah do něj patří tvůj.
 
 import { mediaBucket } from '../env.js'
-
-import { seedAssets, seedDocuments } from '@/cms/studio/dev/seed'
 
 // Bumped when the translation below changes shape, not when the fixtures gain a
 // document. A store file written by an older version is discarded and rebuilt —
 // same mechanism, same reasoning as devPort.js's STORE_VERSION.
-export const STORE_VERSION = 1
+// Prázdné sady. Jsou tu jako pojmenované hodnoty, ne jako `{}` v kódu níž,
+// aby bylo vidět, že prázdno je záměr, ne opomenutí.
+const seedDocuments = {}
+
+export const STORE_VERSION = 2
 
 const clone = (value) => (value == null ? value : JSON.parse(JSON.stringify(value)))
 
@@ -85,13 +85,13 @@ const mediaRow = (asset) => ({
  */
 export const hydrateTables = () => {
     const documents = []
-    for (const [type, entries] of Object.entries(seedDocuments || {})) {
+    for (const [type, entries] of Object.entries(seedDocuments)) {
         for (const entry of entries) documents.push(documentRow(type, entry))
     }
 
     return {
         cms_document: documents,
-        cms_media: (seedAssets || []).map(mediaRow),
+        cms_media: [],
         cms_user: [],
         cms_session: [],
     }

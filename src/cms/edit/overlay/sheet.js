@@ -1,4 +1,5 @@
 import styles from "./overlay.module.scss"
+import { registerStudioFont } from "../../studio/styles/font.js"
 
 /**
  * The overlay's stylesheet, and how it reaches the document it is drawn in.
@@ -27,14 +28,40 @@ export default styles
 const KEY = "data-cms-overlay-styles"
 
 /**
- * The one selector fragment in `overlay.module.scss` that is not a hashed class:
- * `:global([data-cms-editing])`, which styles the page's own element while it is
- * being typed into. It is `:global` because the attribute belongs to text.js, not
- * to this module, and it is listed here for the same reason it exists there —
- * the element is a motion component and an attribute is the only hook on it that
- * neither React nor framer-motion will take back.
+ * The element being typed into, styled from here rather than from the SCSS.
+ *
+ * It marks a node in the *page*: the attribute is set by text.js because it is
+ * the only hook on a motion component that neither React nor framer-motion
+ * takes back, and no ancestor of it is named by `overlay.module.scss`. As a
+ * rule in that module the selector was `:global([data-cms-editing])` — fully
+ * global, with no local class anywhere in it.
+ *
+ * Which is exactly what a CSS module compiled in pure mode refuses:
+ *
+ *     Selector ":global([data-cms-editing])" is not pure
+ *     (pure selectors must contain at least one local class or id)
+ *
+ * Every escape stays refused — a `:global { … }` block, a selector list pairing
+ * it with a local class. Only a local ancestor passes, and there is none. The
+ * rule was therefore portable only as long as nothing compiled this module in
+ * pure mode; the first host that did could not build the package at all.
+ *
+ * So it is a string. It reaches the frame the same way the rest does, appended
+ * to `overlayCss()` below, and being a string it also cannot be lost when the
+ * host's own sheet is the one thing this file cannot see into.
+ *
+ * The colours are `$pick`, `$pick-inner` and `$pick-edge` from the SCSS. They
+ * are literals in both places because a Sass variable cannot cross into JS, and
+ * a custom property would not help: the element inherits nothing from `.root`.
+ * The note above `$pick` explains why there are three rings and not one.
  */
-const GLOBAL_MARKERS = ["data-cms-editing"]
+const EDITING_CSS = `[data-cms-editing] {
+  caret-color: #ff6a00;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.82),
+    0 0 0 3px #ff6a00,
+    0 0 0 4px rgba(0, 0, 0, 0.72);
+}`
 
 const classMarkers = () =>
   Object.values(styles)
@@ -76,7 +103,7 @@ function collect(rules, markers, out) {
 /** Every rule in `hostDoc` that belongs to this module, as text. */
 export function overlayCss(hostDoc = typeof document === "undefined" ? null : document) {
   if (!hostDoc) return ""
-  const markers = [...classMarkers(), ...GLOBAL_MARKERS]
+  const markers = classMarkers()
   const out = []
   for (const sheet of Array.from(hostDoc.styleSheets)) {
     let rules = null
@@ -104,6 +131,11 @@ export function overlayCss(hostDoc = typeof document === "undefined" ? null : do
  */
 export function installOverlayStyles(frameDoc, hostDoc) {
   if (!frameDoc?.head) return null
+
+  // Rám je jiný dokument s vlastní sadou písem. Bez tohohle by se ovládání
+  // overlaye kreslilo systémovým písmem uvnitř stránky, která má své vlastní
+  // — dvě různá písma v jednom obrázku.
+  registerStudioFont(frameDoc)
   const css = overlayCss(hostDoc)
   if (!css) {
     // The host's own stylesheet has not arrived, which cannot happen from a
@@ -114,13 +146,20 @@ export function installOverlayStyles(frameDoc, hostDoc) {
     return null
   }
 
+  // The editing ring goes last, so a host that ships its own rule for the
+  // attribute loses to ours rather than the other way round. Appended here and
+  // not inside `overlayCss` so the check above still means what it says: it asks
+  // whether the module's own rules arrived, and a string added by this file
+  // would always answer yes.
+  const full = `${css}\n${EDITING_CSS}`
+
   let node = frameDoc.querySelector(`style[${KEY}]`)
   if (!node) {
     node = frameDoc.createElement("style")
     node.setAttribute(KEY, "")
     frameDoc.head.appendChild(node)
   }
-  if (node.textContent !== css) node.textContent = css
+  if (node.textContent !== full) node.textContent = full
   return node
 }
 

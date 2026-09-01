@@ -11,6 +11,7 @@
 
 export { OMIT, f } from './fields.js'
 export {
+    addressesOf,
     copyKeysOf,
     defineBlock,
     defineBlockList,

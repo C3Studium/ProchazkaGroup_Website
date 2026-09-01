@@ -63,6 +63,8 @@
  * overlay, so no overlay is created, so nothing is ever blocked there.
  */
 
+import { pathMatches } from "./dom.js"
+
 /**
  * Every pointer and mouse event, minus everything that scrolls.
  *
@@ -96,6 +98,7 @@ const BLOCKED = [
 const CANCELLED = new Set(["click", "auxclick", "dragstart"])
 
 /** The overlay's chrome, and the field an editor is typing into. */
+
 const EXEMPT = "[data-cms-overlay],[data-cms-editing]"
 
 /**
@@ -114,11 +117,19 @@ export function installInteractionLock(frameWindow) {
   if (!doc) return { release() {} }
 
   const onEvent = (event) => {
-    const target = event.target
-    // `closest` is missing on the document, on `window` and on a text node — all
-    // of which can be a target here (`mouseleave` fires at the document when the
-    // pointer leaves the frame). None of them is an exempt zone.
-    if (target && typeof target.closest === "function" && target.closest(EXEMPT)) return
+    // `composedPath()`, ne `event.target.closest()`.
+    //
+    // Dvě věci, které `closest` neumí. Za prvé: cíl uvnitř stínového stromu je
+    // zvenčí PŘEADRESOVANÝ na hostitelský prvek, takže `closest` hledá od
+    // něčeho jiného, než na co se kliklo — výjimka pro overlay by přestala
+    // platit v okamžiku, kdy se jeho část do stínu přesune, a zámek by začal
+    // blokovat vlastní ovládání. Za druhé: `closest` na dokumentu, na `window`
+    // ani na textovém uzlu vůbec není, a všechny tři tady jako cíl být můžou
+    // (`mouseleave` míří na dokument, když ukazatel opustí rám).
+    //
+    // Cesta obojí řeší: je to seznam skutečných uzlů od cíle po okno a
+    // `matches` se ptá jen těch, které jsou prvky.
+    if (pathMatches(event, EXEMPT)) return
     event.stopPropagation()
     if (CANCELLED.has(event.type)) event.preventDefault()
   }

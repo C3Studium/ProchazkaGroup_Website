@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { useStudioRouter } from "../../runtime/navigation.jsx"
+import { useStudioRouter, withQuery } from "../../runtime/navigation.jsx"
 
 import DeviceBar from "./DeviceBar.jsx"
 import PageRail from "./PageRail.jsx"
@@ -71,10 +71,7 @@ export default function PreviewHost({ mode, generatedAt, sources, pages }) {
 
     const navigate = useCallback(
         (next) => {
-            const query = { ...router.query }
-            if (next === "/") delete query.p
-            else query.p = next
-            router.replace({ pathname: router.pathname, query }, undefined, {
+            router.replace(withQuery(router.path, { p: next === "/" ? null : next }), {
                 shallow: true,
                 scroll: false,
             })
@@ -97,11 +94,10 @@ export default function PreviewHost({ mode, generatedAt, sources, pages }) {
      */
     const refresh = useCallback(() => {
         frame.captureScroll()
-        router.replace(
-            { pathname: router.pathname, query: { ...router.query, r: Date.now().toString(36) } },
-            undefined,
-            { scroll: false, shallow: false },
-        )
+        router.replace(withQuery(router.path, { r: Date.now().toString(36) }), {
+            scroll: false,
+            shallow: false,
+        })
     }, [frame, router])
 
     /**

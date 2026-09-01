@@ -140,6 +140,23 @@ function assertDeclared(declared, pathname) {
 export function StudioShell({ children }) {
   useEffect(() => {
     delete document.documentElement.dataset.preload
+
+    // Razítko na `<html>`, dokud je Studio na obrazovce.
+    //
+    // Pages Router má `assertDeclared`, který na chybějící shell upozorní;
+    // App Router neměl nic, takže si každý hostitel psal do svých globals
+    // vlastní pravidlo, aby si na routě /studio vypnul, co tam nechce —
+    // plynulý scroll, obal s `transform`, skryté posuvníky. Teď stačí:
+    //
+    //     html[data-valecms-studio] .muj-obal { transform: none }
+    //
+    // Studio.jsx totéž razí ze své strany; tady kvůli App Routeru, kde se
+    // `StudioShell` mění dřív, než se Studio vůbec připojí.
+    const root = document.documentElement
+    root.dataset.valecmsStudio = "true"
+    return () => {
+      delete root.dataset.valecmsStudio
+    }
   }, [])
 
   return <>{children}</>

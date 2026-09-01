@@ -75,18 +75,11 @@ const present = (name) => Boolean(String(process.env[name] || '').trim())
  *   - which Supabase project the deployment points at.
  *   - which account bootstrapped as owner. An address, and the owner's own; it
  *     is already on the users screen.
- *   - whether NEXT_PUBLIC_CMS_DEV_PORT is on. It is not cosmetic: with it set
- *     to "1" the Studio runs on an in-browser stub AND two API routes stop
- *     checking for a session (api/studio/preview.js:47, api/studio/edit.js:41),
- *     because in that mode there is no server-side session to check. Correct
- *     there, indefensible if it is ever true in production — so the screen says
- *     which it is rather than leaving it to a deploy log.
  */
 export const readStatus = () => {
     assertServer('readStatus')
 
     const serviceRole = hasServiceRoleKey()
-    const devPort = String(process.env.NEXT_PUBLIC_CMS_DEV_PORT || '').trim() === '1'
 
     let url = null
     try {
@@ -130,11 +123,5 @@ export const readStatus = () => {
             ipHashSaltSet: present('CMS_IP_HASH_SALT'),
         },
 
-        devPort: {
-            enabled: devPort,
-            // Named here rather than in the component so the two files that
-            // actually contain the branch are what gets quoted.
-            affects: ['src/pages/api/studio/preview.js', 'src/pages/api/studio/edit.js'],
-        },
     }
 }

@@ -1,11 +1,11 @@
 import { createElement } from "react"
 import { createRoot } from "react-dom/client"
 
-import { createFieldSaver } from "@/cms/studio/lib/visualSave"
-import { bodyOfDoc, valueAt } from "./assets"
-import { trackSave } from "./commit"
-import { installInteractionLock } from "./lock"
-import { installOverlayStyles, removeOverlayStyles } from "./sheet"
+import { createFieldSaver } from "../../studio/lib/visualSave.js"
+import { bodyOfDoc, valueAt } from "./assets.js"
+import { trackSave } from "./commit.js"
+import { installInteractionLock } from "./lock.js"
+import { installOverlayStyles, removeOverlayStyles } from "./sheet.js"
 
 /**
  * Mounting the overlay into the framed page, from the host's bundle.
@@ -62,12 +62,9 @@ const records = new WeakMap()
 // Contract C's host half. One saver for the whole session: it serialises writes
 // per field, so two edits a keystroke apart cannot land out of order, and that
 // property only exists if there is one of it.
-const useDevPort = process.env.NEXT_PUBLIC_CMS_DEV_PORT === "1"
 
 const loadPort = () =>
-  useDevPort
-    ? import("@/cms/studio/dev/devPort").then((module) => module.createDevPort())
-    : import("@/cms/server/httpDataPort").then((module) => module.createHttpDataPort())
+  import("../../server/httpDataPort.js").then((module) => module.createHttpDataPort())
 
 let portPromise = null
 const withPort = () => {
@@ -157,7 +154,7 @@ function create(frameWindow) {
   // stay in their own chunk. The stylesheet above is *not* in that chunk — it is
   // reached by the static import at the top of this file — so it is in the
   // host's page bundle and parsed before any of this runs.
-  import("./Overlay").then(({ default: Overlay }) => {
+  import("./Overlay.jsx").then(({ default: Overlay }) => {
     if (!record.alive) return
     record.Overlay = Overlay
     record.root = createRoot(record.container)

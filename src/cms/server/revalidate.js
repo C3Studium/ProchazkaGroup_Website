@@ -23,8 +23,8 @@
 // Nothing here is reachable from a public page: it is imported by the CMS API
 // handler alone, and `res.revalidate` only exists on an API route's response.
 
-import site from '@/cms/site/config'
-import { dynamicPages, routesForDocument, sourceHolds } from '@/cms/site'
+import site from '../site/config.js'
+import { addressesOf, dynamicPages, routesForDocument, sourceHolds } from '../site/index.js'
 
 import { listRegeneratingRoutes } from './pages.js'
 import { readPublished } from './site/read.js'
@@ -88,7 +88,13 @@ const allDynamicPaths = async (routes = null) => {
         for (const body of rows) {
             if (!sourceHolds(page.query, page.query.type, body)) continue
             for (const path of [].concat(page.resolve(body) || [])) {
-                if (typeof path === 'string' && path.startsWith('/')) out.push(path)
+                // Rozšíření na regiony i tady. `routesForDocument` si to řeší
+                // samo, ale tahle větev jde mimo něj — je pro `everywhere`,
+                // tedy pro patičku a další globální bloky, které jsou na
+                // KAŽDÉ stránce. Kdyby se rozšíření vynechalo, byla by
+                // regenerace globálního bloku ta jediná, která deset regionů
+                // přeskočí.
+                if (typeof path === 'string' && path.startsWith('/')) out.push(...addressesOf(site, path))
             }
         }
     }

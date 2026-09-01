@@ -24,7 +24,7 @@ import {
     getPageContent,
     readerFor,
     viewOf,
-} from "@/cms/server/site"
+} from "@/lib/site"
 
 // This page took `footerStaticProps` until it grew a belt of reviews. A page
 // with a reader of its own writes its own and calls the shared three

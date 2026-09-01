@@ -1,7 +1,7 @@
 import Head from "next/head"
 
 import AdvisorCard from "@/components/pages/advisor/AdvisorCard"
-import { getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
+import { getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
 
 // One page per published consultant, and it exists to collect a review for that
 // one person — this is the address behind the QR code on their business card,

@@ -24,25 +24,18 @@
 import { requireOwner } from '../auth.js'
 import { getArchiveMoment } from '../site/index.js'
 
-// Mirrors the switch in the two sibling routes: with the in-memory dev port
-// there is no server-side session to check, so requiring one would make the
-// Archive unreachable in the environment it is developed in.
-const DEV_PORT = process.env.NEXT_PUBLIC_CMS_DEV_PORT === '1'
-
 export const handleMoment = async function handler(req, res) {
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET')
         return res.status(405).json({ code: 'invalid', message: 'Metoda není povolena, použijte GET' })
     }
 
-    if (!DEV_PORT) {
-        try {
-            await requireOwner(req, res)
-        } catch {
-            return res.status(401).json({ code: 'unauthorized', message: 'Archiv je přístupný jen vlastníkovi' })
-        }
+    try {
+        await requireOwner(req, res)
+    } catch {
+        return res.status(401).json({ code: 'unauthorized', message: 'Archiv je přístupný jen vlastníkovi' })
     }
-
+    
     const at = Array.isArray(req.query.at) ? req.query.at[0] : req.query.at
     const route = Array.isArray(req.query.route) ? req.query.route[0] : req.query.route
 

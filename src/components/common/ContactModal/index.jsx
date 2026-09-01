@@ -16,7 +16,7 @@ import { editable, editableDoc, editableLink, isEditMode } from "@/cms/edit";
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
 // The sheet's own words come from the CMS (siteCopy "global.contact" — see
-// getContactContent in @/cms/server/site/footer, where CONTACT_LINES names the
+// getContactContent in @/lib/site/footer, where CONTACT_LINES names the
 // positions this file spells as literals). These are what it shipped with and
 // what it falls back to; a route whose getStaticProps hands down nothing renders
 // exactly this.
@@ -52,7 +52,7 @@ const labelAt = (copy, index) =>
 
 // Whose sheet this is comes from the Studio — the `assistant` type, read on
 // every page beside the patička because this opens from the navigation and the
-// navigation has no props of its own. See @/cms/server/site/footer.
+// navigation has no props of its own. See @/lib/site/footer.
 //
 // Nothing is hardcoded here, and the empty state is deliberate rather than
 // defensive: with no row in the Studio the right-hand half shows the frame and
@@ -590,7 +590,7 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                                 fields of one `assistant` row, and what an editor
                                 wants from clicking any of them is the form they
                                 already know. `id` reaches here only in draft mode
-                                — see `provenance` in @/cms/server/site/content. */}
+                                — see `provenance` in @/lib/site/people. */}
                             {/* Not rendered on a phone rather than hidden there.
                                 The photograph is a GridDistortion, which is a
                                 WebGL canvas: it already declines to take a

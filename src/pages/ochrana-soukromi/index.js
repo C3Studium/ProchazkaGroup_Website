@@ -1,6 +1,6 @@
 import Head from "next/head"
 
-import { getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
+import { getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
 
 import TermsContent from "@/components/pages/gdpr/TermsPage"
 

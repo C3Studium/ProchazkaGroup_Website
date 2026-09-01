@@ -16,22 +16,32 @@ import path from 'node:path'
 
 import { cmsErrorFromPostgrest, conflict, invalid, notFound, serverError } from './errors.js'
 import { probeBytes } from './imageProbe.js'
+import { sanitizeSvg } from './svgSanitize.js'
 import { MEDIA_COLUMNS, toAsset } from './query.js'
 import { buildUsageIndex } from './mediaUsage.js'
 import { assertStoragePort, buildObjectKey } from './ports/storage.js'
 
 const TABLE = 'cms_media'
 
-// image/svg+xml is absent deliberately. An SVG is a script host; serving one
-// from a bucket the site embeds turns an editor upload into stored XSS the day
-// someone puts the bucket behind the site's own domain. The public site already
-// ships every logo as .webp, so nothing is lost by requiring the same here.
+// SVG tu dlouho nebylo, a důvod platí dál: SVG není obrázek, je to dokument.
+// Umí `<script>`, `on*` obsluhy, `<foreignObject>` s HTML uvnitř. Uložit ho tak,
+// jak přišel, a servírovat z domény webu znamená dát redaktorovi možnost
+// spustit cizí kód komukoli, kdo tu adresu otevře.
+//
+// Teď tu je, ale ne tak, jak přišlo: ukládají se bajty PO vyčištění
+// (./svgSanitize.js, bílý seznam značek a atributů), ne originál. Rozšířit
+// seznam bez toho by byla ta chyba, před kterou tenhle komentář varoval.
+//
+// Zbývající riziko, které se čištěním neřeší: bucket na TÉŽE doméně jako web.
+// Pak je otevřená adresa souboru stránkou webu se vším, co k tomu patří.
+// Proto CMS_MEDIA_HOST míří jinam — a proto to tady stojí.
 const ALLOWED_MIME = new Set([
     'image/png',
     'image/jpeg',
     'image/webp',
     'image/avif',
     'image/gif',
+    'image/svg+xml',
     'application/pdf',
 ])
 
@@ -169,7 +179,22 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
                 )
             }
 
-            const hash = crypto.createHash('sha256').update(buffer).digest('hex')
+            // Čistí se PŘED otiskem, aby se ukládalo, počítalo a porovnávalo
+            // totéž. Otisk originálu by znamenal, že dva soubory lišící se jen
+            // vloženým skriptem jsou dva různé assety se stejnou kresbou.
+            let bytes = buffer
+            if (mime === 'image/svg+xml') {
+                const cleaned = sanitizeSvg(buffer)
+                if (!cleaned) {
+                    throw invalid(
+                        'Z toho SVG po vyčištění nezbyla žádná kresba. ' +
+                        'Nejspíš je celé postavené na skriptu nebo na vnořeném HTML — ulož ho jako .webp.'
+                    )
+                }
+                bytes = Buffer.from(cleaned, 'utf8')
+            }
+
+            const hash = crypto.createHash('sha256').update(bytes).digest('hex')
             const key = buildObjectKey({ hash, filename })
 
             // Same bytes uploaded twice is the same asset. Returning the
@@ -182,11 +207,11 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
             const existing = await repo.findByPath(key)
             if (existing) return existing.archivedAt ? repo.restore(existing.id) : existing
 
-            await storage.put(key, buffer, { contentType: mime, upsert: true })
+            await storage.put(key, bytes, { contentType: mime, upsert: true })
 
             const { width, height } = probed.width
                 ? { width: probed.width, height: probed.height }
-                : await probeDimensions(buffer, mime)
+                : await probeDimensions(bytes, mime)
             const url = storage.publicUrl(key) || (await storage.signedUrl(key, { expiresIn: 60 * 60 * 24 * 365 }))
 
             const { data, error } = await table()
@@ -195,7 +220,7 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
                     path: key,
                     url,
                     mime,
-                    size_bytes: buffer.length,
+                    size_bytes: bytes.length,
                     width,
                     height,
                     alt: String(alt || '').slice(0, 500),
@@ -518,7 +543,30 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
             const probed = await probeDimensions(source, row.mime)
             const box = clampRect(rect, probed)
 
-            const { default: sharp } = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'sharp')
+            // sharp se natahuje až tady a chyba z něj umí být matoucí.
+            //
+            // Je to nativní modul: `sharp` samo je jen obal, pixely řeže
+            // binárka pro konkrétní platformu (`@img/sharp-win32-x64`), která
+            // je volitelná závislost. Lockfile pořízený na macOS ji pro Windows
+            // nemusí obsahovat, takže `pnpm install` projde, `sharp` se
+            // naimportuje a spadne teprve při první práci s obrázkem — hláškou
+            // o runtime, kterou Studio ukázalo jako "Ořez se nepodařilo uložit".
+            // Vypadá to jako chyba ořezu a je to chybějící balíček.
+            //
+            // `probeDimensions` výš tuhle chybu polyká schválně (rozměr je
+            // pohodlí), tady ne: bez sharpu ořez neexistuje.
+            let sharp
+            try {
+                ;({ default: sharp } = await import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'sharp'))
+            } catch (failure) {
+                throw serverError(
+                    'Ořez potřebuje balíček sharp a ten se nepodařilo načíst. ' +
+                        'Na Windows to obvykle znamená, že chybí jeho binárka pro tuhle platformu — ' +
+                        'pomůže `pnpm install --force`, nebo `pnpm add sharp`. ' +
+                        `(${failure?.message || failure})`,
+                )
+            }
+
             const cropped = await sharp(source)
                 .extract({ left: box.x, top: box.y, width: box.width, height: box.height })
                 // Same format in, same format out. Re-encoding a PNG as WebP

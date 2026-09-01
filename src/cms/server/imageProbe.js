@@ -40,7 +40,7 @@
 
 import { assertServer } from './env.js'
 
-assertServer('@/cms/server/imageProbe')
+assertServer('./imageProbe')
 
 const NONE = Object.freeze({ mime: null, width: null, height: null })
 
@@ -162,7 +162,41 @@ const avif = (buffer) => {
 // a content-stream question and nothing asks it, so dimensions stay null.
 const pdf = (buffer) => (at(buffer, 0, '%PDF-') ? { mime: 'application/pdf', width: null, height: null } : null)
 
-const READERS = [png, jpeg, webp, gif, avif, pdf]
+/**
+ * SVG. Jediný formát tady, který nemá magické byty — je to text, takže se
+ * hledá kořenová značka v prvních kilobajtech. `<?xml`, BOM a komentáře před
+ * ní jsou běžné, proto se nekouká jen na offset 0.
+ *
+ * Rozměr je z `width`/`height`, a když chybí, z `viewBox` — Figma i Illustrator
+ * exportují obojí, ale ikonové sady často jen viewBox. Bez rozměru se obrázek
+ * ve Studiu vykreslí, jen se hůř skládá mřížka.
+ */
+const svg = (buffer) => {
+    const head = buffer.subarray(0, 4096).toString('utf8')
+    if (!/<svg[\s>]/i.test(head)) return null
+    const attr = (name) => {
+        const match = head.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`, 'i'))
+        if (!match) return null
+        // `100`, `100px`, `100pt` — procenta a `em` na pixel nepřepočítám.
+        const number = /^([\d.]+)\s*(px|pt)?$/.exec(match[1].trim())
+        return number ? Math.round(Number(number[1])) || null : null
+    }
+    let width = attr('width')
+    let height = attr('height')
+    if (!width || !height) {
+        const box = head.match(/\bviewBox\s*=\s*["']\s*[-\d.]+[,\s]+[-\d.]+[,\s]+([\d.]+)[,\s]+([\d.]+)/i)
+        if (box) {
+            width = width || Math.round(Number(box[1])) || null
+            height = height || Math.round(Number(box[2])) || null
+        }
+    }
+    return { mime: 'image/svg+xml', width, height }
+}
+
+// SVG až na konci: je to jediný reader, který hledá text kdekoli v hlavičce
+// místo bytů na pevném offsetu, takže se na něj má dojít teprve tehdy, když
+// se soubor nepodařilo poznat spolehlivěji.
+const READERS = [png, jpeg, webp, gif, avif, pdf, svg]
 
 /**
  * @param {Buffer} buffer

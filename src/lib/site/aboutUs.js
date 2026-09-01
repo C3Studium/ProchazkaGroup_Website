@@ -26,9 +26,9 @@
 // this page, why the roster is the consultant type — moved with the declarations
 // they describe. See the /o-nas section of `cms.config.js`.
 
-export { ABOUT_COPY_KEYS as ABOUT_KEYS } from '@/cms/visualEditing'
+export { ABOUT_COPY_KEYS as ABOUT_KEYS } from '@/cms/visualEditing.js'
 
-import { getPageContent } from './page.js'
+import { getPageContent } from '@/cms/server/site'
 
 /**
  * Everything /o-nas needs, in one round trip.

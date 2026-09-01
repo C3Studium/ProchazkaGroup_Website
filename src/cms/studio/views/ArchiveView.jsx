@@ -1130,7 +1130,7 @@ function AsOfFrame({ at, sitePath, onNavigate, backHref }) {
         data-ready={frame.ready ? "true" : "false"}
       >
         {session.status === "failed" ? (
-          <ErrorState error={session.error} onRetry={() => router.replace(router.asPath)} />
+          <ErrorState error={session.error} onRetry={() => router.replace(router.path)} />
         ) : session.status === "opening" ? (
           <span className={styles.booting}>
             <Spinner size={18} />

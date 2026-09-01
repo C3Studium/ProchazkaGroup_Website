@@ -1,5 +1,6 @@
 import { useStudioRouter } from "../../runtime/navigation.jsx"
-import { useAuth, useCore } from "../context/StudioProvider.jsx"
+import { useAuth, useCore, useTypes } from "../context/StudioProvider.jsx"
+import { reviewsManaged } from "../lib/moderation.js"
 import { BASE, parseRoute } from "../lib/routes.js"
 import DocumentListView from "../views/DocumentListView.jsx"
 import DocumentEditorView from "../views/DocumentEditorView.jsx"
@@ -40,7 +41,25 @@ export default function Shell() {
 
 function Workspace({ route, core, isAdmin }) {
   if (route.view === "overview") return <OverviewView />
-  if (route.view === "moderation") return <ModerationView />
+  // Fronta se schová i z adresy, ze stejného důvodu jako typ níž: schovaná
+  // položka v menu není totéž co vypnutá obrazovka.
+  if (route.view === "moderation") {
+    if (!reviewsManaged()) {
+      return (
+        <EmptyState
+          icon="lock"
+          title="Recenze se tady neschvalují"
+          description="V tomhle projektu je spravuje jiný nástroj. Ve Studiu je fronta proto vypnutá."
+          action={
+            <Button href={BASE} variant="secondary" icon="arrowLeft">
+              Zpět na přehled
+            </Button>
+          }
+        />
+      )
+    }
+    return <ModerationView />
+  }
   if (route.view === "edit") return <EditView />
   if (route.view === "media") return <MediaView />
   if (route.view === "stats") return <StatsView />
@@ -67,6 +86,28 @@ function Workspace({ route, core, isAdmin }) {
   if (route.view === "archive") {
     if (!isAdmin) return <OwnerOnly what="Archiv" />
     return <ArchiveView section={route.section} />
+  }
+
+  // Typ, který Studio nespravuje, se nedá otevřít ani napsáním adresy.
+  //
+  // `types` z providera je seznam, který Studio nabízí; registr schémat zná
+  // i to, co nenabízí. Kdyby se tady sahalo do registru, `reviews: false` by
+  // schoval položku v menu, ale `/studio/review` by se pořád otevřelo —
+  // a editor by upravoval dokumenty, které mu spravuje jiný nástroj.
+  const managed = useTypes()
+  if (route.type && !managed.some((entry) => entry.name === route.type) && core.getType(route.type)) {
+    return (
+      <EmptyState
+        icon="lock"
+        title="Tenhle obsah se tady nespravuje"
+        description={`Typ „${route.type}" v tomhle projektu spravuje jiný nástroj. Ve Studiu je proto vypnutý.`}
+        action={
+          <Button href={BASE} variant="secondary" icon="arrowLeft">
+            Zpět na přehled
+          </Button>
+        }
+      />
+    )
   }
 
   // A bad type in the URL is a typo or a renamed schema, not a crash.

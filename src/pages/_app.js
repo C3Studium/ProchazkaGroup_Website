@@ -221,7 +221,7 @@ function SiteShell({ Component, pageProps }) {
             {/* The contact sheet the navigation opens reads both its copy and
                 the person it is addressed to from here: the bar is mounted once,
                 outside any page, so they travel on every page's props beside the
-                patička. See @/cms/server/site/footer. */}
+                patička. See @/lib/site/footer. */}
             <Preloader />
             <PageVeil />
             <Navbar
@@ -237,7 +237,7 @@ function SiteShell({ Component, pageProps }) {
                 `App.getInitialProps`, which opts the whole site out of static
                 generation; a page with no getStaticProps hands down nothing and
                 the footer renders the copy it ships with. See
-                @/cms/server/site/footer. */}
+                @/lib/site/footer. */}
             <SiteFooter {...(pageProps.footer || {})} />
             <Analytics />
             {/* Last, so a fixed badge in a corner is painted over the page

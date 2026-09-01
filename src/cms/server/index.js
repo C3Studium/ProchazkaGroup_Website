@@ -7,7 +7,7 @@
 
 import { assertServer } from './env.js'
 
-assertServer('@/cms/server')
+assertServer('./index.js')
 
 export { CmsError, CMS_ERROR_CODES, isCmsError } from './errors.js'
 export { ENV_REFERENCE } from './env.js'

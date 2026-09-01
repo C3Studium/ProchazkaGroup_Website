@@ -16,7 +16,7 @@ import QnaContact from "@/components/pages/index/QnaContact";
 // import { StatbarData } from "@/constants/mainpage";
 import Head from "next/head";
 import { useRef } from "react";
-import { getAssistant, getFooterContent, getHomepageContent } from "@/cms/server/site";
+import { getAssistant, getFooterContent, getHomepageContent } from "@/lib/site";
 
 //WIP: Every index has to be a logo, not a greek letters
 
@@ -52,7 +52,7 @@ export async function getStaticProps() {
 
   return {
     // `footer` is read by _app, not by this page — the patička is rendered
-    // under every route and belongs to none. See @/cms/server/site/footer.
+    // under every route and belongs to none. See @/lib/site/footer.
     props: { content, footer, assistant },
     revalidate: REVALIDATE_SECONDS,
   };

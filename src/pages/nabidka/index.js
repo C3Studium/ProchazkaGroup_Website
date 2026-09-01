@@ -16,7 +16,7 @@ import {
     getPageContent,
     readerFor,
     viewOf,
-} from "@/cms/server/site";
+} from "@/lib/site";
 
 // Not /nabidky — that route is the partner discounts page and has been for as
 // long as there have been links to it. This one is the offer itself: why a

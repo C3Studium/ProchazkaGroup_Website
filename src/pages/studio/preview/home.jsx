@@ -3,7 +3,7 @@ import { PagesNavigation } from "@/cms/runtime/pagesNavigation.jsx"
 
 import { siteChrome } from "@/cms"
 import Home from "@/pages/index"
-import { getFooterContent, getHomepageContent, viewOf } from "@/cms/server/site"
+import { getFooterContent, getHomepageContent, viewOf } from "@/lib/site"
 
 /**
  * The homepage, under glass.

@@ -36,7 +36,7 @@ export function registerType(type) {
       "not_a_type",
       `type "${type?.name ?? "(unnamed)"}" was not built with defineType(). A plain object ` +
         `will read but not write: fields carry behaviour (visibility, permissions, validation), ` +
-        `not just data. Wrap the declaration in defineType({ ... }) from '@/cms/core'.`,
+        `not just data. Wrap the declaration in defineType({ ... }) from '@c3studium/valecms/core'.`,
       { type: type?.name },
     )
   }
@@ -47,7 +47,7 @@ export function registerType(type) {
       "not_a_field",
       `type "${type.name}" has ${loose.length} field(s) not built with defineField(): ` +
         `${loose.map((f) => f?.name ?? "(unnamed)").join(", ")}. Wrap each one in ` +
-        `defineField({ ... }) from '@/cms/core'.`,
+        `defineField({ ... }) from '@c3studium/valecms/core'.`,
       { type: type.name },
     )
   }

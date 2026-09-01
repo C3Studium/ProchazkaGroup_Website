@@ -30,7 +30,7 @@ function RecenzeAdminEmailComponent({ customerName, email, message, consultantNa
                 </DataTable>
             </div>
 
-            {msg ? (
+            {message ? (
                 <div style={{ paddingTop: "18px" }}>
                     <BrandText muted style={{ margin: "0 0 8px" }}>Text recenze</BrandText>
                     <div style={{ padding: "16px", backgroundColor: BRAND.raised, border: `1px solid ${BRAND.line}`, fontSize: "15px", lineHeight: "24px", color: BRAND.ink, whiteSpace: "pre-wrap" }}>

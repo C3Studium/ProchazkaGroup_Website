@@ -143,9 +143,16 @@ export const hrefs = {
   },
 }
 
-/** True when `href` is the active route, tolerant of trailing segments. */
-export const isActive = (href, asPath) => {
-  const current = (asPath || "").split("?")[0].replace(/\/$/, "") || BASE
+/**
+ * True when `href` is the active route, tolerant of trailing segments.
+ *
+ * `path` is `router.path` — the address including the query, in both routers.
+ * Passing nothing makes every item read as inactive except the overview, which
+ * is what the sidebar looked like while it was reading a `asPath` the Studio's
+ * navigation never had.
+ */
+export const isActive = (href, path) => {
+  const current = (path || "").split("?")[0].replace(/\/$/, "") || BASE
   if (href === BASE) return current === BASE
   return current === href || current.startsWith(`${href}/`)
 }

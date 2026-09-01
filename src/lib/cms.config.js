@@ -1610,6 +1610,18 @@ const benefitPage = definePage({
 
 export default defineSite({
     pages: [homepage, aboutUs, cookiesPage, privacyPage, reviewsPage, advisorPage, offerPage, partnersPage, benefitPage],
+    // Náhled úvodní stránky má vlastní adresu, a musí se o ni říct.
+    //
+    // Rám načítá každou stránku na její vlastní adrese — `/o-nas?edit=1` —
+    // protože jinak by se v něm vykreslila jinak než na webu. Kořen `/` je
+    // výjimka: v Pages Routeru je staticky generovaný a koncept přečíst neumí,
+    // takže existuje `src/pages/studio/preview/home.jsx`, kterou načítá jen rám.
+    //
+    // Do 0.1.46 to knihovna měla natvrdo. Neplatí to ale nikde, kde úvodní
+    // stránka na `/` není — web pod `app/[countryCode]/` ji má na `/cz` a rám si
+    // místo webu načetl Studio samo v sobě. Teď se o tu výjimku říká, a tenhle
+    // web o ni říct musí, protože ji doopravdy má.
+    homePreview: '/studio/preview/home',
     // The patička, the contact sheet and the assistant. `_app` renders all three
     // under every route and `_app` has no data fetching, so each page's own
     // getStaticProps hands them down — see server/site/footer.js. No page

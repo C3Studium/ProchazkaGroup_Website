@@ -122,8 +122,28 @@ const HOST_PATHS = [HOST_PATH, EDIT_HOST_PATH, ARCHIVE_HOST_PATH]
 const EDITING_HOST_PATHS = [HOST_PATH, EDIT_HOST_PATH]
 
 /**
- * The homepage's stand-in. The one route in the project that may read drafts,
- * and therefore the one page whose preview is not its own public URL.
+ * The homepage's stand-in — for a site that HAS one. No longer a constant this
+ * file applies on its own.
+ *
+ * It was: `frameUrl("/")` silently loaded `/studio/preview/home` instead. That
+ * is a Pages Router workaround — there `/` is statically generated and cannot
+ * read a draft, so the draft switch lives on a page only the frame loads. In
+ * App Router `draftMode()` works on any page and the stand-in is dead weight.
+ *
+ * Worse, the substitution assumed the homepage is at `/`. On a site whose pages
+ * live under `app/[countryCode]/` the homepage is `/cz`, so the exception both
+ * missed the real homepage AND, for anyone who declared `/` out of habit,
+ * pointed the frame at a page nobody had created — where the App Router
+ * catch-all served the Studio, and the Studio appeared inside its own iframe
+ * reporting "this content type does not exist".
+ *
+ * So it is opt-in now, from the site config, and the default is what every
+ * other page already did: load the page at its own address.
+ *
+ *     defineSite({ pages: [...], homePreview: '/studio/preview/home' })
+ *
+ * @deprecated Read `site.homePreview`; this constant is only the conventional
+ *             path for a Pages Router project that writes such a page.
  */
 export const HOME_PREVIEW_PATH = "/studio/preview/home"
 
@@ -150,12 +170,14 @@ const normalise = (sitePath) => {
 /**
  * The address the frame should load in order to show `sitePath`.
  *
- * @param {string} sitePath  a public route — "/", "/o-nas", "/reviews/vituj-lukas"
- * @param {{ edit?: boolean, bust?: string }} [options]
+ * @param {string} sitePath  a public route — "/", "/cz", "/o-nas"
+ * @param {{ edit?: boolean, bust?: string, homePreview?: string|null }} [options]
+ *        `homePreview` comes from `site.homePreview` and is null for almost
+ *        every project; see the note on HOME_PREVIEW_PATH.
  */
-export const frameUrl = (sitePath, { edit = true, bust } = {}) => {
+export const frameUrl = (sitePath, { edit = true, bust, homePreview = null } = {}) => {
     const path = normalise(sitePath)
-    const base = path === "/" ? HOME_PREVIEW_PATH : path
+    const base = homePreview && path === "/" ? homePreview : path
     const query = new URLSearchParams()
     if (edit) query.set(EDIT_PARAM, EDIT_VALUE)
     if (bust) query.set(BUST_PARAM, bust)
@@ -170,9 +192,9 @@ export const frameUrl = (sitePath, { edit = true, bust } = {}) => {
  * following a link out of the preview and into /studio would otherwise put the
  * admin inside its own frame.
  */
-export const sitePathFromFrame = (pathname) => {
+export const sitePathFromFrame = (pathname, { homePreview = null } = {}) => {
     const path = normalise(pathname)
-    if (path === HOME_PREVIEW_PATH) return "/"
+    if (homePreview && path === normalise(homePreview)) return "/"
     if (path === HOST_PATH || path.startsWith(`${HOST_PATH}/`)) return null
     if (path === "/studio" || path.startsWith("/studio/")) return null
     if (path.startsWith("/api/")) return null

@@ -22,6 +22,7 @@ import path from 'node:path'
 import { discoverRoutes } from './routes.js'
 
 import site from '../site/config.js'
+import { addressesOf } from '../site/index.js'
 
 /**
  * The page's own <title>, when it is a plain string.
@@ -217,7 +218,17 @@ export const listSitePages = () => {
  *
  * @returns {string[]}
  */
+/**
+ * Statické routy k regeneraci — každá na všech adresách, které opravdu má.
+ *
+ * Bez rozšíření by publikace globálního bloku (patička, hlavička) přegenerovala
+ * `/cz` a nechala `/de` až `/pl` na starém obsahu: v CMS publikováno, na webu
+ * ne. Bez `prefixes` v konfiguraci se nic nemění — `addressesOf` vrací jednu
+ * adresu.
+ */
 export const listRegeneratingRoutes = () =>
-    listSitePages()
-        .filter((entry) => entry.regenerates && !entry.missing)
-        .map((entry) => entry.path)
+    [...new Set(
+        listSitePages()
+            .filter((entry) => entry.regenerates && !entry.missing)
+            .flatMap((entry) => addressesOf(site, entry.path)),
+    )]

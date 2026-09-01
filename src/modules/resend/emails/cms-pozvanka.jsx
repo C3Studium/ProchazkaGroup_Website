@@ -9,7 +9,7 @@ import {
     Preview,
     Section,
     Text,
-} from "@react-email/components"
+} from "./_html.jsx"
 
 /**
  * Pozvánka do redakčního systému.

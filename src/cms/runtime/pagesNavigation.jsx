@@ -13,8 +13,8 @@ import { NavigationProvider, withGuards } from './navigation.jsx'
 export const usePagesNavigation = () => {
     const router = useRouter()
     const { push, replace, guard, guards } = withGuards({
-        go: (url) => router.push(url),
-        replaceGo: (url) => router.replace(url),
+        go: (url, options) => router.push(url, undefined, options),
+        replaceGo: (url, options) => router.replace(url, undefined, options),
     })
 
     useEffect(() => {

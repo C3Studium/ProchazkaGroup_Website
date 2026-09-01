@@ -1,19 +1,19 @@
-import { useAuth } from "../context/StudioProvider"
-import { errorAt } from "../lib/core"
-import { FieldShell } from "../ui/controls"
-import { resolveInput } from "./registry"
-import FallbackInput from "./inputs/FallbackInput"
+import { useAuth } from "../context/StudioProvider.jsx"
+import { errorAt } from "../lib/core.js"
+import { FieldShell } from "../ui/controls.jsx"
+import { resolveInput } from "./registry.js"
+import FallbackInput from "./inputs/FallbackInput.jsx"
 
 // Importing the input modules is what populates the registry. Each one calls
 // registerInput()/registerKind() at module scope, so this is the single place
 // that decides which inputs exist.
-import "./inputs/TextInputs"
-import "./inputs/ChoiceInputs"
-import "./inputs/DateInputs"
-import "./inputs/RichTextInput"
-import "./inputs/AssetInputs"
-import "./inputs/ReferenceInput"
-import "./inputs/ContainerInputs"
+import "./inputs/TextInputs.jsx"
+import "./inputs/ChoiceInputs.jsx"
+import "./inputs/DateInputs.jsx"
+import "./inputs/RichTextInput.jsx"
+import "./inputs/AssetInputs.jsx"
+import "./inputs/ReferenceInput.jsx"
+import "./inputs/ContainerInputs.jsx"
 
 /**
  * Renders one schema field.

@@ -44,29 +44,21 @@ import { requireOwner } from '../auth.js'
 import { listSitePages } from '../pages.js'
 import { momentOf } from '../site/index.js'
 
-// Mirrors the switch in src/pages/studio/[[...path]].jsx and in both sibling
-// routes. With the in-memory dev port there is no server-side session to check —
-// the Studio's documents live in the browser — so requiring one here would make
-// the Archive unreachable in the exact environment it is developed in.
-const DEV_PORT = process.env.NEXT_PUBLIC_CMS_DEV_PORT === '1'
-
 export const handleAsof = async function handler(req, res) {
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET')
         return res.status(405).json({ code: 'invalid', message: 'Metoda není povolena, použijte GET' })
     }
 
-    if (!DEV_PORT) {
-        try {
-            await requireOwner(req, res)
-        } catch {
-            // JSON rather than a redirect, unlike /api/studio/preview: this is an
-            // XHR from a screen that is already mounted, and the caller turns the
-            // code into a message on the stage rather than a blank tab.
-            return res.status(401).json({ code: 'unauthorized', message: 'Archiv je přístupný jen vlastníkovi' })
-        }
+    try {
+        await requireOwner(req, res)
+    } catch {
+        // JSON rather than a redirect, unlike /api/studio/preview: this is an
+        // XHR from a screen that is already mounted, and the caller turns the
+        // code into a message on the stage rather than a blank tab.
+        return res.status(401).json({ code: 'unauthorized', message: 'Archiv je přístupný jen vlastníkovi' })
     }
-
+    
     // Anything that is not a readable instant closes. A malformed parameter must
     // not be able to open a moment, because a moment that fell back to "now"
     // would put today's site under yesterday's date — the one failure ARCHIVE.md

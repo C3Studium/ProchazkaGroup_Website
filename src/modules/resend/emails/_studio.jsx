@@ -1,4 +1,4 @@
-import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from "@react-email/components"
+import { Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text } from "./_html.jsx"
 
 /**
  * Obálka e-mailů, které posílá redakční systém.

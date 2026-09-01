@@ -13,6 +13,7 @@
 export {
     readPublished,
     readOnePublished,
+    documentId,
     imageValue,
     plainText,
     slugValue,
@@ -33,13 +34,7 @@ export { readEditable } from './draft.js'
 // archive.js.
 export { getArchiveMoment, momentOf, readAt, readerAt, readerFor, viewOf } from './archive.js'
 
-export {
-    getSiteCopy,
-    getPartners,
-    getApprovedReviews,
-    getConsultants,
-    getAssistant,
-} from './content.js'
+export { getSiteCopy } from './content.js'
 
 // One generic reader for every configured route. `cms.config.js` says which
 // documents a page holds and where each field lands; ./page.js runs the queries
@@ -47,19 +42,18 @@ export {
 // 512-line hand-written seam is gone; `getHomepageContent` is one line of this.
 export { getPageContent, getHomepageContent, parseHighlights, COPY_KEYS } from './page.js'
 
-// The two seams not yet on the configuration. `footer.js` is the one that is
-// not a page: `_app` renders the patička under every route, so every page's
-// reader hands the same block down through `props.footer`. `aboutUs.js` is a
-// page and is next; see the note at the head of ./page.js.
-export { getAboutContent, ABOUT_KEYS } from './aboutUs.js'
-export {
-    getFooterContent,
-    getContactContent,
-    footerStaticProps,
-    FOOTER_KEY,
-    FOOTER_LINES,
-    FOOTER_LINKS,
-    CLAIM_LINES,
-    CONTACT_LINES,
-    GLOBAL_KEYS,
-} from './footer.js'
+// Který čtenář odpovídá na `type` ve `sources`. Prázdné, dokud si to projekt
+// nenaplní — jména typů dokumentů patří jemu, ne knihovně. Viz ./sources.js.
+export { registerSources, registeredSources, sourceReader } from './sources.js'
+
+// Co tady bývalo a už není: `getAboutContent`, patička, kontaktní list a čtyři
+// čtenáři typů dokumentů (partner, recenze, asistentka, poradce).
+//
+// Byl to slovník jednoho webu. `getConsultants` je jméno jedné firmy — knihovna,
+// která ho vydává, ho vnucuje každému dalšímu projektu; a `footer.js` popisoval
+// pozice řádků v patičce, kterou má jenom on. Odsud se to nedalo použít ani
+// obejít: barrel je jeden a exportuje všem.
+//
+// Přestěhovalo se to do `@/lib/site/`, kde tomu jméno sedí. Obecná část zůstala
+// tady: čtenáři, `getSiteCopy`, `getPageContent` a archiv nemluví o žádném
+// konkrétním webu a mluvit nemají.

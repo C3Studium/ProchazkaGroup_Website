@@ -8,11 +8,11 @@
  * `./resetTypes` runs ahead of the schemas so a hot reload does not trip the
  * core's duplicate-type check. On a cold start it is a no-op.
  */
-import { hasType } from "@/cms/core"
-import { registerType } from "@/cms/core/registry.js"
+import { hasType } from "../core/index.js"
+import { registerType } from "../core/registry.js"
 
-import "./resetTypes"
-import schemas from "@/cms/schemas"
+import "./resetTypes.js"
+import schemas from "../schemas/index.js"
 
 // `clearTypes()` empties the registry; the schema modules refill it only when
 // they EVALUATE, and a module evaluates once. So a reset that runs after

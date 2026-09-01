@@ -60,7 +60,7 @@ import { conflict, invalid, serverError } from '../errors.js'
 import { assertFileStoreUsable, storeDir } from '../fileStore/store.js'
 import { assertStoragePort, registerStorageDriver } from './storage.js'
 
-assertServer('@/cms/server/ports/fileStorage')
+assertServer('./fileStorage')
 
 // The route that reads this directory back out. One constant, so the URL a row
 // stores and the route that serves it cannot drift apart.

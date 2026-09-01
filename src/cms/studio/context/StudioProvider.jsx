@@ -1,7 +1,8 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { normalizeCore } from "../lib/core"
-import { RESERVED } from "../lib/routes"
-import { ToastProvider } from "./ToastProvider"
+import { normalizeCore } from "../lib/core.js"
+import { REVIEW_TYPE, reviewsManaged } from "../lib/moderation.js"
+import { RESERVED } from "../lib/routes.js"
+import { ToastProvider } from "./ToastProvider.jsx"
 
 /**
  * The Studio's only two dependencies — the schema core (Contract 1) and the data
@@ -23,7 +24,18 @@ export function StudioProvider({ core, port, config, children }) {
 
   const value = useMemo(() => {
     const normalized = normalizeCore(core)
-    const types = normalized.listTypes()
+
+    // Seznam typů, které Studio nabízí — a jediné místo, kde se z něj ubírá.
+    //
+    // `reviews: false` znamená, že recenze spravuje něco jiného. Pak nestačí
+    // schovat moderační frontu: dokud typ zůstane v tomhle seznamu, je „Recenze"
+    // pořád v obsahu v bočním menu, pořád mezi rychlými akcemi a pořád ve
+    // filtrech archivu. Ubrat ho tady je ubere ve všech třech najednou, protože
+    // všechny tři čtou tenhle seznam.
+    //
+    // Typ se z registru schémat nemaže — server ho pořád zná a veřejný web
+    // pořád čte schválené recenze. Mění se jen to, co Studio nabízí.
+    const types = normalized.listTypes().filter((type) => reviewsManaged() || type.name !== REVIEW_TYPE)
 
     // A type whose name collides with a shell route would be unreachable. Fail
     // loudly in development rather than 404 for the client months later.

@@ -12,7 +12,7 @@ import QnaContact from "@/components/pages/index/QnaContact"
 import Head from "next/head"
 import { AnimatePresence } from "framer-motion"
 import { useCallback, useEffect, useState } from "react"
-import { getAboutContent, getAssistant, getContactContent, getFooterContent, readerFor, viewOf } from "@/cms/server/site"
+import { getAboutContent, getAssistant, getContactContent, getFooterContent, readerFor, viewOf } from "@/lib/site"
 
 // ISR, on the same terms as the homepage (src/pages/index.js): three
 // scroll-driven sections over copy an editor changes a few times a year, so the
@@ -161,7 +161,7 @@ export default function AboutPage({ content }) {
         {/* `docId` is the siteCopy block each section's copy came from, and it
             is present only when this page is being rendered for the Studio's
             editing frame — see the note on editableDoc() in
-            @/cms/server/site/aboutUs. It is what lets a section mark its own
+            @/lib/site/aboutUs. It is what lets a section mark its own
             text and photos as editable; on the public page it is undefined and
             the annotation helper answers with nothing. */}
         <AboutHero

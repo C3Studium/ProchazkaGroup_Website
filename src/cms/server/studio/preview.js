@@ -38,14 +38,6 @@
 
 import { requireUser } from '../auth.js'
 
-// Mirrors the switch in src/pages/studio/[[...path]].jsx. With the in-memory dev
-// port there is no server-side session to check — the Studio's documents live in
-// the browser — so requiring one here would make the preview unreachable in the
-// exact environment it is developed in. It is the same flag that already decides
-// the Studio has no real backend, not a new hole: with a real port configured
-// this branch is dead and the check below is the only path.
-const DEV_PORT = process.env.NEXT_PUBLIC_CMS_DEV_PORT === '1'
-
 // `<type>/<id>`, and nothing that could carry a scheme, a host or a path
 // traversal into the Location header. Studio ids are uuids from Postgres or
 // `type-xxxxxxxx` from the dev port; both fit.
@@ -74,17 +66,15 @@ export const handlePreview = async function handler(req, res) {
     const from = FROM.test(String(req.query.from || '')) ? String(req.query.from) : null
     const page = PAGE.test(String(req.query.p || '')) ? String(req.query.p) : null
 
-    if (!DEV_PORT) {
-        try {
-            await requireUser(req, res)
-        } catch {
-            // Not "401 Unauthorized" as a body: this is a navigation, and the
-            // useful answer to an editor whose session expired mid-preview is
-            // the sign-in screen, not a JSON error in a blank tab.
-            return res.redirect(307, '/studio')
-        }
+    try {
+        await requireUser(req, res)
+    } catch {
+        // Not "401 Unauthorized" as a body: this is a navigation, and the
+        // useful answer to an editor whose session expired mid-preview is
+        // the sign-in screen, not a JSON error in a blank tab.
+        return res.redirect(307, '/studio')
     }
-
+    
     // The whole mechanism, in one call. `enable: false` clears the cookie, which
     // is what makes the panel's "Publikováno" side show the page exactly as a
     // visitor gets it rather than a draft render with the drafts filtered out.

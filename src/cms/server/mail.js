@@ -19,12 +19,26 @@
  * ani vrátit chybu, ani vzít zpět něco, co se povedlo.
  */
 import { assertServer, bootstrapAdmin, siteUrl } from './env.js'
+import site from '../site/config.js'
 import { getAdminClient } from './supabaseAdmin.js'
 
 const optional = (name) => String(process.env[name] || '').trim()
 
 /** Je nastavený odesílatel? Bez něj se nic neposílá. */
-export const hasSender = () => Boolean(optional('RESEND_API_KEY') && senderAddress())
+/**
+ * Umí tenhle projekt poslat e-mail?
+ *
+ * `site.mail === false` znamená, že poštu obsluhuje něco jiného — u e-shopu
+ * Medusa, která posílá potvrzení objednávek i rezervace. Bez téhle podmínky
+ * by CMS se stejnými klíči v prostředí posílalo pozvánky souběžně s ním,
+ * z téže domény, a klíče v prostředí tam jsou právě proto, že je používá ten
+ * druhý systém.
+ *
+ * Volba, ne přepínač instalátoru: `--mail=no` se dal zvolit jednou a pak už
+ * nešel vzít zpátky jinak než mazáním proměnných.
+ */
+export const hasSender = () =>
+    site?.mail !== false && Boolean(optional('RESEND_API_KEY') && senderAddress())
 
 /**
  * Adresa, ze které se odesílá.
@@ -57,7 +71,7 @@ export const sendInvite = async ({ to, name, role, invitedBy }) => {
     try {
         const [{ Resend }, { render }, template] = await Promise.all([
             import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
-            import('@react-email/render'),
+            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
             import('@/modules/resend/emails/cms-pozvanka.jsx'),
         ])
 
@@ -141,7 +155,7 @@ export const sendUpdateNotice = async ({ what, typeTitle, who, actorEmail, pages
 
         const [{ Resend }, { render }, template] = await Promise.all([
             import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
-            import('@react-email/render'),
+            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
             import('@/modules/resend/emails/cms-aktualizace.jsx'),
         ])
 

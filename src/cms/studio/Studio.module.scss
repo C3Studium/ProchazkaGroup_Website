@@ -6,6 +6,7 @@
    a view change. */
 .root {
   @include t.declare;
+  @include t.island;
 
   position: fixed;
   inset: 0;
@@ -57,6 +58,10 @@
       animation-iteration-count: 1 !important;
     }
   }
+
+  /* Poslední: emituje @media bloky, takže po něm už žádná deklarace
+     následovat nesmí. */
+  @include t.declare-responsive;
 }
 
 .boot {

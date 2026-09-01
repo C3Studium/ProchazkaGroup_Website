@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react"
-import { useStudioRouter } from "../../runtime/navigation.jsx"
+import { useStudioRouter, withQuery } from "../../runtime/navigation.jsx"
 
 import { DOC_ATTR, EDITABLE_SELECTOR } from "../../edit/attrs.js"
 import { commitPendingEdit } from "../../edit/overlay/commit.js"
@@ -219,10 +219,7 @@ export default function EditView() {
 
     const navigate = useCallback(
         (next) => {
-            const query = { ...router.query }
-            if (next === "/") delete query.p
-            else query.p = next
-            router.replace({ pathname: router.pathname, query }, undefined, {
+            router.replace(withQuery(router.path, { p: next === "/" ? null : next }), {
                 shallow: true,
                 scroll: false,
             })
@@ -493,7 +490,7 @@ export default function EditView() {
                 {session.status === "failed" ? (
                     <ErrorState
                         error={session.error}
-                        onRetry={() => router.replace(router.asPath)}
+                        onRetry={() => router.replace(router.path)}
                     />
                 ) : session.status === "opening" ? (
                     <span className={styles.booting}>

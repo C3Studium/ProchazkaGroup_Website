@@ -142,7 +142,7 @@ export const persist = () => {
  * live.
  */
 export const tables = () => {
-    assertServer('@/cms/server/fileStore')
+    assertServer('./index.js')
     assertFileStoreUsable()
 
     const c = cell()

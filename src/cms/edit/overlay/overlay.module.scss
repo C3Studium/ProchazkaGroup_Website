@@ -54,6 +54,7 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 
 .root {
   @include t.declare;
+  @include t.island;
 
   --cms-pick: #{$pick};
   --cms-pick-soft: #{rgba(#ff6a00, 0.1)};
@@ -77,6 +78,10 @@ $pick-inner: rgba(255, 255, 255, 0.82);
   *::after {
     box-sizing: border-box;
   }
+
+  /* Poslední: emituje @media bloky, takže po něm už žádná deklarace
+     následovat nesmí. */
+  @include t.declare-responsive;
 }
 
 /* ------------------------------------------------------------- tracking -- */
@@ -104,17 +109,17 @@ $pick-inner: rgba(255, 255, 255, 0.82);
    could not do it either way, having no way to be counter-scaled by the zoom. */
 .boxHover {
   box-shadow:
-    0 0 0 calc(1px * var(--cms-inv)) var(--cms-pick-inner),
-    0 0 0 calc(2.5px * var(--cms-inv)) var(--cms-pick),
-    0 0 0 calc(3.5px * var(--cms-inv)) var(--cms-pick-edge);
+    0 0 0 calc(1px * var(--cms-inv, 1)) var(--cms-pick-inner),
+    0 0 0 calc(2.5px * var(--cms-inv, 1)) var(--cms-pick),
+    0 0 0 calc(3.5px * var(--cms-inv, 1)) var(--cms-pick-edge);
 }
 
 .boxSelected {
   background: var(--cms-pick-soft);
   box-shadow:
-    0 0 0 calc(1px * var(--cms-inv)) var(--cms-pick-inner),
-    0 0 0 calc(3px * var(--cms-inv)) var(--cms-pick),
-    0 0 0 calc(4px * var(--cms-inv)) var(--cms-pick-edge);
+    0 0 0 calc(1px * var(--cms-inv, 1)) var(--cms-pick-inner),
+    0 0 0 calc(3px * var(--cms-inv, 1)) var(--cms-pick),
+    0 0 0 calc(4px * var(--cms-inv, 1)) var(--cms-pick-edge);
 }
 
 /* -------------------------------------------------------------- control -- */
@@ -308,46 +313,90 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 
 /* ---------------------------------------------------------- the element -- */
 
-/* The element being edited is a page element — a motion component that rewrites
-   its own `style` attribute every frame — so it is reached by the attribute
-   `text.js` sets on it rather than by a class React would take back or an inline
-   style motion would overwrite. `:global` because the attribute is not this
-   module's to hash. */
-/* The element being edited. The literal is the point: this rule matches a node
-   in the *page*, which inherits nothing declared on `.root`. Same three rings as
-   the selection box, drawn tight against the text rather than offset, because
-   here they mark the box a caret is inside. */
-:global([data-cms-editing]) {
-  caret-color: $pick;
-  box-shadow:
-    0 0 0 1px $pick-inner,
-    0 0 0 3px $pick,
-    0 0 0 4px $pick-edge;
-}
+/* The element being edited used to be styled here, as `:global([data-cms-editing])`.
+   It is now a string in sheet.js — see EDITING_CSS there for why.
+
+   Short version: a CSS module compiled in pure mode refuses any selector without
+   a local class in it, and this one cannot have one. The element belongs to the
+   *page*, and the attribute is set by text.js because it is the only hook on a
+   motion component that neither React nor framer-motion takes back. There is no
+   ancestor of it that this module names. */
 
 /* -------------------------------------------------------------- library -- */
 
 /* The media library, when the host has not offered to open it at full width.
    Counter-scaled with the rest of the chrome, which on a phone preset means it
    is as wide as the phone — legible, and honestly cramped. See MediaModule. */
+/* Popup je modál, ne chrome.
+ *
+ * `.root` má `z-index` schválně POD Studiem (2147482000 proti 2147483000):
+ * na routě /studio je overlay vrstva nad náhledem a nemá překrývat rail ani
+ * hlavičku. Pro popup to ale neplatí — knihovna médií i ořez jsou dialogy,
+ * které musí být nade vším.
+ *
+ * Dokud popup bydlel v `body` vedle Studia, řešil to jeho vlastní stacking
+ * context. Od chvíle, kdy se portáluje DOVNITŘ Studia (aby sdílel jeho styly
+ * a nebyl vystavený hostitelskému CSS), je to sourozenec kořene Studia — a se
+ * svým nižším číslem skončil pod ním. Vykreslil se správně, jen na něj nešlo
+ * myší: `elementFromPoint` uvnitř stínu vracel `iframe.preview`.
+ */
+.root[data-cms-overlay="popup"] {
+  z-index: 2147483100;
+}
+
 .mediaScrim {
   position: absolute;
   inset: 0;
   display: grid;
+  /* DEFINITNÍ stopy, ne `auto`.
+     
+     S `auto` určuje velikost buňky panel, takže `height: 100%` na panelu
+     nemá o co se opřít — je to kruh a řeší se jako `auto`. Ten řádek byl
+     tím pádem MRTVÝ a o velikosti dialogu rozhodoval jedině strop
+     `max-height`. Odtud plyne, co bylo vidět na 2K monitoru: dialog byl
+     960×640 na jakkoli velké obrazovce, protože se neměl podle čeho
+     natáhnout.
+     
+     `minmax(0, 1fr)` vyplní scrim, který je `inset: 0` na kořeni
+     s `position: fixed`, takže ho definuje okno. Teprve tím má `100%`
+     proti čemu měřit — a dialog začne růst s oknem místo aby stál na
+     stropu.
+     
+     Stejná oprava je od dřívějška v `studio/ui/Modal.module.scss`; sem se
+     ji zapomnělo přenést. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
   place-items: center;
-  padding: calc(24px * var(--cms-inv));
+  padding: calc(24px * var(--cms-inv, 1));
   pointer-events: auto;
   background: var(--st-overlay);
   backdrop-filter: blur(2px);
 }
 
+/* Dialog knihovny, uvnitř náhledu.
+ *
+ * Žije v dokumentu rámu, který je zmenšený na `--cms-zoom` (náhled 2560px
+ * webu v 1300px ploše je zoom 0.5), a proto se sám o `--cms-inv` zvětšuje
+ * zpátky — aby byl na obrazovce vždycky stejně velký, ať je náhled jakkoli
+ * zmenšený.
+ *
+ * Rozměr v pixelech se tím pádem rovná pixelům na obrazovce — `100% *
+ * --cms-zoom` je přesně ta část monitoru, kterou náhled zabírá.
+ *
+ * Strop výšky byl 640px a to je málo. Nahoře je detail obrázku s popiskem
+ * a tlačítky (Uložit popis, Oříznout, Odebrat), pod ním filtry a teprve pak
+ * mřížka; do 640 se vejde nadpis, půldruhého řádku dlaždic a konec. Na 2K
+ * monitoru přitom místo je. 880 nechá vidět detail i dvě řady mřížky,
+ * a `100%` ho stejně zastaví dřív, kdyby byl náhled menší.
+ *
+ * Šířka 1180 místo 960 ze stejného důvodu: v 960 se lišta s filtry lámala
+ * a mřížka měla čtyři sloupce. */
 .mediaSurface {
   display: flex;
   flex-direction: column;
-  width: calc(100% * var(--cms-zoom));
-  max-width: 960px;
-  height: calc(100% * var(--cms-zoom));
-  max-height: 640px;
+  width: calc(100% * var(--cms-zoom, 1));
+  max-width: 1180px;
+  height: calc(100% * var(--cms-zoom, 1));
+  max-height: 880px;
   overflow: hidden;
   font-size: var(--st-text-body);
   color: var(--st-ink);
@@ -355,7 +404,7 @@ $pick-inner: rgba(255, 255, 255, 0.82);
   border: 1px solid var(--st-line-strong);
   border-radius: var(--st-radius-lg);
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.6);
-  transform: scale(var(--cms-inv));
+  transform: scale(var(--cms-inv, 1));
   transform-origin: center;
 }
 
@@ -393,6 +442,14 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 }
 
 .mediaBody {
+  /* Poslední záchrana, ne hlavní cesta rolování.
+     
+     Panely uvnitř mají vlastní `overflow` a v drtivé většině stačí. Kdyby ale
+     obsah přesto přerostl — jiné písmo, delší popisky, budoucí pole —, je
+     `overflow: hidden` na `.mediaSurface` jediné, co ho chytá, a chytá ho
+     nedosažitelně: tlačítka prostě zmizí pod hranou. Tady se z toho stane
+     posuvník, což je nejhorší přijatelný výsledek. */
+  overflow: auto;
   display: flex;
   flex: 1;
   min-height: 0;
@@ -580,6 +637,9 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 .setLibrary {
   display: flex;
   flex: 1;
+  /* Bez tohohle se knihovna uvnitř nescvrkne pod šířku své mřížky a přebytek
+     zmizí pod `overflow: hidden` na dialogu. Sousední `.setPane` ho má. */
+  min-width: 0;
   min-height: 0;
 }
 
@@ -587,6 +647,8 @@ $pick-inner: rgba(255, 255, 255, 0.82);
    a flex child actually able to scroll instead of growing the dialog past the
    viewport. */
 .docForm {
+  /* Ať se rolování nepropadne do stránky pod overlayem, až panel dojede. */
+  overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
   padding: var(--st-s4);
@@ -606,6 +668,8 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 /* A review is read before it is judged, so the words get the room and the two
    decisions sit under them rather than beside them. */
 .modRead {
+  /* Ať se rolování nepropadne do stránky pod overlayem, až panel dojede. */
+  overscroll-behavior: contain;
   flex: 1;
   min-height: 0;
   padding: var(--st-s4);
@@ -639,6 +703,10 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 }
 
 .modActions {
+  /* Řada akcí v dialogu — zalomí se, místo aby vytekla ven z panelu.
+     Šířka textu na tlačítku závisí na písmu, které dodá hostitel. */
+  flex-wrap: wrap;
+  min-width: 0;
   display: flex;
   flex: none;
   gap: var(--st-s2);
@@ -652,6 +720,10 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 }
 
 .setFoot {
+  /* Řada akcí v dialogu — zalomí se, místo aby vytekla ven z panelu.
+     Šířka textu na tlačítku závisí na písmu, které dodá hostitel. */
+  flex-wrap: wrap;
+  min-width: 0;
   display: flex;
   flex: none;
   gap: var(--st-s2);
@@ -729,6 +801,10 @@ $pick-inner: rgba(255, 255, 255, 0.82);
 }
 
 .imageActions {
+  /* Řada akcí v dialogu — zalomí se, místo aby vytekla ven z panelu.
+     Šířka textu na tlačítku závisí na písmu, které dodá hostitel. */
+  flex-wrap: wrap;
+  min-width: 0;
   display: flex;
   gap: var(--st-s2);
   align-items: center;
@@ -741,6 +817,8 @@ $pick-inner: rgba(255, 255, 255, 0.82);
    LinkModule. The panel is short, so the form sits at the top rather than
    stretching to fill a dialog sized for a media grid. */
 .linkForm {
+  /* Ať se rolování nepropadne do stránky pod overlayem, až panel dojede. */
+  overscroll-behavior: contain;
   display: flex;
   flex: 1;
   flex-direction: column;

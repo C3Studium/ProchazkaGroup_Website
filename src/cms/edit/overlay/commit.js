@@ -47,7 +47,10 @@
  * promise kept a different way: nothing is dropped on the way to a preview.
  */
 
+import { deepQuery } from "./dom.js"
+
 const EDITING = "[data-cms-editing]"
+
 const CONTROL = '[data-cms-part="control"]'
 
 /** In-flight submissions, added by `trackSave` and removed when they settle. */
@@ -97,22 +100,22 @@ export async function commitPendingEdit(frameWindow, hostDoc = typeof document =
   // Any popup the overlay drew over the *Studio* — the media library, a
   // document form. Matched on the marker rather than on one popup's name, so a
   // popup added later is covered by default rather than by being remembered.
-  if (hostDoc?.querySelector("[data-cms-overlay]")) {
+  if (deepQuery(hostDoc, "[data-cms-overlay]")) {
     return { ok: false, reason: "Nejprve zavřete otevřené okno úprav — rozpracovaná volba se do náhledu nepřenese." }
   }
 
-  const control = doc.querySelector(CONTROL)
-  if (control?.querySelector("input, textarea")) {
+  const control = deepQuery(doc, CONTROL)
+  if (deepQuery(control, "input, textarea")) {
     return { ok: false, reason: "V panelu je rozepsané pole. Uložte ho, nebo úpravu zrušte, a zkuste Náhled znovu." }
   }
 
-  const editing = doc.querySelector(EDITING)
+  const editing = deepQuery(doc, EDITING)
   if (editing) {
     // *Uložit* is on the control only while the value differs from what is
     // stored — that is the whole of the button swap — so its absence means there
     // is nothing to save, and the edit is closed instead. Escape is that path,
     // and `text.js` listens for it on the element itself.
-    const commit = doc.querySelector(`${CONTROL} [data-cms-action="save"]`)
+    const commit = deepQuery(doc, `${CONTROL} [data-cms-action="save"]`)
     if (commit) commit.click()
     else
       editing.dispatchEvent(
@@ -131,7 +134,7 @@ export async function commitPendingEdit(frameWindow, hostDoc = typeof document =
   // An element still marked as being edited means the commit did not take — the
   // button reached nothing, or `commit()` threw on the way. Either way the typed
   // text is still only in the DOM, and the overlay must stay up to hold it.
-  if (doc.querySelector(EDITING)) {
+  if (deepQuery(doc, EDITING)) {
     return { ok: false, reason: "Rozepsanou úpravu se nepodařilo uložit — zkuste ji uložit tlačítkem Uložit." }
   }
 

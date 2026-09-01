@@ -228,7 +228,25 @@ export const defineGlobals = (config) => {
 }
 
 /** The whole site. One of these, exported from `cms.config.js`. */
+/**
+ * Klíče, které `defineSite` opravdu čte.
+ *
+ * Vedle deklarace v `types/index.d.ts`, a to je ten problém: typy se udržují
+ * ručně vedle běhu, takže každá nová volba je nejdřív v TypeScriptu
+ * nepoužitelná — `reviews` i `readEditable` na to doplatily. Tenhle seznam
+ * to úplně neřeší, ale otočí to selhání správným směrem: dřív bylo `revievs`
+ * překlep, který mlčel, teď je to řádek v konzoli při startu.
+ */
+const SITE_KEYS = ['pages', 'globals', 'prefixes', 'reviews', 'mail', 'homePreview']
+
 export const defineSite = (config) => {
+    for (const key of Object.keys(config || {})) {
+        if (SITE_KEYS.includes(key)) continue
+        // Varování, ne chyba: neznámý klíč nic nerozbije, jen nic nedělá —
+        // a shodit kvůli němu build webu, který jinak běží, je horší.
+        console.warn(`[cms.config] defineSite: neznámý klíč "${key}". Znám: ${SITE_KEYS.join(', ')}.`)
+    }
+
     const pages = freezeList([...(config?.pages || [])])
     const routes = new Set()
     for (const page of pages) {
@@ -245,7 +263,101 @@ export const defineSite = (config) => {
             }
         }
     }
-    return Object.freeze({ __cmsSite: true, pages, globals: config?.globals || defineGlobals({}) })
+    // `homePreview` je úniková cesta pro Pages Router, ne výchozí chování.
+    //
+    // Náhled načítá každou stránku na její vlastní adrese — `/o-nas?edit=1` —
+    // protože jinak by se v rámu vykreslila jinak než na webu. Jedna výjimka
+    // dřív platila napevno: kořen `/` se nahrazoval za `/studio/preview/home`.
+    //
+    // Ta výjimka je z Pages Routeru, kde `/` bývá staticky generované a koncept
+    // přečíst neumí, takže musí existovat zvláštní stránka, kterou načítá jen
+    // rám. V App Routeru to neplatí — `draftMode()` umí kterákoli stránka —
+    // a hlavně neplatí nikde, kde úvodní stránka není na `/`. Web pod
+    // `app/[countryCode]/` ji má na `/cz`, takže se výjimka minula účinkem
+    // a rám si místo webu načetl Studio samo v sobě.
+    //
+    // Napevno tedy nic. Kdo tu stránku má, řekne si o ni:
+    //
+    //     defineSite({ pages: [...], homePreview: '/studio/preview/home' })
+    const homePreview = config?.homePreview ? String(config.homePreview) : null
+    if (homePreview && !homePreview.startsWith('/')) {
+        fail(`homePreview musí být cesta začínající lomítkem, dostal jsem "${homePreview}".`)
+    }
+
+    // Jedna routa, víc adres.
+    //
+    // `/kurzy` na e-shopu s regiony neexistuje. Existuje `/cz/kurzy`,
+    // `/de/kurzy`, `/pl/kurzy` — jedenáct adres, na kterých se vykresluje
+    // TENTÝŽ dokument. Není to o překladech; obsah je jeden.
+    //
+    // Do 0.1.35 uměla `definePage` jednu cestu, takže publikace přegenerovala
+    // jednu z jedenácti. Zbylých deset drželo starý obsah, dokud je něco
+    // jiného neshodilo — a v CMS to přitom vypadalo jako publikováno. Tichá
+    // chyba, která se pozná až tím, že si jí někdo všimne na webu.
+    //
+    // `prefixes` jsou ALTERNATIVY PRVNÍHO SEGMENTU, ne předpony k připojení:
+    //
+    //     defineSite({ prefixes: ['cz', 'de', 'pl'], pages: [...] })
+    //     definePage({ route: '/cz/kurzy' })   // → /cz/kurzy, /de/kurzy, /pl/kurzy
+    //
+    // Takhle zůstane deklarovaná routa tím, co se dá otevřít v prohlížeči
+    // a co vidí náhled, a konfigurace už napsaná pro jeden region platí dál.
+    // Routa, jejíž první segment mezi nimi není, se nerozšiřuje — `/studio`
+    // ani `/api/x` nemá jedenáct podob.
+    const prefixes = Object.freeze([...(config?.prefixes || [])].map((value) => {
+        const clean = String(value).replace(/^\/+|\/+$/g, '')
+        if (!clean || clean.includes('/')) {
+            fail(`prefixes: "${value}" není segment cesty — čekám 'cz', ne '/cz/' ani 'cz/kurzy'.`)
+        }
+        return clean
+    }))
+
+    // Schvalování recenzí je modul, ne součást Studia.
+    //
+    // Web s recenzemi ho chce; e-shop na Meduse ne — tam recenze spravuje
+    // backend a druhá fronta ve druhém nástroji znamená dvě místa, kde se
+    // schvaluje, a jedno z nich se přehlédne. Do 0.1.32 byl v navigaci
+    // napevno, takže se na to nedalo nic dělat.
+    //
+    // Výchozí je zapnuto: kdo o tom nevěděl, ať mu Studio zůstane, jaké bylo.
+    const reviews = config?.reviews !== false
+
+    // Pošta stejně jako recenze: modul, který si může držet něco jiného.
+    // `--mail=no` byl dosud jen přepínač instalátoru, takže po instalaci se
+    // to vypnout nedalo jinak než smazáním proměnných — a doctor mezitím
+    // hlásil "Resend ✓" u projektu, kde e-maily posílá backend.
+    const mail = config?.mail !== false
+
+    return Object.freeze({
+        __cmsSite: true,
+        pages,
+        globals: config?.globals || defineGlobals({}),
+        homePreview,
+        prefixes,
+        reviews,
+        mail,
+    })
+}
+
+/**
+ * Každá adresa, na které tahle cesta žije.
+ *
+ * Bez `prefixes` vrací jednoprvkové pole, takže volající nemusí řešit, jestli
+ * je web regionální — a chování webu bez nich se nezmění o jediný požadavek.
+ *
+ * @param {object} site
+ * @param {string} path  `/cz/kurzy`
+ * @returns {string[]}   `['/cz/kurzy', '/de/kurzy', '/pl/kurzy']`
+ */
+export const addressesOf = (site, path) => {
+    const prefixes = site?.prefixes || []
+    if (!prefixes.length || typeof path !== 'string' || !path.startsWith('/')) return [path]
+
+    const [, head, ...rest] = path.split('/')
+    if (!prefixes.includes(head)) return [path]
+
+    const tail = rest.length ? '/' + rest.join('/') : ''
+    return prefixes.map((prefix) => `/${prefix}${tail}`)
 }
 
 // --- reading the configuration ------------------------------------------------

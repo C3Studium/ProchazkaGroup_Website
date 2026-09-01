@@ -6,7 +6,7 @@ import { editable } from "@/cms/edit";
 const COPY = group(0.05);
 
 // Every line here comes from the CMS (siteCopy "o-nas.prompt" — see
-// @/cms/server/site/aboutUs, where PROMPT_LINES names the positions this file
+// @/lib/site/aboutUs, where PROMPT_LINES names the positions this file
 // spells as literals). These are the words it shipped with and what it falls
 // back to, line by line: an empty database leaves the section saying exactly
 // what it said before any of this was wired.

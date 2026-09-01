@@ -45,9 +45,35 @@
  * archived like anything else (ARCHIVE.md, "Mazání je ruční, a je jediné").
  */
 
-import { REJECTION_FIELDS, REJECTION_REASONS } from "@/cms/schemas/review"
+import { REJECTION_FIELDS, REJECTION_REASONS } from "../../schemas/review.js"
 
-import { bodyOf } from "./documents"
+import site from "../../site/config.js"
+import { bodyOf } from "./documents.js"
+
+/**
+ * Jméno typu, ve kterém recenze bydlí.
+ *
+ * Bylo natvrdo na pěti místech. Je to pořád jedno jméno a Studio ho zná —
+ * moderační fronta není obecná obrazovka, je to fronta recenzí — ale když je
+ * na jednom místě, dá se najít a dá se kolem něj postavit vypínač níž.
+ */
+export const REVIEW_TYPE = "review"
+
+/**
+ * Spravují se recenze v tomhle Studiu?
+ *
+ * `reviews: false` v `valecms.config` neznamená „web recenze nemá". Znamená
+ * „nespravují se tady" — třeba e-shop na Meduse je má ve svém adminu. Dvě
+ * fronty ve dvou nástrojích znamenají dvě místa, kde se schvaluje, a jedno
+ * z nich se přehlédne.
+ *
+ * Od 0.1.47 to schová i typ obsahu, ne jen frontu. Nechat „Recenze" v seznamu
+ * obsahu u projektu, který je spravuje jinde, je nabídka, která lže: kliknutím
+ * se dostane editor k dokumentům, o kterých mu jiný nástroj tvrdí, že jsou
+ * jeho. Ostatní typy se dají zapnout a vypnout tím, co je v konfiguraci —
+ * recenze ne, protože na nich visí moderace.
+ */
+export const reviewsManaged = () => site?.reviews !== false
 
 export const PENDING = "pending"
 export const APPROVED = "approved"

@@ -17,7 +17,7 @@ import {
 } from "@/components/pages/aboutUs/aboutStack";
 
 // The heading, the three marks and the photograph come from the CMS (siteCopy
-// "o-nas.hero" — see @/cms/server/site/aboutUs). Everything below is what the
+// "o-nas.hero" — see @/lib/site/aboutUs). Everything below is what the
 // section shipped with and what it falls back to: an empty database, a missing
 // table or a failed query all leave it rendering exactly what it rendered
 // before any of this was wired.
@@ -45,7 +45,7 @@ const FALLBACK_PHOTO = {
 // The badge that rotates over the photograph. It goes off this site, so both
 // halves are the editor's: the words that ride round the ring and the address
 // they lead to. They live in `o-nas.links` rather than in the hero's own block —
-// see ABOUT_LINKS in @/cms/server/site/aboutUs, which names the positions the
+// see ABOUT_LINKS in @/lib/site/aboutUs, which names the positions the
 // annotation below spells as literals.
 //
 // The trailing space is the ring's own. The sentence is set twice round the
@@ -82,7 +82,7 @@ const HERO_END = HERO_PINS_AT;
 // job; anything laid over it here, however translucent, only flattens it.
 //
 // `docId` is the siteCopy block this section's copy came from, and it arrives
-// only inside the Studio's editing frame (see @/cms/server/site/aboutUs). It is
+// only inside the Studio's editing frame (see @/lib/site/aboutUs). It is
 // spread onto elements that already exist, as attributes — nothing here gains a
 // wrapper, a class, a style or a transform, because this section's timeline is
 // measured against boxes that must stay exactly where they are.
@@ -284,7 +284,7 @@ export default function AboutHero({ title: cmsTitle, marks: cmsMarks, photo: cms
                         <span> per letter, each turned by its own transform, and
                         an annotation on it would name an element that is a
                         thirtieth of the word. `items.0.*` is ABOUT_LINKS.badge —
-                        see @/cms/server/site/aboutUs.
+                        see @/lib/site/aboutUs.
 
                         Target only, which is the same reading the homepage's
                         identical badge already has (MainIntro). The words are

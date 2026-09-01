@@ -8,12 +8,12 @@
 // instalace tiše nemá vizuální editaci ani cestu do ní. Tenhle soubor je ta
 // hranice, aby ji layout mohl vložit jedním prvkem.
 //
-//     import StudioClient from '@/cms/manage/appClient'
+//     import StudioClient from '@c3studium/valecms/manage/appClient.jsx'
 //     …
 //     <body>{children}<StudioClient /></body>
 
-import { useEditArming } from '@/cms/edit/arm'
-import ManageBadge from '@/cms/manage'
+import { useEditArming } from '../edit/arm.js'
+import ManageBadge from './index.jsx'
 
 export default function StudioClient() {
     useEditArming()

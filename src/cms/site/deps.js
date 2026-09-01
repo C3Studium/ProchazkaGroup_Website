@@ -1,3 +1,5 @@
+import { addressesOf } from './define.js'
+
 // Which routes a document is on — PURE and ISOMORPHIC, on ./define.js's terms.
 //
 // This is the half of "a publish reaches the site" that must not be a table.
@@ -11,7 +13,7 @@
 // So the answer is derived from the same declarations the READER uses:
 //
 //   `copy: 'index'`                  -> getSiteCopy({ page: 'index' })
-//   `sources: { reviews: {…} }`      -> getApprovedReviews(…)
+//   `sources: { reviews: {…} }`      -> čtečka typu 'review' (registerSources)
 //   `includes: ['/']`                -> getHomepageContent() inside another page
 //   `globals`                        -> what _app puts under every route
 //
@@ -134,7 +136,19 @@ export const routesForDocument = (site, doc = {}) => {
         }
     }
 
-    return { everywhere: false, paths: [...paths], dynamic: [...dynamic], unresolved: [...unresolved] }
+    // Teprve tady se z cest stanou ADRESY. Uvnitř se celou dobu pracuje
+    // s tím, co je v konfiguraci — jedna routa je jedna položka a `includes`
+    // se řeší proti ní. Rozšíření na regiony patří až na konec, jinak by se
+    // jedenáct adres téže stránky porovnávalo mezi sebou jako jedenáct
+    // různých stránek.
+    const spread = (list) => [...new Set(list.flatMap((path) => addressesOf(site, path)))]
+
+    return {
+        everywhere: false,
+        paths: spread([...paths]),
+        dynamic: spread([...dynamic]),
+        unresolved: [...unresolved],
+    }
 }
 
 /**

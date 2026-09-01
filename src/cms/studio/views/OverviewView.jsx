@@ -1,14 +1,14 @@
 import Link from "next/link"
-import { useAuth, usePort, useRevision, useTypes } from "../context/StudioProvider"
-import { useAsync } from "../hooks/useAsync"
-import { PENDING, queueQuery } from "../lib/moderation"
-import { STATE_LABELS, previewOf, stateOf } from "../lib/documents"
-import { form, formatRelative, truncate } from "../lib/format"
-import { hrefs } from "../lib/routes"
-import { Button } from "../ui/controls"
-import { Badge, EmptyState, SkeletonRows, Spinner } from "../ui/feedback"
-import Icon from "../ui/Icon"
-import { ViewBody, ViewHeader } from "./ViewLayout"
+import { useAuth, usePort, useRevision, useTypes } from "../context/StudioProvider.jsx"
+import { useAsync } from "../hooks/useAsync.js"
+import { PENDING, REVIEW_TYPE, queueQuery, reviewsManaged } from "../lib/moderation.js"
+import { STATE_LABELS, previewOf, stateOf } from "../lib/documents.js"
+import { form, formatRelative, truncate } from "../lib/format.js"
+import { hrefs } from "../lib/routes.js"
+import { Button } from "../ui/controls.jsx"
+import { Badge, EmptyState, SkeletonRows, Spinner } from "../ui/feedback.jsx"
+import Icon from "../ui/Icon.jsx"
+import { ViewBody, ViewHeader } from "./ViewLayout.jsx"
 import styles from "./OverviewView.module.scss"
 
 /**
@@ -28,9 +28,14 @@ export default function OverviewView() {
   const { user } = useAuth()
   const { revision } = useRevision()
 
+  // Modul recenzí. Vypnutý znamená, že se na ně ani NEPTÁ: web bez typu
+  // `review` by na ten dotaz odpověděl chybou nebo prázdnem a přehled by
+  // ukazoval prázdnou frontu něčeho, co v tomhle projektu neexistuje.
+  const showReviews = reviewsManaged()
+
   const { data: pending, loading: pendingLoading } = useAsync(
-    () => port.list({ type: "review", perPage: 12, ...queueQuery(PENDING) }),
-    [port, revision],
+    () => (showReviews ? port.list({ type: REVIEW_TYPE, perPage: 12, ...queueQuery(PENDING) }) : Promise.resolve(null)),
+    [port, revision, showReviews],
   )
 
   const { data: recent, loading: recentLoading } = useAsync(() => port.list({ perPage: 12 }), [port, revision])
@@ -39,55 +44,60 @@ export default function OverviewView() {
 
   return (
     <>
-      <ViewHeader title={greeting(user)} subtitle="Přehled toho, co čeká a co se naposledy měnilo." />
+      <ViewHeader
+        title={greeting(user)}
+        subtitle={showReviews ? "Přehled toho, co čeká a co se naposledy měnilo." : "Přehled toho, co se naposledy měnilo."}
+      />
 
       <ViewBody className={styles.body}>
-        <div className={styles.grid}>
-          <section className={styles.primary}>
-            <header className={styles.head}>
-              <h2 className={styles.eyebrow}>Recenze čekající na schválení</h2>
-              {pendingCount ? (
-                <Button href={hrefs.moderation()} variant="primary" size="sm" iconRight="chevronRight">
-                  Projít frontu
-                </Button>
-              ) : null}
-            </header>
+        <div className={showReviews ? styles.grid : `${styles.grid} ${styles.gridSolo}`}>
+          {showReviews ? (
+            <section className={styles.primary}>
+              <header className={styles.head}>
+                <h2 className={styles.eyebrow}>Recenze čekající na schválení</h2>
+                {pendingCount ? (
+                  <Button href={hrefs.moderation()} variant="primary" size="sm" iconRight="chevronRight">
+                    Projít frontu
+                  </Button>
+                ) : null}
+              </header>
 
-            {pendingLoading && !pending ? (
-              <div className={styles.inlineLoading}>
-                <Spinner size={16} />
-              </div>
-            ) : pendingCount === 0 ? (
-              <EmptyState
-                compact
-                icon="check"
-                title="Nic nečeká"
-                description="Všechny recenze jsou vyřízené. Nové se objeví tady."
-              />
-            ) : (
-              <>
-                <p className={styles.count}>
-                  <strong>{pendingCount}</strong>
-                  <span>{form(pendingCount, "recenze čeká", "recenze čekají", "recenzí čeká")}</span>
-                </p>
-                <p className={styles.countNote}>Dokud je neschválíte, nejsou na webu.</p>
+              {pendingLoading && !pending ? (
+                <div className={styles.inlineLoading}>
+                  <Spinner size={16} />
+                </div>
+              ) : pendingCount === 0 ? (
+                <EmptyState
+                  compact
+                  icon="check"
+                  title="Nic nečeká"
+                  description="Všechny recenze jsou vyřízené. Nové se objeví tady."
+                />
+              ) : (
+                <>
+                  <p className={styles.count}>
+                    <strong>{pendingCount}</strong>
+                    <span>{form(pendingCount, "recenze čeká", "recenze čekají", "recenzí čeká")}</span>
+                  </p>
+                  <p className={styles.countNote}>Dokud je neschválíte, nejsou na webu.</p>
 
-                <ul className={styles.peek}>
-                  {(pending?.rows || []).map((doc) => {
-                    const body = doc.draft ?? doc.data ?? {}
-                    return (
-                      <li key={doc.id}>
-                        <Link href={hrefs.moderation()} className={styles.peekRow}>
-                          <span className={styles.peekName}>{body.customerName || "Bez jména"}</span>
-                          <span className={styles.peekText}>{truncate(body.message, 180) || "—"}</span>
-                        </Link>
-                      </li>
-                    )
-                  })}
-                </ul>
-              </>
-            )}
-          </section>
+                  <ul className={styles.peek}>
+                    {(pending?.rows || []).map((doc) => {
+                      const body = doc.draft ?? doc.data ?? {}
+                      return (
+                        <li key={doc.id}>
+                          <Link href={hrefs.moderation()} className={styles.peekRow}>
+                            <span className={styles.peekName}>{body.customerName || "Bez jména"}</span>
+                            <span className={styles.peekText}>{truncate(body.message, 180) || "—"}</span>
+                          </Link>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </>
+              )}
+            </section>
+          ) : null}
 
           <div className={styles.side}>
             <section className={styles.recentPane}>

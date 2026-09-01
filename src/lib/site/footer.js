@@ -26,12 +26,13 @@
 // by two different affordances. `global.contact` is the sheet the navigation
 // opens — under every route for the same reason the patička is.
 
-import { GLOBAL_COPY_KEYS } from '@/cms/visualEditing'
+import { GLOBAL_COPY_KEYS } from '@/cms/visualEditing.js'
 
 // One place decides which of the three readers answers a call — published,
 // draft or a moment in the archive. See ./archive.js.
-import { readerFor, viewOf } from './archive.js'
-import { getAssistant, getSiteCopy } from './content.js'
+import { getSiteCopy, readerFor, viewOf } from '@/cms/server/site'
+
+import { getAssistant } from './people.js'
 
 export const FOOTER_KEY = GLOBAL_COPY_KEYS.footer
 export const GLOBAL_KEYS = GLOBAL_COPY_KEYS
@@ -202,7 +203,7 @@ const REVALIDATE_SECONDS = 600
  * hand-written copies of the same six lines is eighteen places for the draft
  * switch to be forgotten on one of them. So it is written once:
  *
- *     import { footerStaticProps } from "@/cms/server/site"
+ *     import { footerStaticProps } from "@/lib/site"
  *     export const getStaticProps = footerStaticProps
  *
  * Assigned to a named export rather than re-exported, because Next detects

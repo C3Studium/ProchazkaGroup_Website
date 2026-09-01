@@ -12,7 +12,7 @@
 
 import { CmsError, serverError } from '../errors.js'
 import { assertStoragePort, registerStorageDriver } from './storage.js'
-import { encodeKey, presignUrl, signRequest } from './s3.js'
+import { encodeKey, presignUrl, signedRequest } from './s3.js'
 
 const trimSlashes = (value) => String(value || '').replace(/\/+$/, '')
 
@@ -40,14 +40,11 @@ export const createS3Storage = ({
         return url
     }
 
-    const call = async (method, url, { body = '', headers = {} } = {}) => {
-        const signed = signRequest({ method, url, body, headers, accessKeyId, secretAccessKey, region })
-        return fetch(signed.url, {
-            method,
-            headers: signed.headers,
-            body: method === 'GET' || method === 'HEAD' || method === 'DELETE' ? undefined : body,
-        })
-    }
+    // `signedRequest`, ne `signRequest`: dvojice `{ url, headers }` se plete
+    // a mýlka je tichá — požadavek odejde bez podpisu a server odpoví
+    // AccessDenied, tedy hláškou o oprávnění tam, kde se žádné netvrdilo.
+    const call = (method, url, { body = '', headers = {} } = {}) =>
+        fetch(signedRequest({ method, url, body, headers, accessKeyId, secretAccessKey, region }))
 
     const driver = {
         name: 's3',

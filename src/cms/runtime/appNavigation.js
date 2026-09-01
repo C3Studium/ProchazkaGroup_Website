@@ -21,8 +21,10 @@ export const useAppNavigation = () => {
     const search = useSearchParams()
 
     const { push, replace, guard } = withGuards({
-        go: (url) => router.push(url),
-        replaceGo: (url) => router.replace(url),
+        // App Router zná ze tří voleb jen `scroll`; `shallow` u něj nemá co
+        // znamenat, protože stránka žádná data předem nenačítá.
+        go: (url, options) => router.push(url, { scroll: options?.scroll }),
+        replaceGo: (url, options) => router.replace(url, { scroll: options?.scroll }),
     })
 
     const searchString = search?.toString() ?? ''

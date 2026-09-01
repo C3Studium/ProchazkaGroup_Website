@@ -1,9 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
-import { EDIT_PARAM, EDIT_VALUE, frameUrl, sitePathFromFrame } from "@/cms/preview/frame"
-import { mountEditOverlay } from "@/cms/edit/overlay/mount"
-import { usePersistedJson } from "../shell/persist"
-import { CUSTOM, CUSTOM_LIMITS, DEFAULT_PRESET, byId, matching, stepZoom } from "./presets"
+import { EDIT_PARAM, EDIT_VALUE, frameUrl, sitePathFromFrame } from "../../preview/frame.js"
+import site from "../../site/config.js"
+
+// Náhradní stránka za úvodní — skoro nikde. `frame.js` o ní nic neví schválně:
+// je to volba konkrétního webu, ne pravidlo náhledu. Čte se tady, kde je
+// konfigurace stejně po ruce, a předává se do obou funkcí, aby se cesta tam
+// a zpátky vždycky shodovala.
+const homePreview = site?.homePreview || null
+import { mountEditOverlay } from "../../edit/overlay/mount.jsx"
+import { usePersistedJson } from "../shell/persist.js"
+import { CUSTOM, CUSTOM_LIMITS, DEFAULT_PRESET, byId, matching, stepZoom } from "./presets.js"
 
 /**
  * The framed page: a real viewport, scaled, with an editor mounted into it.
@@ -65,7 +72,7 @@ export const safePath = (value) => {
     const path = String(value || "/")
     if (!PAGE_PARAM.test(path)) return "/"
     const trimmed = path.replace(/\/+$/, "") || "/"
-    return sitePathFromFrame(trimmed) === trimmed ? trimmed : "/"
+    return sitePathFromFrame(trimmed, { homePreview }) === trimmed ? trimmed : "/"
 }
 
 const clampSide = (value) =>
@@ -104,7 +111,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
      * See src/cms/server/site/archive.js.
      */
     const srcFor = useCallback(
-        (path) => frameUrl(path, { edit: annotated, bust }),
+        (path) => frameUrl(path, { edit: annotated, bust, homePreview }),
         [annotated, bust],
     )
     // Set only by a refresh, read only by the load that follows it. A page change
@@ -259,7 +266,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
             win.lenis?.scrollTo?.(target, { immediate: true })
         }
 
-        const framed = sitePathFromFrame(location.pathname)
+        const framed = sitePathFromFrame(location.pathname, { homePreview })
         if (framed === null) {
             // Not a page of the site — /studio, an API route. No surface here is a
             // browser and none of them will host the admin inside itself.
@@ -333,7 +340,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
         try {
             flagged =
                 new URLSearchParams(win.location.search).get(EDIT_PARAM) === EDIT_VALUE &&
-                sitePathFromFrame(win.location.pathname) !== null
+                sitePathFromFrame(win.location.pathname, { homePreview }) !== null
         } catch {
             // Same-origin by construction; a document mid-navigation can still
             // refuse the read, and there will be another load along shortly.

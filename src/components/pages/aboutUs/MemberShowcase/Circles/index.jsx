@@ -140,7 +140,7 @@ const screenEase = (t, localSpan, trackSpan) => {
 };
 
 // `docId` is the block the six words came from (`o-nas.showcase.values` — see
-// @/cms/server/site/aboutUs) and arrives only inside the Studio's editing frame.
+// @/lib/site/aboutUs) and arrives only inside the Studio's editing frame.
 // The frame loop below writes `style.transform` on the disc and `style.opacity`
 // on the label every frame; an attribute is neither, so annotating the label
 // changes nothing about what this file does.
@@ -482,7 +482,7 @@ export default function Circles({ progress, labels = [], markRefs, docId, geo })
                     {/* The label, not the disc: the disc is the object and the
                         word is what is written on it. `items.N.label` is offset
                         by one — SHOWCASE_VALUES.valuesFrom in
-                        @/cms/server/site/aboutUs, where item 0 is the cards'
+                        @/lib/site/aboutUs, where item 0 is the cards'
                         button. */}
                     <span
                         {...editable(docId, `items.${i + 1}.label`, "text")}

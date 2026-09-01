@@ -1,5 +1,19 @@
 # In-house CMS — system design
 
+> **Stale in its framing, still true in its reasoning.** This was written when
+> the CMS was a folder inside one site, and it says so below — "not a package,
+> not a published library" was accurate then and is not now. The content types
+> it opens with (`siteCopy`, `partner`, `consultant`, `review`, `offer`, `qna`)
+> are that one site's, not the library's: a project declares its own in
+> `valecms.config.js`, and the package ships none.
+>
+> The parts worth reading are the parts about shape — why documents are rows of
+> JSONB, why schemas are config, why the layers sit where they do. Those did not
+> change when this became a package. The vocabulary around them did, and nobody
+> has been back to fix it.
+>
+> Not shipped in the tarball. See `docs/TODO.md`.
+
 The contract three parallel builds share. Read this before writing anything.
 
 ## What this is

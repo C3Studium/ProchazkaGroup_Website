@@ -34,29 +34,21 @@
 import { requireUser } from '../auth.js'
 import { listSitePages } from '../pages.js'
 
-// Mirrors the switch in src/pages/studio/[[...path]].jsx and in the sibling
-// preview route. With the in-memory dev port there is no server-side session to
-// check — the Studio's documents live in the browser — so requiring one here
-// would make editing unreachable in the exact environment it is developed in.
-const DEV_PORT = process.env.NEXT_PUBLIC_CMS_DEV_PORT === '1'
-
 export const handleEdit = async function handler(req, res) {
     if (req.method !== 'GET') {
         res.setHeader('Allow', 'GET')
         return res.status(405).json({ code: 'invalid', message: 'Metoda není povolena, použijte GET' })
     }
 
-    if (!DEV_PORT) {
-        try {
-            await requireUser(req, res)
-        } catch {
-            // JSON here, unlike the preview route's redirect: this is an XHR from
-            // a screen that is already mounted, and the caller turns the code into
-            // a message on the stage rather than a blank tab.
-            return res.status(401).json({ code: 'unauthorized', message: 'Přihlaste se prosím znovu' })
-        }
+    try {
+        await requireUser(req, res)
+    } catch {
+        // JSON here, unlike the preview route's redirect: this is an XHR from
+        // a screen that is already mounted, and the caller turns the code into
+        // a message on the stage rather than a blank tab.
+        return res.status(401).json({ code: 'unauthorized', message: 'Přihlaste se prosím znovu' })
     }
-
+    
     // Anything that is not the word "open" closes. A malformed parameter must not
     // be able to hand out the draft cookie.
     const open = String(req.query.session || '') === 'open'

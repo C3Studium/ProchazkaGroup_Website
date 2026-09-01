@@ -2,7 +2,7 @@ import Head from "next/head";
 
 import ReviewsHero from "@/components/pages/reviews/ReviewsHero";
 import ReviewWall from "@/components/pages/reviews/ReviewWall";
-import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/cms/server/site"
+import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
 
 // ISR on the same terms as the other pages: reviews are approved by an editor a
 // few times a month, and `revalidate` is what lets an approval reach the public

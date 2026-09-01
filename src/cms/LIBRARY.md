@@ -24,12 +24,12 @@ So this is not a rewrite. It is one new layer, and the deletion of three.
 
 ## The boundary — what `src/cms` is allowed to know
 
-Two seams, both files the SITE owns, both in `src/lib`:
+Two seams, both files the SITE owns, both in the repo root:
 
 | file | what it declares |
 |---|---|
-| `src/lib/cms.config.js` | the pages — routes, the documents each holds, where fields land |
-| `src/lib/cms.types.mjs` | the content types this installation has, and their Studio order |
+| `cms.config.js` | the pages — routes, the documents each holds, where fields land |
+| `cms.types.mjs` | the content types this installation has, and their Studio order |
 
 Everything else under `src/cms` reaches them through exactly two modules —
 `site/config.js` and `site/types.js` — and nothing else in the library imports a
@@ -72,7 +72,7 @@ file that belongs to one client.
 
 ## The config
 
-One file, `src/lib/cms.config.js`. It declares pages, the blocks each
+One file, `cms.config.js`, at the repo root. It declares pages, the blocks each
 page holds, and what each block's fields are. Everything else is derived.
 
 ```js

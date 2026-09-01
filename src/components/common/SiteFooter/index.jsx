@@ -9,7 +9,7 @@ import { externalClass } from "@/components/common/ui/externalLink";
 import { editable, editableLink } from "@/cms/edit";
 
 // The patička's single-line copy comes from the CMS (siteCopy "global.footer" —
-// see @/cms/server/site/footer). These are the values it shipped with and what
+// see @/lib/site/footer). These are the values it shipped with and what
 // it falls back to; a page that hands down nothing renders exactly this.
 //
 // The non-breaking spaces are load-bearing and are why these lines are read as
@@ -25,7 +25,7 @@ const FALLBACK = {
 // The left half of the top row — "global.footer.claim", a block of its own
 // because it is the half set with hard line breaks and every one of its lines
 // has to be an element before it can be clicked. CLAIM_LINES in
-// @/cms/server/site/footer names the positions this file spells as literals.
+// @/lib/site/footer names the positions this file spells as literals.
 const FALLBACK_CLAIM = {
     lines: ["Jsme odhodláni vám zlehčit", "finanční aspekt života."],
     cta: ["Kdykoliv jste připraveni,", "my jsme taky."],
@@ -74,7 +74,7 @@ const CONTACT = group(0.16);
 // the clip window as the page scrolls to the bottom.
 //
 // `docId` is the block the copy came from and arrives only inside the Studio's
-// editing frame, through `pageProps.footer` — see @/cms/server/site/footer for
+// editing frame, through `pageProps.footer` — see @/lib/site/footer for
 // why a component `_app` renders cannot fetch for itself.
 //
 // Everything on the patička is annotated now except two things, and both are
@@ -106,7 +106,7 @@ const CONTACT = group(0.16);
 // goes and why.
 //
 // The `items.N.label` paths below are positions in the block's list, and the
-// names for those positions are FOOTER_LINES in @/cms/server/site/footer. They
+// names for those positions are FOOTER_LINES in @/lib/site/footer. They
 // are spelled as literals here because that module is server-only and this
 // component is on every public route; change one and change the other.
 export default function SiteFooter({ where, contactLead, address, legal, claim: cmsClaim, links: cmsLinks, docId }) {
@@ -196,7 +196,7 @@ export default function SiteFooter({ where, contactLead, address, legal, claim: 
                                     print their own target as their words, so a
                                     text edit that could not move the href would
                                     make the page lie. `items.N.*` is
-                                    FOOTER_LINKS in @/cms/server/site/footer.
+                                    FOOTER_LINKS in @/lib/site/footer.
                                     All four leave the site and say so, and the
                                     two the CMS could retarget derive the marker
                                     from the href they actually render. */}
