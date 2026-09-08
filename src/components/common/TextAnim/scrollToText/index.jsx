@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 const alphabet = [
     { letter: "A", index: 0 },
@@ -66,8 +66,66 @@ const SPIN_EASE = [0.6, 0.05, 0, 0.9];
 // instead of snapping when the letter count changes.
 const AlphabetChar = ({ char, duration = 0.5 }) => {
     const index = findAlphabetIndex(char);
-    const translateY = `${-(index * 100)}%`;
     const size = { duration, ease: SPIN_EASE };
+    const trackRef = useRef(null);
+
+    // How far the track has to travel to bring this letter into the window —
+    // measured off the letter, not calculated from its position in the alphabet.
+    //
+    // It was `-(index * 100)%`, and that asks two independent parts of the
+    // engine for the same length: the transform resolves a percentage of the
+    // track's used height, while the letters are a stack of `1em` cells laid
+    // out one after another. Whenever those two disagree — and they may, since
+    // one is a single multiplication and the other is forty-three roundings —
+    // the error is multiplied by the index. Blink lands both on the same value
+    // at every width and pixel ratio measured, so it never showed there; on
+    // WebKit it did, and it showed on the highest index in the word: Z is 39th
+    // in this alphabet, against 25 for R and 1 for Á. Reported as the Z of
+    // PROCHÁZKA sitting high with the Ž behind it creeping into view, which is
+    // what a few pixels of drift look like when the window only has a couple to
+    // give (see the trim in styles.scss).
+    //
+    // The difference between the two rects is the letter's offset inside the
+    // track, and it is invariant under the track's own transform — both boxes
+    // carry it — so this can be read at any point in the spin and needs no
+    // co-ordination with the animation.
+    const [offset, setOffset] = useState(null);
+
+    useEffect(() => {
+        const track = trackRef.current;
+        if (!track) return;
+
+        const measure = () => {
+            const cell = track.children[index];
+            if (!cell) return;
+            const box = track.getBoundingClientRect();
+            // A column inside a `display: none` branch — the third word of the
+            // bar is one on a phone — measures zero for everything. Taking that
+            // as an offset would park every letter on A.
+            if (!box.height) return;
+            const next = cell.getBoundingClientRect().top - box.top;
+            setOffset((prev) => (prev !== null && Math.abs(prev - next) < 0.01 ? prev : next));
+        };
+
+        measure();
+
+        // The offsets are all multiples of the cell, so they move whenever the
+        // cell does: a breakpoint changing the type size, the root ramp past
+        // 1920, an orientation change. Observing the track catches each of
+        // those without listening for any of them by name.
+        const watch = new ResizeObserver(measure);
+        watch.observe(track);
+        // And once more when the web font lands, which changes the cell height
+        // under a layout that has already been measured against the fallback.
+        document.fonts?.ready?.then(measure).catch(() => {});
+
+        return () => watch.disconnect();
+    }, [index]);
+
+    // The arithmetic is still what the server renders and what the first client
+    // frame uses; the effect above replaces it before the spin is over. Keeping
+    // it means a column with nothing to measure yet is never parked on A.
+    const translateY = offset === null ? `${-(index * 100)}%` : -offset;
 
     return (
         <motion.span
@@ -78,6 +136,7 @@ const AlphabetChar = ({ char, duration = 0.5 }) => {
             transition={size}
         >
             <motion.span
+                ref={trackRef}
                 className="scrollToText__char__track"
                 animate={{ y: translateY }}
                 transition={{ duration, ease: SPIN_EASE }}
