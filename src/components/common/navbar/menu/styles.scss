@@ -10,11 +10,31 @@
     // lines up with the page rather than floating over it.
     padding: 1.5rem 3vw;
     width: 100%;
-    height: fit-content;
+    // As tall as the three words, said the plain way.
+    //
+    // This was `fit-content`, and on iOS that is what put the bar in the middle
+    // of the screen. WebKit does not resolve an intrinsic height the way Blink
+    // does on a fixed-position box, and the bar came out the full height of the
+    // viewport — at which point the two rules below finish the job: a grid's
+    // default `align-content` is `stretch`, so the single row grew to fill it,
+    // and `align-items: center` then put the words in the middle of that row.
+    // The ::before scrim is sized off this box too, so the same fault laid a
+    // 92%-black gradient over the top half of every page. Reproduced exactly by
+    // forcing `height: 100vh` here in a desktop browser.
+    //
+    // `auto` is the same content height everywhere it already worked —
+    // measured identical at 390, 844, 768, 1280, 1440 and 2552 across, down to
+    // the position of each word — and it is the value with no intrinsic-sizing
+    // edge cases in it.
+    height: auto;
     z-index: 160;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     align-items: center;
+    // The belt to that brace. Whatever this box's height turns out to be, the
+    // row it holds sits at the top of it rather than being stretched down the
+    // middle — so the bar cannot drift again if anything else ever grows it.
+    align-content: start;
 
     // A ground for the bar where the page has none to give it. On the wide
     // compositions every section is designed with clearance under the bar, so
