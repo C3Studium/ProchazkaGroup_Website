@@ -44,6 +44,7 @@ import {
     PRIVACY_COPY_KEYS,
     REVIEWS_COPY_KEYS,
 } from '@/cms/visualEditing'
+import { reviewCredit } from '@/constants/reviews'
 
 const K = HOMEPAGE_COPY_KEYS
 const A = ABOUT_COPY_KEYS
@@ -85,18 +86,24 @@ const orbitLogo = (partner, { draft }) => {
  *
  * Both strings are composed out of two fields each, which is why they are a
  * function and not two readers: `tag` drops the ordinal because the section
- * numbers each quote from its position in the pool and prints the category
- * after it — "#poradce", not "01#poradce" — and `author` drops the city the
- * placeholder line promises ("| Jméno a město - klienta") because `review` has
- * a customer name and nothing geographic. The city is dropped rather than
+ * numbers each quote from its position in the pool and prints the credit after
+ * it — "Pro – Jan Novák", not "01 Pro – Jan Novák" — and `author` drops the city
+ * the placeholder line promises ("| Jméno a město - klienta") because `review`
+ * has a customer name and nothing geographic. The city is dropped rather than
  * invented.
+ *
+ * `tag` was the category ("#poradce") and is now who the review is for. See
+ * constants/reviews for why: the category was derived from the consultant's
+ * name, so printing both said one thing twice.
  *
  * Nothing composed here has one field behind it, so nothing here can be edited
  * in place; the section annotates a quote as a whole document instead, and
  * clicking it opens the form an editor already knows from Schvalování recenzí.
  */
 const reviewQuote = (review, { draft }) => ({
-    tag: `#${review.hashtag}`,
+    // Empty rather than null: the section prints the ordinal and this on one
+    // line, and a null would put the word "null" beside the number.
+    tag: reviewCredit(review) || '',
     text: review.message,
     author: `| ${review.customerName}`,
     ...(draft && review.id ? { docId: review.id } : {}),

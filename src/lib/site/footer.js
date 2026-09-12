@@ -33,6 +33,7 @@ import { GLOBAL_COPY_KEYS } from '@/cms/visualEditing.js'
 import { getSiteCopy, readerFor, viewOf } from '@/cms/server/site'
 
 import { getAssistant } from './people.js'
+import { DIAL_PREFIXES } from '@/constants/dialPrefixes'
 
 export const FOOTER_KEY = GLOBAL_COPY_KEYS.footer
 export const GLOBAL_KEYS = GLOBAL_COPY_KEYS
@@ -117,6 +118,39 @@ const labelsAt = (block, from, count) =>
 const linkAt = (block, index) => {
     const item = (block?.items || [])[index]
     return { text: item?.label || '', href: item?.value || '' }
+}
+
+/**
+ * Předvolby, které jdou vybrat před telefonním číslem.
+ *
+ * Blok `global.dial-prefixes`: jedna položka na zemi, `label` je název,
+ * `value` předvolba a `note` dvoupísmenný kód země. Pořadí v bloku je pořadí
+ * v seznamu a první položka je to, na čem pole začíná — takže země se ve Studiu
+ * přidávají, mažou i přerovnávají bez zásahu do kódu.
+ *
+ * Prázdná odpověď vrací `DIAL_PREFIXES` z @/constants/dialPrefixes, na stejných
+ * podmínkách jako každý jiný fallback na tomhle webu: chybějící tabulka nebo
+ * nedostupná databáze nechá formuláře fungovat s tím, co bylo nasazené.
+ *
+ * Položka bez předvolby se zahazuje. Země bez čísla není volba, je to řádek,
+ * který by v seznamu nic neudělal.
+ *
+ * @param {{ draft?: boolean, at?: string|null }} [options]
+ */
+export const getDialPrefixes = async ({ draft = false, at = null } = {}) => {
+    const read = readerFor({ draft, at })
+    const copy = await getSiteCopy({ page: 'global', read })
+    const block = copy[GLOBAL_KEYS.dialPrefixes] || null
+
+    const list = (block?.items || [])
+        .map((item) => ({
+            iso: (item?.note || '').trim().toUpperCase() || null,
+            code: (item?.value || '').trim(),
+            label: (item?.label || '').trim(),
+        }))
+        .filter((entry) => entry.code)
+
+    return list.length ? list : DIAL_PREFIXES
 }
 
 export const getFooterContent = async ({ draft = false, at = null } = {}) => {

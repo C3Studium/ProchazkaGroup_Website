@@ -1,7 +1,8 @@
 import Head from "next/head"
 
 import AdvisorCard from "@/components/pages/advisor/AdvisorCard"
-import { getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { getConsultants, getAssistant, getContactContent, getDialPrefixes, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { rosterFromCms } from "@/constants/roster"
 
 // One page per published consultant, and it exists to collect a review for that
 // one person — this is the address behind the QR code on their business card,
@@ -40,7 +41,7 @@ export async function getStaticProps({ params, ...context }) {
     const view = viewOf(context)
     const read = readerFor(view)
 
-    const [content, consultants, footer, contact, assistant] = await Promise.all([
+    const [content, consultants, footer, contact, assistant, dialPrefixes] = await Promise.all([
         // The card's framing — the ask over the form, the office's city, the
         // words on the send button. ONE block behind every consultant's page,
         // declared under `page: 'recenze'` in cms.config.js: editing it once
@@ -53,6 +54,7 @@ export async function getStaticProps({ params, ...context }) {
         getFooterContent(view),
         getContactContent(view),
         getAssistant({ read }),
+        getDialPrefixes(view),
     ])
 
     const advisor = consultants.find((c) => c.slug === params.slug) || null
@@ -60,7 +62,9 @@ export async function getStaticProps({ params, ...context }) {
     // belongs to anybody has to 404, not render an empty card.
     if (!advisor) return { notFound: true, revalidate: REVALIDATE_SECONDS }
 
-    return { props: { advisor, content, footer, contact, assistant }, revalidate: REVALIDATE_SECONDS }
+    // `roster` je pro lištu a jede na propech každé stránky — tady se
+    // odvodí z poradců, kteří už jsou načtení, místo druhého čtení.
+    return { props: { advisor, content, footer, contact, assistant, roster: rosterFromCms(consultants), dialPrefixes }, revalidate: REVALIDATE_SECONDS }
 }
 
 export default function AdvisorPage({ advisor, content }) {

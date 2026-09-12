@@ -351,6 +351,12 @@ export const GLOBAL_COPY_KEYS = Object.freeze({
     footerClaim: 'global.footer.claim',
     footerLinks: 'global.footer.links',
     contact: 'global.contact',
+    // Země, které jdou vybrat před telefonním číslem. Globální ze stejného
+    // důvodu jako kontaktní arch: formulář s telefonem je na úvodní stránce, na
+    // /nabídce, v benefit programu i v archu, který otevírá lišta — a předvolby
+    // jsou ve všech čtyřech tytéž. `label` je název země, `value` předvolba
+    // („Česko" / „+420"). Pořadí v bloku je pořadí v seznamu, první je výchozí.
+    dialPrefixes: 'global.dial-prefixes',
 })
 
 /**

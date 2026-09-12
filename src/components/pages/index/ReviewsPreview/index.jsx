@@ -27,34 +27,39 @@ import { ACTIONS_MODERATE, editable, editableDoc } from "@/cms/edit";
 // The pool is read two at a time, so it wants an even count: the pair on screen
 // is [2n, 2n + 1] and the tag numbers come straight from these positions, which
 // is why re-ordering this list also re-numbers what the reader sees.
+//
+// The tags were hashtags — and stale ones: "#hypoteka" and "#investice" are not
+// values the review schema accepts, so no real review could ever have shown
+// them. They are placeholders now saying what a real one says: who it is for.
+// See constants/reviews.
 const FALLBACK_REVIEWS = [
     {
-        tag: "#benefitprogram",
+        tag: "Pro – jméno poradce",
         text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce in dui ut metus blandit dapibus ut eget purus. Nunc vel turpis mollis, consequat turpis at, tempus velit.",
         author: "| Jméno a město - klienta",
     },
     {
-        tag: "#benefitprogram",
+        tag: "Pro – jméno poradce",
         text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce in dui ut metus blandit dapibus ut eget purus. Nunc vel turpis mollis, consequat turpis at, tempus velit.",
         author: "| Jméno a město - klienta",
     },
     {
-        tag: "#hypoteka",
+        tag: "Pro – jméno poradce",
         text: "Praesent commodo cursus magna vel scelerisque nisl consectetur et. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.",
         author: "| Jméno a město - klienta",
     },
     {
-        tag: "#investice",
+        tag: "Pro – jméno poradce",
         text: "Maecenas faucibus mollis interdum. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur, nullam quis risus eget urna mollis.",
         author: "| Jméno a město - klienta",
     },
     {
-        tag: "#pojisteni",
+        tag: "Pro – jméno poradce",
         text: "Nullam quis risus eget urna mollis ornare vel eu leo. Integer posuere erat a ante venenatis dapibus posuere velit aliquet, sed do eiusmod tempor incididunt.",
         author: "| Jméno a město - klienta",
     },
     {
-        tag: "#rodinnefinance",
+        tag: "Pro – jméno poradce",
         text: "Curabitur blandit tempus porttitor. Etiam porta sem malesuada magna mollis euismod. Duis mollis, est non commodo luctus, nisi erat porttitor ligula eget lacinia odio.",
         author: "| Jméno a město - klienta",
     },

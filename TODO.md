@@ -140,3 +140,54 @@ a ověřená byla.
 
 Obsah je pořád zakomentovaný na `/kontakt`, `/benefit-program`, `/cookies`
 a `/ochrana-soukromi`.
+
+
+
+
+TODO: dodělat shader - 3 verze - světlejší. hlavně pro PC. Udělat dvě verze prop pc - světlejší  a pro telefony tmavší co je teď.
+
+---
+
+## 7. Předvolby telefonu — vytvořit blok ve Studiu
+
+**Stav:** kód hotový a otestovaný, čeká na založení bloku.
+
+Pole s předvolbou je teď vlastní rozbalovací seznam a čte země ze Studia, ne
+z kódu. Blok ale ještě neexistuje — dokud se nezaloží, formuláře jedou na
+záložním seznamu ze `src/constants/dialPrefixes.js` (Česko, Slovensko, Rakousko,
+Německo, Polsko, Maďarsko, Spojené království, Irsko, Nizozemsko, Švýcarsko,
+Itálie, Španělsko, USA/Kanada) a nic není rozbité.
+
+### Co založit
+
+Nový blok textů typu **siteCopy** s klíčem `global.dial-prefixes`, jedna položka
+na zemi:
+
+| pole | co do něj | příklad |
+| --- | --- | --- |
+| `label` | název země | `Česko` |
+| `value` | předvolba i s plusem | `+420` |
+| `note` | dvoupísmenný kód země (nepovinné) | `CZ` |
+
+Pořadí položek je pořadí v seznamu a **první položka je to, na čem pole začíná**.
+Položka bez `value` se zahodí — země bez čísla není volba.
+
+Až blok vznikne, přebije záložní seznam sám, bez zásahu do kódu.
+
+---
+
+## 8. Loga partnerů mají pevný rozměr
+
+**Stav:** změřeno, k rozhodnutí.
+
+Prstenec rozprostře loga rovnoměrně při jakémkoli počtu, ale **velikost loga na
+počtu nezávisí** — `itemWidth={178} itemHeight={68}` v
+`src/components/pages/index/Offers/index.jsx`.
+
+Naměřeno dosazením dvaceti log místo čtrnácti: rozměr loga se nezměnil ani o
+pixel, nejbližší dvojice středů klesla ze 69,2 px na 49,1 px a překrývajících se
+dvojic přibylo z 6 na 17. Nad zhruba šestnácti logy se to začne tisknout přes
+sebe.
+
+Rozhodnout, co se má stát při větším počtu: zmenšit loga (odvodit `itemWidth`
+z počtu), nebo zvětšit prstenec. Dokud jich je čtrnáct, je to v pořádku.

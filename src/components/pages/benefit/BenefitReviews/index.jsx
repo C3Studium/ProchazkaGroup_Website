@@ -6,6 +6,7 @@ import { AnimatePresence, motion } from "framer-motion";
 
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
 import { editable } from "@/cms/edit";
+import { reviewCredit } from "@/constants/reviews";
 
 // The section's two lines of its own — everything else on the belt is a
 // client's words, moderated as a review document rather than edited as copy.
@@ -498,8 +499,8 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                                 data-cursor="frame"
                                 data-cursor-label="Rozkliknout"
                             >
-                                {review.hashtag ? (
-                                    <span className="BenReviews__tag">#{review.hashtag}</span>
+                                {reviewCredit(review) ? (
+                                    <span className="BenReviews__tag">{reviewCredit(review)}</span>
                                 ) : null}
                                 <motion.p
                                     className="BenReviews__text"
@@ -514,9 +515,6 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                                     >
                                         {review.customerName}
                                     </motion.span>
-                                    {review.consultantName ? (
-                                        <span className="BenReviews__for">{review.consultantName}</span>
-                                    ) : null}
                                     {/* On a mouse the card says what it does through
                                         the cursor — data-cursor-label, below. A thumb
                                         has no cursor, so the same sentence has to be
@@ -562,9 +560,9 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                                           onClick={(e) => e.stopPropagation()}
                                       >
                                           <div className="BenReviews__sheet__head">
-                                              {open.review.hashtag ? (
+                                              {reviewCredit(open.review) ? (
                                                   <span className="BenReviews__tag">
-                                                      #{open.review.hashtag}
+                                                      {reviewCredit(open.review)}
                                                   </span>
                                               ) : null}
                                               <button
@@ -590,11 +588,6 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                                               >
                                                   {open.review.customerName}
                                               </motion.span>
-                                              {open.review.consultantName ? (
-                                                  <span className="BenReviews__for">
-                                                      {open.review.consultantName}
-                                                  </span>
-                                              ) : null}
                                           </div>
                                       </motion.article>
                                   </div>

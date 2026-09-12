@@ -1,9 +1,8 @@
 @use "../../../../styles/system/_shortcuts.scss" as *;
 
-// See index.jsx. This file takes the browser's own select apart and does
-// nothing else: the type, the colour and the size come from whichever form the
-// control is standing in, through the `prefix` class it shares with the span it
-// replaced.
+// Viz index.jsx. Tenhle soubor kreslí jen rozbalovací seznam: typ, barva
+// i velikost zavřeného ovladače přicházejí z formuláře, ve kterém stojí, skrze
+// třídu `prefix`, kterou sdílí s prvkem, jenž nahradil.
 .DialPrefix {
     position: relative;
     display: inline-flex;
@@ -12,68 +11,215 @@
     white-space: nowrap;
 }
 
-.DialPrefix__select {
-    // A rounded, shaded control is the one shape this site does not draw.
-    appearance: none;
-    -webkit-appearance: none;
+// Zavřený ovladač je široký jako předvolba v něm a ani o píď víc — na řádku za
+// ním se píše telefonní číslo a to je ta delší polovina.
+.DialPrefix__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.15rem;
     margin: 0;
     padding: 0;
     border: 0;
-    border-radius: 0;
     background: none;
-    // Everything about how it reads is the form's, not this file's.
+    // Všechno, jak se to čte, patří formuláři, ne tomuhle souboru.
     font: inherit;
     color: inherit;
     letter-spacing: inherit;
     line-height: inherit;
     cursor: pointer;
-    outline: none;
-
-    // The closed control is as wide as the code in it and no wider.
-    //
-    // A select takes its width from its widest option, so this is really a
-    // constraint on what the options may say — see index.jsx, where they are
-    // bare codes for exactly this reason. The cap is the belt to that brace: it
-    // holds the field's front to four characters and a chevron whatever a
-    // future entry in the list turns out to be, and the number keeps the row.
-    width: auto;
-    max-width: 4.5em;
-    // Safari gives a bare select a minimum it will not go under.
-    min-width: 0;
 
     &:focus-visible {
         outline: 1px solid rgba(255, 255, 255, 0.6);
         outline-offset: 3px;
     }
+}
 
-    // The list itself is the platform's, and on a dark page a platform list is
-    // drawn in the platform's colours. The one thing worth saying is what the
-    // text sits on, or Windows hands out white-on-white.
-    option {
-        color: #111;
-        background-color: #fff;
-    }
+.DialPrefix__code {
+    font-variant-numeric: tabular-nums;
 }
 
 .DialPrefix__chevron {
     flex: none;
-    // The mark answers the type beside it rather than the screen, so it does
-    // not have to be told anything when a form sets its prefix a size smaller.
+    // Značka odpovídá typu vedle sebe, ne obrazovce, takže jí nemusí nikdo nic
+    // říkat, když si formulář nastaví předvolbu o číslo menší.
     opacity: 0.75;
     pointer-events: none;
+    transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.DialPrefix.is-open .DialPrefix__chevron {
+    transform: rotate(180deg);
 }
 
 .DialPrefix__rule {
     margin-left: 0.15rem;
 }
 
-// A finger needs somewhere to land. The control is a line of text inline with
-// another line of text, so the target is grown downwards and upwards out of it
-// rather than by moving anything — an inline-flex box with a min-height would
-// push the number's baseline off the rule it shares with the field.
+// ── rozbalený seznam ────────────────────────────────────────────────────────
+//
+// Zarovnaný pod ovladač a vlevo, protože vlevo je okraj pole — seznam širší než
+// ovladač roste doprava do formuláře, kde je místo, a ne doleva ven z něj.
+//
+// Šířka není daná obsahem: nejdelší název („Spojené království") by seznam
+// roztáhl na šířku, kterou nejužší telefon nemá. Proto strop v `ch`, který se
+// řídí typem formuláře, a názvy se v případě nouze zkrátí třemi tečkami.
+.DialPrefix__list {
+    position: absolute;
+    top: calc(100% + 0.55rem);
+    left: 0;
+    z-index: 40;
+    margin: 0;
+    padding: 0.35rem 0;
+    list-style: none;
+    min-width: 11rem;
+    max-width: min(22ch, 68vw);
+    // Deset zemí se nemusí vejít, a seznam, který přeteče arch, je horší než
+    // seznam, který se uvnitř sebe posune.
+    max-height: min(17rem, 42vh);
+    overflow-y: auto;
+    overflow-x: hidden;
+    // Vlastní podklad, ne průhledný: leží nad polem formuláře a nad fotkou.
+    background-color: #08151d;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.8);
+    text-align: left;
+    white-space: nowrap;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:focus-visible {
+        outline: 1px solid rgba(255, 255, 255, 0.4);
+        outline-offset: -1px;
+    }
+
+    // Tenký, aby si seznam nevzal šířku na posuvník.
+    &::-webkit-scrollbar { width: 3px; }
+    &::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.22); }
+}
+
+// Otevřený nahoru — viz index.jsx. Pole s telefonem stojí ve všech třech
+// formulářích dole a na svislém tabletu i telefonu se seznam pod ním nevešel.
+.DialPrefix.is-up .DialPrefix__list {
+    top: auto;
+    bottom: calc(100% + 0.55rem);
+}
+
+.DialPrefix__option {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    padding: 0.5rem 0.85rem;
+    cursor: pointer;
+    // Nezdědí se: seznam stojí na vlastním podkladu, ne na poli formuláře, a
+    // 55% bílá, která sedí na lince pole, je tady k nepřečtení.
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    color: rgba(255, 255, 255, 0.72);
+    transition: background-color 0.16s ease, color 0.16s ease;
+
+    &.is-active {
+        background-color: rgba(255, 255, 255, 0.07);
+        color: #fff;
+    }
+
+    &[aria-selected="true"] .DialPrefix__option__code {
+        color: var(--hColor, #4BDADC);
+    }
+}
+
+.DialPrefix__option__code {
+    flex: none;
+    font-variant-numeric: tabular-nums;
+    // Čísla pod sebou zarovnaná, ať se seznam čte jako sloupec a ne jako řádky.
+    min-width: 3.4em;
+}
+
+.DialPrefix__option__name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+// ── dotyk ───────────────────────────────────────────────────────────────────
+//
+// Ovladač je řádek textu uvnitř řádku textu, takže se cíl pro prst zvětšuje ven
+// z něj a ne posunutím čehokoli — inline-flex s min-height by odsunul účtování
+// číslice od linky, na které pole stojí.
 @include touch {
-    .DialPrefix__select {
+    .DialPrefix__button {
         padding: 0.6rem 0;
         margin: -0.6rem 0;
+    }
+
+    // Prst není kurzor: řádek, do kterého se dá trefit, je vyšší než řádek,
+    // na který se dá ukázat.
+    .DialPrefix__option {
+        padding: 0.72rem 0.9rem;
+        font-size: 0.88rem;
+    }
+}
+
+// ── svislý telefon ──────────────────────────────────────────────────────────
+//
+// Nejužší místo, kde tenhle seznam stojí. Arch má po stranách 5vw a pole v něm
+// jsou úzká, takže se seznam drží šířky obrazovky a ne šířky nejdelšího názvu.
+@include below-px(560) {
+    .DialPrefix__list {
+        min-width: 10rem;
+        // Od levého okraje ovladače k pravému okraji archu, a nic přes něj.
+        max-width: min(20ch, 74vw);
+        max-height: min(15rem, 38vh);
+    }
+
+    .DialPrefix__option {
+        padding: 0.68rem 0.8rem;
+        font-size: 0.84rem;
+        gap: 0.5rem;
+    }
+}
+
+// ── svislý tablet ───────────────────────────────────────────────────────────
+//
+// Místa je tu dost a seznam by se rozlil, kdyby se nechal — na 768 širokém
+// archu by `68vw` bylo přes půl stránky pro deset předvoleb. Takže strop v rem,
+// který drží stejnou velikost, jakou má na stole.
+@include v(md) {
+    @include below-px(900) {
+        .DialPrefix__list {
+            min-width: 12rem;
+            max-width: 18rem;
+            max-height: min(19rem, 36vh);
+        }
+
+        .DialPrefix__option {
+            padding: 0.7rem 0.95rem;
+            font-size: 0.9rem;
+        }
+    }
+}
+
+// ── nízký viewport na šířku ─────────────────────────────────────────────────
+//
+// Telefon na šířku má pod polem sotva dvě stě pixelů. Seznam, který je vyšší
+// než to, co pod ním zbývá, se otevře mimo obraz.
+@include phs-h {
+    .DialPrefix__list {
+        max-height: 44vh;
+    }
+
+    .DialPrefix__option {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.8rem;
+    }
+}
+
+@include reduced-motion {
+    .DialPrefix__chevron,
+    .DialPrefix__option {
+        transition: none;
     }
 }

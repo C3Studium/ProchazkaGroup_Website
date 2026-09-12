@@ -7,7 +7,7 @@ import ContactModal from '@/components/common/ContactModal';
 import { onContactRequest } from '@/components/common/ContactModal/open';
 import { AnimatePresence } from 'framer-motion';
 
-export default function Navbar({ assistant, contactCopy }) {
+export default function Navbar({ assistant, contactCopy, roster }) {
     const [menu, setMenu] = useState(false);
     const [contact, setContact] = useState(false);
     const pathname = usePathname();
@@ -65,7 +65,7 @@ export default function Navbar({ assistant, contactCopy }) {
             <Menu menu={menu} setMenu={setMenu} onContact={openContact} />
             <ContactModal open={contact} onClose={() => setContact(false)} assistant={assistant} copy={contactCopy} />
             <AnimatePresence mode='wait'>
-                {menu && <NavbarBody key='navPanel' setMenu={setMenu} onSheet={openSheet} />}
+                {menu && <NavbarBody key='navPanel' setMenu={setMenu} onSheet={openSheet} roster={roster} />}
             </AnimatePresence>
         </>
     )

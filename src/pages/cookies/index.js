@@ -1,6 +1,6 @@
 import Head from "next/head"
 
-import { getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { getAssistant, getContactContent, getDialPrefixes, getFooterContent, getPageContent, getRoster, readerFor, viewOf } from "@/lib/site"
 
 import CookiesContent from "@/components/pages/cookies/CookiesPage"
 
@@ -28,7 +28,7 @@ const REVALIDATE_SECONDS = 600
 export async function getStaticProps(context) {
     const view = viewOf(context)
 
-    const [content, footer, contact, assistant] = await Promise.all([
+    const [content, footer, contact, assistant, roster, dialPrefixes] = await Promise.all([
         getPageContent("/cookies", view),
         getFooterContent(view),
         getContactContent(view),
@@ -36,10 +36,12 @@ export async function getStaticProps(context) {
         // editor, she would arrive with no document id and the contact sheet
         // would have nothing on it to click.
         getAssistant({ read: readerFor(view) }),
+        getRoster({ read: readerFor(view) }),
+        getDialPrefixes(view),
     ])
 
     return {
-        props: { content, footer, contact, assistant },
+        props: { content, footer, contact, assistant, roster, dialPrefixes },
         revalidate: REVALIDATE_SECONDS,
     }
 }

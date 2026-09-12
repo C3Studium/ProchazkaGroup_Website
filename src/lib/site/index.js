@@ -51,11 +51,12 @@ registerSources({
     assistant: (options, read) => getAssistant({ ...options, read }),
 })
 
-export { getPartners, getApprovedReviews, getConsultants, getAssistant } from './people.js'
+export { getPartners, getApprovedReviews, getConsultants, getAssistant, getRoster } from './people.js'
 export { getAboutContent, ABOUT_KEYS } from './aboutUs.js'
 export {
     getFooterContent,
     getContactContent,
+    getDialPrefixes,
     footerStaticProps,
     FOOTER_KEY,
     FOOTER_LINES,

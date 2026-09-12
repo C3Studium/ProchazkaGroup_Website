@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
 import { rootRamp } from "@/helpers/checkViewport";
 import { editable, editableLink } from "@/cms/edit";
+import { reviewCredit } from "@/constants/reviews";
 
 // What people said, as a wall that will not hold still.
 //
@@ -514,6 +515,8 @@ export default function ReviewDrift({ reviews = [], copy = {} }) {
 function Card({ id, col, review, height, touch, active, echo, onReach, onLeave }) {
     const size = sizeOf(review.message);
 
+    const credit = reviewCredit(review);
+
     return (
         <div
             className={`RevDrift__card is-${size}${active ? " is-active" : ""}`}
@@ -538,17 +541,14 @@ function Card({ id, col, review, height, touch, active, echo, onReach, onLeave }
                     <i /><i /><i /><i />
                 </span>
 
-                {review.hashtag ? (
-                    <span className="RevDrift__card__tag">#{review.hashtag}</span>
+                {credit ? (
+                    <span className="RevDrift__card__tag">{credit}</span>
                 ) : null}
 
                 <p className="RevDrift__card__text">{review.message}</p>
 
                 <span className="RevDrift__card__by">
                     <span className="RevDrift__card__who">{review.customerName}</span>
-                    {review.consultantName ? (
-                        <span className="RevDrift__card__for">{review.consultantName}</span>
-                    ) : null}
                 </span>
             </span>
         </div>

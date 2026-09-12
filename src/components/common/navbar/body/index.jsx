@@ -445,7 +445,7 @@ const useOfficeClock = () => {
     return time;
 };
 
-export default function NavbarBody({ setMenu, onSheet }) {
+export default function NavbarBody({ setMenu, onSheet, roster }) {
     const pathname = usePathname();
     const time = useOfficeClock();
     const calm = useReducedMotion();
@@ -802,7 +802,7 @@ export default function NavbarBody({ setMenu, onSheet }) {
                         })}
                     </motion.nav>
                     ) : (
-                        <Advisors key="advisors" calm={calm} touch={touch} onPick={close} />
+                        <Advisors key="advisors" calm={calm} touch={touch} onPick={close} roster={roster} />
                     )}
                     </AnimatePresence>
 

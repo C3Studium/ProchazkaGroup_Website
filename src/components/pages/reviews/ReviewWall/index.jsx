@@ -7,6 +7,7 @@ import AddReview from "@/components/pages/reviews/AddReview";
 import LikeButton from "@/components/common/ui/LikeButton";
 import { useReactions } from "@/components/common/ui/LikeButton/useReactions";
 import { ACTIONS_MODERATE, editable, editableDoc } from "@/cms/edit";
+import { reviewCredit } from "@/constants/reviews";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
@@ -234,7 +235,7 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
                             <span className="RevWall__cell__edge" aria-hidden="true" />
                             <div className="RevWall__cell__in">
                                 <div className="RevWall__cell__head">
-                                    <span className="RevWall__cell__tag">#{review.hashtag}</span>
+                                    <span className="RevWall__cell__tag">{reviewCredit(review)}</span>
                                     <span className="RevWall__cell__idx">
                                         {String(index + 1).padStart(2, "0")}
                                     </span>
@@ -249,9 +250,9 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
                                     <motion.span className="RevWall__cell__who" layoutId={`revwho-${review.id}`}>
                                         {review.customerName}
                                     </motion.span>
-                                    {review.consultantName && (
-                                        <span className="RevWall__cell__for">{review.consultantName}</span>
-                                    )}
+                                    {/* Poradce stával tady a zároveň nahoře jako
+                                        „#poradce". Teď je nahoře jednou a jménem
+                                        — viz constants/reviews. */}
                                     {/* What the cursor says on a desktop. The
                                         cursor does not exist on touch, and a
                                         cell that clips its review has to say so
@@ -343,7 +344,7 @@ function ReviewSheet({ review, onClose, likes, voteAsk }) {
                     own scrollbar could not be scrolled to its end. */}
                 <motion.article className="RevSheet" layoutId={`rev-${review.id}`} data-lenis-prevent>
                     <div className="RevSheet__head">
-                        <span className="RevSheet__tag">#{review.hashtag}</span>
+                        <span className="RevSheet__tag">{reviewCredit(review)}</span>
                         <button type="button" className="RevSheet__close" onClick={onClose} data-cursor="frame" aria-label="Zavřít">
                             <span /><span />
                         </button>
@@ -358,9 +359,6 @@ function ReviewSheet({ review, onClose, likes, voteAsk }) {
                         <motion.span className="RevSheet__who" layoutId={`revwho-${review.id}`}>
                             {review.customerName}
                         </motion.span>
-                        {review.consultantName && (
-                            <span className="RevSheet__for">{review.consultantName}</span>
-                        )}
                     </div>
 
                     {/* Stejná lišta jako na kartě. Rozkliknutá recenze je jiný

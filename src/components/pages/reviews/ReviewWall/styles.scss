@@ -133,13 +133,6 @@
 
     .RevWall__cell__who { color: var(--wText); }
 
-    .RevWall__cell__for {
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        font-size: 0.86em;
-        color: rgba(255, 255, 255, 0.42);
-    }
-
     // The cursor's word, brought into the card. Hidden by default because on a
     // pointer machine the cursor already carries it; switched on under `touch`
     // below, and only on the cards that are holding a review back.
@@ -332,12 +325,6 @@
 
     .RevSheet__who { font-size: clamp(0.9rem, 1.05vw, 1.2rem); color: var(--wText); }
 
-    .RevSheet__for {
-        font-size: clamp(0.66rem, 0.78vw, 0.88rem);
-        letter-spacing: 0.2em;
-        text-transform: uppercase;
-        color: rgba(255, 255, 255, 0.45);
-    }
 }
 
 .RevSheet__close {

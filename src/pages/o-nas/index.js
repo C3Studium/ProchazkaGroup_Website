@@ -12,7 +12,7 @@ import QnaContact from "@/components/pages/index/QnaContact"
 import Head from "next/head"
 import { AnimatePresence } from "framer-motion"
 import { useCallback, useEffect, useState } from "react"
-import { getAboutContent, getAssistant, getContactContent, getFooterContent, readerFor, viewOf } from "@/lib/site"
+import { getAboutContent, getAssistant, getContactContent, getDialPrefixes, getFooterContent, getRoster, readerFor, viewOf } from "@/lib/site"
 
 // ISR, on the same terms as the homepage (src/pages/index.js): three
 // scroll-driven sections over copy an editor changes a few times a year, so the
@@ -46,7 +46,7 @@ export async function getStaticProps(context) {
   // Cannot reject — every read inside answers with empty rather than throwing,
   // so a missing table or an unreachable database yields a page identical to
   // the one that shipped rather than a build failure. See src/cms/server/site.
-  const [content, footer, contact, assistant] = await Promise.all([
+  const [content, footer, contact, assistant, roster, dialPrefixes] = await Promise.all([
     getAboutContent(view),
     getFooterContent(view),
     getContactContent(view),
@@ -55,10 +55,12 @@ export async function getStaticProps(context) {
     // on it can be clicked in — measured that way on /recenze before this — and,
     // in the Archive, today's assistant beside March's page.
     getAssistant({ read: readerFor(view) }),
+    getRoster({ read: readerFor(view) }),
+    getDialPrefixes(view),
   ])
 
   return {
-    props: { content, footer, contact, assistant },
+    props: { content, footer, contact, assistant, roster, dialPrefixes },
     revalidate: REVALIDATE_SECONDS,
   }
 }

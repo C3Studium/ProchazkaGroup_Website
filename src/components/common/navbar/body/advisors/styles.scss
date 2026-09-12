@@ -192,6 +192,30 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 .navAdv__ord,
 .navAdv__foot { position: relative; z-index: 2; }
 
+// „Líbí se" nad dlaždicí, ne v ní — viz index.jsx, dlaždice je odkaz.
+//
+// Vpravo nahoře, protože dole už stojí jméno, motto a číslo. Kreslí se jen na
+// otevřené: zavřená je pruh o pár desítkách pixelů a srdce by z ní čouhalo.
+.navAdv__like {
+    position: absolute;
+    top: 0.65rem;
+    right: 0.65rem;
+    z-index: 3;
+    opacity: 0;
+    // Zavřená dlaždice ho nemá chytat myš, i když ho není vidět.
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+}
+
+.navAdv__cell.is-open .navAdv__like {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+@include reduced-motion {
+    .navAdv__like { transition: none; }
+}
+
 .navAdv__ord {
     display: flex;
     align-items: center;
@@ -573,12 +597,27 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
         // the one thing drawn as a target rather than as a line of type: 44px
         // tall, its own frame, at the bottom of the panel at the bottom of the
         // sheet.
-        .navAdv__now__tel {
-            display: inline-flex;
+        // Číslo a srdíčko vedle sebe. Dvě věci, které s vybraným poradcem jde
+        // udělat — ne dva údaje o něm, takže jeden řádek a ne dva.
+        //
+        // Odsazení shora a `align-self` sedí tady, ne na odkazu: v tom sloupci
+        // je teď položkou tenhle řádek, a kdyby si číslo drželo vlastní
+        // `margin-top`, posunulo by se uvnitř řádku proti srdíčku vedle sebe.
+        .navAdv__now__row {
+            display: flex;
             align-self: flex-start;
             align-items: center;
-            gap: 0.45rem;
+            gap: 0.85rem;
             margin-top: 0.55rem;
+            // Na nejužších telefonech se srdíčko radši zalomí pod číslo, než
+            // aby číslo zkracovalo.
+            flex-wrap: wrap;
+        }
+
+        .navAdv__now__tel {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
             min-height: 44px;
             padding: 0 0.9rem;
             @include font(XSBody);
@@ -690,8 +729,25 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
                 max-width: 34ch;
             }
 
-            .navAdv__now__tel {
+            .navAdv__now__row {
                 margin-top: 0.9rem;
+            }
+
+            // Ze stejného důvodu jako rámeček kolem čísla vedle: fotka za tím
+            // je nahoře bílá a tady tmavá, takže kroužek bez vlastního podkladu
+            // se na světlé půlce ztratí. Stejná barva i sytost jako u čísla —
+            // jsou to dvě tlačítka jednoho řádku, ne dva různé prvky.
+            .navAdv__now__row .LikeBtn__hit {
+                background-color: rgba(3, 13, 19, 0.45);
+                opacity: 0.9;
+            }
+
+            .navAdv__now__row .LikeBtn__count {
+                // Číslo stojí na fotce samo, bez kroužku pod sebou.
+                text-shadow: 0 1px 3px rgba(3, 13, 19, 0.8);
+            }
+
+            .navAdv__now__tel {
                 min-height: 48px;
                 // The picture behind it is white at the top and dark here, so
                 // the frame needs its own ground to stay a frame.

@@ -3,7 +3,7 @@ import PixelReveal from "@/components/common/ui/PixelReveal";
 import { animate, cubicBezier, motion, useInView, useMotionValue, useScroll, useTransform } from "framer-motion";
 import { RiPhoneLine, RiMailLine, RiFacebookLine, RiInstagramLine } from "@remixicon/react";
 import { ARRIVE_TO } from "@/components/pages/aboutUs/aboutStack";
-import { FALLBACK_ROSTER, dial } from "@/constants/roster";
+import { FALLBACK_ROSTER, dial, rosterFromCms } from "@/constants/roster";
 import { PHONE_LANDSCAPE, usePhoneOrTabletUpright } from "@/helpers/usePhone";
 import LikeButton from "@/components/common/ui/LikeButton";
 import { useReactions } from "@/components/common/ui/LikeButton/useReactions";
@@ -46,20 +46,10 @@ const DEPART = cubicBezier(0.5, 0, 0.75, 0);
 const numbered = (list) =>
     list.map((entry, index) => ({ ...entry, index: String(index + 1).padStart(2, "0") }));
 
-// A consultant document, flattened to the five things this section draws. The
-// rest of the record is what the popup is for.
-const fromCms = (person) => ({
-    name: person.name,
-    moto: person.motto,
-    src: person.portrait?.src,
-    srcAlt: person.portraitAlt?.src || null,
-    tel: person.phone,
-    docId: person.docId,
-    // Only for the like button. `id` is the document's, `likes` the count the
-    // page was built with — see cms.config.js `colleague`.
-    id: person.id,
-    likes: person.likes,
-});
+// A consultant document, flattened to what this section draws, now lives in
+// @/constants/roster beside the fallback it replaces — the advisors sheet the
+// navigation opens needed the same mapping, and the note above about two copies
+// of a roster applies to the mapping just as much as to the list.
 
 // ── the phone, held upright ──
 //
@@ -257,7 +247,7 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
     // roster is what carries that through the two memos below.
     const editing = isEditMode();
     const roster = useMemo(
-        () => numbered(cmsRoster?.length ? cmsRoster.map(fromCms) : FALLBACK_ROSTER)
+        () => numbered(cmsRoster?.length ? rosterFromCms(cmsRoster) : FALLBACK_ROSTER)
             .map((entry) => ({ ...entry, cms: editableDoc(entry.docId, "consultant") })),
         [cmsRoster, editing],
     );

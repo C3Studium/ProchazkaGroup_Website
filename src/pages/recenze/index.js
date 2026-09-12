@@ -2,7 +2,8 @@ import Head from "next/head";
 
 import ReviewsHero from "@/components/pages/reviews/ReviewsHero";
 import ReviewWall from "@/components/pages/reviews/ReviewWall";
-import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getDialPrefixes, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { rosterFromCms } from "@/constants/roster"
 
 // ISR on the same terms as the other pages: reviews are approved by an editor a
 // few times a month, and `revalidate` is what lets an approval reach the public
@@ -24,7 +25,7 @@ export async function getStaticProps(context) {
     // Cannot reject — every read inside answers with empty rather than throwing,
     // so an unreachable database yields the page with an empty wall rather than
     // a build failure. See @/cms/server/site.
-    const [content, reviews, consultants, footer, contact, assistant] = await Promise.all([
+    const [content, reviews, consultants, footer, contact, assistant, dialPrefixes] = await Promise.all([
         // This page's own blocks — the head, the word the grid ends on, and the
         // ask. `cms.config.js` says which documents those are and where each
         // field lands; the reviews and the roster stay their own reads because
@@ -39,6 +40,7 @@ export async function getStaticProps(context) {
         getFooterContent(view),
         getContactContent(view),
         getAssistant({ read }),
+        getDialPrefixes(view),
     ])
 
     return {
@@ -54,6 +56,10 @@ export async function getStaticProps(context) {
             // id, so nothing about this reaches a public page.
             reviews: reviews.map((review, index) => ({ id: `r${index}`, ...review })),
             consultants: consultants.map((c) => c.name).filter(Boolean),
+            // Pro lištu, ne pro tuhle stránku — a z už načtených poradců,
+            // aby to nebylo druhé čtení téhož. Viz _app.
+            roster: rosterFromCms(consultants),
+            dialPrefixes,
             footer,
             contact,
             assistant,

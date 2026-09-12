@@ -5,6 +5,8 @@ import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { RiPhoneLine } from '@remixicon/react'
 
 import CornerMarks from '@/components/common/ui/CornerMarks'
+import LikeButton from '@/components/common/ui/LikeButton'
+import { useReactions } from '@/components/common/ui/LikeButton/useReactions'
 import { CURTAIN } from '@/components/common/ui/entrance'
 import { FALLBACK_ROSTER, dial } from '@/constants/roster'
 import { usePhoneOrTabletUpright } from '@/helpers/usePhone'
@@ -197,6 +199,16 @@ export default function Advisors({ roster, calm, touch, onPick }) {
     const people = useMemo(() => (roster?.length ? roster : FALLBACK_ROSTER), [roster]);
     const [lead, ...rest] = people;
 
+    // „Líbí se" u vybraného poradce — stejné tlačítko a stejný počet jako
+    // „Naši kolegové" na /o-nás. Jeden člověk, dvě místa, jedno číslo.
+    //
+    // Drží se na id dokumentu, takže funguje jen s poradci z CMS. Když se
+    // seznam nenačte a nakreslí se záložní jména z @/constants/roster, ta
+    // žádné id nemají a tlačítko se nevykreslí vůbec — radši nic než srdíčko,
+    // které nemá co přičíst.
+    const likeIds = useMemo(() => people.map((person) => person.id).filter(Boolean), [people]);
+    const likes = useReactions("consultant", likeIds);
+
     const rowSizes = useMemo(() => rowsOf(people.length), [people.length]);
     const rows = useMemo(() => {
         let at = 0;
@@ -386,6 +398,27 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                         </span>
                     )}
                 </Tile>
+
+                {/* Na širokém plátně je dlaždice sama odkazem `tel:`, takže
+                    srdíčko dovnitř nesmí — <button> uvnitř <a> není ani jedno z
+                    toho: klávesnice z toho neudělá dvě věci a odečítač obrazovky
+                    ohlásí zmatek. Leží tedy VEDLE dlaždice a nad ní, a jen na
+                    té otevřené: zavřená dlaždice je pruh široký pár desítek
+                    pixelů a srdce v něm by bylo větší než ona.
+
+                    Na telefonu se nekreslí — tam je celý záznam v panelu dole a
+                    srdíčko sedí vedle čísla, kde ho člověk hledá. */}
+                {!phone && person.id ? (
+                    <span className="navAdv__like">
+                        <LikeButton
+                            liked={likes.isLiked(person.id)}
+                            count={likes.countOf(person.id, person.likes || 0)}
+                            label={`Líbí se mi: ${person.name}`}
+                            onToggle={() => likes.toggle(person.id)}
+                            size={16}
+                        />
+                    </span>
+                ) : null}
             </motion.div>
         );
     };
@@ -496,17 +529,32 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                             </span>
                             <span className="navAdv__now__name">{now.name}</span>
                             <span className="navAdv__now__moto">{now.moto}</span>
-                            {dial(now.tel) && (
-                                <a
-                                    className="navAdv__now__tel"
-                                    href={dial(now.tel)}
-                                    data-cursor="frame"
-                                    onClick={(e) => onPick?.(e)}
-                                >
-                                    <RiPhoneLine size={16} aria-hidden="true" />
-                                    {now.tel}
-                                </a>
-                            )}
+                            <span className="navAdv__now__row">
+                                {dial(now.tel) && (
+                                    <a
+                                        className="navAdv__now__tel"
+                                        href={dial(now.tel)}
+                                        data-cursor="frame"
+                                        onClick={(e) => onPick?.(e)}
+                                    >
+                                        <RiPhoneLine size={16} aria-hidden="true" />
+                                        {now.tel}
+                                    </a>
+                                )}
+                                {/* Vedle čísla, ne pod ním: je to druhá věc,
+                                    kterou s vybraným poradcem jde udělat, ne
+                                    další údaj o něm. Bez id se nekreslí — viz
+                                    `likeIds` nahoře. */}
+                                {now.id ? (
+                                    <LikeButton
+                                        liked={likes.isLiked(now.id)}
+                                        count={likes.countOf(now.id, now.likes || 0)}
+                                        label={`Líbí se mi: ${now.name}`}
+                                        onToggle={() => likes.toggle(now.id)}
+                                        size={16}
+                                    />
+                                ) : null}
+                            </span>
                         </div>
                     </motion.div>
                 </div>

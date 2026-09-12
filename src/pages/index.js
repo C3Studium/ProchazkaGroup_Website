@@ -16,7 +16,7 @@ import QnaContact from "@/components/pages/index/QnaContact";
 // import { StatbarData } from "@/constants/mainpage";
 import Head from "next/head";
 import { useRef } from "react";
-import { getAssistant, getFooterContent, getHomepageContent } from "@/lib/site";
+import { getAssistant, getFooterContent, getDialPrefixes, getHomepageContent, getRoster } from "@/lib/site";
 
 //WIP: Every index has to be a logo, not a greek letters
 
@@ -44,16 +44,18 @@ export async function getStaticProps() {
   // reader can reach a draft from here no matter what the preview does. The
   // editable copy of this page is served to the Studio by
   // /studio/preview/home, which is the only caller allowed to pass `draft`.
-  const [content, footer, assistant] = await Promise.all([
+  const [content, footer, assistant, roster, dialPrefixes] = await Promise.all([
     getHomepageContent(),
     getFooterContent(),
         getAssistant(),
+    getRoster(),
+    getDialPrefixes(),
   ]);
 
   return {
     // `footer` is read by _app, not by this page — the patička is rendered
     // under every route and belongs to none. See @/lib/site/footer.
-    props: { content, footer, assistant },
+    props: { content, footer, assistant, roster, dialPrefixes },
     revalidate: REVALIDATE_SECONDS,
   };
 }

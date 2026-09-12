@@ -7,6 +7,7 @@ import { LoadProvider } from "@/context/LoadProvider";
 import { CursorRefProvider } from "@/context/CursorRefProvider";
 import { PerformanceProvider } from "@/context/PerformanceProvider";
 import { CookiesProvider } from "@/context/CookiesProvider";
+import { DialPrefixProvider } from "@/context/DialPrefixProvider";
 // The seam. `@/cms` answers which shell a route wants and supplies the admin's;
 // the decision is a static property of the page component, so it reads the same
 // on the server pass and the first client pass. See @/cms/shell for why it is
@@ -174,6 +175,11 @@ function SiteShell({ Component, pageProps }) {
       <PerformanceProvider>
         <LoadProvider>
           <CursorRefProvider>
+            {/* Předvolby telefonu — jeden seznam pro všechna čtyři místa,
+                kde se na tomhle webu zadává číslo. Veze ho každá stránka na
+                propech (getDialPrefixes v @/lib/site), protože _app si sám
+                načíst nic nemůže; viz DialPrefixProvider. */}
+            <DialPrefixProvider prefixes={pageProps.dialPrefixes}>
             <NeuralTunnel
                 className="neural-tunnel--page"
                 layers={4}
@@ -227,6 +233,14 @@ function SiteShell({ Component, pageProps }) {
             <Navbar
                 assistant={pageProps.assistant || null}
                 contactCopy={pageProps.contact || null}
+                /* Poradci pro seznam, který lišta otevírá. Stejná cesta jako u
+                   asistentky a patičky, a ze stejného důvodu: lišta je
+                   namountovaná tady vedle stránky, ne uvnitř ní, takže si sama
+                   načíst nemůže nic. Každá stránka to veze na propech —
+                   `getRoster` v @/lib/site. Bez toho seznam kreslil natvrdo
+                   zapsaná jména z @/constants/roster, která nemají id, a bez id
+                   nejde u nikoho zmáčknout „líbí se". */
+                roster={pageProps.roster || null}
             />
             <Cursor />
             {/* <CookiesBar /> */}
@@ -245,6 +259,7 @@ function SiteShell({ Component, pageProps }) {
                 does not remount it. */}
             <ManageBadge />
             <Toaster position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
+            </DialPrefixProvider>
           </CursorRefProvider>
         </LoadProvider>
       </PerformanceProvider>

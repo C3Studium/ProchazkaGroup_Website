@@ -350,13 +350,6 @@
     text-transform: uppercase;
 }
 
-.RevDrift__card__for {
-    font-family: "Switzer-Light", sans-serif;
-    font-size: 0.68rem;
-    letter-spacing: 0.14em;
-    color: rgba(255, 255, 255, 0.42);
-}
-
 @include below(sm) {
     .RevDrift {
         margin-top: -9vh;
@@ -497,10 +490,6 @@
 
     .RevDrift__card__who {
         font-size: 0.66rem;
-    }
-
-    .RevDrift__card__for {
-        font-size: 0.58rem;
     }
 
     .NabidkaHandover {

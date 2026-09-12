@@ -37,3 +37,39 @@ export const FALLBACK_ROSTER = people.map((person, index) => ({
 
 /** Spaces are how a telephone number is written, not how it is dialled. */
 export const dial = (tel) => (tel ? `tel:${String(tel).replace(/\s+/g, "")}` : undefined);
+
+/**
+ * A consultant document, flattened to what a roster draws.
+ *
+ * Here for the same reason FALLBACK_ROSTER is: two places draw these people —
+ * „Naši kolegové" on /o-nás and the advisors sheet the navigation opens — and a
+ * mapping written twice is two rosters that agree until somebody edits one. It
+ * lived inside Colleagues until the sheet needed it too.
+ *
+ * It takes either shape the CMS hands out, and that is deliberate rather than
+ * sloppy: /o-nás receives consultants already shaped by `colleague` in
+ * cms.config (portrait / portraitAlt), while the navigation receives them
+ * straight from `getConsultants` (portrait / portraitDetail). Same people, two
+ * seams, one mapping.
+ *
+ * `id` and `likes` are the whole reason the sheet needed real documents at all:
+ * a visitor pressing „líbí se" has to name whom they mean, and a hard-coded
+ * list has no name to give.
+ */
+export const rosterFromCms = (people) =>
+    (Array.isArray(people) ? people : [])
+        .map((person) => ({
+            name: person?.name || "",
+            moto: person?.motto || person?.moto || "",
+            src: person?.portrait?.src || person?.src || "",
+            srcAlt: person?.portraitAlt?.src || person?.portraitDetail?.src || null,
+            tel: person?.phone || person?.tel || "",
+            // Only ever present while the Studio is previewing — see
+            // cms/server/site/read.js.
+            ...(person?.docId ? { docId: person.docId } : {}),
+            id: person?.id || null,
+            likes: Number.isFinite(person?.likes) ? person.likes : 0,
+        }))
+        // A person with no photograph would put an empty frame in the roster,
+        // and both surfaces are built out of portraits.
+        .filter((person) => person.name && person.src);

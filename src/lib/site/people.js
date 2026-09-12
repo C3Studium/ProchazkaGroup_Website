@@ -20,6 +20,7 @@ import {
     stringValue,
 } from '@/cms/server/site'
 import { displayNameOf, reviewSubjectType } from '@/cms/site/types'
+import { rosterFromCms } from '@/constants/roster'
 
 /** Řádek, ze kterého tělo pochází — jako spread, nikdy jako klíč s null. */
 const provenance = (data) => {
@@ -241,3 +242,19 @@ export const getConsultants = async ({ kind, limit = 50, read = readPublished } 
 
     return people
 }
+
+
+/**
+ * Poradci tak, jak je kreslí lišta — pro každou stránku, ne jen pro /o-nás.
+ *
+ * Navigace je namountovaná v `_app` vedle stránky, ne uvnitř ní, takže žádné
+ * `getStaticProps` jí nepatří a nemůže si nic načíst sama. Stejná situace jako
+ * u patičky a u asistentky, a stejné řešení: každá stránka to veze na svých
+ * propech a `_app` to předá dál.
+ *
+ * Zkrácené na tvar rosteru schválně. `getConsultants` vrací celý dokument
+ * včetně příběhu a e-mailu, a to by jelo v propech každé stránky webu kvůli
+ * seznamu jmen s fotkou.
+ */
+export const getRoster = async ({ read = readPublished } = {}) =>
+    rosterFromCms(await getConsultants({ kind: 'consultant', read }))
