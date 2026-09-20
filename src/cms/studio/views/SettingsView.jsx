@@ -62,6 +62,7 @@ export default function SettingsView() {
   const sections = [
     { id: "prostredi", label: "Prostředí" },
     { id: "spravovat", label: "Odkaz na správu" },
+    { id: "predvolby", label: "Telefonní předvolby" },
     { id: "pristup", label: "Veřejný přístup" },
     { id: "klice", label: "API klíče" },
     { id: "prihlaseni", label: "Přihlášení" },
@@ -100,6 +101,7 @@ export default function SettingsView() {
         <div className={styles.sections} ref={bodyRef}>
           <EnvironmentSection />
           <ManageWidgetSection />
+          <DialPrefixSection />
           <ExposureSection />
           <KeysSection />
           <SessionsSection />
@@ -408,6 +410,185 @@ function ManageWidgetSection() {
               }
               note="Přes pohyblivý shader webu je štítek bez rozmazání hůř čitelný. Vypněte ho, pokud vám kazí plynulost."
             />
+          </div>
+
+          <div className={styles.saveRow}>
+            <Button variant="primary" icon="check" onClick={save} loading={saving} disabled={!dirty}>
+              Uložit
+            </Button>
+            {dirty ? (
+              <Button variant="ghost" onClick={() => setDraft(null)} disabled={saving}>
+                Zahodit změny
+              </Button>
+            ) : (
+              <span className={styles.savedNote}>Uložené nastavení.</span>
+            )}
+          </div>
+        </>
+      ) : null}
+    </Section>
+  )
+}
+
+/* ------------------------------------------------------ dial prefixes -- */
+
+/**
+ * Které země nabízí pole s telefonním číslem.
+ *
+ * Nastavení nástroje, ne obsah webu — server/dialPrefixes.js rozepisuje proč,
+ * a je to věta, která se sem vejde celá: „+420 je Česko" platí na každém webu
+ * a nikdo to nevymýšlí, kdežto všechno v cms_document napsal člověk, který za
+ * to odpovídá.
+ *
+ * POŘADÍ JE OBSAH TOHOTO SEZNAMU, ne jeho zobrazení. První země je ta, na které
+ * pole telefonu startuje, takže šipky nahoru a dolů mění chování webu — proto
+ * jsou to tlačítka v řádku a ne přetahování: tažení myší je na tohle jemný cíl,
+ * z klávesnice nejde vůbec a člověk po něm nepozná, jestli se něco stalo.
+ *
+ * Draft se drží zvlášť od uloženého, stejně jako u štítku nad tím, a ze
+ * stejného důvodu: „co je uložené" a „co je na obrazovce" jsou dvě hodnoty
+ * a tlačítko Uložit je musí umět rozeznat.
+ */
+function DialPrefixSection() {
+  const port = usePort()
+  const toast = useToast()
+
+  const { data, error, loading, reload, setData } = useAsync(() => port.settings.dialPrefixes.read(), [port])
+
+  const [draft, setDraft] = useState(null)
+  const [saving, setSaving] = useState(false)
+
+  const list = draft || data
+  const dirty = Boolean(draft && data && JSON.stringify(draft) !== JSON.stringify(data))
+
+  /** Jeden řádek jinak; zbytek beze změny. */
+  const edit = (index, patch) =>
+    setDraft((list || []).map((row, i) => (i === index ? { ...row, ...patch } : row)))
+
+  const move = (index, by) => {
+    const next = [...(list || [])]
+    const to = index + by
+    if (to < 0 || to >= next.length) return
+    ;[next[index], next[to]] = [next[to], next[index]]
+    setDraft(next)
+  }
+
+  const remove = (index) => setDraft((list || []).filter((_, i) => i !== index))
+
+  const add = () => setDraft([...(list || []), { label: "", code: "", iso: null }])
+
+  const save = async () => {
+    setSaving(true)
+    try {
+      // Bere se odpověď serveru, ne draft: server seznam normalizuje — velká
+      // písmena u ISO, oříznuté mezery — a vzít si vlastní verzi by znamenalo
+      // obrazovku, která tvrdí něco jiného než databáze. Tatáž úvaha jako
+      // u štítku nad tím a jako ve studio/lib/visualSave.js.
+      const stored = await port.settings.dialPrefixes.save(list)
+      setData(stored)
+      setDraft(null)
+      toast.success("Uloženo. Projeví se při dalším načtení stránky.")
+    } catch (failure) {
+      toast.error(failure?.message || "Předvolby se nepodařilo uložit.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Section
+      id="predvolby"
+      title="Telefonní předvolby"
+      hint="Země, ze kterých si návštěvník vybírá před telefonním číslem. Platí pro všechna pole s telefonem na webu; první země v pořadí je předvybraná."
+      action={<IconButton icon="refresh" label="Načíst znovu" onClick={reload} />}
+    >
+      {loading && !data ? (
+        <SkeletonRows count={4} height={52} />
+      ) : error ? (
+        <ErrorState error={error} onRetry={reload} compact />
+      ) : list ? (
+        <>
+          <ul className={styles.rows}>
+            {list.map((row, index) => (
+              // Klíč je pozice, ne předvolba. Předvolba je rozepsaná hodnota,
+              // kterou uživatel zrovna přepisuje — klíč, který se mění po
+              // každé klávese, by pole odmountoval a sebral mu kurzor.
+              <li key={index} className={`${styles.row} ${styles.dialRow}`}>
+                <span className={styles.dialIndex} aria-hidden="true">
+                  {index + 1}
+                </span>
+
+                <input
+                  type="text"
+                  className={`${styles.input} ${styles.dialLabel}`}
+                  aria-label={`Země na řádku ${index + 1}`}
+                  placeholder="Česko"
+                  autoComplete="off"
+                  value={row.label || ""}
+                  onChange={(event) => edit(index, { label: event.target.value })}
+                />
+
+                <input
+                  type="text"
+                  className={`${styles.input} ${styles.dialCode}`}
+                  aria-label={`Předvolba na řádku ${index + 1}`}
+                  placeholder="+420"
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={row.code || ""}
+                  onChange={(event) => edit(index, { code: event.target.value.trim() })}
+                />
+
+                <input
+                  type="text"
+                  className={`${styles.input} ${styles.dialIso}`}
+                  aria-label={`Kód země na řádku ${index + 1}`}
+                  placeholder="CZ"
+                  autoComplete="off"
+                  spellCheck={false}
+                  maxLength={2}
+                  value={row.iso || ""}
+                  // Prázdné pole je `null`, ne "": ISO je nepovinné a prázdný
+                  // řetězec by ho udělal vyplněným-ale-neplatným.
+                  onChange={(event) => edit(index, { iso: event.target.value.toUpperCase() || null })}
+                />
+
+                {index === 0 ? <span className={styles.you}>výchozí</span> : <span className={styles.dialGap} />}
+
+                <div className={styles.rowActions}>
+                  <IconButton
+                    icon="chevronUp"
+                    label={`Posunout ${row.label || "řádek"} nahoru`}
+                    disabled={index === 0}
+                    onClick={() => move(index, -1)}
+                  />
+                  <IconButton
+                    icon="chevronDown"
+                    label={`Posunout ${row.label || "řádek"} dolů`}
+                    disabled={index === list.length - 1}
+                    onClick={() => move(index, 1)}
+                  />
+                  <IconButton
+                    icon="trash"
+                    tone="danger"
+                    label={`Smazat ${row.label || "řádek"}`}
+                    // Poslední zemi smazat nejde. Formulář bez jediné
+                    // předvolby je formulář, do kterého nejde napsat telefon —
+                    // server to odmítne taky, tohle je jen dřív a beze ztráty
+                    // rozepsané práce.
+                    disabled={list.length === 1}
+                    onClick={() => remove(index)}
+                  />
+                </div>
+              </li>
+            ))}
+          </ul>
+
+          <div className={styles.rowsFoot}>
+            <Button variant="ghost" icon="plus" onClick={add}>
+              Přidat zemi
+            </Button>
+            <ResultCount>{plural(list.length, "země", "země", "zemí")}</ResultCount>
           </div>
 
           <div className={styles.saveRow}>

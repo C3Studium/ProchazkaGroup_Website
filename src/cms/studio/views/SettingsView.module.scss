@@ -462,3 +462,85 @@
   font-size: var(--st-text-small);
   color: var(--st-ink-4);
 }
+
+/* ------------------------------------------------- telefonní předvolby -- */
+
+/* Řádek seznamu předvoleb. Dědí .row (výška, linka, mezera) a přidává jen to,
+   čím se liší: jsou to editovatelná pole vedle sebe, ne text a stav. */
+.dialRow {
+  gap: var(--st-s3);
+}
+
+/* Pořadové číslo. Je to údaj, ne ovládání — pořadí se mění šipkami vpravo —
+   ale bez něj se v deseti stejně vypadajících řádcích nepozná, který je
+   který, a hlášky serveru mluví o číslech řádků. */
+.dialIndex {
+  flex: none;
+  width: 2ch;
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--st-ink-4);
+}
+
+.dialLabel {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Devět znaků by stačilo na +420, ale pole, které vypadá přesně na svůj obsah,
+   svádí k tomu psát do něj bez plus. Tohle je zřetelně pole na krátkou hodnotu
+   a pořád je v něm vidět, že tam plus patří. */
+.dialCode {
+  flex: none;
+  width: 11ch;
+  font-family: var(--st-mono);
+}
+
+.dialIso {
+  flex: none;
+  width: 8ch;
+  font-family: var(--st-mono);
+  text-transform: uppercase;
+}
+
+/* Místo po štítku „výchozí", který má jen první řádek. Bez něj by se ostatním
+   řádkům tlačítka odskočila doleva a sloupec by přestal být sloupec. */
+.dialGap {
+  flex: none;
+  width: 62px;
+}
+
+/* Úzké okno: pole se zalomí pod sebe a řádek přestane být řádek. Ta tři pole
+   mají dané šířky, takže se to stane dřív, než se zdá — sloupec s Nastavením
+   je v dokovaném Studiu širší než obrazovka. */
+@media (max-width: 900px) {
+  .dialRow {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    padding: 12px 0;
+  }
+
+  .dialLabel {
+    flex: 1 1 100%;
+    order: 1;
+  }
+
+  .dialIndex {
+    order: 0;
+  }
+
+  .dialCode,
+  .dialIso {
+    order: 2;
+  }
+
+  .dialGap {
+    display: none;
+  }
+
+  .dialRow .rowActions {
+    order: 3;
+    margin-left: auto;
+  }
+}

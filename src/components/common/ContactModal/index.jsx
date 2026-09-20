@@ -6,7 +6,7 @@ import Image from "next/image";
 import { AnimatePresence, cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
 import DialPrefix from "@/components/common/ui/DialPrefix";
-import { DEFAULT_DIAL } from "@/constants/dialPrefixes";
+import { DEFAULT_DIAL } from "@/cms/dialPrefixes";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import MoreLink from "@/components/common/ui/MoreLink";
 import Arrow from "@/components/common/ui/Arrow";
@@ -280,6 +280,11 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
         // `useResend` wants a template name and a mailbox that nobody has given
         // yet. See TODO.md. Inventing a destination here would be worse than
         // saying so.
+        //
+        // Až se odesílání napojí: telefon do zprávy patří jako
+        // `fullPhoneNumber(values.dial, values.phone)` z @/cms/dialPrefixes.
+        // `values.dial` a `values.phone` jsou dvě pole, protože to jsou dvě pole —
+        // ale číslo bez předvolby je číslo, na které se nedá zavolat.
         toast.error("Odesílání formuláře zatím není napojené.");
     };
 

@@ -6,7 +6,7 @@
 // into another project, and a library that carries a hard-coded list of one
 // client's document types is not liftable, it is forked.
 //
-// Three of the seven come from the library, because they are mechanisms rather
+// Two of the seven come from the library, because they are mechanisms rather
 // than content: `siteCopy` is the keyed block every page's copy lives in, and
 // `review` is the type the moderation queue is written against. The other five
 // describe this business and live in src/content/types.

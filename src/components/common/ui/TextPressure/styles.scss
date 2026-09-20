@@ -13,7 +13,23 @@
     display: inline-flex;
     justify-content: center;
     align-items: baseline;
-    line-height: 1;
+    // Místo pro čárky nad verzálkami.
+    //
+    // Bývala tu jednička, a ta je pro řádek velkých písmen skoro správně —
+    // jenže tenhle web píše česky. Naměřeno na „PRODÁVÁM TÍM SVÉ ZNÁMÉ?" při
+    // 79,2px: samotné verzálky sahají 58px nad účaří, s čárkami 77px, a řádkový
+    // box jich nad účařím nabízí 73. Čtyři pixely čárek tedy ležely nad jeho
+    // horní hranou — a tam, kde se text odkrývá přes clip-path (otázka
+    // v benefit programu), je ořez uťal.
+    //
+    // 1.2 rozdělí přebytek na obě strany po 10 % velikosti písma, tedy téměř
+    // 8px při té naměřené — proti čtyřem, které přetékaly. Je to poměr, takže
+    // to platí ve všech třech velikostech, ve kterých komponenta na webu stojí.
+    //
+    // Proč ne těsněji: komponenta mění tloušťku písma pod kurzorem až na wght
+    // 900 a těžší řez má čárku vyšší i silnější. 1.15 by vyšlo na dva pixely
+    // rezervy v klidovém stavu, a to je míň, než kolik si ten najetý bere.
+    line-height: 1.2;
     text-transform: uppercase;
     white-space: nowrap;
     user-select: none;

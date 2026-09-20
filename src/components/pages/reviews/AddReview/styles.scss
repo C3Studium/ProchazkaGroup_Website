@@ -331,10 +331,10 @@
     .AddRev__pick__select {
         font-family: "Switzer-Light", sans-serif;
         font-size: clamp(0.82rem, 0.95vw, 1.02rem);
-        // The right side keeps the room the chevron is drawn in; the other
-        // three are the inputs' own, so the three fields start their text on
-        // one line.
-        padding: clamp(0.5rem, 1.4vh, 0.9rem) 2rem clamp(0.5rem, 1.4vh, 0.9rem) clamp(0.3rem, 1vw, 0.8rem);
+        // Vpravo už se místo na šipku nechávat nemusí — kreslí ji tlačítko
+        // vedle hodnoty, ne vrstva přes pole. Zbylé tři hodnoty jsou ty, co
+        // mají inputy kolem, aby všechna tři pole začínala text na jedné čáře.
+        padding: clamp(0.5rem, 1.4vh, 0.9rem) clamp(0.3rem, 1vw, 0.8rem);
         border-bottom-color: rgba(255, 255, 255, 0.28);
         transition: border-color 0.35s ease;
 

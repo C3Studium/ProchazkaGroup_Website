@@ -604,25 +604,35 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                         <p className="Colleagues__moto">{person.moto}</p>
                     </motion.div>
 
+                    {/* „Líbí se" u fotky, ne v řadě ikon pod ní.
+                        Stálo to mezi telefonem a e-mailem, a to je řada
+                        ODKAZŮ: čtyři věci, které někam vedou — zavolat,
+                        napsat, Facebook, Instagram. Tohle nikam nevede, je to
+                        jediné tlačítko na panelu, které něco udělá s tím, na
+                        koho se člověk dívá. Mezi odkazy vypadalo jako pátý
+                        z nich a počet vedle něj jako popisek jednoho z nich.
+                        Nad nimi a u portrétu je to samostatná věc, kterou je. */}
+                    {person.id ? (
+                        <motion.div className="Colleagues__like" style={{ opacity: metaOpacity }}>
+                            <LikeButton
+                                liked={likes.isLiked(person.id)}
+                                count={likes.countOf(person.id, person.likes || 0)}
+                                label={`Líbí se mi: ${person.name}`}
+                                onToggle={() => likes.toggle(person.id)}
+                                // Jako ikony pod ním. Výchozích 18 je o dva
+                                // pixely míň a ve sloupci nad nimi je to vidět.
+                                size={20}
+                            />
+                        </motion.div>
+                    ) : null}
+
                     <motion.ul className="Colleagues__links" style={{ opacity: metaOpacity }}>
                         <li>
                             <a href={dial(person.tel)} aria-label={`Zavolat: ${person.name}`} data-cursor="frame">
                                 <RiPhoneLine size={20} />
                             </a>
                         </li>
-                        {/* Vedle telefonu a schválně stejného tvaru — jiná
-                            ikona, jiná funkce. Není vázaný na žádnou recenzi:
-                            přičítá kolegovi obecný počet. */}
-                        {person.id ? (
-                            <li>
-                                <LikeButton
-                                    liked={likes.isLiked(person.id)}
-                                    count={likes.countOf(person.id, person.likes || 0)}
-                                    label={`Líbí se mi: ${person.name}`}
-                                    onToggle={() => likes.toggle(person.id)}
-                                />
-                            </li>
-                        ) : null}
+
                         {/* Targets only, which is the shape `editableLink` gives
                             an element with no words on it: `items.N.value` is
                             ABOUT_LINKS in @/lib/site/aboutUs. The

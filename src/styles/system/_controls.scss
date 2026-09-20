@@ -43,19 +43,17 @@
         display: block;
     }
 
+    // Pole je linka se slovy nad ní. Ovladač si sem nenese nic vlastního:
+    // od chvíle, kdy tohle kreslí náš vlastní rozbalovací seznam a ne nativní
+    // <select>, je `__select` jeho OBAL — linka, odsazení a typ patří jemu,
+    // samotné tlačítko uvnitř všechno zdědí.
     .#{$block}__select {
-        // A field on this page is a line with words over it. The
-        // browser's own control is a rounded grey box with a system
-        // font and a chevron of its own, so all of that comes off —
-        // the same strip the form does to its inputs, restated here
-        // because this control lives outside the form's box.
-        appearance: none;
-        -webkit-appearance: none;
+        display: flex;
         width: 100%;
-        // The finger's floor. 16px is also the size under which iOS
-        // zooms the page to focus a control, and a zoom the reader
-        // did not ask for leaves them scrolled sideways on a page
-        // that has no sideways.
+        // Podlaha pro prst. 16px je zároveň velikost, pod kterou iOS přibližuje
+        // stránku, aby na ovladač zaostřil — a přiblížení, o které si nikdo
+        // neřekl, nechá čtenáře odsunutého do strany na stránce, která do
+        // strany nejde.
         min-height: 44px;
         background: transparent;
         border: none;
@@ -67,34 +65,20 @@
         font-weight: 200;
         font-size: max(16px, 1rem);
         letter-spacing: 0.01em;
-        // room on the right for the chevron drawn over it
-        padding: 0.45rem 2rem 0.45rem 0.2rem;
+        // Vpravo se už nemusí nechávat místo: šipku kreslí tlačítko vedle
+        // hodnoty, ne vrstva položená přes pole.
+        padding: 0.45rem 0.2rem;
         outline: none;
+        transition: border-color 0.35s ease;
 
-        &:focus {
-            border-bottom-color: var(--hColor);
-        }
+        .Dropdown__button { min-height: 44px; }
 
-        // The list that opens is drawn by the platform. iOS spins
-        // its own wheel and ignores everything here; Android and a
-        // desktop browser inherit from the control, which on this
-        // page is white type on nothing at all. Stated, so the
-        // names are legible in the popup wherever it comes from.
-        option {
-            color: #0b1220;
-            background-color: #ffffff;
-        }
+        // Zaostření je teď na tlačítku uvnitř, ne na poli samotném.
+        &:focus-within { border-bottom-color: var(--hColor); }
     }
 
-    .#{$block}__chevron {
-        position: absolute;
-        right: 0.2rem;
-        top: 50%;
-        transform: translateY(-50%);
-        opacity: 0.75;
-        // it is the control's mark, not a second target beside it
-        pointer-events: none;
-    }
+    // `__chevron` tu bývala jako vrstva položená přes nativní select. Ten je
+    // pryč a s ním i ona; značku kreslí Dropdown sám, vedle hodnoty.
 }
 
 // The telephone number as a mark rather than as a line of type: a square

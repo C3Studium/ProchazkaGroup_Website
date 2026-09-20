@@ -536,8 +536,6 @@ export default function Offers({ partnerLogos: cmsLogos, copyLines: cmsCopyLines
                         radiusY={620}
                         rotation={0}
                         duration={110}
-                        itemWidth={178}
-                        itemHeight={68}
                         responsive
                         fill
                         showPath

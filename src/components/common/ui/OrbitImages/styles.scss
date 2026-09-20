@@ -42,8 +42,36 @@
     overflow: visible;
 }
 
+// Jak velké je jedno logo na prstenci.
+//
+// Bylo to itemWidth={178} itemHeight={68} — dvě čísla v pixelech předaná
+// z Offers. Dvě věci, které tím nešly: rozměr se neměnil se šířkou obrazovky
+// (na telefonu stejných 178px jako na 2K) a nereagoval na počet log.
+// Rozestupy se počtem dělí samy, velikost ne, takže při dvaceti logách klesla
+// vzdálenost středů ze 69 na 49 pixelů a loga se začala tisknout přes sebe —
+// naměřeno.
+//
+// Takže dvě proměnné a jedno pravidlo:
+//
+//   --orbit-item-w/h  základní rozměr. Nastavuje ho sekce, protože ta ví, jak
+//                     velký prstenec kreslí; clamp() v ní ho váže na šířku.
+//   --orbit-count     kolik log na prstenci je. Píše ho komponenta, je to údaj.
+//
+// --orbit-fit je z toho počtu odvozený: prstenec byl kreslený na čtrnáct, a
+// když jich přijde víc, zmenší se logo přesně v tom poměru, v jakém se zkrátil
+// jeho díl dráhy. Dolní mez je tam proto, že logo, které se pořád zmenšuje, se
+// jednou přestane dát přečíst — a nečitelné logo je horší než těsné.
+.orbit-container {
+    --orbit-comfort: 14;
+    --orbit-item-w: 11.125rem;
+    --orbit-item-h: 4.25rem;
+    --orbit-fit: clamp(0.62, calc(var(--orbit-comfort) / var(--orbit-count, var(--orbit-comfort))), 1);
+}
+
 .orbit-item {
     position: absolute;
+    width: calc(var(--orbit-item-w) * var(--orbit-fit));
+    height: calc(var(--orbit-item-h) * var(--orbit-fit));
     will-change: transform;
     user-select: none;
     transform-style: preserve-3d;

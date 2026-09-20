@@ -130,6 +130,20 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     overflow: hidden;
     text-decoration: none;
     color: var(--wText);
+    // Vlastní podklad, a je to ta nejzazší vrstva dlaždice.
+    //
+    // Arch žádný neměl: průhledné byly všechny jeho vrstvy až dolů, a to, co
+    // dlaždici ztmavovalo, byl jen scrim níž — jenže ten je gradient, který
+    // nahoře končí na 0.06 při opacitě 0.62, tedy na čtyřech setinách. Pod
+    // panelem přitom leží jeho vlastní backdrop: kanvas s fotkou kanceláře
+    // (navPanel__ground) pod tintem. Takže horní třetinou každé neaktivní
+    // dlaždice prosvítaly světlé kusy té fotky — nejvíc v rozích, kde je
+    // nejsvětlejší.
+    //
+    // Scrim zůstává tím, čím je: gradientem, který dělá čitelný podklad pod
+    // jméno a číslo. Tohle je podlaha pod ním. Otevřené dlaždice se to netýká,
+    // tu překrývá portrét v plné síle.
+    background-color: rgba(3, 13, 19, 0.9);
 
     &:focus-visible {
         outline: 1px solid var(--bgPrimary, #BBB788);
@@ -154,9 +168,10 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 // material rather than ten photographs at different exposures. The cell that is
 // open covers it with the same picture at full strength, so nothing has to fade
 // this one out.
+// Obě ztmavující vrstvy sahají o kousek za dlaždici — viz poznámka u scrimu.
 .navAdv__ghost {
     position: absolute;
-    inset: 0;
+    inset: -2.5%;
     z-index: 0;
     background-position: center 20%;
     background-size: cover;
@@ -167,9 +182,19 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     .is-open & { opacity: 0.32; }
 }
 
+// O 2,5 % přes každou hranu, tedy 105 % na obě strany.
+//
+// Na `inset: 0` končily obě ztmavující vrstvy přesně na hraně dlaždice — jenže
+// dlaždice je podíl řádku a její šířka vychází na desetiny pixelu (198,33 a
+// podobně). Vrstva uvnitř se zaokrouhlí jinam než box, který ji drží, a po
+// okraji zbyde vlásek toho, co je pod ní: světlý proužek podél dlaždic.
+//
+// Přesah je zadarmo, protože .navAdv__cell__link má overflow: hidden a ořízne
+// ho zpátky na hranu. Gradient i fotka tím povyrostou o dvacetinu, což na
+// vrstvě drženou na 0.2 opacity nikdo nerozezná.
 .navAdv__scrim {
     position: absolute;
-    inset: 0;
+    inset: -2.5%;
     z-index: 1;
     pointer-events: none;
     background-image: linear-gradient(
@@ -194,12 +219,16 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 
 // „Líbí se" nad dlaždicí, ne v ní — viz index.jsx, dlaždice je odkaz.
 //
-// Vpravo nahoře, protože dole už stojí jméno, motto a číslo. Kreslí se jen na
-// otevřené: zavřená je pruh o pár desítkách pixelů a srdce by z ní čouhalo.
+// Vpravo nahoře, naproti pořadovému číslu. Dole už stojí jméno, motto
+// a telefon; horní roh je jediné místo na kartě, kde nic není, a číslo si drží
+// ten levý.
+//
+// Kreslí se jen na otevřené: zavřená dlaždice je pruh o pár desítkách pixelů
+// a srdce by z ní čouhalo.
 .navAdv__like {
     position: absolute;
-    top: 0.65rem;
-    right: 0.65rem;
+    top: 0.8rem;
+    right: 1rem;
     z-index: 3;
     opacity: 0;
     // Zavřená dlaždice ho nemá chytat myš, i když ho není vidět.
@@ -210,6 +239,18 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 .navAdv__cell.is-open .navAdv__like {
     opacity: 1;
     pointer-events: auto;
+}
+
+// Vlastní podklad, ze stejného důvodu jako u rámečku kolem čísla na telefonu:
+// otevřená dlaždice má nahoře skoro bílou fotku a kroužek z 72% bílé se na ní
+// ztrácí. Počet vedle stojí na fotce sám, bez kroužku pod sebou.
+.navAdv__like .LikeBtn__hit {
+    background-color: rgba(3, 13, 19, 0.45);
+    opacity: 0.9;
+}
+
+.navAdv__like .LikeBtn__count {
+    text-shadow: 0 1px 3px rgba(3, 13, 19, 0.8);
 }
 
 @include reduced-motion {
@@ -227,7 +268,17 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
     color: rgba(255, 255, 255, 0.3);
     transition: color 0.45s $curtain;
 
-    .is-open & { color: var(--bgPrimary, #BBB788); }
+    // Otevřená dlaždice nemá tmavý podklad, má fotku — a ta je u těchhle
+    // portrétů nahoře skoro bílá. Zavřené číslo je bílé na tmavém a je to
+    // správně; na otevřené bylo světlé na světlém a nedalo se přečíst.
+    //
+    // Ztmavuje do barvy pozadí webu, ne do libovolné tmavé: je to stejný
+    // inkoust, jakým je psaný zbytek stránky pod archem, takže číslo na
+    // vysvícené dlaždici čte jako popisek nad fotkou, a ne jako druhá barva,
+    // která se tu odnikud vzala. Je to ta tmavá modrá, na které stojí shader.
+    //
+    // Čárka vedle je currentColor, takže jde s ním a nemusí se jí to říkat.
+    .is-open & { color: var(--bgColor2, #050A10); }
 }
 
 // Its twin in the bento — the length is a size and follows the type, the 1px is
@@ -469,7 +520,9 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
             color: rgba(255, 255, 255, 0.55);
 
             .navAdv__tick { display: none; }
-            .is-open & { color: var(--bgPrimary, #BBB788); }
+            // Totéž co na širokém plátně: vybraná miniatura se rozsvítí
+            // a světlé číslo na ní zmizí.
+            .is-open & { color: var(--bgColor2, #050A10); }
         }
 
         // ── the one that is chosen ──

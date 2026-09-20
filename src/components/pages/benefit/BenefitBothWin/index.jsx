@@ -3,7 +3,8 @@
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { RiArrowDownSLine, RiPhoneLine } from "@remixicon/react";
+import { RiPhoneLine } from "@remixicon/react";
+import Dropdown from "@/components/common/ui/Dropdown";
 import TextPressure from "@/components/common/ui/TextPressure";
 import { CURTAIN, ENTERS } from "@/components/common/ui/entrance";
 import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
@@ -506,7 +507,27 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                             </div>
 
                             {path === "client" ? (
-                                <div className="BenBothWin__mini">
+                                // Nástup, který tahle větev neměla.
+                                //
+                                // Přepínač nechá stát obal a vymění jen to, co
+                                // je pod ním, takže se tenhle podstrom při
+                                // každém přepnutí mountuje nanovo — ale byl to
+                                // obyčejný <div>, takže neměl co přehrát:
+                                // roster, výběr i karta poradce se objevily
+                                // naráz a hotovo. Sekce nad tím se přitom
+                                // skládá po kusech.
+                                //
+                                // Stejné `riseAt`, jaké používá zbytek téhle
+                                // sekce, a stejné pořadí čtení: nejdřív seznam,
+                                // z něhož se vybírá, pak karta toho vybraného.
+                                // Páteř a linka nahoře si svůj náběh řídí samy
+                                // (mají vlastní `initial`), takže jim tohle
+                                // nepřepisuje nic.
+                                <motion.div
+                                    className="BenBothWin__mini"
+                                    initial="hidden"
+                                    animate="shown"
+                                >
                                     {/* The section's axis, carried on: the
                                         connector above runs on the content's
                                         centre line, the reply's drop lands on
@@ -556,7 +577,8 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                 attribute there would take the
                                                 page's own scroll away from a
                                                 thumb resting on a portrait. */}
-                                            <ul
+                                            <motion.ul
+                                                variants={riseAt(0.12)}
                                                 className="BenBothWin__mini__list"
                                                 role="listbox"
                                                 aria-label="Váš poradce"
@@ -603,7 +625,7 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                         </button>
                                                     </li>
                                                 ))}
-                                            </ul>
+                                            </motion.ul>
                                             {/* The same ten people again, as
                                                 the one control a phone lying
                                                 down can afford: the OS wheel,
@@ -636,35 +658,30 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                 off the screen, so a reader is
                                                 never offered the roster twice.
 
-                                                A native <select> rather than a
-                                                listbox of our own: it is the only
-                                                control that hands a phone its own
-                                                picker, and the roles, the focus
-                                                trapping and the type-ahead a
-                                                hand-rolled one owes are all had
-                                                from the platform for nothing. */}
-                                            <label className="BenBothWin__mini__pick">
+                                                Býval to nativní <select> kvůli
+                                                tomu, co dává zadarmo. Rozbalený
+                                                seznam u něj ale kreslí operační
+                                                systém a nejde mu říct nic — na
+                                                tmavé stránce bílý obdélník. Teď
+                                                je to společný
+                                                @/components/common/ui/Dropdown. */}
+                                            <motion.label variants={riseAt(0.12)} className="BenBothWin__mini__pick">
                                                 <span className="BenBothWin__mini__pick__label">Váš poradce</span>
                                                 <span className="BenBothWin__mini__pick__field">
-                                                    <select
+                                                    <Dropdown
                                                         className="BenBothWin__mini__pick__select"
+                                                        options={consultants.map((c, i) => ({
+                                                            value: i,
+                                                            label: c.name,
+                                                        }))}
                                                         value={Math.min(pick, consultants.length - 1)}
                                                         onChange={(event) => setPick(Number(event.target.value))}
-                                                    >
-                                                        {consultants.map((c, i) => (
-                                                            <option key={c.slug || c.name || i} value={i}>
-                                                                {c.name}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                    <RiArrowDownSLine
-                                                        className="BenBothWin__mini__pick__chevron"
+                                                        label="Váš poradce"
                                                         size={20}
-                                                        aria-hidden="true"
                                                     />
                                                 </span>
-                                            </label>
-                                            <div className="BenBothWin__mini__who">
+                                            </motion.label>
+                                            <motion.div variants={riseAt(0.26)} className="BenBothWin__mini__who">
                                                 {/* The consultant's portrait, from the same
                                                     Studio record the classic CTA reads — the
                                                     first of the consultant's two photos, a
@@ -752,7 +769,7 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                     Řekněte si o vstup na příští schůzce — nebo
                                                     zavolejte rovnou.
                                                 </p>
-                                            </div>
+                                            </motion.div>
                                         </>
                                     ) : (
                                         // No consultants published: the office
@@ -771,7 +788,7 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                             <p className="BenBothWin__reply__hours">Po–Pá, 8–16</p>
                                         </div>
                                     )}
-                                </div>
+                                </motion.div>
                             ) : (
                                 <div className="BenBothWin__ctaDock">
                                     <ChooseAdvisor

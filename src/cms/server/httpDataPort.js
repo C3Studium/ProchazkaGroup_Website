@@ -352,6 +352,22 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
                 save: (value) => request('/widget', { method: 'PUT', body: value }),
             },
 
+            /**
+             * Telefonní předvolby, které nabízí každé pole s telefonem. Mimo
+             * /settings z téhož důvodu jako widget nad tím — čtení je veřejné,
+             * protože ho potřebuje formulář v prohlížeči návštěvníka.
+             *
+             * Rozbaluje se `{ items }` na pole: na drátě má odpověď jméno, ať
+             * se dá později rozšířit, ale panel v nastavení pracuje se
+             * seznamem a obal by protekl do každého jeho řádku.
+             */
+            dialPrefixes: {
+                read: () => request('/dial-prefixes').then((body) => body?.items || []),
+                save: (items) =>
+                    request('/dial-prefixes', { method: 'PUT', body: { items } })
+                        .then((body) => body?.items || []),
+            },
+
             sessions: {
                 list: () => request('/settings/sessions'),
 

@@ -5,9 +5,10 @@ import { useMemo, useRef, useState } from "react";
 import { motion, useTransform } from "framer-motion";
 import { ENTERS, PHOTO, RISE, group } from "@/components/common/ui/entrance";
 import { toast } from "sonner";
-import { RiMapPinLine, RiThumbUpLine, RiChat3Line, RiArrowDownSLine, RiPhoneLine } from "@remixicon/react";
+import { RiMapPinLine, RiThumbUpLine, RiChat3Line, RiPhoneLine } from "@remixicon/react";
 import DialPrefix from "@/components/common/ui/DialPrefix";
-import { DEFAULT_DIAL } from "@/constants/dialPrefixes";
+import Dropdown from "@/components/common/ui/Dropdown";
+import { DEFAULT_DIAL } from "@/cms/dialPrefixes";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { EXTERNAL_CLASS } from "@/components/common/ui/externalLink";
 import { usePhoneAny } from "@/helpers/usePhone";
@@ -198,6 +199,10 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
         // /api/resend, but which template and which mailbox is a content
         // decision, not one to guess at — so the form validates and stops here
         // rather than telling anyone their message went somewhere it did not.
+        //
+        // Telefon do zprávy složit přes `fullPhoneNumber(values.dial, values.phone)`
+        // z @/cms/dialPrefixes — předvolba je vlastní pole a do e-mailu
+        // musí jít s číslem, ne vedle něj.
         toast.error("Odesílání formuláře zatím není napojené.");
     };
 
@@ -290,25 +295,27 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                 well as off the screen, so a reader is never offered the roster
                 twice.
 
-                A native <select> rather than a listbox of our own: it is the
-                only control that hands a phone its own picker, and the roles,
-                the focus trapping and the type-ahead a hand-rolled one owes
-                are all things this gets from the platform for nothing. */}
+                Býval to nativní <select>, a to kvůli tomu, co dává zadarmo:
+                role, zaostřování, psaní po písmenech a na telefonu systémové
+                kolo. Jenže rozbalený seznam u něj kreslí operační systém
+                a nejde mu říct vůbec nic — na tmavé stránce to byl bílý
+                systémový obdélník. Teď je to @/components/common/ui/Dropdown,
+                kde je všechno kromě toho kola dopsané ručně; ta ztráta je
+                popsaná u něj. */}
             <motion.label className="ChooseAdvisor__pick" variants={RISE}>
                 <span className="ChooseAdvisor__pick__label">Zvolit poradce</span>
                 <span className="ChooseAdvisor__pick__field">
-                    <select
+                    <Dropdown
                         className="ChooseAdvisor__pick__select"
+                        options={advisors.map((advisor, index) => ({
+                            value: index,
+                            label: advisor.name,
+                        }))}
                         value={selected}
                         onChange={(event) => setSelected(Number(event.target.value))}
-                    >
-                        {advisors.map((advisor, index) => (
-                            <option key={advisor.slug || index} value={index}>
-                                {advisor.name}
-                            </option>
-                        ))}
-                    </select>
-                    <RiArrowDownSLine className="ChooseAdvisor__pick__chevron" size={20} aria-hidden="true" />
+                        label="Zvolit poradce"
+                        size={20}
+                    />
                 </span>
             </motion.label>
 

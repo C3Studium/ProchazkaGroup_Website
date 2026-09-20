@@ -56,7 +56,6 @@ export { getAboutContent, ABOUT_KEYS } from './aboutUs.js'
 export {
     getFooterContent,
     getContactContent,
-    getDialPrefixes,
     footerStaticProps,
     FOOTER_KEY,
     FOOTER_LINES,

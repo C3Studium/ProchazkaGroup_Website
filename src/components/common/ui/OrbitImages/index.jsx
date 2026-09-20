@@ -58,7 +58,7 @@ function orbitEntry(entry) {
 
 
 function OrbitItem({
-    item, index, totalItems, path, itemWidth, itemHeight, rotation,
+    item, index, totalItems, path, rotation,
     progress, fill, spin, aspect, size, span, tilt, open, lead,
 }) {
     // Slots run backwards round the path. Advancing the ring moves items
@@ -125,8 +125,12 @@ function OrbitItem({
         <motion.div
             className="orbit-item"
             style={{
-                width: itemWidth,
-                height: itemHeight,
+                // Šířka ani výška tu nejsou schválně. Byly, jako dvě čísla
+                // v pixelech předaná z Offers, a to je rozměr, který se
+                // nepřizpůsobí ani obrazovce, ani počtu log: při dvaceti
+                // logách se rozestupy zkrátily o třetinu a velikost zůstala,
+                // takže se začala tisknout přes sebe. Obojí teď řeší
+                // stylopis — viz styles.scss a --orbit-count níž.
                 offsetPath: `path("${path}")`,
                 offsetRotate: "0deg",
                 offsetAnchor: "center center",
@@ -156,9 +160,8 @@ export default function OrbitImages({
     radius = 300,
     rotation = -8,
     duration = 40,
-    itemSize = 64,
-    itemWidth,
-    itemHeight,
+
+
     direction = "normal",
     fill = true,
     className = "",
@@ -250,7 +253,12 @@ export default function OrbitImages({
         <motion.div
             ref={containerRef}
             className={`orbit-container ${className}`.trim()}
-            style={{ width: "100%", aspectRatio: "1 / 1", perspective }}
+            // Kolik log na prstenci je. Údaj, ne vzhled — proto jde do stylu
+            // jako proměnná a ne jako rozměr: co se s tím počtem má stát,
+            // rozhoduje styles.scss, kde se rozměry dají svázat i s šířkou
+            // obrazovky. Rozestupy se dělí počtem samy (viz `slot`), takže
+            // tohle je to jediné, co o něm stylopis potřebuje vědět.
+            style={{ width: "100%", aspectRatio: "1 / 1", perspective, "--orbit-count": items.length }}
             aria-hidden="true"
         >
             <div
@@ -285,8 +293,6 @@ export default function OrbitImages({
                             index={index}
                             totalItems={items.length}
                             path={path}
-                            itemWidth={itemWidth ?? itemSize}
-                            itemHeight={itemHeight ?? itemSize}
                             rotation={rotation}
                             progress={progress}
                             fill={fill}

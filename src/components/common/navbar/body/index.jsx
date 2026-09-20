@@ -162,18 +162,30 @@ const tracks = (area, axis, count, big, small) => {
 // The two have to share a duration and a curve exactly. Give them different
 // ones and they stop cancelling, and the picture visibly drags inside its own
 // frame.
+// Sto dva procenta, ne sto. Ty dvě procenta navíc jsou ten proužek.
+//
+// Zavřená fotka se odsouvá o celou svou šířku, takže má být přesně za hranou.
+// Jenže ta šířka vychází na desetiny pixelu — box je podíl řádku — a posun
+// o 100 % z ní se při skládání zaokrouhlí. Když padne o zlomek pixelu blíž,
+// zůstane u hrany vidět proužek fotky. Vnitřní vrstva jede opačně a se
+// zvětšením 1.06, takže se ty odchylky sčítají: naměřeno jako jeden až dva
+// pixely prosvítající fotky podél zavřených boxů.
+//
+// Dvě procenta navíc jsou mimo ořez, takže je nikdo neuvidí — a obě vrstvy
+// mají stejnou hodnotu, aby se jejich posuny pořád přesně rušily a obrázek
+// se uvnitř rámu nehýbal. Stejná úprava je ve zdi poradců.
 const OUTER = {
-    left:   { x: '-100%', y: '0%' },
-    right:  { x: '100%',  y: '0%' },
-    top:    { x: '0%',    y: '-100%' },
-    bottom: { x: '0%',    y: '100%' },
+    left:   { x: '-102%', y: '0%' },
+    right:  { x: '102%',  y: '0%' },
+    top:    { x: '0%',    y: '-102%' },
+    bottom: { x: '0%',    y: '102%' },
 };
 
 const INNER = {
-    left:   { x: '100%',  y: '0%' },
-    right:  { x: '-100%', y: '0%' },
-    top:    { x: '0%',    y: '100%' },
-    bottom: { x: '0%',    y: '-100%' },
+    left:   { x: '102%',  y: '0%' },
+    right:  { x: '-102%', y: '0%' },
+    top:    { x: '0%',    y: '102%' },
+    bottom: { x: '0%',    y: '-102%' },
 };
 
 const REST = { x: '0%', y: '0%' };

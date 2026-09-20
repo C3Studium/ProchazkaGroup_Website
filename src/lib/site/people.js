@@ -181,6 +181,10 @@ export const getAssistant = async ({ read = readPublished } = {}) => {
  * Studio shows in its list come from one function rather than two that agree
  * until someone edits one of them.
  *
+ * `likes` je SOUČET: základ uložený v dokumentu, souhlasy zmáčknuté přímo
+ * u poradce a souhlasy u jeho recenzí. Jedno číslo, protože je to jedna věc —
+ * kolik lidí mu dalo palec. Viz konec téhle funkce.
+ *
  * @returns {Promise<{name, academicTitle, firstName, lastName, slug, kind, motto,
  *                    story, portrait, portraitDetail, phone, email, order,
  *                    likes, reviewCount}[]>}
@@ -238,6 +242,38 @@ export const getConsultants = async ({ kind, limit = 50, read = readPublished } 
         for (const person of people) person.likes += counts.get(person.id) || 0
     } catch (error) {
         console.warn(`[cms] počty „líbí se" u poradců se nenačetly — ${String(error?.message || error)}`)
+    }
+
+    // A k tomu souhlasy s jejich recenzemi.
+    //
+    // Číslo u poradce má být jedno: kolik lidí mu dalo palec. Že to jednou
+    // zmáčkli na jeho dlaždici a jindy pod recenzí, kterou na něj někdo
+    // napsal, je rozdíl v tom, KDE stáli — ne v tom, komu ten souhlas patřil.
+    // Dvě čísla vedle sebe by nutila čtenáře je sčítat v hlavě a editora ve
+    // Studiu hádat, které z nich je to pravé.
+    //
+    // Páruje se přes jméno, ne přes id, protože recenze poradce jménem drží —
+    // `consultantName` je text a schéma u něj říká, že musí odpovídat jménu
+    // publikovaného poradce (cms/schemas/review.js). Porovnává se bez ohledu
+    // na velikost písmen a okolní mezery, což je přesně ta odchylka, kterou
+    // ručně psané jméno mívá.
+    //
+    // `getApprovedReviews` si vlastní souhlasy připočítá samo, takže tady se
+    // sčítá už hotové číslo. Selhání se jen zaznamená: poradce s neúplným
+    // počtem je pořád poradce, poradce, kvůli kterému spadl build, není.
+    try {
+        const reviews = await getApprovedReviews({ limit: 500, read })
+        const byName = new Map()
+        for (const review of reviews) {
+            const key = String(review.consultantName || '').trim().toLowerCase()
+            if (!key) continue
+            byName.set(key, (byName.get(key) || 0) + (review.likes || 0))
+        }
+        for (const person of people) {
+            person.likes += byName.get(String(person.name || '').trim().toLowerCase()) || 0
+        }
+    } catch (error) {
+        console.warn(`[cms] souhlasy z recenzí se k poradcům nepřipočetly — ${String(error?.message || error)}`)
     }
 
     return people

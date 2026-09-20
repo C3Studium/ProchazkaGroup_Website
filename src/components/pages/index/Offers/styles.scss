@@ -42,6 +42,22 @@
         will-change: transform;
     }
 
+    // Jak velké je jedno logo na prstenci — základ, ze kterého OrbitImages
+    // počítá (viz jeho styles.scss a --orbit-fit).
+    //
+    // Byla to dvě čísla v pixelech předaná komponentě propem: 178x68, stejných
+    // na telefonu jako na 2K. Strop je ta stará hodnota, takže od 1440 nahoru
+    // je prstenec na pixel tím, čím byl — pod ní se logo zmenšuje se šířkou
+    // okna místo aby z ní přetékalo.
+    //
+    // Obě míry mají stejné hranice pásma, takže poměr stran 178:68 drží na
+    // každé šířce; logo je wordmark a nahnutý wordmark je chyba, které si
+    // všimne každý.
+    .orbit-container {
+        --orbit-item-w: clamp(6.5rem, 12.36vw, 11.125rem);
+        --orbit-item-h: clamp(2.48rem, 4.72vw, 4.25rem);
+    }
+
     // Everything the section shows, so it can be parallaxed away as one on the
     // release. The rules stay outside it: they run to the section's own edges
     // and have to meet the next section there.

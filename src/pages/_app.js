@@ -7,7 +7,7 @@ import { LoadProvider } from "@/context/LoadProvider";
 import { CursorRefProvider } from "@/context/CursorRefProvider";
 import { PerformanceProvider } from "@/context/PerformanceProvider";
 import { CookiesProvider } from "@/context/CookiesProvider";
-import { DialPrefixProvider } from "@/context/DialPrefixProvider";
+import { useTunnelPreset } from "@/components/common/ui/NeuralTunnel/presets";
 // The seam. `@/cms` answers which shell a route wants and supplies the admin's;
 // the decision is a static property of the page component, so it reads the same
 // on the server pass and the first client pass. See @/cms/shell for why it is
@@ -51,6 +51,12 @@ import PageVeil from "@/components/common/PageVeil";
 const Cursor = dynamic(() => import("@/components/common/ui/Cursor"), {
     ssr: false,
 });
+// Pravítko u pravého okraje: kde na stránce jsme, a dá se na něj kliknout.
+// Klientsky ze stejného důvodu jako kurzor — než se vykreslí, musí vědět, jestli
+// je tu vůbec ukazovátko, a na to se serveru zeptat nedá.
+const ScrollRail = dynamic(() => import("@/components/common/ui/ScrollRail"), {
+    ssr: false,
+});
 import { Toaster } from "sonner";
 // import Footer from "@/components/common/footer";
 import SiteFooter from "@/components/common/SiteFooter";
@@ -78,6 +84,10 @@ export default function App({ Component, pageProps, router }) {
 /** The managed site: everything a visitor gets, on every route that is one. */
 function SiteShell({ Component, pageProps }) {
   useEditArming();
+  // Které hodnoty shaderu platí pro tuhle obrazovku — svisle na dotyku jedna
+  // sada, všude jinde druhá. Sledování orientace i obě sady jsou v
+  // NeuralTunnel/presets; tady se jen dosadí.
+  const tunnel = useTunnelPreset();
   const router = useRouter();
   const { pathname } = router;
 
@@ -175,34 +185,16 @@ function SiteShell({ Component, pageProps }) {
       <PerformanceProvider>
         <LoadProvider>
           <CursorRefProvider>
-            {/* Předvolby telefonu — jeden seznam pro všechna čtyři místa,
-                kde se na tomhle webu zadává číslo. Veze ho každá stránka na
-                propech (getDialPrefixes v @/lib/site), protože _app si sám
-                načíst nic nemůže; viz DialPrefixProvider. */}
-            <DialPrefixProvider prefixes={pageProps.dialPrefixes}>
-            <NeuralTunnel
-                className="neural-tunnel--page"
-                layers={4}
-                falloff={1.15}
-                blend={4}
-                feedback={3}
-                amplitude={1.5}
-                scale={5}
-                perspective={1}
-                zoom={0.2}
-                speed={1.25}
-                bands={3}
-                phase={6}
-                spread={0}
-                gamut={0.1}
-                contrast={2.5}
-                vignette={1}
-                opacity={1}
-                color="#020e15"
-                hotColor="#98dbf8"
-                backgroundColor="#020e15"
-                cursorInteraction={false}
-            />
+            {/* Předvolby telefonu tady bývaly, jako provider krmený propem
+                z každé stránky. Nejsou obsah tohohle webu, ale funkce Studia:
+                pole si je bere z @/cms/dialPrefixes, knihovna si je stáhne sama
+                jedním dotazem za záložku a devět `getStaticProps` je nemusí
+                vozit. Viz src/cms/DIAL-PREFIXES.md. */}
+            {/* Hodnoty už nestojí tady, ale v NeuralTunnel/presets — jsou dvě
+                sady a která platí, rozhoduje orientace a to, jestli je to
+                dotykové zařízení. Rozepsané na tomhle místě by se daly změnit
+                jen pro obojí najednou. */}
+            <NeuralTunnel className="neural-tunnel--page" {...tunnel} />
             {/* Sits over the shader and under everything that is read. Values
                 are the ones settled on in the generator: a 150px lattice at 10%
                 white and a half-pixel stroke, which is the same hairline weight
@@ -243,6 +235,7 @@ function SiteShell({ Component, pageProps }) {
                 roster={pageProps.roster || null}
             />
             <Cursor />
+            <ScrollRail />
             {/* <CookiesBar /> */}
             {/* <BackgroundGradient /> */}
             <Component {...pageProps} />
@@ -259,7 +252,6 @@ function SiteShell({ Component, pageProps }) {
                 does not remount it. */}
             <ManageBadge />
             <Toaster position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
-            </DialPrefixProvider>
           </CursorRefProvider>
         </LoadProvider>
       </PerformanceProvider>

@@ -25,7 +25,13 @@ import { fileURLToPath, pathToFileURL } from 'node:url'
 
 // The project root, from this file's own location. Not `process.cwd()`: a
 // script run from anywhere should still find the same `src/`.
-const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..', '..')
+//
+// `fileURLToPath` and not `new URL(...).pathname`, which is the difference
+// between this working on Windows and not. A file URL's pathname keeps a
+// leading slash — `/C:/Users/…` — and `path.resolve` reads that as an absolute
+// path on the current drive, so the root came out as `C:\C:\Users\…` and every
+// script using this loader died on the first import it tried to read.
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..')
 const SRC = `${pathToFileURL(path.join(ROOT, 'src')).href}/`
 
 // jsconfig.json's `@/*` -> `./src/*`, plus the extension search a bundler does

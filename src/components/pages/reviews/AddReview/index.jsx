@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import Arrow from "@/components/common/ui/Arrow";
-import { RiArrowDownSLine } from "@remixicon/react";
+import Dropdown from "@/components/common/ui/Dropdown";
 import { editable } from "@/cms/edit";
 import { toast } from "sonner";
 
@@ -238,12 +238,13 @@ export default function AddReview({ consultants = [], copy = {} }) {
                                     It was an `<input list>` — a suggest box you
                                     could also type a stranger's name into —
                                     while the form's own check has always read
-                                    «Vyberte prosím poradce», choose. A native
-                                    <select> is what that sentence describes: it
-                                    hands a phone its own wheel, and the roles,
-                                    the focus handling and the type-ahead a
-                                    hand-rolled listbox would owe come from the
-                                    platform for nothing.
+                                    «Vyberte prosím poradce», choose.
+
+                                    Pak to byl nativní <select> a teď je to
+                                    @/components/common/ui/Dropdown: rozbalený
+                                    seznam u nativního kreslí operační systém
+                                    a nejde mu říct nic, takže uprostřed tmavého
+                                    archu stál bílý systémový obdélník.
 
                                     At every width, deliberately. Which advisor
                                     this is about is a closed question on a
@@ -264,24 +265,26 @@ export default function AddReview({ consultants = [], copy = {} }) {
                                     <span>Koho se týká <em>*</em></span>
                                     {roster.length > 0 ? (
                                         <span className="AddRev__pick__field">
-                                            <select
+                                            <Dropdown
                                                 className="AddRev__pick__select"
                                                 value={form.consultantName}
                                                 onChange={set("consultantName")}
-                                                data-cursor="frame"
-                                            >
-                                                {/* Disabled rather than merely
-                                                    empty: the field is required,
-                                                    so the blank is a state to
-                                                    leave and never one to come
-                                                    back to. It is also what the
-                                                    reset after a successful send
-                                                    returns the control to. */}
-                                                <option value="" disabled>Vyberte poradce</option>
-                                                {roster.map((name) => <option key={name} value={name}>{name}</option>)}
-                                                <option value="Benefit Program">Benefit Program</option>
-                                            </select>
-                                            <RiArrowDownSLine className="AddRev__pick__chevron" size={20} aria-hidden="true" />
+                                                placeholder="Vyberte poradce"
+                                                label="Koho se recenze týká"
+                                                size={20}
+                                                // Výzva je v seznamu jako
+                                                // nevybratelná položka, ne jako
+                                                // prázdný řádek: pole je povinné,
+                                                // takže prázdno je stav, který se
+                                                // opouští a nikdy se do něj
+                                                // nevrací. Je to zároveň to, na co
+                                                // se pole nastaví po odeslání.
+                                                options={[
+                                                    { value: "", label: "Vyberte poradce", disabled: true },
+                                                    ...roster.map((name) => ({ value: name, label: name })),
+                                                    { value: "Benefit Program", label: "Benefit Program" },
+                                                ]}
+                                            />
                                         </span>
                                     ) : (
                                         <>

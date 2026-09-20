@@ -11,7 +11,6 @@ import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
 import {
     getAssistant,
     getContactContent,
-    getDialPrefixes,
     getFooterContent,
     getHomepageContent,
     getPageContent,
@@ -47,7 +46,7 @@ export async function getStaticProps(context) {
     // The advisor block at the foot is the homepage's own, words and consultants
     // and all — read from the same place, so the two cannot come to say
     // different things.
-    const [content, home, footer, contact, assistant, roster, dialPrefixes] = await Promise.all([
+    const [content, home, footer, contact, assistant, roster] = await Promise.all([
         // `read` and `view` on all five, where the first two used to be read
         // published whoever was asking. Harmless for a visitor, wrong for both
         // of the other readers: it put unpublished copy beside published
@@ -59,7 +58,6 @@ export async function getStaticProps(context) {
         getContactContent(view),
         getAssistant({ read }),
         getRoster({ read }),
-        getDialPrefixes(view),
     ]);
 
     const { reviews = [], ...copy } = content || {};
@@ -77,7 +75,6 @@ export async function getStaticProps(context) {
             contact,
             assistant,
             roster,
-            dialPrefixes,
         },
         revalidate: REVALIDATE_SECONDS,
     };

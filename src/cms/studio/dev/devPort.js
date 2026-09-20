@@ -844,6 +844,15 @@ export function createDevPort({ signedIn = false } = {}) {
       // public site — which reads the real endpoint — does not use.
       "widget.read",
       "widget.save",
+      // Předvolby telefonu jsou ten druhý uložený případ a odmítají se ze
+      // stejného důvodu, slovo od slova: formuláře na webu čtou skutečný
+      // endpoint (/api/cms/dial-prefixes), takže seznam upravený proti stubu
+      // by žil jen v téhle záložce a obrazovka by hlásila země, které pole
+      // telefonu nenabízí. Čistá instalace navíc předvolby UMÍ i bez řádku
+      // v databázi — DIAL_PREFIX_DEFAULTS v server/dialPrefixes.js — takže
+      // „nedostupné v dev portu" tady nikoho o nic nepřipraví.
+      "dialPrefixes.read",
+      "dialPrefixes.save",
     ]),
 
     /** Dev-only escape hatch used by the "reset data" control in the shell. */

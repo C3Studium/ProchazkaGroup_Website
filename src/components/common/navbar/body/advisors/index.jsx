@@ -1,7 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { RiPhoneLine } from '@remixicon/react'
 
 import CornerMarks from '@/components/common/ui/CornerMarks'
@@ -107,44 +107,89 @@ const opensFor = (row, col, colCount) => {
 // portrait never moves relative to its block — what moves is the edge that
 // uncovers it. `clip-path` would be re-rasterised on the main thread every
 // frame, inside a block whose own width is being animated at the same time.
+// Sto dva procenta, ne sto. Ty dvě procenta navíc jsou ten proužek.
+//
+// Zavřená fotka se odsouvá o celou svou šířku, takže má být přesně za hranou.
+// Jenže ta šířka vychází na desetiny pixelu — dlaždice je podíl řádku — a posun
+// o 100 % z ní se při skládání zaokrouhlí. Když padne o zlomek pixelu blíž,
+// zůstane u hrany vidět proužek fotky. Vnitřní vrstva jede opačně a se
+// zvětšením 1.06, takže se ty odchylky sčítají.
+//
+// Dvě procenta navíc jsou mimo ořez, takže je nikdo neuvidí — a obě vrstvy mají
+// stejnou hodnotu, aby se jejich posuny pořád přesně rušily a obrázek se uvnitř
+// dlaždice nehýbal. Stejná úprava je v panelu nad tímhle.
 const OUTER = {
-    left: { x: '-100%', y: '0%' },
-    right: { x: '100%', y: '0%' },
-    top: { x: '0%', y: '-100%' },
-    bottom: { x: '0%', y: '100%' },
+    left: { x: '-102%', y: '0%' },
+    right: { x: '102%', y: '0%' },
+    top: { x: '0%', y: '-102%' },
+    bottom: { x: '0%', y: '102%' },
 };
 
 const INNER = {
-    left: { x: '100%', y: '0%' },
-    right: { x: '-100%', y: '0%' },
-    top: { x: '0%', y: '100%' },
-    bottom: { x: '0%', y: '-100%' },
+    left: { x: '102%', y: '0%' },
+    right: { x: '-102%', y: '0%' },
+    top: { x: '0%', y: '102%' },
+    bottom: { x: '0%', y: '-102%' },
 };
 
 const REST = { x: '0%', y: '0%' };
-
-const MASK = { duration: 0.7, ease: CURTAIN };
-const PUSH = { duration: 1.15, ease: CURTAIN };
-const CALM = { duration: 0.28, ease: CURTAIN };
-
-const outerPose = (opens, open, calm) => ({
-    ...(open ? REST : OUTER[opens]),
-    transition: calm ? CALM : MASK,
-});
-
-const innerPose = (opens, open, calm) => ({
-    ...(open ? REST : INNER[opens]),
-    scale: calm ? 1 : open ? 1 : 1.06,
-    transition: calm ? CALM : { x: MASK, y: MASK, scale: PUSH },
-});
 
 // The house physics, from /nabidka: two springs of different stiffness, so one
 // axis leads and the other trails it by a few frames. Written there as the
 // reason "the three cells read as pushing each other apart rather than as one
 // number being scrubbed".
+//
+// Deklarované nad pózami schválně: pózy si tu šířkovou pružinu berou, a
+// konstanta, kterou si funkce nad sebou bere, je past na toho, kdo ji jednou
+// zavolá dřív, než se modul dojede.
 const WIDTH_SPRING = { type: 'spring', stiffness: 150, damping: 26, restDelta: 0.001 };
 const HEIGHT_SPRING = { type: 'spring', stiffness: 210, damping: 24, restDelta: 0.001 };
 const CALM_SIZE = { duration: 0.24, ease: CURTAIN };
+
+const MASK = { duration: 0.7, ease: CURTAIN };
+const PUSH = { duration: 1.15, ease: CURTAIN };
+const CALM = { duration: 0.28, ease: CURTAIN };
+
+// Zalezení. Krátké, a to je celý jeho úkol.
+//
+// Odkrytí i zakrytí jelo na MASK, tedy 0,7 s. Jenže po zdi se přejíždí myší,
+// ne se na ni kliká: než jedna fotka zaleze, jsou rozjeté další dvě. Naměřeno
+// na jednom přejezdu tam a zpět — ze 440 snímků mělo 307 rozjeté tři fotky
+// najednou. To je to, co je na zdi vidět jako problikávání; není to zaostávající
+// ztmavení (to drží kartu na tři setiny pixelu) ani rozjeté časování proti ní
+// (karta i fotka dojedou obě kolem 630 ms).
+//
+// Zkusil jsem to nejdřív svázat s pružinou karty, a bylo to HORŠÍ: pružina má
+// dlouhý doběh, takže fotek ve vzduchu přibylo na čtyři. Tady nepomůže sladit,
+// tady pomůže zkrátit — dlaždice, od které myš odjela, už nikoho nezajímá.
+const TUCK = { duration: 0.3, ease: CURTAIN };
+
+// Odkrytí jde na svou vlastní křivku, ZAKRYTÍ na tu, na které se hýbe karta.
+//
+// Obojí jelo na MASK a PUSH: 0,7 s a 1,15 s. Karta se přitom sesmekne na
+// WIDTH_SPRING, tedy zhruba za půl vteřiny. Takže ve chvíli, kdy myš odjede,
+// je dlaždice dávno úzká a fotka se v ní pořád ještě sune — a při přejezdu
+// řady jich takových zůstane viset pět naráz. To je to problikávání: ne že by
+// ztmavení za kartou zaostávalo (naměřeno, drží ji na tři setiny pixelu), ale
+// že se pod ním pohybuje fotka, která měla být dávno zalezlá.
+//
+// Otevírání si svou křivku nechává. Tam se dívá na jednu dlaždici a to, že
+// portrét dojíždí o chlup dýl než šířka, je ten pomalý nádech, kvůli kterému
+// je ta animace napsaná.
+const outerPose = (opens, open, calm) => ({
+    ...(open ? REST : OUTER[opens]),
+    transition: calm ? CALM : open ? MASK : TUCK,
+});
+
+const innerPose = (opens, open, calm) => ({
+    ...(open ? REST : INNER[opens]),
+    scale: calm ? 1 : open ? 1 : 1.06,
+    transition: calm
+        ? CALM
+        : open
+            ? { x: MASK, y: MASK, scale: PUSH }
+            : TUCK,
+});
 
 // The same optimiser every picture on the site goes through — 384 is one of
 // Next's default `imageSizes`, and an unlisted width is refused.
@@ -189,81 +234,22 @@ const wallIn = {
 // then throws away, and ten subtrees React tears down to swap an <a> for a
 // <button>.
 
-export default function Advisors({ roster, calm, touch, onPick }) {
-    const [hovered, setHovered] = useState(0);
-    // Upright and no wider than a tablet. The sheet a phone gets is the sheet a
-    // tablet upright wants too, only bigger — see PHONE_OR_TABLET_UPRIGHT in
-    // @/helpers/usePhone, which is its own constant rather than a wider PHONE
-    // because two other components read that one and neither wants this.
-    const phone = usePhoneOrTabletUpright({ eager: true });
-    const people = useMemo(() => (roster?.length ? roster : FALLBACK_ROSTER), [roster]);
-    const [lead, ...rest] = people;
-
-    // „Líbí se" u vybraného poradce — stejné tlačítko a stejný počet jako
-    // „Naši kolegové" na /o-nás. Jeden člověk, dvě místa, jedno číslo.
-    //
-    // Drží se na id dokumentu, takže funguje jen s poradci z CMS. Když se
-    // seznam nenačte a nakreslí se záložní jména z @/constants/roster, ta
-    // žádné id nemají a tlačítko se nevykreslí vůbec — radši nic než srdíčko,
-    // které nemá co přičíst.
-    const likeIds = useMemo(() => people.map((person) => person.id).filter(Boolean), [people]);
-    const likes = useReactions("consultant", likeIds);
-
-    const rowSizes = useMemo(() => rowsOf(people.length), [people.length]);
-    const rows = useMemo(() => {
-        let at = 0;
-        return rowSizes.map((n) => {
-            const slice = rest.slice(at, at + n).map((person, i) => ({ person, index: at + i + 1 }));
-            at += n;
-            return slice;
-        });
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [people, rowSizes]);
-
-    // ── the bounds ──
-    //
-    // A share is a number with no units and the floor under a block is in
-    // pixels, so the engine cannot decide how much a row can spare without
-    // knowing how wide that row actually is. Each row hands its own width back
-    // through a ref, remeasured whenever the panel changes size — which it does,
-    // because arriving here is the panel growing.
-    //
-    // `offsetWidth` and not a rect: the rect is the box after transforms, and a
-    // row measured mid-animation would feed its own movement back into the sums.
-    const rowRefs = useRef([]);
-    const [rowWidths, setRowWidths] = useState([]);
-
-    const measure = useCallback(() => {
-        setRowWidths(rowRefs.current.map((el) => (el ? el.offsetWidth : 0)));
-    }, []);
-
-    useLayoutEffect(() => {
-        measure();
-        if (typeof ResizeObserver === 'undefined') return;
-        const observer = new ResizeObserver(measure);
-        rowRefs.current.forEach((el) => el && observer.observe(el));
-        return () => observer.disconnect();
-    }, [measure, people.length]);
-
-    // Which row holds the block being reached for, and where in it.
-    const at = useMemo(() => {
-        if (hovered <= 0) return { row: -1, col: -1 };
-        let seen = 0;
-        for (let r = 0; r < rowSizes.length; r++) {
-            if (hovered - 1 < seen + rowSizes[r]) return { row: r, col: hovered - 1 - seen };
-            seen += rowSizes[r];
-        }
-        return { row: -1, col: -1 };
-    }, [hovered, rowSizes]);
-
-    // Who the panel at the bottom is showing. `hovered` opens at 0, so arriving
-    // on a phone the lead is already down there — the sheet opens on somebody
-    // rather than on an empty frame waiting to be filled.
-    const nowIndex = hovered >= 0 && hovered < people.length ? hovered : 0;
-    const now = people[nowIndex];
-
-    const block = (person, index, opens, share) => {
-        const isOpen = hovered === index;
+// Jedna dlaždice zdi, memoizovaná — a zaslouží si to.
+//
+// Přejetí myší mění `hovered`, což je stav CELÉ zdi: bez tohohle se při každém
+// posunu myši o dlaždici překreslilo všech dvanáct, se všemi motion prvky
+// uvnitř. Naměřeno na jednom přejezdu tam a zpět: 1001 přepočtů stylu a 2418 ms
+// scriptingu, 12 % snímků přes 20 ms. Přitom se mění právě dvě dlaždice — ta
+// opouštěná a ta braná; zbylých deset nemá co nového říct.
+//
+// Aby memo drželo, musí být stabilní všechno, co sem chodí propem. `onHover`
+// a `onPick` drží useCallback v sekci níž, `likes` si svou identitu drží od
+// chvíle, kdy useReactions vrací memoizovaný objekt (viz jeho vlastní
+// poznámka) — předtím rozdával novou identitu při každém renderu a memo tu
+// bylo jen na ozdobu.
+const Cell = memo(function Cell({
+    person, index, opens, share, isOpen, calm, touch, phone, likes, onHover, onPick,
+}) {
         const href = dial(person.tel);
 
         // On a phone a tile only chooses. The number it would have dialled is
@@ -281,7 +267,7 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                 // is decoration and the rest of the record has moved downstairs.
                 'aria-label': person.name,
                 'aria-pressed': isOpen,
-                onClick: () => setHovered(index),
+                onClick: () => onHover(index),
             }
             : {
                 href,
@@ -294,7 +280,7 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                 onClick: (e) => {
                     if (touch && !isOpen) {
                         e.preventDefault();
-                        setHovered(index);
+                        onHover(index);
                         return;
                     }
                     onPick?.(e);
@@ -302,17 +288,16 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                 // Keyboard preview only: on touch a tap fires focus BEFORE
                 // click, and an unguarded focus would select the block
                 // mid-tap — turning the first tap into the call.
-                onFocus: () => { if (!touch) setHovered(index); },
+                onFocus: () => { if (!touch) onHover(index); },
             };
 
         return (
             <motion.div
-                key={person.name}
                 className={`navAdv__cell${isOpen ? ' is-open' : ''}`}
                 style={{ flexBasis: 0 }}
                 animate={{ flexGrow: share }}
                 transition={calm ? CALM_SIZE : WIDTH_SPRING}
-                onPointerEnter={() => { if (!touch) setHovered(index); }}
+                onPointerEnter={() => { if (!touch) onHover(index); }}
             >
                 <Tile
                     className="navAdv__cell__link"
@@ -420,8 +405,110 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                     </span>
                 ) : null}
             </motion.div>
-        );
-    };
+        );});
+export default function Advisors({ roster, calm, touch, onPick }) {
+    const [hovered, setHovered] = useState(0);
+
+    // Dvě ustálené funkce, bez kterých by memo na dlaždici nedrželo.
+    //
+    // Šipka zapsaná rovnou do JSX je při každém renderu nová, a nová funkce je
+    // přesně ten prop, který memo nepřežije — dlaždice by se překreslily
+    // všechny a memo by bylo jen dekorace.
+    //
+    // `onPick` chodí zvenčí a jeho stabilitu nemáme v ruce, takže se drží
+    // v refu a ven jde obal, který se nemění nikdy. Ref se přepisuje při
+    // renderu schválně: volá se až z obsluhy události, tedy dávno po něm.
+    const hover = useCallback((index) => setHovered(index), []);
+    const pickRef = useRef(onPick);
+    pickRef.current = onPick;
+    const pick = useCallback((event) => pickRef.current?.(event), []);
+    // Upright and no wider than a tablet. The sheet a phone gets is the sheet a
+    // tablet upright wants too, only bigger — see PHONE_OR_TABLET_UPRIGHT in
+    // @/helpers/usePhone, which is its own constant rather than a wider PHONE
+    // because two other components read that one and neither wants this.
+    const phone = usePhoneOrTabletUpright({ eager: true });
+    const people = useMemo(() => (roster?.length ? roster : FALLBACK_ROSTER), [roster]);
+    const [lead, ...rest] = people;
+
+    // „Líbí se" u vybraného poradce — stejné tlačítko a stejný počet jako
+    // „Naši kolegové" na /o-nás. Jeden člověk, dvě místa, jedno číslo.
+    //
+    // Drží se na id dokumentu, takže funguje jen s poradci z CMS. Když se
+    // seznam nenačte a nakreslí se záložní jména z @/constants/roster, ta
+    // žádné id nemají a tlačítko se nevykreslí vůbec — radši nic než srdíčko,
+    // které nemá co přičíst.
+    const likeIds = useMemo(() => people.map((person) => person.id).filter(Boolean), [people]);
+    const likes = useReactions("consultant", likeIds);
+
+    const rowSizes = useMemo(() => rowsOf(people.length), [people.length]);
+    const rows = useMemo(() => {
+        let at = 0;
+        return rowSizes.map((n) => {
+            const slice = rest.slice(at, at + n).map((person, i) => ({ person, index: at + i + 1 }));
+            at += n;
+            return slice;
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [people, rowSizes]);
+
+    // ── the bounds ──
+    //
+    // A share is a number with no units and the floor under a block is in
+    // pixels, so the engine cannot decide how much a row can spare without
+    // knowing how wide that row actually is. Each row hands its own width back
+    // through a ref, remeasured whenever the panel changes size — which it does,
+    // because arriving here is the panel growing.
+    //
+    // `offsetWidth` and not a rect: the rect is the box after transforms, and a
+    // row measured mid-animation would feed its own movement back into the sums.
+    const rowRefs = useRef([]);
+    const [rowWidths, setRowWidths] = useState([]);
+
+    const measure = useCallback(() => {
+        setRowWidths(rowRefs.current.map((el) => (el ? el.offsetWidth : 0)));
+    }, []);
+
+    useLayoutEffect(() => {
+        measure();
+        if (typeof ResizeObserver === 'undefined') return;
+        const observer = new ResizeObserver(measure);
+        rowRefs.current.forEach((el) => el && observer.observe(el));
+        return () => observer.disconnect();
+    }, [measure, people.length]);
+
+    // Which row holds the block being reached for, and where in it.
+    const at = useMemo(() => {
+        if (hovered <= 0) return { row: -1, col: -1 };
+        let seen = 0;
+        for (let r = 0; r < rowSizes.length; r++) {
+            if (hovered - 1 < seen + rowSizes[r]) return { row: r, col: hovered - 1 - seen };
+            seen += rowSizes[r];
+        }
+        return { row: -1, col: -1 };
+    }, [hovered, rowSizes]);
+
+    // Who the panel at the bottom is showing. `hovered` opens at 0, so arriving
+    // on a phone the lead is already down there — the sheet opens on somebody
+    // rather than on an empty frame waiting to be filled.
+    const nowIndex = hovered >= 0 && hovered < people.length ? hovered : 0;
+    const now = people[nowIndex];
+
+    const block = (person, index, opens, share) => (
+        <Cell
+            key={person.name}
+            person={person}
+            index={index}
+            opens={opens}
+            share={share}
+            isOpen={hovered === index}
+            calm={calm}
+            touch={touch}
+            phone={phone}
+            likes={likes}
+            onHover={hover}
+            onPick={pick}
+        />
+    );
 
     return (
         <motion.div

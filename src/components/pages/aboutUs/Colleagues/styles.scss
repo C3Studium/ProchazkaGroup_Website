@@ -447,6 +447,49 @@ $panel: rgba(0, 0, 0, 0.6);
         line-height: 1.5;
     }
 
+    // „Líbí se" nad řadou ikon, na stejné svislici jako ona.
+    //
+    // Stálo to v té řadě jako druhá položka. Řada je čtyři ODKAZY — zavolat,
+    // napsat, Facebook, Instagram; tohle nikam nevede a je to jediné tlačítko
+    // na panelu, které něco udělá s tím, na koho se člověk dívá. Vedle nich
+    // vypadalo jako pátý odkaz a počet vedle něj jako jejich popisek.
+    //
+    // Odsazení zdola je řada ikon plus mezera: 2.5rem je jejich výška a zbytek
+    // je odstup. Váže se na stejné --frame-* jako ona, takže se s rámem
+    // portrétu hýbe obojí najednou.
+    .Colleagues__like {
+        position: absolute;
+        z-index: 1;
+        right: calc(var(--frame-x) + 1.8vw);
+        bottom: calc(var(--frame-bottom) + 3vh + 3.4rem);
+        display: flex;
+        justify-content: flex-end;
+        // Bez tohohle je počet ČERNÝ. LikeBtn barvu nenastavuje schválně —
+        // stojí i na světlých sekcích a dědí ji po tom, v čem je — jenže tady
+        // nad ním není nic, co by ji řeklo, takže spadl na černou a na tmavé
+        // fotce z něj byla šmouha. Odkazy pod ním si ji nastavují každý sám;
+        // tohle je totéž jedním řádkem pro kroužek i pro číslo vedle.
+        color: rgba(255, 255, 255, 0.7);
+
+        // Kroužek napravo, počet nalevo od něj — aby kroužek stál přesně nad
+        // ikonami a ne o šířku čísla vedle.
+        .LikeBtn { flex-direction: row-reverse; }
+
+        // A stejný kroužek, jaký mají ikony pod ním.
+        //
+        // LikeBtn si nese vlastní hodnoty, protože stojí i na světlých
+        // sekcích: 2.4rem a 72% krytí dědící barvu. Tady je ale přímo nad
+        // čtyřmi stejnými kroužky a čte se s nimi jako jedna skupina, takže
+        // slabší obrys vedle nich vypadá jako nedokreslený, ne jako jiná věc.
+        .LikeBtn__hit {
+            width: 2.5rem;
+            height: 2.5rem;
+            opacity: 1;
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
     .Colleagues__links {
         position: absolute;
         z-index: 1;
@@ -827,8 +870,17 @@ $panel: rgba(0, 0, 0, 0.6);
             // now whatever the sheet left, two numbers measured off the viewport
             // are measuring the wrong box.
             .Colleagues__meta,
+            .Colleagues__like,
             .Colleagues__links {
                 position: static;
+            }
+
+            // Ve sloupci už kroužek nad ničím nestojí, takže počet zpátky
+            // napravo, jak ho LikeBtn kreslí všude jinde.
+            .Colleagues__like {
+                justify-content: flex-start;
+                margin-top: 0.9rem;
+                .LikeBtn { flex-direction: row; }
             }
 
             .Colleagues__meta {
@@ -1093,8 +1145,15 @@ $panel: rgba(0, 0, 0, 0.6);
         // and `--frame-bottom`, which are a wide screen's insets — 6vw and 7vh
         // of a 236px panel puts the motto and the targets in the same corner.
         .Colleagues__meta,
+        .Colleagues__like,
         .Colleagues__links {
             position: static;
+        }
+
+        .Colleagues__like {
+            justify-content: flex-start;
+            margin-top: 0.7rem;
+            .LikeBtn { flex-direction: row; }
         }
 
         .Colleagues__meta {

@@ -6,7 +6,7 @@ import GridDistortion from "@/components/common/ui/GridDistortion";
 import { useRef, useState } from "react";
 import { AnimatePresence, motion, useTransform } from "framer-motion";
 import DialPrefix from "@/components/common/ui/DialPrefix";
-import { DEFAULT_DIAL } from "@/constants/dialPrefixes";
+import { DEFAULT_DIAL } from "@/cms/dialPrefixes";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { editable, editableList, editableLink } from "@/cms/edit";
 
@@ -363,7 +363,7 @@ export default function QnaContact({ copy = {} }) {
                                     <span {...editable(formDoc, "items.2.label", "text")} className="label">{form.fieldLabels[2]}</span>
                                     {/* The editable string that was here is
                                         the control's list now — see
-                                        constants/dialPrefixes. `form.prefix`
+                                        @/cms/dialPrefixes. `form.prefix`
                                         is still read above and still what an
                                         editor sets, so it is what the field
                                         OPENS on. */}

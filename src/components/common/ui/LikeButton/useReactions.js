@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 /**
  * „Líbí se" na veřejné stránce — stav, přepnutí a smíření se serverem.
@@ -117,5 +117,20 @@ export function useReactions(type, ids) {
     /** The count to print: the server's when it has spoken, the built-in until then. */
     const countOf = useCallback((id, fallback = 0) => (id in counts ? counts[id] : fallback), [counts]);
 
-    return { liked, ready, toggle, countOf, isLiked: (id) => liked.has(id) };
+    const isLiked = useCallback((id) => liked.has(id), [liked]);
+
+    // Stabilní objekt, a je to podmínka, ne uhlazování.
+    //
+    // Vracel se odsud literál a `isLiked` byla pokaždé nová šipka, takže každý
+    // render hooku rozdal novou identitu všemu, co tohle dostane propem.
+    // Komponenta obalená `memo`, která si tohle bere, se tím překresluje
+    // pokaždé — memo pak nedrží nic. Ve zdi poradců to je dvanáct dlaždic
+    // s desítkami motion prvků při každém přejetí myší.
+    //
+    // Závislosti jsou přesně ty čtyři věci, které se doopravdy mění; `toggle`
+    // a `countOf` si svou stabilitu řeší samy o kus výš.
+    return useMemo(
+        () => ({ liked, ready, toggle, countOf, isLiked }),
+        [liked, ready, toggle, countOf, isLiked],
+    );
 }

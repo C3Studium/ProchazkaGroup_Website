@@ -351,12 +351,10 @@ export const GLOBAL_COPY_KEYS = Object.freeze({
     footerClaim: 'global.footer.claim',
     footerLinks: 'global.footer.links',
     contact: 'global.contact',
-    // Země, které jdou vybrat před telefonním číslem. Globální ze stejného
-    // důvodu jako kontaktní arch: formulář s telefonem je na úvodní stránce, na
-    // /nabídce, v benefit programu i v archu, který otevírá lišta — a předvolby
-    // jsou ve všech čtyřech tytéž. `label` je název země, `value` předvolba
-    // („Česko" / „+420"). Pořadí v bloku je pořadí v seznamu, první je výchozí.
-    dialPrefixes: 'global.dial-prefixes',
+    // Telefonní předvolby tu byly taky, jako `global.dial-prefixes`, a už nejsou.
+    // Číselník států není text webu: "+420 je Česko" platí na každém webu
+    // a nikdo to nevymýšlí. Je z toho nativní funkce nástroje — jeden řádek
+    // v cms_setting a panel v Nastavení. Viz src/cms/DIAL-PREFIXES.md.
 })
 
 /**

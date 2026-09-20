@@ -1,0 +1,87 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Viz index.jsx. Pravítko z benefit programu postavené na výšku, u pravého
+// okraje okna.
+//
+// Cíl pro myš je mnohem širší než to, co je vidět: vidět je hairline a čárky,
+// ale chytá to pruh, do kterého se dá trefit bez míření. Proto je lišta široká
+// a průhledná a kresba v ní leží vpravo.
+.ScrollRail {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    translate: 0 -50%;
+    z-index: 150;
+    width: 2.75rem;
+    height: 62vh;
+    // Hairline vpravo, cíl doleva od něj.
+    padding-right: 1.1rem;
+    cursor: pointer;
+    // Stránka pod ním pokračuje; chytat se má jen tenhle pruh.
+    touch-action: none;
+}
+
+// Linka, po které se to měří. Stejný vlas a stejná barva jako pravítko v benefit
+// programu — je to tentýž nástroj, jen otočený.
+.ScrollRail__line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 1.1rem;
+    width: 1px;
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+// Kudy už jsme prošli.
+.ScrollRail__fill {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 1.1rem;
+    width: 1px;
+    transform-origin: center top;
+    background-color: var(--hColor, #4BDADC);
+    will-change: transform;
+}
+
+// Jedna čárka pravítka: roste doleva z linky.
+//
+// Původ škálování je vpravo, tedy na lince — čárka z ní vyjíždí a nezvětšuje se
+// kolem svého středu. To je ten rozdíl mezi „pravítko" a „řádka čárek".
+.ScrollRail__tick {
+    position: absolute;
+    right: 1.1rem;
+    width: 1.15rem;
+    height: 1px;
+    translate: 0 -50%;
+    transform-origin: right center;
+    background-color: #fff;
+    will-change: transform, opacity;
+}
+
+// Pod závěsem se nekreslí — stejně jako lišta nahoře. Je to prvek stránky,
+// a dokud stránka není, nemá co ukazovat.
+html[data-preload="1"] .ScrollRail,
+html[data-veil="1"] .ScrollRail {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.ScrollRail {
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+// Na úzkém okně by pravítko ukrajovalo z šířky, které je málo. Na dotyku se
+// nekreslí vůbec (viz index.jsx); tohle je pro úzké okno s myší.
+@include below-px(900) {
+    .ScrollRail { display: none; }
+}
+
+// A na nízkém okně naležato by zabralo skoro celou výšku.
+@include phs-h {
+    .ScrollRail { display: none; }
+}
+
+@include reduced-motion {
+    .ScrollRail { transition: none; }
+}
