@@ -219,14 +219,28 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
                             onPointerLeave={isTouch ? undefined : () => {
                                 setHover((p) => (p === index ? null : p));
                             }}
+                            // `animate` vypisuje klidovou hodnotu KAŽDÉ
+                            // vlastnosti, kterou může nastavit kterákoli
+                            // z obou větví — i té, kterou ta druhá nepoužívá.
+                            //
+                            // `calm` se totiž překlápí až po mountu, takže
+                            // karta dostane `initial` z pohyblivé větve
+                            // (`blur(10px)`) a hned nato `animate` z té klidné.
+                            // Když v něm `filter` chyběl, nebylo co dopočítat
+                            // a karta zůstala rozmazaná napořád. Změřeno: se
+                            // zapnutým omezením pohybu takhle viselo 12 karet
+                            // z 24 na `blur(10px)`.
+                            //
+                            // `none` a ne `blur(0px)`: nulový blur je pořád
+                            // filtr, a filtr drží prvek ve vlastní kompozitní
+                            // vrstvě, kde se text převzorkuje a zůstane měkký.
+                            // Na retina displeji je to vidět.
                             initial={calm
                                 ? { opacity: 0 }
                                 : { opacity: 0, y: 40, filter: "blur(10px)" }}
-                            animate={calm
-                                ? { opacity: 1 }
-                                : { opacity: 1, y: 0, filter: "blur(0px)" }}
+                            animate={{ opacity: 1, y: 0, filter: "none" }}
                             exit={calm
-                                ? { opacity: 0 }
+                                ? { opacity: 0, y: 0, filter: "none" }
                                 : { opacity: 0, y: -20, filter: "blur(8px)" }}
                             transition={calm
                                 ? { duration: 0.3, ease: "linear" }

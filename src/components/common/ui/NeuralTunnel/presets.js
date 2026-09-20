@@ -46,28 +46,73 @@ export const UPRIGHT = Object.freeze({
  * bude ladit, mění jen čísla tady a druhé sady se to nedotkne.
  */
 
+// export const LANDSCAPE = Object.freeze({
+//     layers: 4,
+//     falloff: 1.15,
+//     blend: 4,
+//     feedback: 3,
+//     amplitude: 1.5,
+//     scale: 5,
+//     perspective: 1,
+//     zoom: 0.15,
+//     speed: 0.75,
+//     bands: 3,
+//     phase: 6,
+//     spread: 0,
+//     gamut: 0.25,
+//     contrast: 2,
+//     vignette: 0.5,
+//     opacity: 1,
+//     color: "#020e15",
+//     hotColor: "#5cc7ef",
+//     backgroundColor: "#5cc7ef",
+//     cursorInteraction: false
+// });
 export const LANDSCAPE = Object.freeze({
-    layers: 5,
+    layers: 4,
     falloff: 1.15,
     blend: 4,
     feedback: 3,
     amplitude: 1.5,
     scale: 5,
     perspective: 1,
-    zoom: 0.2,
-    speed: 1.25,
+    zoom: 0.15,
+    speed: 0.75,
     bands: 3,
     phase: 6,
     spread: 0,
-    gamut: 0.1,
-    contrast: 2,
-    vignette: 0,
+    gamut: 0.35,
+    contrast: 1.25,
+    vignette: 0.5,
     opacity: 1,
-    color: "#020e15",
-    hotColor: "#98dbf8",
-    backgroundColor: "#020e15",
+    color: "#071a30",
+    hotColor: "#5cc7ef",
+    backgroundColor: "#5cc7ef",
     cursorInteraction: false
 });
+
+// export const LANDSCAPE = Object.freeze({
+//     layers: 4,
+//     falloff: 1.15,
+//     blend: 4,
+//     feedback: 3,
+//     amplitude: 1.75,
+//     scale: 5,
+//     perspective: 1,
+//     zoom: 0.25,
+//     speed: 1.15,
+//     bands: 3,
+//     phase: 6,
+//     spread: 0,
+//     gamut: 0.15,
+//     contrast: 0.75,
+//     vignette: 1,
+//     opacity: 1.1,
+//     color: "#020e15",
+//     hotColor: "#98dbf8",
+//     backgroundColor: "#020e15",
+//     cursorInteraction: false
+// });
 
 // Svisle A na dotyk. Ta druhá půlka je tam kvůli oknu na stole zúženému do
 // výšky — je to pořád stůl a patří mu sada pro naležato, i když je okno vyšší

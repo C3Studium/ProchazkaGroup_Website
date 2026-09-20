@@ -224,10 +224,9 @@ const RAW = {
     // gets 460px, read the way the home page reads its own: word by word, off
     // its own ride rather than off the section's.
     close: [0.92, 1],
-    // The still hands back to the live shader once nothing else is moving.
-    // Both are the same thing; the only difference is that one of them has
-    // drifted since it was photographed, so a slow dissolve between them at a
-    // moment when nothing else is happening is the least visible way to do it.
+    // Tady se podklad vrací stránce. Do 0.1.x tu byla bitmapa shaderu, která
+    // se v tuhle chvíli rozplývala do živého plátna; teď je za sekcí rovnou to
+    // živé, takže se nic nepřekrývá a nic nedrifuje.
 
 
 };
@@ -551,36 +550,37 @@ export default function StatRail({ copy = {}, close: closing = {}, cells = [] })
     // boxes standing on it rather than as three windows cut into it.
     const restClip = "inset(0% 0% 0% 0%)";
 
-    // What the wipe uncovers is a photograph of the shader, not the shader.
-    // Measured across the wipe the live canvas doubled the frame time, and it
-    // is uncovering exactly when the section can least afford it. This is the
-    // same image, costing nothing, and it steps aside for the real one at the
-    // very end.
+    // Co odkryv odhalí, je shader — ne jeho fotka.
     //
-    // Which is here, and it matters more than it did: while this section was
-    // three photographs the ground was never seen, so a bitmap of the shader
-    // was free. The offer is see-through — the page's own ground carries on
-    // behind the band — and a bitmap behind that is a still photograph of a
-    // thing that is supposed to be moving. It goes out with the photographs.
-    const stillOut = useTransform(squares, [0.25, 0.8], [1, 0]);
+    // Dřív tu ležela bitmapa `tunnel_still.webp`, protože přes odkryv živé
+    // plátno zdvojnásobilo dobu snímku a odkrývá se přesně tehdy, kdy si to
+    // sekce může dovolit nejmíň. Jenže nabídka je průsvitná — podklad stránky
+    // běží za pásem dál — a nehybná fotka za něčím, co se má hýbat, je vidět.
+    //
+    // Cena se nezaplatí zahozením toho ústupku, ale jeho přesunutím: dokud
+    // fotografie kryjí celou plochu, shader spí (níž), a probouzí se přesně
+    // v okamžiku, kdy by ho začalo být vidět. Viz `decideCover`.
 
     // While this section owns the screen, the page's shader is drawing four
     // screens of scrolling that nobody can see. Covering it is not enough —
     // the cost is the drawing, not the being-seen — so it is told, and drops
-    // to an on-demand frameloop until the still hands back to it.
+    // to an on-demand frameloop while nothing of it can be seen.
     const [covering, setCovering] = useState(false);
     const decideCover = () => {
-        // Held to the very end, not released when the still starts handing
-        // back. The shader does not need to be awake to be uncovered — on an
-        // on-demand frameloop it holds its last frame, which is a still of the
-        // same picture — and letting the lattice wake in the middle of the
-        // exit put every long frame back exactly where they are noticed.
-        // Only while the arc owns the screen. Held to the end — which is what
-        // this said — the shader stays on an on-demand frameloop for the whole
-        // of the offer, holding one frame: the ground behind the band was a
-        // photograph of the shader rather than the shader.
-        const shouldCover =
-            approach.get() >= 0.999 && progress.get() < ARC_SHARE + 0.02;
+        // Dřív se krytí drželo až do konce sekce a bylo to v pořádku, protože
+        // to, co se odkrývalo, byla bitmapa. Bez ní by držené krytí znamenalo,
+        // že shader stojí na posledním snímku přesně ve chvíli, kdy je ho
+        // vidět — tedy zase nehybný obrázek, jen jinak vyrobený.
+        // Konec krytí je `collapse` — takt, ve kterém se tři buňky skládají do
+        // shluku v levém horním rohu. Obdélník, který po nich zůstane, JE ten
+        // odkrytý podklad; od téhle chvíle je vidět a shader musí běžet.
+        //
+        // Dřív se krytí drželo přes celý oblouk až do nabídky, a bylo to
+        // v pořádku, dokud se odkrývala bitmapa. Bez ní by to znamenalo, že
+        // shader stojí na posledním snímku přes celý závěr sekce — tedy zase
+        // nehybný obrázek, jen jinak vyrobený. Změřeno: podklad je vidět od
+        // 29 % scrollu stránky, krytí končilo o čtyři procenta později.
+        const shouldCover = approach.get() >= 0.999 && progress.get() < BEATS.collapse[0];
         setCovering((current) => (current === shouldCover ? current : shouldCover));
     };
     useMotionValueEvent(approach, "change", decideCover);
@@ -604,11 +604,6 @@ export default function StatRail({ copy = {}, close: closing = {}, cells = [] })
     return (
         <section className="StatRail" ref={sectionRef}>
             <motion.div className="StatRail__viewport" style={{ opacity: shown }}>
-                <motion.div
-                    className="StatRail__still"
-                    style={{ opacity: stillOut }}
-                    aria-hidden="true"
-                />
                 <div className="StatRail__ground">
                 {CELLS.map((cell, index) => (
                     <Cell

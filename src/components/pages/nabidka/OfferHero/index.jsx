@@ -296,13 +296,28 @@ export default function OfferHero({ copy = {} }) {
         if (!node || typeof IntersectionObserver === "undefined") return undefined;
 
         let release = null;
-        const watcher = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting && !release) release = coverGround();
-            else if (!entry.isIntersecting && release) {
-                release();
-                release = null;
-            }
-        });
+        const watcher = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting && !release) release = coverGround();
+                else if (!entry.isIntersecting && release) {
+                    release();
+                    release = null;
+                }
+            },
+            // Střed obrazovky, ne celá obrazovka.
+            //
+            // Vlastní box téhle sekce zabírá výřez pořád, i když přes ni
+            // StatRail přejede — ta je vytažená o obrazovku nahoru a překryv
+            // `intersectionRatio` nesnižuje. S plným výřezem tedy hero drželo
+            // podklad krytý i do cizí sekce, kde je podklad vidět, a shader
+            // tam stál na posledním snímku. Zmrzlý shader je totéž, co byla
+            // ta bitmapa: nehybný obrázek něčeho, co se má hýbat.
+            //
+            // Zúžený kořen znamená „tahle sekce je na řadě": přestane platit,
+            // jakmile hero sjede přes půl obrazovky — tedy přesně tehdy, kdy
+            // začíná mluvit sekce nad ní.
+            { rootMargin: "-50% 0px -50% 0px" },
+        );
         watcher.observe(node);
 
         return () => {

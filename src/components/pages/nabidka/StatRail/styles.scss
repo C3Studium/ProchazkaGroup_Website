@@ -52,20 +52,6 @@
         overflow: hidden;
     }
 
-    // The shader, as a bitmap. Captured from the live canvas so the two are the
-    // same picture — see stillOut in index.jsx for why the section uncovers
-    // this instead of the real thing.
-    .StatRail__still {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        background-color: #020E15;
-        background-image: url("/assets/backgrounds/tunnel_still.webp");
-        background-size: cover;
-        background-position: center;
-        pointer-events: none;
-    }
-
     // Everything the photographs are. Fading this is the whole of the change
     // of ground at the end of the section — the shader in _app is behind it and
     // nothing else in here is opaque.
