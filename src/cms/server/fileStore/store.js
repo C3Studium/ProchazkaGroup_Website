@@ -111,6 +111,32 @@ const readFromDisk = () => {
 }
 
 /**
+ * migrations/0011 for stores written before it: `owner` -> `admin`,
+ * `editor` -> `member`. In Postgres the rename ran as a migration; a file store
+ * has no migration runner, so it runs here, on load, in place.
+ *
+ * NOT via STORE_VERSION — bumping that discards the whole file and reseeds,
+ * which for a site that has been edited means losing its content over a rename
+ * two roles needed. `owner` -> `admin` mirrors the SQL's reasoning exactly:
+ * the pre-0011 `owner` was the account with full rights, and full rights are
+ * what `admin` now means. Rows already holding the new roles pass untouched,
+ * so this is idempotent and stays cheap once the store is healed.
+ */
+const RENAMED_ROLES = { owner: 'admin', editor: 'member' }
+
+const migrateRoles = (loadedTables) => {
+    let changed = false
+    for (const row of loadedTables.cms_user || []) {
+        const next = RENAMED_ROLES[row.role]
+        if (next) {
+            row.role = next
+            changed = true
+        }
+    }
+    return changed
+}
+
+/**
  * Write the whole snapshot, atomically.
  *
  * Temp file plus rename, because `rename(2)` within a directory is atomic: a
@@ -166,6 +192,7 @@ export const tables = () => {
         if (loaded) {
             c.tables = loaded
             c.mtimeMs = stat.mtimeMs
+            if (migrateRoles(loaded)) persist()
             announce('načteno z disku')
             return c.tables
         }

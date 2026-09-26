@@ -1,6 +1,6 @@
 import { forwardRef, useId } from "react"
 import Link from "next/link"
-import Icon from "./Icon"
+import Icon from "./Icon.jsx"
 import styles from "./controls.module.scss"
 
 /** Shared controls. Kept in one file so their density stays in lockstep. */

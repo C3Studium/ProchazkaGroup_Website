@@ -60,5 +60,5 @@ export const handleEdit = async function handler(req, res) {
     // response is per-editor and carries a cookie, so it must not be cached by
     // anything in front of it.
     res.setHeader('Cache-Control', 'no-store')
-    return res.status(200).json({ pages: listSitePages() })
+    return res.status(200).json({ pages: await listSitePages() })
 }

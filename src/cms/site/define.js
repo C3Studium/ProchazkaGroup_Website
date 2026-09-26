@@ -25,6 +25,7 @@
 // replaced did.
 
 import { OMIT } from './fields.js'
+import { normalizeSurfaces } from './surfaces.js'
 
 const fail = (message) => {
     throw new Error(`[cms.config] ${message}`)
@@ -237,7 +238,62 @@ export const defineGlobals = (config) => {
  * to úplně neřeší, ale otočí to selhání správným směrem: dřív bylo `revievs`
  * překlep, který mlčel, teď je to řádek v konzoli při startu.
  */
-const SITE_KEYS = ['pages', 'globals', 'prefixes', 'reviews', 'mail', 'homePreview']
+const SITE_KEYS = ['pages', 'globals', 'prefixes', 'languages', 'surfaces', 'reviews', 'mail', 'homePreview']
+
+/**
+ * Jazyky, jak je zná BUILD.
+ *
+ * Pravdu o jazycích drží databáze — `cms_setting`, klíč `site.languages`
+ * (docs/I18N.md §1) — a tenhle klíč ji nenahrazuje. Je tu proto, že přidání
+ * jazyka je z podstaty dvoukrokové: nový jazyk v databázi NEVYROBÍ novou routu,
+ * stránky vznikají při buildu. Co o jazycích ví build, musí tedy být
+ * v konfiguraci; co o nich ví Nastavení, je v databázi.
+ *
+ * Pro 0.1.50 z toho plyne jediná povinnost, a je to hlášení podle §9 níž.
+ *
+ * Bere se trojí zápis, protože se to bude psát ze tří stran:
+ *
+ *     languages: ['cs', 'en']
+ *     languages: [{ code: 'cs', label: 'Čeština' }, { code: 'en' }]
+ *     languages: { default: 'cs', list: [{ code: 'cs', label: 'Čeština', enabled: true }] }
+ *
+ * Ten třetí je tvar uložený v `cms_setting`, takže hodnota vyčtená z databáze
+ * jde vložit sem beze změny a nemusí se přepisovat do jiného tvaru.
+ */
+const normalizeLanguages = (declared) => {
+    const raw = Array.isArray(declared) ? declared : declared?.list || []
+    const list = []
+    const seen = new Set()
+
+    for (const entry of raw) {
+        const code = String((typeof entry === 'string' ? entry : entry?.code) || '').trim()
+        if (!code) fail("languages: každý jazyk musí mít \"code\" — např. 'cs'.")
+        if (code.includes('/')) fail(`languages: "${code}" není kód jazyka — čekám 'cs', ne '/cs/'.`)
+        if (seen.has(code)) fail(`languages: jazyk "${code}" je uvedený dvakrát.`)
+        seen.add(code)
+        list.push(
+            Object.freeze({
+                code,
+                label: String((typeof entry === 'object' && entry?.label) || code),
+                // Vypnutý jazyk ze seznamu nemizí. Smazat ho znamená smazat
+                // obsah, který pod ním v `cms_document_translation` leží;
+                // `enabled: false` je „nevykresluj", ne „neexistuje".
+                enabled: !(typeof entry === 'object' && entry?.enabled === false),
+            }),
+        )
+    }
+
+    // Výchozí jazyk je ten, jehož obsah leží v základním řádku `cms_document`.
+    // Bez deklarace je to první na seznamu; bez seznamu `null`, a ne vymyšlené
+    // 'cs' — web s jedním jazykem o jazycích nic říkat nemusí a nemá se mu nic
+    // podsouvat.
+    const preferred = Array.isArray(declared) ? null : declared?.default || null
+    if (preferred && !seen.has(preferred)) {
+        fail(`languages: výchozí jazyk "${preferred}" není na seznamu.`)
+    }
+
+    return Object.freeze({ default: preferred || list[0]?.code || null, list: Object.freeze(list) })
+}
 
 export const defineSite = (config) => {
     for (const key of Object.keys(config || {})) {
@@ -328,12 +384,49 @@ export const defineSite = (config) => {
     // hlásil "Resend ✓" u projektu, kde e-maily posílá backend.
     const mail = config?.mail !== false
 
+    // `prefixes` a jazyky se nepletou — a když se přesto potkají, řekne se to.
+    //
+    // Stejný tvar URL, opačný význam (docs/I18N.md §9). `prefixes: ['cz','de']`
+    // znamená „týž obsah na dvou adresách"; `languages: ['cs','de']` znamená
+    // „jiný obsah". Segment, který je v obou, tvrdí obojí najednou, a která
+    // z těch dvou vět platí, se pozná až tím, že na `/de/kurzy` je buď česky
+    // psaný text, nebo prázdno.
+    //
+    // Varování, ne chyba, ze stejného důvodu jako u neznámého klíče výš: na
+    // e-shopu s jedenácti regiony a jedním jazykem je `de` legitimně obojí,
+    // dokud někdo němčinu vážně nezavede. Shodit mu kvůli tomu build by
+    // znamenalo, že se k druhému jazyku nedostane přes vlastní konfiguraci.
+    //
+    // Rozhodnutí, jestli URL ponese jazyk i region, patří k Meduse a dělá se
+    // až s ní — do té doby je tohle jediné, co o tom střetu knihovna říká.
+    const languages = normalizeLanguages(config?.languages)
+    const clashes = languages.list.map((language) => language.code).filter((code) => prefixes.includes(code))
+    if (clashes.length) {
+        console.warn(
+            `[cms.config] defineSite: ${clashes.map((code) => `"${code}"`).join(', ')} ` +
+                `${clashes.length === 1 ? 'je' : 'jsou'} zároveň v "prefixes" i mezi jazyky. ` +
+                'Prefix znamená tentýž obsah na víc adresách, jazyk jiný obsah — ' +
+                'na téhle adrese teď platí obojí a nepozná se to jinak než na webu.',
+        )
+    }
+
+    // Povrchy stojí vedle stránek, ne mezi nimi (docs/I18N.md §7.1).
+    //
+    // Stránka má adresu a vykreslí se; povrch adresu nemá a vykreslí se, až si
+    // ho někdo vyžádá — nebo taky nikdy, protože přeložit modál nepotřebuje,
+    // aby byl modál otevřený. Kdyby to byla stránka, musela by mít `route`,
+    // kterou nejde otevřít, a publikace by kvůli ní přegenerovávala adresu,
+    // která neexistuje.
+    const surfaces = normalizeSurfaces(config?.surfaces)
+
     return Object.freeze({
         __cmsSite: true,
         pages,
         globals: config?.globals || defineGlobals({}),
         homePreview,
         prefixes,
+        languages,
+        surfaces,
         reviews,
         mail,
     })

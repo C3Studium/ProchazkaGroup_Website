@@ -587,7 +587,7 @@ const printPlan = ({ options, source, plan, ground, target }) => {
         if (blocking.length) {
             console.log('')
             console.log(c.red(`    ${blocking.length} migrací neproběhlo. Spusťte v Supabase SQL editoru, v pořadí:`))
-            for (const item of blocking) console.log(c.dim(`      migrations/${item.file}`))
+            for (const item of blocking) console.log(c.dim(`      migrations/manual/${item.file}`))
             console.log(c.dim('    Tento nástroj SQL nespouští — 0004 nevratně maže sloupce a PostgREST DDL neumí.'))
         }
     }
@@ -897,7 +897,7 @@ const main = async () => {
     if (target.kind === 'supabase' && blocking.length) {
         throw new Error(
             `Zápis se neprovede: ${blocking.length} migrací v cílovém projektu neproběhlo.\n` +
-            blocking.map((r) => `  migrations/${r.file}`).join('\n') +
+            blocking.map((r) => `  migrations/manual/${r.file}`).join('\n') +
             '\n  Spusťte je v pořadí v Supabase SQL editoru a zkuste znovu.'
         )
     }

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react"
-import { registerInput } from "../registry"
-import Icon from "../../ui/Icon"
+import { registerInput } from "../registry.js"
+import Icon from "../../ui/Icon.jsx"
 import styles from "./inputs.module.scss"
 
 /**

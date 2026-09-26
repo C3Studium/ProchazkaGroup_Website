@@ -1,13 +1,13 @@
 import { useState } from "react"
-import { useAuth, usePort } from "../context/StudioProvider"
-import { useAsync } from "../hooks/useAsync"
-import { useToast } from "../context/ToastProvider"
-import { formatRelative, initials } from "../lib/format"
-import { Button, FieldShell, IconButton, Select } from "../ui/controls"
-import { Badge, EmptyState, ErrorState, SkeletonRows } from "../ui/feedback"
-import { ConfirmDialog, Modal } from "../ui/Modal"
-import Icon from "../ui/Icon"
-import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout"
+import { useAuth, usePort } from "../context/StudioProvider.jsx"
+import { useAsync } from "../hooks/useAsync.js"
+import { useToast } from "../context/ToastProvider.jsx"
+import { formatRelative, initials } from "../lib/format.js"
+import { Button, FieldShell, IconButton, Select } from "../ui/controls.jsx"
+import { Badge, EmptyState, ErrorState, SkeletonRows } from "../ui/feedback.jsx"
+import { ConfirmDialog, Modal } from "../ui/Modal.jsx"
+import Icon from "../ui/Icon.jsx"
+import { ResultCount, Spacer, ViewBody, ViewHeader, ViewToolbar } from "./ViewLayout.jsx"
 import styles from "./UsersView.module.scss"
 
 /**
@@ -92,7 +92,7 @@ export default function UsersView() {
       <ViewToolbar>
         <span className={styles.legend}>
           <Icon name="info" size={13} />
-          Vlastník spravuje uživatele, redaktor jen obsah. Obojí se ověřuje na serveru.
+          Správce spravuje uživatele, majitel a členové obsah. Obojí se ověřuje na serveru.
         </span>
         <Spacer />
         <ResultCount>
@@ -148,9 +148,11 @@ export default function UsersView() {
           bump()
           setInviting(false)
           // A generated password exists exactly once, in this response. If the
-          // dialog closed without showing it, it would be gone for good.
+          // dialog closed without showing it, it would be gone for good — so it
+          // is shown even when the invite e-mail carried it too.
           if (result?.temporaryPassword) setIssued(result)
-          else toast.success("Uživatel byl vytvořen.")
+          else if (result?.invite?.sent) toast.success("Uživatel byl vytvořen a pozvánka s heslem odeslána.")
+          else toast.success("Uživatel byl vytvořen. E-mail se neodeslal — heslo mu předejte sami.")
         }}
       />
 
@@ -237,11 +239,11 @@ function UserRow({ user, isMe, busy, locked, onRole, onDisabled, onRemove }) {
       {/* Always rendered, filled only when it applies. A note that appears on
           one row and not the others would otherwise shorten that row's controls
           and break the column the eye is reading down. */}
-      <span className={styles.lockNote} title={locked ? "Systém musí mít alespoň jednoho aktivního vlastníka" : undefined}>
+      <span className={styles.lockNote} title={locked ? "Systém musí mít alespoň jednoho aktivního správce" : undefined}>
         {locked ? (
           <>
             <Icon name="info" size={12} />
-            poslední vlastník
+            poslední správce
           </>
         ) : null}
       </span>
@@ -255,13 +257,17 @@ function UserRow({ user, isMe, busy, locked, onRole, onDisabled, onRemove }) {
  * someone else, in a hurry, for a colleague, is reliably a bad password.
  */
 function InviteDialog({ open, onClose, onCreate }) {
-  const [form, setForm] = useState({ email: "", name: "", role: "editor", password: "" })
+  // "member", and it has to be a value ROLES actually contains: the field once
+  // defaulted to "editor", a role 0011 renamed away — the native select then
+  // DISPLAYED the first option while the form still held "editor", and
+  // submitting answered "Neznámá role" for a role the person never chose.
+  const [form, setForm] = useState({ email: "", name: "", role: "member", password: "" })
   const [state, setState] = useState({ busy: false, error: null, fields: {} })
 
   const set = (key) => (value) => setForm((current) => ({ ...current, [key]: value }))
 
   const close = () => {
-    setForm({ email: "", name: "", role: "editor", password: "" })
+    setForm({ email: "", name: "", role: "member", password: "" })
     setState({ busy: false, error: null, fields: {} })
     onClose()
   }
@@ -275,7 +281,7 @@ function InviteDialog({ open, onClose, onCreate }) {
         role: form.role,
         password: form.password || undefined,
       })
-      setForm({ email: "", name: "", role: "editor", password: "" })
+      setForm({ email: "", name: "", role: "member", password: "" })
       setState({ busy: false, error: null, fields: {} })
     } catch (failure) {
       setState({
@@ -291,7 +297,7 @@ function InviteDialog({ open, onClose, onCreate }) {
       open={open}
       onClose={close}
       title="Přidat uživatele"
-      description="Účet vznikne hned. Heslo mu předejte osobně — e-mail se odsud neposílá."
+      description="Účet vznikne hned a e-mailem mu odejde pozvánka s adresou, heslem a odkazem do Studia."
       footer={
         <>
           <Button variant="ghost" onClick={close} disabled={state.busy}>
@@ -395,8 +401,10 @@ function IssuedDialog({ issued, onClose }) {
       }
     >
       <p className={styles.issuedIntro}>
-        Účet <strong>{issued?.user?.email}</strong> je vytvořen. Předejte mu toto heslo — po přihlášení si ho může
-        změnit.
+        Účet <strong>{issued?.user?.email}</strong> je vytvořen.{" "}
+        {issued?.invite?.sent
+          ? "Pozvánka s heslem a odkazem do Studia mu odešla e-mailem; tady je heslo pro jistotu ještě jednou."
+          : "Pozvánkový e-mail se neodeslal, takže mu toto heslo předejte sami — po přihlášení si ho může změnit."}
       </p>
       <div className={styles.secretRow}>
         <code className={styles.secret}>{issued?.temporaryPassword}</code>

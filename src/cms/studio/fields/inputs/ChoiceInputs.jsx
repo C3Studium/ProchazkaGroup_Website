@@ -1,5 +1,5 @@
-import { registerInput, registerKind } from "../registry"
-import { Checkbox, Select, Toggle } from "../../ui/controls"
+import { registerInput, registerKind } from "../registry.js"
+import { Checkbox, Select, Toggle } from "../../ui/controls.jsx"
 import styles from "./inputs.module.scss"
 
 function BooleanInput({ value, onChange, readOnly, title, layout }) {

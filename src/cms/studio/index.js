@@ -6,10 +6,10 @@
  * import from `studio/` directly.
  */
 
-export { default as Studio } from "./Studio"
-export { default } from "./Studio"
+export { default as Studio } from "./Studio.jsx"
+export { default } from "./Studio.jsx"
 
 // Extension points, for wiring at the entry point rather than inside the admin.
-export { registerInput, registerKind } from "./fields/registry"
-export { registerStatsSource } from "./stats/statsSource"
-export { createClaritySource, CLARITY_PROJECT_ID } from "./stats/clarity"
+export { registerInput, registerKind } from "./fields/registry.js"
+export { registerStatsSource } from "./stats/statsSource.js"
+export { createClaritySource, CLARITY_PROJECT_ID } from "./stats/clarity.js"

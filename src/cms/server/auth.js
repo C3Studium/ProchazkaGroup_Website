@@ -29,7 +29,7 @@ import { bootstrapAdmin, isProduction, sessionSecret } from './env.js'
 // Browser-safe and imported here only for the name, so the cookie the site
 // reads and the cookie this module writes cannot drift. Everything about what
 // that cookie may and may not be trusted for is in that file.
-import { HINT_COOKIE, HINT_VALUE } from '@/cms/manage/hint'
+import { HINT_COOKIE, HINT_VALUE } from '../manage/hint.js'
 import { clientKey, consume } from './rateLimit.js'
 import { decoyHash, hashPassword, needsRehash, passwordProblem, verifyPassword } from './password.js'
 import { getAdminClient } from './supabaseAdmin.js'
@@ -452,7 +452,16 @@ export const signIn = async (req, res, { email, password }) => {
         () => {}
     )
 
-    return { id: data.id, email: data.email, name: data.name || data.email, role: data.role }
+    // effectiveRole, same as getSessionUser — the stored role is not the
+    // answer. Returning `data.role` raw meant the developer's first render
+    // after sign-in ran as whatever the row said (on stores seeded before 0011,
+    // "Majitel") and only a session refresh corrected it.
+    return {
+        id: data.id,
+        email: data.email,
+        name: data.name || data.email,
+        role: effectiveRole(data.email, data.role),
+    }
 }
 
 export const signOut = async (req, res) => {

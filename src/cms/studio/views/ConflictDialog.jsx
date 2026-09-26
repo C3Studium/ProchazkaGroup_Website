@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react"
-import { useCore } from "../context/StudioProvider"
-import { applyChoices, mergeReport, unanswered } from "../lib/merge"
-import { plural } from "../lib/format"
-import FieldRenderer from "../fields/FieldRenderer"
-import { Modal } from "../ui/Modal"
-import { Button } from "../ui/controls"
-import Icon from "../ui/Icon"
+import { useCore } from "../context/StudioProvider.jsx"
+import { applyChoices, mergeReport, unanswered } from "../lib/merge.js"
+import { plural } from "../lib/format.js"
+import FieldRenderer from "../fields/FieldRenderer.jsx"
+import { Modal } from "../ui/Modal.jsx"
+import { Button } from "../ui/controls.jsx"
+import Icon from "../ui/Icon.jsx"
 import styles from "./ConflictDialog.module.scss"
 
 /**

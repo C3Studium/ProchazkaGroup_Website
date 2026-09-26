@@ -10,6 +10,6 @@
  * deliberately not shared — the server must not import anything from the
  * Studio's tree, and one line is a cheaper duplicate than that dependency.
  */
-import { clearTypes } from "@/cms/core"
+import { clearTypes } from "../core/index.js"
 
 clearTypes()

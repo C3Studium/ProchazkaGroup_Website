@@ -94,8 +94,13 @@ const withSaver = () => {
 // `trackSave` is how commit.js knows a submission is outstanding: *Náhled*
 // takes the overlay down, and an edit still in flight when it does would be lost
 // with it. It returns its argument untouched.
-const submitField = ({ docId, field, value }) =>
-  trackSave(withSaver().then((it) => it.save({ docId, field, value })))
+//
+// `lang` prochází beze změny až do těla požadavku (docs/I18N.md §4). Který
+// jazyk to je, neví ani překryv, ani tenhle soubor — vybírá se v „Upravit
+// kontent" a jde sem jako prop rámu, takže je jedna pravda a nemá se kde
+// rozejít. Bez něj se píše do základního řádku, což je výchozí jazyk.
+const submitField = ({ docId, field, value, lang }) =>
+  trackSave(withSaver().then((it) => it.save({ docId, field, value, lang })))
 
 /**
  * What is stored at a path right now — the read half, and the only one there is.

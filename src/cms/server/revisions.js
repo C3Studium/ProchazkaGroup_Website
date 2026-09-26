@@ -75,7 +75,7 @@ export const createRevisionRepository = ({ client, mediaArchive = null }) => {
          * revalidation report and any media dates derived from it all name the
          * same moment.
          */
-        async record({ document, reason, changedBy = null, at = new Date().toISOString() }) {
+        async record({ document, reason, changedBy = null, at = new Date().toISOString(), lang = null }) {
             if (!document?.id) throw serverError('record(): chybí dokument')
             if (!REVISION_REASONS.includes(reason)) {
                 throw serverError(`record(): neznámý přechod "${reason}"`)
@@ -94,6 +94,14 @@ export const createRevisionRepository = ({ client, mediaArchive = null }) => {
                 changed_by: changedBy,
                 reason,
                 build_id: currentBuildId(),
+                // Který jazyk se tím publikoval. `null` je výchozí jazyk, tedy
+                // základní řádek dokumentu — proto nullable a proto se dnešní
+                // zápisy nemusely měnit.
+                //
+                // Bez tohohle sloupce by revize překladu vypadala jako revize
+                // základu: archiv by k jednomu okamžiku nabídl anglické tělo
+                // jako české. Sloupec je v 0013, tohle je druhá půlka.
+                lang,
             }
 
             const { data, error } = await table()

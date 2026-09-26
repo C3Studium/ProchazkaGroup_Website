@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react"
 
-import { useCore, usePort } from "@/cms/studio/context/StudioProvider"
-import { useAsync } from "@/cms/studio/hooks/useAsync"
-import { Button } from "@/cms/studio/ui/controls"
-import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
+import { useCore, usePort } from "../../studio/context/StudioProvider.jsx"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
 
-import { addImage, asList, bodyOfDoc, moveTo, removeImage, replaceImage, sameSet, valueAt } from "./assets"
-import MediaModule from "./MediaModule"
-import styles from "./sheet"
+import { addImage, asList, bodyOfDoc, moveTo, removeImage, replaceImage, sameSet, valueAt } from "./assets.js"
+import MediaModule from "./MediaModule.jsx"
+import styles from "./sheet.js"
 
 /**
  * A whole array-of-images field, in the popup.

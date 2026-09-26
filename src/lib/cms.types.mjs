@@ -20,6 +20,7 @@
 
 import review from '@/cms/schemas/review'
 import siteCopy from '@/cms/schemas/siteCopy'
+import uiText from '@/cms/schemas/uiText'
 
 import assistant from '@/content/types/assistant'
 import consultant from '@/content/types/consultant'
@@ -27,7 +28,10 @@ import offer from '@/content/types/offer'
 import partner from '@/content/types/partner'
 import qna from '@/content/types/qna'
 
-export const types = [siteCopy, partner, consultant, assistant, review, offer, qna]
+// `uiText` je slovník klíč → text: popisky tlačítek, hlášky, texty v modálech.
+// Nejsou to bloky stránky, a proto mají vlastní typ — viz VALECMS/docs/I18N.md,
+// oddíl 6.
+export const types = [siteCopy, uiText, partner, consultant, assistant, review, offer, qna]
 
 /**
  * Who a review is about.

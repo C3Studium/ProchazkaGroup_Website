@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { surfaceRoot } from "@/cms/edit";
 import Image from "next/image";
 import { AnimatePresence, cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
@@ -44,11 +45,23 @@ const FALLBACK = {
         // CONTACT_LINES says the same thing from the other side.
         "Zpráva",
     ],
+    // Hlášky, které list řekne po stisku. Vlastní blok v CMS
+    // (`global.contact.hlasky`), protože se na stránce objeví až po akci —
+    // prvek, na který by šlo kliknout, pro ně neexistuje a existovat nebude.
+    notices: {
+        missing: "Vyplňte prosím jméno, e-mail a telefon.",
+        badEmail: "Zkontrolujte prosím e-mailovou adresu.",
+        notWired: "Odesílání formuláře zatím není napojené.",
+    },
 };
 
 /** One label, by position, falling back on the one the sheet shipped with. */
 const labelAt = (copy, index) =>
     copy?.labels?.[index]?.trim() ? copy.labels[index].trim() : FALLBACK.labels[index];
+
+/** Jedna hláška, na týchž podmínkách: prázdno z CMS je záloha, ne prázdno. */
+const noticeAt = (copy, name) =>
+    copy?.notices?.[name]?.trim() ? copy.notices[name].trim() : FALLBACK.notices[name];
 
 // Whose sheet this is comes from the Studio — the `assistant` type, read on
 // every page beside the patička because this opens from the navigation and the
@@ -118,7 +131,7 @@ const MQ_PHONE = "(max-width: 749.98px)";
 // itself as landscape, and both are under 480.
 const MQ_LAND = "(min-width: 480px) and (max-height: 520px) and (orientation: landscape)";
 
-export default function ContactModal({ open, onClose, assistant, copy }) {
+export default function ContactModal({ open, onClose, assistant, copy, studioRoot = null }) {
     const [mounted, setMounted] = useState(false);
     // Whether this is a phone, decided before the sheet paints anything.
     //
@@ -269,11 +282,11 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
     const onSubmit = (event) => {
         event.preventDefault();
         if (!values.name.trim() || !values.email.trim() || !values.phone.trim()) {
-            toast.error("Vyplňte prosím jméno, e-mail a telefon.");
+            toast.error(noticeAt(copy, "missing"));
             return;
         }
         if (!/^\S+@\S+\.\S+$/.test(values.email.trim())) {
-            toast.error("Zkontrolujte prosím e-mailovou adresu.");
+            toast.error(noticeAt(copy, "badEmail"));
             return;
         }
         // Stops in the same place the home page's CTA stops, and deliberately:
@@ -285,7 +298,7 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
         // `fullPhoneNumber(values.dial, values.phone)` z @/cms/dialPrefixes.
         // `values.dial` a `values.phone` jsou dvě pole, protože to jsou dvě pole —
         // ale číslo bez předvolby je číslo, na které se nedá zavolat.
-        toast.error("Odesílání formuláře zatím není napojené.");
+        toast.error(noticeAt(copy, "notWired"));
     };
 
     if (!mounted) return null;
@@ -321,6 +334,7 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                 <>
                     <motion.div
                         ref={backdropRef}
+                        {...surfaceRoot(studioRoot)}
                         className="ContactModal__backdrop"
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
@@ -330,7 +344,7 @@ export default function ContactModal({ open, onClose, assistant, copy }) {
                         aria-hidden="true"
                     />
 
-                    <div ref={wrapRef} className="ContactModal__wrap" role="dialog" aria-modal="true" aria-label="Spojme se">
+                    <div {...surfaceRoot(studioRoot)} ref={wrapRef} className="ContactModal__wrap" role="dialog" aria-modal="true" aria-label="Spojme se">
                         <motion.div
                             className="ContactModal"
                             initial={{ opacity: 0, clipPath: "inset(0% 0% 100% 0%)" }}

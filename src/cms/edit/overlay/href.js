@@ -14,7 +14,7 @@
 // message: an editor who typed `www.example.com` needs to be told to write
 // `https://`, and that is a different sentence from the one for an empty box.
 
-import { CREDIT_HOST } from "../attrs"
+import { CREDIT_HOST } from "../attrs.js"
 
 /** Said once, and reused by four of the refusals below. */
 const ACCEPTED = "Přijímáme /cestu na webu, https://…, mailto: nebo tel:"

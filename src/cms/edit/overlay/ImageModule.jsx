@@ -1,15 +1,15 @@
 import { useState } from "react"
 
-import { usePort } from "@/cms/studio/context/StudioProvider"
-import { isCroppableImage, resolveCropTarget } from "@/cms/studio/media/cropTarget"
-import { useAsync } from "@/cms/studio/hooks/useAsync"
-import { Button } from "@/cms/studio/ui/controls"
-import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
+import { usePort } from "../../studio/context/StudioProvider.jsx"
+import { isCroppableImage, resolveCropTarget } from "../../studio/media/cropTarget.js"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
 
-import { bodyOfDoc, valueAt } from "./assets"
-import CropEditor from "./CropEditor"
-import MediaModule from "./MediaModule"
-import styles from "./sheet"
+import { bodyOfDoc, valueAt } from "./assets.js"
+import CropEditor from "./CropEditor.jsx"
+import MediaModule from "./MediaModule.jsx"
+import styles from "./sheet.js"
 
 /**
  * One picture — the popup Contract D asks for, and the discrepancy it closes.

@@ -4,6 +4,10 @@ import { useState } from "react";
 import Image from "next/image";
 import { cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
+// Hlášky obou formulářů recenzí jsou jeden blok (`recenze.hlasky`) — obě routy
+// posílají recenzi stejnou cestou. Čtečka bydlí u toho formuláře, který ji
+// potřeboval první; druhá kopie by byla druhé místo, kde se dá změnit jen jedno.
+import { noticeOf } from "@/components/pages/reviews/AddReview";
 import { RiChat3Line, RiThumbUpLine } from "@remixicon/react";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import { useGlobalContext } from "@/context/LoadProvider";
@@ -84,7 +88,7 @@ const Req = () => <em className="AdvCard__req" aria-hidden="true">*</em>;
 //   `getPageContent("/recenze/[slug]")`. One block behind ten cards: it is
 //   declared under `page: 'recenze'`, so editing it once moves every
 //   consultant's page and a publish regenerates all of them.
-export default function AdvisorCard({ advisor, copy = {} }) {
+export default function AdvisorCard({ advisor, copy = {}, notices = null }) {
     const { gate } = useGlobalContext();
     // The card is the page's only surface and the portrait lives inside it,
     // so both enter at "ground" — a photo opening inside a still-invisible
@@ -99,6 +103,7 @@ export default function AdvisorCard({ advisor, copy = {} }) {
         sending: copy.sending || SHIPPED.sending,
         note: copy.note || SHIPPED.note,
     };
+    const says = (name) => noticeOf(notices, name);
     const [values, setValues] = useState({ customerName: "", message: "", website: "" });
     const [busy, setBusy] = useState(false);
     const [sent, setSent] = useState(false);
@@ -115,7 +120,7 @@ export default function AdvisorCard({ advisor, copy = {} }) {
         } catch {
             // Refused, or no clipboard at all over plain http. Saying so beats a
             // button that silently did nothing.
-            toast.error("Zkopírování se nepovedlo, označte prosím text ručně.");
+            toast.error(says("copyFailed"));
         }
     };
 
@@ -123,8 +128,8 @@ export default function AdvisorCard({ advisor, copy = {} }) {
 
     const onSubmit = async (event) => {
         event.preventDefault();
-        if (!values.customerName.trim()) return toast.error("Doplňte prosím jméno.");
-        if (!values.message.trim()) return toast.error("Napište prosím pár slov.");
+        if (!values.customerName.trim()) return toast.error(says("needName"));
+        if (!values.message.trim()) return toast.error(says("needMessage"));
 
         setBusy(true);
         try {
@@ -143,7 +148,7 @@ export default function AdvisorCard({ advisor, copy = {} }) {
             setWritten(values.message);
             setSent(true);
         } catch {
-            toast.error("Odeslání se nepovedlo. Zkuste to prosím znovu.");
+            toast.error(says("failed"));
         } finally {
             setBusy(false);
         }

@@ -12,7 +12,7 @@
 // does not is worse than one that never does. Constructing this object is the
 // server saying "the caller has been checked".
 
-import { isRejectionReason } from '@/cms/schemas/review'
+import { isRejectionReason } from '../schemas/review.js'
 
 import { assertServer, maxUploadBytes, mediaBucket, s3Config, storageDriver } from './env.js'
 import { forbidden, invalid, serverError } from './errors.js'
@@ -223,7 +223,16 @@ export const createSupabaseDataPort = ({ user = null, client, storage, req = nul
          * file store's deliberately short list of translated functions. The
          * loop gets the same outcome for the case that happens.
          */
-        async patchField({ id, field, value }) {
+        async patchField({ id, field, value, lang = null }) {
+            // Překlad má vlastní řádek, vlastní verzi a vlastní zámek, takže
+            // smyčka níž se ho netýká — ta řeší souběh nad `cms_document`.
+            // Autorizaci dělá repozitář (`assertFieldRole` kontroluje `editRoles`
+            // pojmenovaného i horního pole, tedy totéž co `assertMayWriteFields`
+            // o dva řádky níž) a odmítne zápis do nepřeložitelného pole.
+            if (lang) {
+                return documents.patchField({ id, field, value, lang, role: user?.role ?? null, updatedBy: userId })
+            }
+
             {
                 // The visual editor's write path. Checked before the retry loop
                 // rather than inside it: the answer cannot change between
@@ -279,7 +288,13 @@ export const createSupabaseDataPort = ({ user = null, client, storage, req = nul
             await documents.remove({ id })
         },
 
-        async publish({ id }) {
+        async publish({ id, lang = null }) {
+            // Jazyk se publikuje sám za sebe. Základní řádek se nedotkne —
+            // o tom, jestli je dokument na webu vůbec vidět, rozhoduje on,
+            // takže publikovaný překlad nepublikovaného dokumentu je stav,
+            // který nikomu nic neukáže a nikomu nic nerozbije.
+            if (lang) return documents.publishTranslation({ id, lang, updatedBy: userId })
+
             const current = await documents.get({ id })
             // The draft may have been saved before a schema change made it
             // invalid. Publishing is the moment that matters, so it is checked

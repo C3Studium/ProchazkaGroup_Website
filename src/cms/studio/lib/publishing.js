@@ -23,7 +23,7 @@
  * live.
  */
 
-import { plural } from './format'
+import { plural } from './format.js'
 
 /** Reports from one or more transitions, folded into one. */
 const fold = (reports) => {

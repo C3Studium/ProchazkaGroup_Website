@@ -121,8 +121,8 @@ const convert = (sql) => {
 const files = readdirSync(DIR)
     .filter((f) => /^\d{4}_.*\.sql$/.test(f))
     .sort()
-    // 0004 zamyká legacy tabulky proti anonymnímu klíči Supabase; tady nedává smysl.
-    .filter((f) => !f.startsWith('0004'))
+    // `manual/` sem nepatří a readdir ho nevrací (není to .sql). Dřív tu stál
+    // filtr na 0004; ten soubor je teď v manual/, takže to řeší složka sama.
 
 let out = '-- VYGENEROVÁNO scripts/cms-migrations-postgres.mjs — needituj.\n\n'
 let totalSkipped = 0

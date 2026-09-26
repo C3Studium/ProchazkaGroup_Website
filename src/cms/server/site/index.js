@@ -34,7 +34,7 @@ export { readEditable } from './draft.js'
 // archive.js.
 export { getArchiveMoment, momentOf, readAt, readerAt, readerFor, viewOf } from './archive.js'
 
-export { getSiteCopy } from './content.js'
+export { getSiteCopy, getUiText } from './content.js'
 
 // One generic reader for every configured route. `cms.config.js` says which
 // documents a page holds and where each field lands; ./page.js runs the queries

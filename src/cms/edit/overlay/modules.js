@@ -25,6 +25,7 @@
 //   DocModule       docId, typeName, onSaved(doc), onClose
 //   ModerateModule  docId, onModerated("unpublish" | "archive")
 //   LinkModule      docId, field, hrefField, href, onCommit({text, href}), onClose
+//   SurfaceModule   surface, lang, onSaved(count), onClose
 //
 // `SetModule` and `ListModule` take and return the value at the annotated path,
 // so a single `save(docId, field, value)` serves both — the same call the image
@@ -35,15 +36,16 @@
 // those are not field writes, they touch no body, and there is nothing for the
 // overlay to put back on the page.
 
-import DocModule from "./DocModule"
-import ImageModule from "./ImageModule"
-import LinkModule from "./LinkModule"
-import ListModule from "./ListModule"
-import MediaModule from "./MediaModule"
-import ModerateModule from "./ModerateModule"
-import SetModule from "./SetModule"
+import DocModule from "./DocModule.jsx"
+import ImageModule from "./ImageModule.jsx"
+import LinkModule from "./LinkModule.jsx"
+import ListModule from "./ListModule.jsx"
+import MediaModule from "./MediaModule.jsx"
+import ModerateModule from "./ModerateModule.jsx"
+import SetModule from "./SetModule.jsx"
+import SurfaceModule from "./SurfaceModule.jsx"
 
-export { DocModule, ImageModule, LinkModule, ListModule, MediaModule, ModerateModule, SetModule }
+export { DocModule, ImageModule, LinkModule, ListModule, MediaModule, ModerateModule, SetModule, SurfaceModule }
 
 /**
  * Which body a popup shows.
@@ -61,6 +63,11 @@ export { DocModule, ImageModule, LinkModule, ListModule, MediaModule, ModerateMo
  * not an empty dialog.
  */
 export function bodyFor(kind, actions) {
+  // Jediné tělo, které neotevírá překryv, ale „Upravit kontent" ze seznamu
+  // povrchů (docs/I18N.md §7.2) — a proto jediné, které nedostane `docId`:
+  // zavřený modál nemá na stránce prvek, ze kterého by se dal přečíst. Sdílí
+  // ale celou skořápku, takže scrim, Escape i zavírací křížek jsou tytéž.
+  if (kind === "surface") return SurfaceModule
   if (kind === "document" && actions === "moderate") return ModerateModule
   if (kind === "document") return DocModule
   if (kind === "imageSet") return SetModule
@@ -77,7 +84,10 @@ export function bodyFor(kind, actions) {
  * thing by from the Studio's sidebar. A moderated one is not: "Recenze" would
  * name the record, and what the popup is for is the decision.
  */
-export function titleFor(kind, actions, typeTitle, field) {
+export function titleFor(kind, actions, typeTitle, field, surface) {
+  // Titulek povrchu je jeho vlastní `title` z konfigurace — je to jméno, které
+  // pro ten modál zvolil ten, kdo web psal, a editor ho zná ze seznamu vedle.
+  if (kind === "surface") return surface?.title || surface?.name || "Povrch"
   if (kind === "document" && actions === "moderate") return "Recenze zákazníka"
   if (kind === "document") return typeTitle || "Upravit záznam"
   if (kind === "imageSet") return "Sada obrázků"

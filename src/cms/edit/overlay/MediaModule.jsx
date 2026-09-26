@@ -1,4 +1,4 @@
-import MediaLibrary from "@/cms/studio/media/MediaLibrary"
+import MediaLibrary from "../../studio/media/MediaLibrary.jsx"
 
 /**
  * Picking an image, without a second media library.

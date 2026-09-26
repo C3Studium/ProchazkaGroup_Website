@@ -84,6 +84,21 @@ $pick-inner: rgba(255, 255, 255, 0.82);
   @include t.declare-responsive;
 }
 
+/* ---------------------------------------------------------------- shield -- */
+
+/* Interakční štít. Root má `pointer-events: none` a tenhle JEDEN prvek si
+   bere celou plochu zpět: stránka pod ním nedostane hover, klik, pohyb myši
+   ani shaderový dotek — v režimu úprav žijí jen anotované prvky skrz hit-test
+   overlaye a (při rozepsané editaci) díra vyříznutá clip-pathem nad
+   editovaným prvkem. Kolečko a dotykové POSOUVÁNÍ štítem záměrně procházejí:
+   výchozí scroll není pointer event a editor se bez něj na dlouhé stránce
+   nikam nedostane. Kurzor píše rAF smyčka podle hoveru. */
+.shield {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
 /* ------------------------------------------------------------- tracking -- */
 
 /* One node per state, moved by `transform` and sized in px, both written from
@@ -632,6 +647,19 @@ $pick-inner: rgba(255, 255, 255, 0.82);
   font-size: var(--st-text-small);
   color: var(--st-danger);
   background: var(--st-danger-soft);
+}
+
+/* Věta nad formulářem, která něco vysvětluje — ne varuje.
+   Vedle `.setProblem` a ne místo něj: „tohle pole se nepřekládá" je stav, ne
+   chyba, a v červené by editor hledal, co pokazil. */
+.setNote {
+  flex: none;
+  margin: 0;
+  padding: var(--st-s2) var(--st-s4);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  background: var(--st-sunken);
+  border-bottom: 1px solid var(--st-line);
 }
 
 .setLibrary {

@@ -89,6 +89,16 @@ const AuthContext = createContext(null)
  * person, not a boundary.
  */
 export function AuthProvider({ children }) {
+  // Už jeden nad sebou máme? Pak jen pustit dál.
+  //
+  // Překryv v rámu si zakládá vlastní React root (edit/overlay/mount.jsx) a musí
+  // si proto session obstarat sám — jenže tentýž Popup Studio renderuje i uvnitř
+  // sebe, kde `AuthProvider` z Studio.jsx dávno je. Bez tohohle by tam vznikl
+  // druhý a s ním druhé volání /auth/user na každé otevření popupu.
+  //
+  // Nakrátko, ne podmíněně: hooky pod tímhle řádkem se musí zavolat vždycky
+  // a ve stejném pořadí, takže se vrací až na konci souboru. Viz `nested`.
+  const inherited = useContext(AuthContext)
   const port = usePort()
   const [state, setState] = useState({ status: "checking", user: null })
 
@@ -104,8 +114,13 @@ export function AuthProvider({ children }) {
   }, [port])
 
   useEffect(() => {
+    // Zděděný kontext znamená, že se někdo nad námi ptá za nás. Hook zavolat
+    // musíme (pořadí hooků je pořád stejné), ale dotaz posílat ne — jinak by
+    // každé otevření popupu uvnitř Studia znamenalo druhé kolo na /auth/user
+    // a odpověď, kterou stejně zahodíme.
+    if (inherited) return
     refresh()
-  }, [refresh])
+  }, [inherited, refresh])
 
   const value = useMemo(
     () => ({
@@ -140,6 +155,10 @@ export function AuthProvider({ children }) {
     }),
     [state, port, refresh],
   )
+
+  // Teprve tady, po všech hoocích. Vrátit `children` hned nahoře by znamenalo
+  // pokaždé jiný počet zavolaných hooků, což React zakazuje.
+  if (inherited) return children
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

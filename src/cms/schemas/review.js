@@ -22,7 +22,7 @@
 //     has nowhere to put it; `data` is world-readable once a document is
 //     published, so this is the wrong place for a submitter's address.
 
-import { defineField, defineType } from '@/cms/core'
+import { defineField, defineType } from '../core/index.js'
 
 /**
  * Why a rejection is refused publication and never deleted.

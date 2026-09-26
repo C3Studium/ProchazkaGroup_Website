@@ -79,7 +79,7 @@ importers). A production build of this branch puts the anon key in 0 of 98
 client chunks. That removed the caller, not the permission — and not the past:
 the site deployed today still serves the key and the compiled hook in
 `/_next/static/chunks/124-*.js`. The key keeps insert/update on the legacy
-tables until `server/migrations/0004_legacy_lockdown.sql` is run by hand against
+tables until `server/migrations/manual/0004_legacy_lockdown.sql` is run by hand against
 the live project, and should be rotated afterwards. That file is destructive and
 waits for a human.
 

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 
-import { isEditFrame } from "@/cms/preview/frame"
-import { setEditMode } from "./mode"
+import { isEditFrame } from "../preview/frame.js"
+import { setEditMode } from "./mode.js"
 
 /**
  * The one thing the framed page still has to do for itself — SITE-SAFE.

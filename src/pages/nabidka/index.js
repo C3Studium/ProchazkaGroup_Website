@@ -10,7 +10,7 @@ import ReviewDrift from "@/components/pages/nabidka/ReviewDrift";
 import ChooseAdvisor from "@/components/pages/index/ChooseAdvisor";
 import {
     getAssistant,
-    getContactContent,
+    getContactContent, getNavbarContent,
     getFooterContent,
     getHomepageContent,
     getPageContent,
@@ -46,7 +46,7 @@ export async function getStaticProps(context) {
     // The advisor block at the foot is the homepage's own, words and consultants
     // and all — read from the same place, so the two cannot come to say
     // different things.
-    const [content, home, footer, contact, assistant, roster] = await Promise.all([
+    const [content, home, footer, contact, navbar, assistant, roster] = await Promise.all([
         // `read` and `view` on all five, where the first two used to be read
         // published whoever was asking. Harmless for a visitor, wrong for both
         // of the other readers: it put unpublished copy beside published
@@ -56,6 +56,7 @@ export async function getStaticProps(context) {
         getHomepageContent(view),
         getFooterContent(view),
         getContactContent(view),
+        getNavbarContent(view),
         getAssistant({ read }),
         getRoster({ read }),
     ]);
@@ -73,6 +74,7 @@ export async function getStaticProps(context) {
             advisorFormCopy: home?.advisorFormCopy || {},
             footer,
             contact,
+            navbar,
             assistant,
             roster,
         },
@@ -91,7 +93,7 @@ export default function NabidkaPage({
     // for the Studio's editing frame — see `f.docId()` in @/cms/site/fields. On
     // the public page it is absent and every annotation helper answers nothing,
     // and a block the CMS does not hold leaves its section exactly as it ships.
-    const { hero, rail, open, chain, chart, reviewsCopy } = content;
+    const { hero, rail, strip, open, chain, chart, reviewsCopy } = content;
 
     return (
         <>
@@ -140,7 +142,7 @@ export default function NabidkaPage({
 
             <main lang="cs" key="nabidka">
                 <OfferHero copy={hero} />
-                <StatRail copy={rail} close={rail?.close} cells={rail?.cells?.rows} />
+                <StatRail copy={rail} close={rail?.close} cells={rail?.cells?.rows} strip={strip} />
                 {/* The band ends on the map, pointing right. The page turns
                     downwards here: a line of type to change the subject, then
                     the offer itself. Neither is pinned and neither is driven by

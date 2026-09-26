@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from "react"
+import dynamic from "next/dynamic"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { useStudioRouter, withQuery } from "../../runtime/navigation.jsx"
 
 import { DOC_ATTR, EDITABLE_SELECTOR } from "../../edit/attrs.js"
 import { commitPendingEdit } from "../../edit/overlay/commit.js"
+import { announceStudioSurface } from "../../edit/surface.js"
+import sheet from "../../edit/overlay/sheet.js"
+import site from "../../site/config.js"
+import { surfacesOfKind } from "../../site/surfaces.js"
 
 import { DevicePicker, PagePicker, ZoomControls } from "../preview/FrameControls.jsx"
 import Stage from "../preview/Stage.jsx"
@@ -14,11 +19,17 @@ import { plural } from "../lib/format.js"
 import { bodyOf, changedFields, hasUnpublishedChanges, previewOf } from "../lib/documents.js"
 import { publishOutcome } from "../lib/publishing.js"
 import Icon from "../ui/Icon.jsx"
-import { Button } from "../ui/controls.jsx"
+import { Button, IconButton } from "../ui/controls.jsx"
 import { Modal } from "../ui/Modal.jsx"
 import { ErrorState, Spinner } from "../ui/feedback.jsx"
 import preview from "../preview/preview.module.scss"
 import styles from "./EditView.module.scss"
+
+// Popup povrchu, ve vlastním kusu balíčku. Tentýž důvod, proč ho takhle načítá
+// i překryv (viz Overlay.jsx): táhne s sebou poskytovatele Studia, všechny
+// vstupy polí a knihovnu médií, a většina sezení v „Upravit kontent" je klikání
+// po stránce, které ho nikdy neotevře.
+const SurfacePopup = dynamic(() => import("../../edit/overlay/Popup.jsx"), { ssr: false })
 
 /**
  * Upravit kontent — the page, editable, with the Studio around it.
@@ -125,6 +136,98 @@ const ARM_WINDOW_MS = 4000
 const ARM_INTERVAL_MS = 250
 
 /**
+ * Tři záložky, tři způsoby, jak se vybírá, co se upravuje. docs/I18N.md §7.2.
+ *
+ * Stránky jsou dnešní chování: rám na adrese a výběr myší. Modály a seznamy
+ * jsou to nové — vybírají se ZE SEZNAMU, protože výběr myší je geometrický
+ * (`hitTest` přes `elementsFromPoint`) a co má `display: none`, nemá obdélník
+ * a pro překryv neexistuje.
+ *
+ * Rám zůstává na obrazovce ve všech třech. Nejen kvůli tomu, že přepnutí
+ * záložky není důvod ho načítat znovu, ale hlavně kvůli §7.3: komponenta, která
+ * si zavolá `useStudioSurface`, se při výběru povrchu OTEVŘE — a to je vidět
+ * jenom tehdy, když je na co koukat.
+ */
+const SURFACE_TABS = [
+    { id: "pages", icon: "document", title: "Stránky", hint: "Klikání přímo na stránce v rámu" },
+    { id: "modal", icon: "layers", title: "Modály", hint: "Okna, která na stránce nejsou vidět, dokud je něco neotevře" },
+    { id: "list", icon: "list", title: "Seznamy", hint: "Accordiony, výběry, časté dotazy" },
+]
+
+/**
+ * Rady nad rámem se dají zavřít, a natrvalo.
+ *
+ * Věta „klikněte na text a upravte ho" je užitečná při prvním otevření a od
+ * druhého je to řádek, který ubírá výšku stránce v rámu — a výška je tady to
+ * jediné, čeho je málo. Zavření se pamatuje v `localStorage`, tedy na prohlížeč,
+ * ne na účet: je to preference pohledu, ne obsah, a do databáze nepatří.
+ *
+ * Každé čtení i zápis je v `try`, protože přístup k úložišti umí rovnou
+ * VYHODIT — v anonymním okně, se zakázanými daty webu, v rámu s třetí stranou.
+ * Rada, která spadne, by vzala s sebou celou obrazovku editoru, což je přesně
+ * obráceně než málo důležitá věc má selhávat.
+ */
+const ADVICE_STORE = "valecms.studio.advice"
+
+const readAdvice = () => {
+    try {
+        const raw = window.localStorage.getItem(ADVICE_STORE)
+        const parsed = raw ? JSON.parse(raw) : null
+        return parsed && typeof parsed === "object" ? parsed : {}
+    } catch {
+        return {}
+    }
+}
+
+const useAdvice = () => {
+    // Prázdno při prvním renderu, načtení až v efektu: server o `localStorage`
+    // neví a jeho HTML by se s klientským nepotkalo. Rada, která zmizí až po
+    // hydrataci, je lepší než hydratační chyba.
+    const [hidden, setHidden] = useState({})
+
+    useEffect(() => {
+        setHidden(readAdvice())
+    }, [])
+
+    const dismiss = useCallback((id) => {
+        setHidden((prev) => {
+            const next = { ...prev, [id]: true }
+            try {
+                window.localStorage.setItem(ADVICE_STORE, JSON.stringify(next))
+            } catch {
+                // Nezapsalo se — rada se vrátí po načtení stránky. Zmizet teď
+                // je to, oč editor požádal, a to se stalo i tak.
+            }
+            return next
+        })
+    }, [])
+
+    return { hidden, dismiss }
+}
+
+/** Jeden řádek rady s křížkem. Tón `warn` je pro to, co si žádá pozornost. */
+function Advice({ id, icon, tone, onDismiss, children }) {
+    return (
+        <p className={`${styles.strip} ${tone === "warn" ? styles.stripWarn : ""}`}>
+            <Icon name={icon} size={13} className={styles.stripIcon} />
+            <span>{children}</span>
+            {/* `IconButton`, ne holé <button>. Studio bydlí v shadow rootu
+                (styles/ShadowHost.jsx), kam resety stránky nedosáhnou, takže
+                nezrušené tlačítko dostane výchozí styl prohlížeče — přesně tak
+                se z tohohle křížku stal prázdný šedý čtvereček. Komponenta to
+                řeší jednou pro všechna ikonová tlačítka. */}
+            <IconButton
+                icon="close"
+                size={12}
+                label="Skrýt tuto radu"
+                className={styles.stripClose}
+                onClick={() => onDismiss(id)}
+            />
+        </p>
+    )
+}
+
+/**
  * One editing session per Studio, refcounted, with the close deferred by a
  * microtask.
  *
@@ -171,6 +274,7 @@ const releaseSession = () => {
 
 export default function EditView() {
     const router = useStudioRouter()
+    const toast = useToast()
 
     // Nothing read from the URL may be rendered until this is true. The Studio is
     // client-only, so its subtree is never server-rendered and cannot mismatch —
@@ -227,6 +331,71 @@ export default function EditView() {
         [router],
     )
 
+    /* ------------------------------------------------------------- jazyk -- */
+
+    /**
+     * Do kterého jazyka se píše.
+     *
+     * Seznam jazyků drží databáze (`cms_setting`, klíč `site.languages`,
+     * docs/I18N.md §1) a přidávají se v Nastavení. Tady se zatím čte
+     * z konfigurace webu, kterou `defineSite` normalizuje do stejného tvaru
+     * `{ default, list }` — takže až přijde endpoint, mění se jeden řádek
+     * a nic kolem.
+     *
+     * TODO: nahradit voláním API, až bude.
+     *
+     * Vypnuté jazyky se nenabízejí. `enabled: false` znamená „nevykresluj",
+     * ne „neexistuje" — obsah pod nimi v `cms_document_translation` zůstává,
+     * takže smazat je ze seznamu nejde, ale psát do nich nemá smysl.
+     */
+    const languages = useMemo(
+        () => (site?.languages?.list || []).filter((entry) => entry.enabled !== false),
+        [],
+    )
+    const defaultLang = site?.languages?.default || languages[0]?.code || null
+
+    // Neznámý kód v adrese padá na výchozí jazyk. Odkaz se dá poslat
+    // a konfigurace se mezitím může změnit; obrazovka, která by kvůli tomu
+    // odmítla vzniknout, by z překlepu udělala rozbitý odkaz.
+    const asked = urlReady && router.isReady ? String(router.query.lang || "").trim() : ""
+    const lang = languages.some((entry) => entry.code === asked) ? asked : defaultLang || ""
+
+    /**
+     * Co se přikládá k zápisu — a u výchozího jazyka je to NIC.
+     *
+     * Výchozí jazyk JE základní řádek `cms_document` (§2), takže zápis bez
+     * `lang` do něj míří správně. Posílat ho explicitně by znamenalo založit
+     * překladový řádek pro jazyk, jehož obsah už jinde leží, a čtení by pak
+     * mělo dvě pravdy o téže větě.
+     */
+    const writeLang = lang && lang !== defaultLang ? lang : null
+
+    const chooseLanguage = useCallback(
+        (code) => {
+            // Adresa se skládá VÝHRADNĚ přes `withQuery`, tedy jako řetězec.
+            // Objektový tvar `{ pathname, query }` umí jen Pages Router;
+            // App Router na něm skončí na `path.startsWith is not a function`
+            // — viz runtime/navigation.jsx, kde se to zastavuje s větou.
+            router.replace(withQuery(router.path, { lang: code && code !== defaultLang ? code : null }), {
+                shallow: true,
+                scroll: false,
+            })
+        },
+        [defaultLang, router],
+    )
+
+    /* ----------------------------------------------------------- povrchy -- */
+
+    const [tab, setTab] = useState("pages")
+    const [openSurface, setOpenSurface] = useState(null)
+    const surfaceTab = SURFACE_TABS.find((entry) => entry.id === tab) || SURFACE_TABS[0]
+    // Kam se rám vrátí, až editor přepne zpátky na „Stránky". Povrch s vlastním
+    // náhledem odvede rám na svou adresu a ta v seznamu stránek není — bez
+    // tohohle by se editor vrátil na výchozí stránku, ne na tu svou.
+    const pageBefore = useRef(null)
+    const { hidden: adviceHidden, dismiss: dismissAdvice } = useAdvice()
+    const surfaces = useMemo(() => (tab === "pages" ? [] : surfacesOfKind(site, tab)), [tab])
+
     // The frame is not pointed anywhere until the session is open, because a
     // frame loaded without the draft cookie renders the published page — which has
     // nothing annotated on it and therefore nothing to click.
@@ -255,7 +424,27 @@ export default function EditView() {
         bust,
         onNavigate: navigate,
         editing: !previewing,
+        lang: writeLang,
     })
+
+    /**
+     * Rámu se řekne, který povrch se zrovna edituje — pro `useStudioSurface`.
+     *
+     * Jen tudy: hostitel běží v jiném JS realmu než stránka, takže jí příznak
+     * nastavit nemůže a jediné, co sdílejí, je DOM rámu (viz edit/surface.js).
+     * Komponenta, která si o to řekla, si modál otevře sama; komponenta, která
+     * si o to neřekla, se nezmění — a přeložit se dá stejně, protože popup
+     * geometrii nepotřebuje.
+     *
+     * `loadedAt` je v závislostech proto, že nový dokument přijde s čistým
+     * `<html>`: po obnovení nebo po prokliku odkazem uvnitř webu by atribut
+     * jinak zmizel a modál by se pod otevřeným popupem zavřel.
+     */
+    useEffect(() => {
+        const win = frame.frameRef.current?.contentWindow
+        announceStudioSurface(win, openSurface?.name || null)
+        return () => announceStudioSurface(win, null)
+    }, [frame.frameRef, frame.loadedAt, openSurface])
 
     const refresh = useCallback(() => {
         frame.captureScroll()
@@ -288,7 +477,7 @@ export default function EditView() {
 
     /* --------------------------------------------------------- publikovat -- */
 
-    const publish = usePublishSet(frame.frameRef, previewing)
+    const publish = usePublishSet(frame.frameRef, previewing, writeLang)
 
     return (
         <div className={styles.view}>
@@ -378,12 +567,95 @@ export default function EditView() {
             </header>
 
             <div className={preview.bar}>
-                <PagePicker
-                    idPrefix="edit"
-                    pages={session.pages}
-                    current={sitePath}
-                    onNavigate={navigate}
-                />
+                {/* Přepínač povrchů. Vlevo, před vším ostatním, protože mění
+                    význam toho, co je za ním: na „Stránkách" se vybírá adresa,
+                    na ostatních záložkách povrch ze seznamu pod barem. */}
+                <div className={preview.group}>
+                    {/* Ikona se mění s výběrem, protože nativní `option` svou
+                        vlastní mít nemůže. Zavřený select tak pořád ukazuje
+                        obojí — obrázek i slovo — a to je celá výhoda, kvůli
+                        které tu ikona je. */}
+                    <Icon
+                        name={surfaceTab.icon}
+                        size={15}
+                        className={preview.groupIcon}
+                    />
+                    <label className={preview.hidden} htmlFor="edit-surface">
+                        Co se upravuje
+                    </label>
+                    <select
+                        id="edit-surface"
+                        className={preview.select}
+                        value={tab}
+                        title={surfaceTab.hint}
+                        onChange={(event) => {
+                            const next = event.target.value
+                            setTab(next)
+                            // Popup patří k záložce, ze které se otevřel.
+                            // Nechat ho viset nad jiným seznamem znamená
+                            // formulář, k němuž na obrazovce nic nevede.
+                            setOpenSurface(null)
+                            // Zpátky na „Stránky" znamená zpátky na tu stránku,
+                            // od které editor odešel — ne na výchozí. Adresa
+                            // náhledu povrchu v seznamu stránek není, takže bez
+                            // tohohle by výběr stránky ukazoval na nic.
+                            if (next === "pages" && pageBefore.current !== null) {
+                                navigate(pageBefore.current)
+                                pageBefore.current = null
+                            }
+                        }}
+                    >
+                        {SURFACE_TABS.map((entry) => (
+                            <option key={entry.id} value={entry.id}>
+                                {entry.title}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+
+                <span className={preview.divider} aria-hidden="true" />
+
+                {/* Výběr stránky jen tam, kde se stránka vybírá. Na záložce
+                    modálů by tvrdil, že na tom, která stránka je v rámu, pro
+                    tenhle popup záleží — a nezáleží: povrch se čte
+                    z konfigurace, ne ze stránky. */}
+                {tab === "pages" ? (
+                    <PagePicker
+                        idPrefix="edit"
+                        pages={session.pages}
+                        current={sitePath}
+                        onNavigate={navigate}
+                    />
+                ) : null}
+
+                {/* Jazyk jen tam, kde je z čeho vybírat. Web s jedinou češtinou
+                    nemá jazykem co přepínat a ovládání, které má jednu možnost,
+                    je otázka bez odpovědi. */}
+                {languages.length > 1 ? (
+                    <div className={preview.group}>
+                        {/* `tag` proto, že knihovna ikonu zeměkoule nemá a Icon.jsx si drží
+                            jiný agent. Štítek je ze seznamu to nejbližší: jazyk je
+                            v tomhle baru značka obsahu, ne místo na mapě. */}
+                        <Icon name="tag" size={15} className={preview.groupIcon} />
+                        <label className={preview.hidden} htmlFor="edit-lang">
+                            Jazyk obsahu
+                        </label>
+                        <select
+                            id="edit-lang"
+                            className={preview.select}
+                            value={lang}
+                            onChange={(event) => chooseLanguage(event.target.value)}
+                            title="Do kterého jazyka se ukládají úpravy"
+                        >
+                            {languages.map((entry) => (
+                                <option key={entry.code} value={entry.code}>
+                                    {entry.label}
+                                    {entry.code === defaultLang ? " (výchozí)" : ""}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                ) : null}
 
                 <span className={preview.divider} aria-hidden="true" />
 
@@ -453,6 +725,75 @@ export default function EditView() {
                 </span>
             </p>
 
+            {/* Seznam povrchů. Jen na záložkách, které o povrchách jsou —
+                a v jednom řádku nad rámem, ne v postranním sloupci: je to
+                výběr, ne navigace, a rám pod ním musí zůstat vidět kvůli
+                živému náhledu (§7.3). */}
+            {tab !== "pages" ? (
+                <div className={styles.surfaces} role="group" aria-label="Povrchy">
+                    {surfaces.length ? (
+                        surfaces.map((surface) => (
+                            <button
+                                key={surface.name}
+                                type="button"
+                                className={`${preview.chip} ${
+                                    openSurface?.name === surface.name ? preview.chipOn : ""
+                                }`}
+                                aria-pressed={openSurface?.name === surface.name}
+                                onClick={() => {
+                                    // Dvě cesty, jedno tlačítko. Povrch s vlastní
+                                    // adresou se ukáže v rámu jako komponenta
+                                    // a upravuje se klikáním do ní; povrch bez ní
+                                    // otevře formulář, protože není kam přepnout.
+                                    if (surface.preview) {
+                                        if (pageBefore.current === null) pageBefore.current = sitePath
+                                        setOpenSurface(surface)
+                                        navigate(surface.preview)
+                                        return
+                                    }
+                                    setOpenSurface(surface)
+                                }}
+                                title={
+                                    surface.preview
+                                        ? `Ukázat „${surface.title}" v rámu a upravovat klikáním`
+                                        : `Upravit texty povrchu „${surface.title}" (blok ${surface.copy})`
+                                }
+                            >
+                                <Icon name={tab === "modal" ? "layers" : "list"} size={14} />
+                                {surface.title}
+                            </button>
+                        ))
+                    ) : (
+                        // Prázdno se vysvětluje, ne mlčí: chybějící povrch není
+                        // porucha Studia, je to nenapsaná konfigurace, a tohle
+                        // je jediné místo, kde se to dá říct tomu, kdo se diví.
+                        <p className={styles.surfacesEmpty}>
+                            <Icon name="info" size={13} />
+                            <span>
+                                Žádné {tab === "modal" ? "modály" : "seznamy"} nejsou přihlášené.
+                                Přidá je <code>defineSurface</code> v konfiguraci webu.
+                            </span>
+                        </p>
+                    )}
+                </div>
+            ) : null}
+
+            {/* Co znamená vybraný jazyk, řečeno tam, kde se pracuje.
+                Nejdůležitější je druhá věta: rám ukazuje výchozí jazyk i po
+                přepnutí, protože překlady se do stránek dostanou až publikací
+                a nasazením (§1). Bez toho by to vypadalo, že se zápis neuložil. */}
+            {writeLang && !adviceHidden.lang ? (
+                <Advice id="lang" icon="tag" tone="warn" onDismiss={dismissAdvice}>
+                    Úpravy se ukládají do jazyka{" "}
+                    <strong>
+                        {languages.find((entry) => entry.code === writeLang)?.label || writeLang}
+                    </strong>
+                    . Stránka v rámu zůstává ve výchozím jazyce — přeložený text se na webu objeví
+                    až po publikaci a nasazení. Pole, která se nepřekládají, zápis odmítne
+                    a řekne proč.
+                </Advice>
+            ) : null}
+
             {/* One line, always on screen, saying which of the two states the
                 page below is in and what that means. The refusal replaces it
                 rather than sitting beside it: an editor whose Náhled did not
@@ -463,23 +804,35 @@ export default function EditView() {
                     <span>{refusal}</span>
                 </p>
             ) : previewing ? (
-                <p className={styles.strip}>
-                    <Icon name="eye" size={13} className={styles.stripIcon} />
-                    <span>
+                // Zavíratelné až odtud dolů. Odmítnutí nahoře křížek nemá
+                // schválně: to není rada, kterou si editor přečte a pak ji zná,
+                // ale stav, ve kterém jeho text pořád leží jen ve stránce.
+                adviceHidden.preview ? null : (
+                    <Advice id="preview" icon="eye" onDismiss={dismissAdvice}>
                         Úpravy jsou vypnuté a stránka se chová přesně jako návštěvníkovi. Vidíte
                         ale <strong>koncept</strong>, ne web — na webu je zatím poslední
                         publikovaná verze.
-                    </span>
-                </p>
-            ) : (
-                <p className={styles.strip}>
-                    <Icon name="info" size={13} className={styles.stripIcon} />
-                    <span>
-                        Klikněte na text nebo obrázek a upravte ho přímo na stránce. Změny se
-                        ukládají jako <strong>koncept</strong> — na webu se objeví až po
-                        publikování. Myš stránky je zatím vypnutá; zapne ji <strong>Náhled</strong>.
-                    </span>
-                </p>
+                    </Advice>
+                )
+            ) : tab !== "pages" ? (
+                // Na povrchové záložce je návod jiný, protože je jiný i způsob
+                // výběru. Kdyby tu zůstala věta o klikání na stránce, mířila by
+                // na to jediné, co tady nefunguje: zavřený modál se kliknout
+                // nedá, a to je celý důvod, proč tahle záložka existuje.
+                adviceHidden.surface ? null : (
+                    <Advice id="surface" icon="info" onDismiss={dismissAdvice}>
+                        Vyberte {tab === "modal" ? "modál" : "seznam"} v řádku nad stránkou — otevře se
+                        formulář s jeho texty. Na stránce se klikat nedá a nemusí:{" "}
+                        {tab === "modal" ? "zavřený modál" : "sbalený seznam"} tam žádný prvek nemá.
+                        Ukládá se jako <strong>koncept</strong>.
+                    </Advice>
+                )
+            ) : adviceHidden.edit ? null : (
+                <Advice id="edit" icon="info" onDismiss={dismissAdvice}>
+                    Klikněte na text nebo obrázek a upravte ho přímo na stránce. Změny se
+                    ukládají jako <strong>koncept</strong> — na webu se objeví až po
+                    publikování. Myš stránky je zatím vypnutá; zapne ji <strong>Náhled</strong>.
+                </Advice>
             )}
 
             <div
@@ -521,6 +874,37 @@ export default function EditView() {
             ) : null}
 
             <PublishDialog {...publish} />
+
+            {/* Popup povrchu, tatáž skořápka, jakou otevírá překryv kliknutím
+                na stránce — `.root` na zoomu 1 je to, co jí dává pozadí
+                a stacking context (viz Overlay.jsx, kde se portáluje sem, do
+                Studia). Tady se neportáluje nikam: tenhle strom UŽ ve Studiu
+                je, takže by portál byl krok tam a zpátky. */}
+            {openSurface && !openSurface.preview ? (
+                <div
+                    className={sheet.root}
+                    style={{ "--cms-zoom": 1, "--cms-inv": 1 }}
+                    data-cms-overlay="popup"
+                    data-cms-popup="surface"
+                >
+                    <SurfacePopup
+                        kind="surface"
+                        surface={openSurface}
+                        lang={writeLang}
+                        onClose={() => setOpenSurface(null)}
+                        onDocSaved={(count) => {
+                            setOpenSurface(null)
+                            // Popup zmizí, takže potvrzení musí být jinde než
+                            // v něm — a musí říct, že je to koncept: tahle
+                            // obrazovka na web nic nepouští.
+                            toast.success(
+                                `Uloženo: ${plural(count, "pole", "pole", "polí")}`,
+                                { description: "Jako koncept — na webu se to objeví až po publikování." },
+                            )
+                        }}
+                    />
+                </div>
+            ) : null}
         </div>
     )
 }
@@ -572,7 +956,7 @@ function annotatedDocs(frameWindow) {
  * cannot happen. Swallowing that would be the worst kind of silence, because the
  * page on screen would look exactly like a published one.
  */
-function usePublishSet(frameRef, previewing) {
+function usePublishSet(frameRef, previewing, lang = null) {
     const port = usePort()
     const core = useCore()
     const toast = useToast()
@@ -623,7 +1007,11 @@ function usePublishSet(frameRef, previewing) {
         const reports = []
         for (const block of blocks) {
             try {
-                const published = await port.publish({ id: block.id })
+                // Publikuje se PO JAZYCÍCH (docs/I18N.md §4): bez `lang` jde ven
+                // základní řádek, s ním ten překladový. Posílá se odsud, i když
+                // `httpDataPort.publish` ho zatím zahazuje — až ho přebere,
+                // tohle už bude na svém místě a nikdo ho nebude hledat.
+                const published = await port.publish({ id: block.id, lang })
                 reports.push(published?.revalidation)
             } catch (error) {
                 failures.push({ block, error })
@@ -651,7 +1039,7 @@ function usePublishSet(frameRef, previewing) {
         if (outcome.ok) toast.success(title, { description: outcome.description })
         else toast.error(title, { description: outcome.description, duration: 12000 })
         setState({ status: "idle", blocks: [], error: null })
-    }, [bump, port, state.blocks, toast])
+    }, [bump, lang, port, state.blocks, toast])
 
     return { state, open, close, confirm, previewing }
 }

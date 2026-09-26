@@ -50,7 +50,7 @@
  * click the first button — which is a worse silence than the one this replaces.
  */
 
-import { sameJson } from "@/cms/core"
+import { sameJson } from "../../core/index.js"
 
 /**
  * Every key any of the three bodies has, in schema order first.

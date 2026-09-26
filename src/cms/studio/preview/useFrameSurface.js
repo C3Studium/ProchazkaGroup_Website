@@ -8,6 +8,9 @@ import site from "../../site/config.js"
 // konfigurace stejně po ruce, a předává se do obou funkcí, aby se cesta tam
 // a zpátky vždycky shodovala.
 const homePreview = site?.homePreview || null
+// Cesty, na kterých se povrch vykresluje sám. Bez nich by je `sitePathFromFrame`
+// odmítlo jako každou jinou adresu pod /studio — viz komentář tam.
+const surfacePreviews = (site?.surfaces || []).map((surface) => surface.preview).filter(Boolean)
 import { mountEditOverlay } from "../../edit/overlay/mount.jsx"
 import { usePersistedJson } from "../shell/persist.js"
 import { CUSTOM, CUSTOM_LIMITS, DEFAULT_PRESET, byId, matching, stepZoom } from "./presets.js"
@@ -72,7 +75,7 @@ export const safePath = (value) => {
     const path = String(value || "/")
     if (!PAGE_PARAM.test(path)) return "/"
     const trimmed = path.replace(/\/+$/, "") || "/"
-    return sitePathFromFrame(trimmed, { homePreview }) === trimmed ? trimmed : "/"
+    return sitePathFromFrame(trimmed, { homePreview, allowed: surfacePreviews }) === trimmed ? trimmed : "/"
 }
 
 const clampSide = (value) =>
@@ -86,8 +89,10 @@ const clampSide = (value) =>
  * @param {function} options.onNavigate   told when the framed document turned out
  *                                        to be a different page than expected
  * @param {boolean} [options.annotated]   whether the framed URL carries `?edit=1`
+ * @param {string|null} [options.lang]    jazyk obsahu, do kterého překryv píše.
+ *                                        `null` je výchozí jazyk; viz Overlay.
  */
-export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, annotated = true }) {
+export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, annotated = true, lang = null }) {
     const [view, setView, viewReady] = usePersistedJson(VIEW_KEY, DEFAULT_VIEW)
 
     const stageRef = useRef(null)
@@ -266,7 +271,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
             win.lenis?.scrollTo?.(target, { immediate: true })
         }
 
-        const framed = sitePathFromFrame(location.pathname, { homePreview })
+        const framed = sitePathFromFrame(location.pathname, { homePreview, allowed: surfacePreviews })
         if (framed === null) {
             // Not a page of the site — /studio, an API route. No surface here is a
             // browser and none of them will host the admin inside itself.
@@ -329,6 +334,11 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
      */
     const overlayRef = useRef(null)
     const zoomRef = useRef(zoom)
+    // Jazyk se čte refem ze stejného důvodu jako zoom: přepnutí jazyka nesmí
+    // překryv přestavět pod kurzorem. Rozdíl je, že zoom jen posune ovládání,
+    // kdežto jazyk mění, kam půjde další zápis — proto se musí dostat dovnitř
+    // i k už mountovanému překryvu, viz efekt níž.
+    const langRef = useRef(lang)
 
     useEffect(() => {
         if (!editing) return undefined
@@ -340,7 +350,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
         try {
             flagged =
                 new URLSearchParams(win.location.search).get(EDIT_PARAM) === EDIT_VALUE &&
-                sitePathFromFrame(win.location.pathname, { homePreview }) !== null
+                sitePathFromFrame(win.location.pathname, { homePreview, allowed: surfacePreviews }) !== null
         } catch {
             // Same-origin by construction; a document mid-navigation can still
             // refuse the read, and there will be another load along shortly.
@@ -350,7 +360,7 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
 
         // Read through a ref rather than taken as a dependency: a zoom change
         // must move the control, not rebuild the overlay under an editor's cursor.
-        const handle = mountEditOverlay(win, { zoom: zoomRef.current })
+        const handle = mountEditOverlay(win, { zoom: zoomRef.current, lang: langRef.current })
         overlayRef.current = handle
         return () => {
             if (overlayRef.current === handle) overlayRef.current = null
@@ -371,6 +381,21 @@ export function useFrameSurface({ sitePath, bust, onNavigate, editing = false, a
         zoomRef.current = zoom
         overlayRef.current?.update({ zoom })
     }, [zoom])
+
+    /**
+     * Jazyk, stejnou cestou jako zoom — a je to jediná cesta, kterou se dovnitř
+     * dostane.
+     *
+     * Rám se kvůli přepnutí jazyka NENAČÍTÁ ZNOVU, a je to schválně: stránka
+     * v rámu ukazuje pořád výchozí jazyk, protože překlady se do ní dostanou až
+     * publikací a buildem (docs/I18N.md §1). Co se mění, je cíl zápisu, ne to,
+     * co je vidět. Kdyby se rám překresloval, tvářil by se, že jazyk přepnul,
+     * a editor by čekal jiný text, než jaký přijde.
+     */
+    useEffect(() => {
+        langRef.current = lang
+        overlayRef.current?.update({ lang })
+    }, [lang])
 
     const src = sitePath === null ? null : srcFor(sitePath)
 

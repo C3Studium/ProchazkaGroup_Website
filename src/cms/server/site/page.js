@@ -17,11 +17,11 @@
 // instances. getStaticProps rejects all three, and a section that receives a
 // half-shape cannot tell it from real content.
 
-import { markAtPath } from '@/cms/schemas/marks'
-import siteCopy from '@/cms/schemas/siteCopy'
-import site from '@/cms/site/config'
-import { pageFor, resolvePage } from '@/cms/site'
-import { HOMEPAGE_COPY_KEYS } from '@/cms/visualEditing'
+import { markAtPath } from '../../schemas/marks.js'
+import siteCopy from '../../schemas/siteCopy.js'
+import site from '../../site/config.js'
+import { pageFor, resolvePage } from '../../site/index.js'
+import { HOMEPAGE_COPY_KEYS } from '../../visualEditing.js'
 
 import { readerFor } from './archive.js'
 import { getSiteCopy } from './content.js'
@@ -92,21 +92,30 @@ const report = (message) => {
  * with — which is the same answer an empty CMS gives, and the right one for a
  * route somebody added a file for and has not described yet.
  *
+ * `lang` je třetí páka a je kolmá na obě předchozí: nevybírá čtenáře, jen mu
+ * říká, v jakém jazyce má odpovídat. Jazyk taky NEVYRÁBÍ ROUTY — stránky
+ * vznikají při buildu, takže přidání jazyka v Nastavení je vždycky dvoukrokové
+ * (I18N.md, oddíl 1) a tenhle soubor o tom druhém kroku nic neví. Bez `lang`
+ * se čte výchozí jazyk, tedy přesně to, co se četlo dosud.
+ *
  * @param {string} route
- * @param {{ draft?: boolean, at?: string|null }} [options]
+ * @param {{ draft?: boolean, at?: string|null, lang?: string|null }} [options]
  */
-export const getPageContent = async (route, { draft = false, at = null } = {}) => {
+export const getPageContent = async (route, { draft = false, at = null, lang = null } = {}) => {
     const page = pageFor(site, route)
     if (!page) {
         report(`route "${route}" není v cms.config.js — stránka se vykreslí s obsahem zabudovaným v komponentách.`)
         return {}
     }
 
-    const read = readerFor({ draft, at })
+    // Jazyk se váže do čtečky a předává se i `getSiteCopy`. Dvakrát totéž
+    // schválně: čtečka ho nese zdrojům, které si ji volají samy, a explicitní
+    // argument je to, co uvidí ten, kdo si `getSiteCopy` zavolá bez nás.
+    const read = readerFor({ draft, at, lang })
     const names = Object.keys(page.sources)
 
     const [copy, ...lists] = await Promise.all([
-        page.copy ? getSiteCopy({ page: page.copy, read }) : Promise.resolve({}),
+        page.copy ? getSiteCopy({ page: page.copy, read, lang }) : Promise.resolve({}),
         ...names.map((name) => {
             const { type, ...options } = page.sources[name]
             const reader = sourceReader(type)

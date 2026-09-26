@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion, useSpring, useTransform } from "framer-motion";
 import { CURTAIN, RISE, group } from "@/components/common/ui/entrance";
 import { useGlobalContext } from "@/context/LoadProvider";
+import { editableIn } from "@/cms/edit";
 
 // The navbar wall's arithmetic, three members wide: the reached-for tile takes
 // and its neighbours give exactly that up, so the row is full to its edges at
@@ -29,6 +30,11 @@ const BOTTOM_BASES = [1, 1, 1, 1];
 
 // The six tips, in the site's plain voice. Rendered where the L seats them:
 // four along the foot, two up the right edge.
+//
+// Co tu stojí, je ZÁLOHA, ne obsah: texty přicházejí z bloku `404.tipy`
+// (cms.config.js) a tohle je to, co stránka řekne, když CMS mlčí. Pět jich je
+// a pět jich zůstane — L je šest oken a jejich šířky se počítají z TOP_BASES
+// a BOTTOM_BASES níž, takže šestý tip by se neobjevil na konci řady, ale nikde.
 const TIPS = [
     ["Tip 01", "Všechno podstatné je v menu nahoře."],
     ["Tip 02", "Nabídka má vlastní stránku — co pro vás vyřešíme a za kolik."],
@@ -36,6 +42,16 @@ const TIPS = [
     ["Tip 04", "Spojit se s námi jde kdykoli — vpravo nahoře."],
     ["Tip 05", "Benefit program: doporučení, které se počítá."],
 ];
+
+/** Co říká rozcestník kolem tipů, když CMS mlčí. */
+const FALLBACK = {
+    words: "Stránka nenalezena",
+    cap: "Nejrychlejší cesta",
+    home: "Zpět na hlavní stránku",
+};
+
+/** Uložený řádek, když něco říká; jinak ten, se kterým stránka přišla. */
+const line = (value, zaloha) => (typeof value === "string" && value.trim() ? value.trim() : zaloha);
 
 const TILE_SPRING = { type: "spring", stiffness: 150, damping: 26, restDelta: 0.001 };
 // The rise and the notch are ONE gesture, so they run on ONE clock: the same
@@ -122,8 +138,27 @@ const notchClip = (tileLeftVw, tileWVw, tileHVh, bottomShares, hotIndex) => {
 // scroll to on a first-paint page) through one motion tree, each element
 // carrying its own delay so the order reads: words, numeral, then the lines,
 // then the caption the lines lead to.
-export default function NotFound404() {
+export default function NotFound404({ content = null }) {
     const { gate } = useGlobalContext();
+    // Dva bloky, dva dokumenty — prvek musí pojmenovat ten, do kterého zapisuje.
+    // Mimo rám Studia je `docId` pryč a `edit(...)` vrací prázdný objekt, takže
+    // se na veřejnou stránku nerozprostře nic.
+    const hero = content?.hero || {};
+    const edit = editableIn(hero.docId || null);
+    const words = {
+        words: line(hero.words, FALLBACK.words),
+        cap: line(hero.cap, FALLBACK.cap),
+        home: line(hero.home, FALLBACK.home),
+    };
+    // Pořadí je vazba: první tip stojí v horní řadě vedle cesty domů, zbylé
+    // čtyři v dolní. Prázdná položka musí zůstat prázdná — zavřít po ní mezeru
+    // by znamenalo posunout tip o dlaždici vedle.
+    const tipsDoc = content?.tips?.docId || null;
+    const editTip = editableIn(tipsDoc);
+    const tips = TIPS.map((shipped, index) => {
+        const row = content?.tips?.rows?.[index];
+        return [line(row?.label, shipped[0]), line(row?.value, shipped[1])];
+    });
     const go = gate === "go";
     // Every delay and duration collapses for a reader who has asked for that —
     // the DOM this renders is identical either way, only the transitions
@@ -284,8 +319,13 @@ export default function NotFound404() {
                 onPointerLeave={fine ? rest : undefined}
                 onPointerDown={dismiss}
             >
+                {/* Bez anotace: slova jsou holý textový uzel sdílející odstavec
+                    s `<em>404</em>` a s pomlčkou, a překryv ukládá `textContent`
+                    — první uložení by značku i pomlčku sežralo. Jsou to `title`
+                    bloku a upravují se ve formuláři. Stejná úvaha jako
+                    u nadhozu /ochrana-soukromi. */}
                 <motion.p className="NotFound404__eyebrow" variants={rise(0.03)}>
-                    <em>404</em> — Stránka nenalezena
+                    <em>404</em> — {words.words}
                 </motion.p>
 
                 {/* One quiet off-grid tick opposite the eyebrow. */}
@@ -330,13 +370,17 @@ export default function NotFound404() {
                         >
                             <GoInner className="NotFound404__box__link" {...goInnerProps}>
                                 <span className="NotFound404__box__body">
-                                    <span className="NotFound404__box__cap">Nejrychlejší cesta</span>
+                                    <span className="NotFound404__box__cap" {...edit("items.0.label")}>{words.cap}</span>
+                                    {/* Také bez anotace: slova stojí uvnitř
+                                        `<span>`u se čtyřmi rohovými značkami,
+                                        takže by je uložení `textContent`em
+                                        smazalo. `items.1.label`, formulářem. */}
                                     <span className="cornerButton NotFound404__goLabel">
                                         <span className="corner corner--tl" />
                                         <span className="corner corner--tr" />
                                         <span className="corner corner--bl" />
                                         <span className="corner corner--br" />
-                                        Zpět na hlavní stránku
+                                        {words.home}
                                     </span>
                                 </span>
                             </GoInner>
@@ -350,9 +394,14 @@ export default function NotFound404() {
                             transition={tileTransition}
                             {...reachProps(0, 1)}
                         >
+                            {/* Na obalu schválně NIC. `editableList` na něm by
+                                přebil všechno pod sebou — překryv hledá prvky
+                                geometricky, takže klik kamkoli do dlaždice by
+                                otevřel formulář celého seznamu místo úpravy toho
+                                řádku, na který editor ukázal. */}
                             <span className="NotFound404__box__body">
-                                <span className="NotFound404__box__cap">{TIPS[0][0]}</span>
-                                <span className="NotFound404__box__text">{TIPS[0][1]}</span>
+                                <span className="NotFound404__box__cap" {...editTip("items.0.label")}>{tips[0][0]}</span>
+                                <span className="NotFound404__box__text" {...editTip("items.0.value")}>{tips[0][1]}</span>
                             </span>
                         </motion.div>
                     </div>
@@ -372,8 +421,8 @@ export default function NotFound404() {
                                 {...reachProps(1, i)}
                             >
                                 <span className="NotFound404__box__body">
-                                    <span className="NotFound404__box__cap">{TIPS[i + 1][0]}</span>
-                                    <span className="NotFound404__box__text">{TIPS[i + 1][1]}</span>
+                                    <span className="NotFound404__box__cap" {...editTip(`items.${i + 1}.label`)}>{tips[i + 1][0]}</span>
+                                    <span className="NotFound404__box__text" {...editTip(`items.${i + 1}.value`)}>{tips[i + 1][1]}</span>
                                 </span>
                             </motion.div>
                         ))}

@@ -11,7 +11,7 @@
 // cms_document does not exist yet, and the day it does the homepage should
 // start reading it without a second deploy.
 
-import { createDocumentRepository } from '../documents.js'
+import { createDocumentRepository, mergeTranslation, normalizeLang } from '../documents.js'
 import { getAnonClient } from '../supabaseAdmin.js'
 
 // Anon, not service_role, deliberately.
@@ -44,15 +44,69 @@ const report = (type, error) => {
 }
 
 /**
+ * Řádky s tělem přeloženým do `lang`, nebo tytéž řádky beze změny.
+ *
+ * Jeden dotaz na stránku výsledků, ne jeden na dokument. Vrací se ŘÁDKY a ne
+ * těla, aby `withIds` níž pořád vidělo na `id` — překlad mění obsah dokumentu,
+ * ne to, který dokument to je.
+ *
+ * Selhání toho dotazu se polyká TADY a ne o patro výš: pravidlo téhle složky
+ * je „nepřečteno = výchozí obsah", a výchozí obsah pro nepřečtený překlad není
+ * prázdná stránka, ale výchozí jazyk. Databáze bez migrace 0013 tak vrátí web
+ * česky místo webu bez textů.
+ */
+const translate = async (type, rows, lang) => {
+    const code = normalizeLang(lang)
+    if (!code || !rows.length) return rows
+
+    let overlays
+    try {
+        overlays = await documents().listTranslations({
+            ids: rows.map((row) => row?.id),
+            lang: code,
+            published: true,
+        })
+    } catch (error) {
+        report(`${type}:${code}`, error)
+        return rows
+    }
+    if (!overlays.size) return rows
+
+    return rows.map((row) => {
+        const overlay = overlays.get(row?.id)
+        if (!overlay) return row
+        return { ...row, data: mergeTranslation(type, row?.data, overlay.data) }
+    })
+}
+
+/**
  * Published bodies of one document type, oldest contract first: `data` only,
  * `status = 'published'` only, never `draft`.
  *
+ * ---------------------------------------------------------------------------
+ * `lang` — a co se stane, když se nenapíše
+ * ---------------------------------------------------------------------------
+ *
+ * Nic. Bez `lang` se čte základní řádek, protože ten JE výchozí jazyk — žádný
+ * dotaz navíc, žádná větev navíc, takže dnešní volání se nemusela měnit a dva
+ * běžící weby se po 0.1.50 chovají přesně jako před ní.
+ *
+ * S `lang` se k publikovaným dokumentům dohledají publikované překlady a přes
+ * základ se položí přeložitelná pole (documents.js `mergeTranslation`). Chybějící
+ * překlad není větev, je to prázdný merge: dokument bez řádku, řádek bez toho
+ * pole i prázdná hodnota v něm dopadnou všechny stejně — zůstane výchozí jazyk,
+ * a pod ním pořád leží fallback zabudovaný v komponentách.
+ *
+ * Neplatný kód jazyka se čte jako „žádný": veřejná stránka s podivným `lang`
+ * má ukázat výchozí jazyk, ne spadnout. Zápis je na to přísný, čtení ne.
+ *
  * @returns {Promise<object[]>} the documents' `data` bodies, or `[]`.
  */
-export const readPublished = async ({ type, sort, filters, perPage = 50, withIds = false } = {}) => {
+export const readPublished = async ({ type, sort, filters, perPage = 50, withIds = false, lang = null } = {}) => {
     try {
         const { rows } = await documents().listPublished({ type, sort, filters, perPage })
-        return rows
+        const translated = await translate(type, rows, lang)
+        return translated
             // `withIds` is OFF by default and deliberately so: a document id is
             // an editing concern, and putting one into every published body
             // would ship it in the `__NEXT_DATA__` of every page for no reader's

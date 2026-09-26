@@ -4,7 +4,7 @@
 // keeps the coupling to another build's module in one place — when the core's
 // surface shifts, one file changes — and it gives tests a single seam to stub.
 
-import { findType, getType, listTypes, sameJson, validateDocument, validateValue } from '@/cms/core'
+import { findType, getType, listTypes, sameJson, validateDocument, validateValue } from '../core/index.js'
 
 import { invalid, notFound } from './errors.js'
 

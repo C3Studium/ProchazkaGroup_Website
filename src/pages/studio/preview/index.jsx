@@ -48,7 +48,7 @@ export async function getStaticProps(context) {
       generatedAt: new Date().toISOString(),
       sources: summarise(content),
       // Read off src/pages, never typed out — see src/cms/server/pages.js.
-      pages: listSitePages(),
+      pages: await listSitePages(),
     },
     revalidate: 15,
   }

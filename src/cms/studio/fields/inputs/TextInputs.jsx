@@ -1,7 +1,7 @@
-import { registerInput, registerKind } from "../registry"
-import { getPath } from "../../lib/documents"
-import Icon from "../../ui/Icon"
-import { IconButton } from "../../ui/controls"
+import { registerInput, registerKind } from "../registry.js"
+import { getPath } from "../../lib/documents.js"
+import Icon from "../../ui/Icon.jsx"
+import { IconButton } from "../../ui/controls.jsx"
 import styles from "./inputs.module.scss"
 
 /**

@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from "react"
-import { usePort } from "../context/StudioProvider"
-import { useToast } from "../context/ToastProvider"
-import Icon from "../ui/Icon"
+import { usePort } from "../context/StudioProvider.jsx"
+import { useToast } from "../context/ToastProvider.jsx"
+import Icon from "../ui/Icon.jsx"
 import styles from "./media.module.scss"
 
 /**

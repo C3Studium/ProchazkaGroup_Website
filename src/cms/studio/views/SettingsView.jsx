@@ -1,4 +1,7 @@
 import { useCallback, useMemo, useRef, useState } from "react"
+// Čistý modul bez serverových závislostí — `httpDataPort.js` si ho bere ze
+// stejného důvodu. Překládá stavový kód a tělo odpovědi na tutéž `CmsError`,
+// jakou dostane zbytek Studia z portu, takže hlášky vypadají všude stejně.
 import { useAuth, usePort } from "../context/StudioProvider.jsx"
 import { useAsync } from "../hooks/useAsync.js"
 import { useToast } from "../context/ToastProvider.jsx"
@@ -62,7 +65,8 @@ export default function SettingsView() {
   const sections = [
     { id: "prostredi", label: "Prostředí" },
     { id: "spravovat", label: "Odkaz na správu" },
-    { id: "predvolby", label: "Telefonní předvolby" },
+    { id: "jazyky", label: "Jazyky" },
+    { id: "jazyk-studia", label: "Jazyk Studia" },
     { id: "pristup", label: "Veřejný přístup" },
     { id: "klice", label: "API klíče" },
     { id: "prihlaseni", label: "Přihlášení" },
@@ -101,7 +105,8 @@ export default function SettingsView() {
         <div className={styles.sections} ref={bodyRef}>
           <EnvironmentSection />
           <ManageWidgetSection />
-          <DialPrefixSection />
+          <LanguagesSection />
+          <StudioLanguageSection />
           <ExposureSection />
           <KeysSection />
           <SessionsSection />
@@ -430,66 +435,111 @@ function ManageWidgetSection() {
   )
 }
 
-/* ------------------------------------------------------ dial prefixes -- */
+/* ---------------------------------------------------------------- jazyky -- */
+
 
 /**
- * Které země nabízí pole s telefonním číslem.
+ * Tvar kódu jazyka, tentýž jako `CODE` v `src/server/settings.js` a jako CHECK
+ * v migraci 0013.
  *
- * Nastavení nástroje, ne obsah webu — server/dialPrefixes.js rozepisuje proč,
- * a je to věta, která se sem vejde celá: „+420 je Česko" platí na každém webu
- * a nikdo to nevymýšlí, kdežto všechno v cms_document napsal člověk, který za
- * to odpovídá.
- *
- * POŘADÍ JE OBSAH TOHOTO SEZNAMU, ne jeho zobrazení. První země je ta, na které
- * pole telefonu startuje, takže šipky nahoru a dolů mění chování webu — proto
- * jsou to tlačítka v řádku a ne přetahování: tažení myší je na tohle jemný cíl,
- * z klávesnice nejde vůbec a člověk po něm nepozná, jestli se něco stalo.
- *
- * Draft se drží zvlášť od uloženého, stejně jako u štítku nad tím, a ze
- * stejného důvodu: „co je uložené" a „co je na obrazovce" jsou dvě hodnoty
- * a tlačítko Uložit je musí umět rozeznat.
+ * Je to kopie, a schválně: odpověď „takhle kód nevypadá” má přijít hned pod
+ * polem, ne po kolečku na server. Rozhoduje pořád server — tenhle test jenom
+ * ušetří cestu tam a zpátky.
  */
-function DialPrefixSection() {
+const LANGUAGE_CODE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/
+
+/**
+ * Jazyky, ve kterých je web.
+ *
+ * ---------------------------------------------------------------------------
+ * Uložit tady NESTAČÍ, a obrazovka to musí říct nahlas
+ * ---------------------------------------------------------------------------
+ *
+ * Seznam jazyků leží v databázi (`cms_setting`, klíč `site.languages`), takže se
+ * změní hned. Adresy stránek ale vznikají při buildu — jazyk přidaný tady sám
+ * o sobě žádnou routu nevyrobí a web o něm do nejbližšího nasazení neví.
+ * Přidání jazyka je proto vždycky dvoukrokové (docs/I18N.md, oddíl 1)
+ * a nenapsat to sem znamená, že si člověk bude myslet, že je hotovo, a půjde
+ * hledat poruchu tam, kde žádná není. Odtud ten rámeček pod formulářem.
+ *
+ * ---------------------------------------------------------------------------
+ * Co s výchozím jazykem nejde
+ * ---------------------------------------------------------------------------
+ *
+ * Výchozí jazyk je ten, jehož obsah leží v základním řádku `cms_document`;
+ * ostatní jazyky na něj padají, kdykoli překlad chybí. Smazat ani vypnout ho
+ * proto nejde — bez něj by web neměl jazyk, ve kterém texty opravdu jsou.
+ * Přepnout, který jazyk je výchozí, se odsud nedá vůbec: to není nastavení,
+ * to je přesun obsahu mezi tabulkami.
+ *
+ * Zdrojem pravdy o obojím je `validate()` v `src/server/settings.js`. Tady je
+ * vypnutý přepínač a chybějící koš, což je pohodlí, ne kontrola.
+ */
+function LanguagesSection() {
   const port = usePort()
   const toast = useToast()
+  const { data, error, loading, reload, setData } = useAsync(() => port.settings.languages.read(), [])
 
-  const { data, error, loading, reload, setData } = useAsync(() => port.settings.dialPrefixes.read(), [port])
-
+  // Rozepsaná kopie, nebo nic. Držená zvlášť od `data` ze stejného důvodu jako
+  // u widgetu: „co je uložené” a „co je na obrazovce” musí jít rozeznat, jinak
+  // neví tlačítko Uložit, kdy má svítit.
   const [draft, setDraft] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [code, setCode] = useState("")
+  const [label, setLabel] = useState("")
+  const [addError, setAddError] = useState(null)
+  const [removing, setRemoving] = useState(null)
 
-  const list = draft || data
+  const value = draft || data
   const dirty = Boolean(draft && data && JSON.stringify(draft) !== JSON.stringify(data))
 
-  /** Jeden řádek jinak; zbytek beze změny. */
-  const edit = (index, patch) =>
-    setDraft((list || []).map((row, i) => (i === index ? { ...row, ...patch } : row)))
+  const editList = (list) => setDraft({ ...(draft || data), list })
 
-  const move = (index, by) => {
-    const next = [...(list || [])]
-    const to = index + by
-    if (to < 0 || to >= next.length) return
-    ;[next[index], next[to]] = [next[to], next[index]]
-    setDraft(next)
+  // Které kódy v rozepsaném seznamu ještě nejsou uložené. Kvůli hlášce po
+  // uložení: věta o nasazení má přijít tehdy, kdy opravdu platí.
+  const addedCodes = useMemo(() => {
+    if (!draft || !data) return []
+    const before = new Set(data.list.map((entry) => entry.code))
+    return draft.list.filter((entry) => !before.has(entry.code)).map((entry) => entry.code)
+  }, [draft, data])
+
+  const add = () => {
+    const wanted = code.trim().toLowerCase()
+    if (!LANGUAGE_CODE.test(wanted)) {
+      setAddError("Kód je BCP 47 — třeba cs, en, de nebo pt-BR.")
+      return
+    }
+    if (value.list.some((entry) => entry.code === wanted)) {
+      setAddError(`Jazyk „${wanted}” už v seznamu je.`)
+      return
+    }
+    setAddError(null)
+    // Do seznamu, ne rovnou na server. Přidání, vypnutí i odebrání se ukládají
+    // jedním tlačítkem, takže je z toho jeden zápis a jedna odpověď.
+    editList([...value.list, { code: wanted, label: label.trim() || wanted, enabled: true }])
+    setCode("")
+    setLabel("")
   }
 
-  const remove = (index) => setDraft((list || []).filter((_, i) => i !== index))
-
-  const add = () => setDraft([...(list || []), { label: "", code: "", iso: null }])
-
   const save = async () => {
+    const added = addedCodes
     setSaving(true)
     try {
-      // Bere se odpověď serveru, ne draft: server seznam normalizuje — velká
-      // písmena u ISO, oříznuté mezery — a vzít si vlastní verzi by znamenalo
-      // obrazovku, která tvrdí něco jiného než databáze. Tatáž úvaha jako
-      // u štítku nad tím a jako ve studio/lib/visualSave.js.
-      const stored = await port.settings.dialPrefixes.save(list)
+      // Bere se, co server uložil, ne co se poslalo: tvar normalizuje a některé
+      // věci odmítne. Totéž dorovnání jako u widgetu.
+      const stored = await port.settings.languages.save(value)
       setData(stored)
       setDraft(null)
-      toast.success("Uloženo. Projeví se při dalším načtení stránky.")
+      setAddError(null)
+      toast.success(
+        added.length === 0
+          ? "Uloženo."
+          : added.length === 1
+            ? `Uloženo. Jazyk „${added[0]}” se na webu objeví až po nejbližším nasazení.`
+            : `Uloženo. Nové jazyky (${added.join(", ")}) se na webu objeví až po nejbližším nasazení.`
+      )
     } catch (failure) {
-      toast.error(failure?.message || "Předvolby se nepodařilo uložit.")
+      toast.error(failure?.message || "Jazyky se nepodařilo uložit.")
     } finally {
       setSaving(false)
     }
@@ -497,106 +547,129 @@ function DialPrefixSection() {
 
   return (
     <Section
-      id="predvolby"
-      title="Telefonní předvolby"
-      hint="Země, ze kterých si návštěvník vybírá před telefonním číslem. Platí pro všechna pole s telefonem na webu; první země v pořadí je předvybraná."
+      id="jazyky"
+      title="Jazyky webu"
+      hint="V kolika jazycích je obsah. Chybějící překlad padá na výchozí jazyk, takže přidání jazyka nic nerozbije — jen otevře místo, kam překlad napsat."
       action={<IconButton icon="refresh" label="Načíst znovu" onClick={reload} />}
     >
       {loading && !data ? (
-        <SkeletonRows count={4} height={52} />
+        <SkeletonRows count={2} height={44} />
       ) : error ? (
         <ErrorState error={error} onRetry={reload} compact />
-      ) : list ? (
+      ) : value ? (
         <>
           <ul className={styles.rows}>
-            {list.map((row, index) => (
-              // Klíč je pozice, ne předvolba. Předvolba je rozepsaná hodnota,
-              // kterou uživatel zrovna přepisuje — klíč, který se mění po
-              // každé klávese, by pole odmountoval a sebral mu kurzor.
-              <li key={index} className={`${styles.row} ${styles.dialRow}`}>
-                <span className={styles.dialIndex} aria-hidden="true">
-                  {index + 1}
-                </span>
+            {value.list.map((entry) => {
+              const isDefault = entry.code === value.default
+              return (
+                <li key={entry.code} className={`${styles.row} ${entry.enabled ? "" : styles.rowOff}`}>
+                  <span className={styles.rowMain}>
+                    <span className={styles.rowName}>
+                      {entry.label}
+                      <span className={styles.langCode}>{entry.code}</span>
+                      {isDefault ? <Badge tone="accent">výchozí</Badge> : null}
+                    </span>
+                    <span className={styles.rowMeta}>
+                      {isDefault
+                        ? "Obsah leží v tomhle jazyce a ostatní na něj padají, když překlad chybí. Vypnout ani odebrat ho nejde."
+                        : entry.enabled
+                          ? "Zapnutý. Na webu se objeví po nejbližším nasazení."
+                          : "Vypnutý. Uložené překlady zůstávají, jen se nikde nepoužijí."}
+                    </span>
+                  </span>
 
-                <input
-                  type="text"
-                  className={`${styles.input} ${styles.dialLabel}`}
-                  aria-label={`Země na řádku ${index + 1}`}
-                  placeholder="Česko"
-                  autoComplete="off"
-                  value={row.label || ""}
-                  onChange={(event) => edit(index, { label: event.target.value })}
-                />
+                  <span className={styles.rowState}>
+                    <Toggle
+                      checked={entry.enabled}
+                      disabled={isDefault}
+                      label={entry.enabled ? "Zapnuto" : "Vypnuto"}
+                      onChange={(on) =>
+                        editList(value.list.map((row) => (row.code === entry.code ? { ...row, enabled: on } : row)))
+                      }
+                    />
+                  </span>
 
-                <input
-                  type="text"
-                  className={`${styles.input} ${styles.dialCode}`}
-                  aria-label={`Předvolba na řádku ${index + 1}`}
-                  placeholder="+420"
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={row.code || ""}
-                  onChange={(event) => edit(index, { code: event.target.value.trim() })}
-                />
-
-                <input
-                  type="text"
-                  className={`${styles.input} ${styles.dialIso}`}
-                  aria-label={`Kód země na řádku ${index + 1}`}
-                  placeholder="CZ"
-                  autoComplete="off"
-                  spellCheck={false}
-                  maxLength={2}
-                  value={row.iso || ""}
-                  // Prázdné pole je `null`, ne "": ISO je nepovinné a prázdný
-                  // řetězec by ho udělal vyplněným-ale-neplatným.
-                  onChange={(event) => edit(index, { iso: event.target.value.toUpperCase() || null })}
-                />
-
-                {index === 0 ? <span className={styles.you}>výchozí</span> : <span className={styles.dialGap} />}
-
-                <div className={styles.rowActions}>
-                  <IconButton
-                    icon="chevronUp"
-                    label={`Posunout ${row.label || "řádek"} nahoru`}
-                    disabled={index === 0}
-                    onClick={() => move(index, -1)}
-                  />
-                  <IconButton
-                    icon="chevronDown"
-                    label={`Posunout ${row.label || "řádek"} dolů`}
-                    disabled={index === list.length - 1}
-                    onClick={() => move(index, 1)}
-                  />
-                  <IconButton
-                    icon="trash"
-                    tone="danger"
-                    label={`Smazat ${row.label || "řádek"}`}
-                    // Poslední zemi smazat nejde. Formulář bez jediné
-                    // předvolby je formulář, do kterého nejde napsat telefon —
-                    // server to odmítne taky, tohle je jen dřív a beze ztráty
-                    // rozepsané práce.
-                    disabled={list.length === 1}
-                    onClick={() => remove(index)}
-                  />
-                </div>
-              </li>
-            ))}
+                  <span className={styles.rowActions}>
+                    {isDefault ? null : (
+                      <IconButton
+                        icon="trash"
+                        label={`Odebrat jazyk ${entry.label}`}
+                        tone="danger"
+                        onClick={() => setRemoving(entry)}
+                      />
+                    )}
+                  </span>
+                </li>
+              )
+            })}
           </ul>
 
-          <div className={styles.rowsFoot}>
-            <Button variant="ghost" icon="plus" onClick={add}>
-              Přidat zemi
+          <div className={styles.addForm}>
+            <FieldShell label="Kód" description="BCP 47 — cs, en, de, pt-BR.">
+              {(id) => (
+                <input
+                  id={id}
+                  type="text"
+                  className={`${styles.input} ${styles.codeInput}`}
+                  value={code}
+                  placeholder="en"
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(event) => setCode(event.target.value)}
+                />
+              )}
+            </FieldShell>
+
+            <FieldShell label="Název" description="Jak se jazyk jmenuje v nabídkách — „English”, „Deutsch”.">
+              {(id) => (
+                <input
+                  id={id}
+                  type="text"
+                  className={styles.input}
+                  value={label}
+                  placeholder="English"
+                  autoComplete="off"
+                  onChange={(event) => setLabel(event.target.value)}
+                />
+              )}
+            </FieldShell>
+
+            <Button variant="secondary" icon="plus" onClick={add}>
+              Přidat jazyk
             </Button>
-            <ResultCount>{plural(list.length, "země", "země", "zemí")}</ResultCount>
           </div>
+
+          {addError ? (
+            <p className={styles.failure} role="alert">
+              <Icon name="warning" size={13} />
+              {addError}
+            </p>
+          ) : null}
+
+          {/* Tahle věta je důvod, proč tu sekce vypadá takhle. Bez ní vypadá
+              přidání jazyka jako hotová věc a web pak „mlčí” bez vysvětlení. */}
+          <p className={styles.notice}>
+            <Icon name="warning" size={13} />
+            <span>
+              <strong>Nový jazyk potřebuje nasazení.</strong> Adresy stránek vznikají při buildu, takže jazyk uložený
+              tady sám o sobě žádnou routu nevyrobí — na webu se objeví až po nejbližším nasazení. Do té doby o něm ví
+              jen Studio. Totéž platí obráceně: odebraný nebo vypnutý jazyk zmizí z webu až tímtéž krokem.
+            </span>
+          </p>
 
           <div className={styles.saveRow}>
             <Button variant="primary" icon="check" onClick={save} loading={saving} disabled={!dirty}>
               Uložit
             </Button>
             {dirty ? (
-              <Button variant="ghost" onClick={() => setDraft(null)} disabled={saving}>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setDraft(null)
+                  setAddError(null)
+                }}
+                disabled={saving}
+              >
                 Zahodit změny
               </Button>
             ) : (
@@ -604,6 +677,113 @@ function DialPrefixSection() {
             )}
           </div>
         </>
+      ) : null}
+
+      <ConfirmDialog
+        open={Boolean(removing)}
+        onClose={() => setRemoving(null)}
+        title="Odebrat jazyk?"
+        description={`Jazyk „${removing?.label}” (${removing?.code}) zmizí ze seznamu. Uložené překlady se nemažou — zůstanou v databázi a vrátí se, až jazyk přidáte znovu. Ze seznamu odejde po uložení, z webu až po nejbližším nasazení.`}
+        confirmLabel="Odebrat"
+        onConfirm={() => {
+          editList(value.list.filter((entry) => entry.code !== removing.code))
+          setRemoving(null)
+        }}
+      />
+    </Section>
+  )
+}
+
+/* --------------------------------------------------------- jazyk Studia -- */
+
+/** Jak se ty dva jazyky jmenují. Katalog `src/i18n/` je zatím nemá odkud vzít. */
+const STUDIO_LANGUAGE_LABELS = { cs: "Čeština", en: "English" }
+
+/**
+ * Jazyk Studia — a je to něco JINÉHO než sekce nad tím.
+ *
+ * Nahoře je řeč o obsahu: v kolika jazycích je web pro návštěvníka. Tady jde
+ * o to, jakou řečí mluví admin na obsluhu. Web může být trojjazyčný a Studio
+ * česky, i naopak; jsou to dva klíče v `cms_setting` (`site.languages`
+ * a `studio.language`) a dva endpointy, ne jedno nastavení se dvěma poli.
+ * Proto taky vlastní sekce s vlastním nadpisem — vedle sebe v jedné by se to
+ * spolehlivě pletlo.
+ *
+ * ---------------------------------------------------------------------------
+ * KAM SE NAPOJÍ KATALOG TEXTŮ
+ * ---------------------------------------------------------------------------
+ *
+ * Dneska se tu ukládá jenom volba. Katalog (`src/i18n/`, viz docs/I18N.md,
+ * oddíl 8) se staví zvlášť a až bude, je uložený kód jediné, co potřebuje:
+ *
+ *   - Studio: kód se přečte jednou nahoře (`src/studio/shell/`) a rozdá se
+ *     komponentám přes kontext, stejně jako se dnes rozdává port. Tahle sekce
+ *     se nemění — pořád jen zapisuje řádek.
+ *   - server: hlášky jádra a veřejných API si sáhnou pro `readStudioLanguage()`
+ *     z `src/server/handlers/settings.js` (a až se to přestěhuje, ze
+ *     `src/server/settings.js` vedle `readSiteLanguages`).
+ *   - pluralizace: `plural()` ve `src/studio/lib/format.js` je česká; katalog
+ *     ji musí umět nahradit pravidlem podle jazyka.
+ *
+ * Do té doby přepnutí na „English” nic nepřeloží — a věta pod přepínačem to
+ * říká nahlas, aby to nevypadalo jako porucha.
+ */
+function StudioLanguageSection() {
+  const port = usePort()
+  const toast = useToast()
+  const { data, error, loading, reload, setData } = useAsync(() => port.settings.studioLanguage.read(), [])
+  const [saving, setSaving] = useState(false)
+
+  // Bez tlačítka Uložit. Je to jedna hodnota ze dvou možností, takže kliknutí
+  // na přepínač JE to rozhodnutí — mezikrok by tu nic nechránil.
+  const choose = async (next) => {
+    if (!data || next === data.code) return
+    setSaving(true)
+    try {
+      const stored = await port.settings.studioLanguage.save({ code: next })
+      setData(stored)
+      toast.success("Uloženo.")
+    } catch (failure) {
+      toast.error(failure?.message || "Jazyk Studia se nepodařilo uložit.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  // Nabídka chodí ze serveru: co Studio opravdu umí, ví katalog, ne obrazovka.
+  const options = (data?.available || ["cs"]).map((item) => ({
+    id: item,
+    title: STUDIO_LANGUAGE_LABELS[item] || item,
+  }))
+
+  return (
+    <Section
+      id="jazyk-studia"
+      title="Jazyk Studia"
+      hint="Řeč téhle správy — nabídek, tlačítek a hlášek. S jazyky webu nad tím to nesouvisí: web může být v pěti jazycích a Studio česky."
+      action={<IconButton icon="refresh" label="Načíst znovu" onClick={reload} />}
+    >
+      {loading && !data ? (
+        <SkeletonRows count={1} height={44} />
+      ) : error ? (
+        <ErrorState error={error} onRetry={reload} compact />
+      ) : data ? (
+        <div className={styles.facts}>
+          <Fact
+            wide
+            label="Jazyk Studia"
+            value={<Segmented options={options} value={data.code} onChange={saving ? () => {} : choose} />}
+            note="Platí pro celou správu a pro každého, kdo se do ní přihlásí — není to osobní předvolba."
+          />
+
+          <Fact
+            wide
+            label="Překlady textů"
+            value={<Badge tone="accent" dot>zatím jen čeština</Badge>}
+            tone="accent"
+            note="Volba se uloží, ale texty se přepnou až s katalogem překladů. Do té doby zůstane Studio české i po přepnutí na English."
+          />
+        </div>
       ) : null}
     </Section>
   )

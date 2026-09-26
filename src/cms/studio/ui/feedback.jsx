@@ -1,5 +1,5 @@
-import Icon from "./Icon"
-import { Button } from "./controls"
+import Icon from "./Icon.jsx"
+import { Button } from "./controls.jsx"
 import styles from "./feedback.module.scss"
 
 /**

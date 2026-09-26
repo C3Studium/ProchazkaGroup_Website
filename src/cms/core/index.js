@@ -37,3 +37,9 @@ export {
 export { isField } from "./defineField.js"
 export { createRule, isRule, RULE_FLAGS } from "./rules.js"
 export { CmsSchemaError } from "./errors.js"
+
+// Vícejazyčnost, ta její část, která je čistá logika nad schématem: která pole
+// jdou do překladového řádku a která zůstávají v základu. Ptá se na to čtení
+// i zápis (docs/I18N.md §3 a §4) a obě strany musí dostat tutéž odpověď, jinak
+// zápis projde a čtení jeho výsledek zahodí.
+export { isTranslatable, TRANSLATES_BY_DEFAULT } from "./translate.js"

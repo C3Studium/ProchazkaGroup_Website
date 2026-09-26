@@ -15,11 +15,11 @@
 // Pure — the core and errors.js, nothing else — and therefore browser-safe in
 // the same way `httpDataPort.js` is, despite living under `server/`. Shared so
 // the stub cannot accept a field path or a value that production would refuse.
-import { sameJson } from "@/cms/core"
-import { patchBody } from "@/cms/server/fieldPatch"
-import { REJECTION_FIELDS, REJECTION_REASONS } from "@/cms/schemas/review"
+import { sameJson } from "../../core/index.js"
+import { patchBody } from "../../server/fieldPatch.js"
+import { REJECTION_FIELDS, REJECTION_REASONS } from "../../schemas/review.js"
 
-import { DEV_PASSWORD, seedAssets, seedDocuments, seedUsers } from "./seed"
+import { DEV_PASSWORD, seedAssets, seedDocuments, seedUsers } from "./seed.js"
 
 const STORE_KEY = "cms.studio.dev"
 // 8: consultants gained academicTitle/firstName/lastName, a second portrait and
@@ -31,7 +31,10 @@ const STORE_KEY = "cms.studio.dev"
 // raw ones. Version 9 fixtures drew ten logos with their backgrounds still on
 // — including KB and ČSOB, the two that were dropped because keying could not
 // clean them — so a stale store silently undoes that work on the homepage.
-const STORE_VERSION = 10
+// 11: roles renamed per 0011 (admin/owner/member). A version 10 store carries
+// the signed-in fixture as "owner", and against requireAdmin that locks the
+// dev session out of the Users screen it is there to exercise.
+const STORE_VERSION = 11
 const LATENCY = 140
 
 export class CmsError extends Error {
@@ -278,14 +281,15 @@ export function createDevPort({ signedIn = false } = {}) {
   }
 
   /** The server checks this on every request; so does the stub, or the Studio
-   *  gets developed against a permission model that does not exist. */
-  const requireOwner = () => {
+   *  gets developed against a permission model that does not exist. Since 0011
+   *  the role with the rights is `admin` — owner is a title. */
+  const requireAdmin = () => {
     const user = requireSession()
-    if (user.role !== "owner") throw new CmsError("forbidden", "Tuto akci může provést jen vlastník.")
+    if (user.role !== "admin") throw new CmsError("forbidden", "Tuto akci může provést jen správce.")
     return user
   }
 
-  const activeOwners = () => store.users.filter((user) => user.role === "owner" && !user.disabledAt)
+  const activeAdmins = () => store.users.filter((user) => user.role === "admin" && !user.disabledAt)
 
   const findUser = (id) => {
     const user = store.users.find((entry) => entry.id === id)
@@ -293,12 +297,12 @@ export function createDevPort({ signedIn = false } = {}) {
     return user
   }
 
-  const assertNotLastOwner = (target) => {
-    if (target.role !== "owner" || target.disabledAt) return
-    if (activeOwners().length <= 1) {
+  const assertNotLastAdmin = (target) => {
+    if (target.role !== "admin" || target.disabledAt) return
+    if (activeAdmins().length <= 1) {
       throw new CmsError(
         "conflict",
-        "Toto je poslední aktivní vlastník. Nejdřív pověřte někoho dalšího, jinak by se systém uzamkl.",
+        "Toto je poslední aktivní správce. Nejdřív pověřte někoho dalšího, jinak by se systém uzamkl.",
       )
     }
   }
@@ -412,9 +416,18 @@ export function createDevPort({ signedIn = false } = {}) {
      * The one thing it re-states rather than shares is the write itself, and it
      * re-states it identically: `draft` moves, `data` does not.
      */
-    async patchField({ id, field, value }) {
+    async patchField({ id, field, value, lang = null }) {
       await wait()
       requireSession()
+      // Vývojový port drží dokumenty v jednom souboru a překladové řádky nemá.
+      // Tiše zapsat překlad do základu by znamenalo, že si v dev režimu přepíšeš
+      // češtinu němčinou a poznáš to až na ostrém webu — tak radši věta.
+      if (lang) {
+        throw new Error(
+          `Vývojový režim neumí překlady. Zápis do jazyka „${lang}" vyžaduje databázi ` +
+            '— nastav SUPABASE_SERVICE_ROLE_KEY nebo DATABASE_URL.',
+        )
+      }
       const doc = find(id)
       const next = patchBody(doc.type, doc.draft ?? doc.data ?? {}, field, value)
 
@@ -736,20 +749,30 @@ export function createDevPort({ signedIn = false } = {}) {
       users: {
         async list() {
           await wait(120)
-          requireOwner()
+          requireAdmin()
+          // Ascending, matching users.js listUsers: with admin/owner/member the
+          // alphabet puts admin first. The stub sorted descending from the
+          // owner/editor era, which now buried the administrator at the bottom.
           const rows = [...store.users].sort(
-            (a, b) => b.role.localeCompare(a.role) || a.email.localeCompare(b.email, "cs"),
+            (a, b) => a.role.localeCompare(b.role) || a.email.localeCompare(b.email, "cs"),
           )
           return { rows: rows.map(publicUser) }
         },
 
-        async create({ email, name, role = "editor", password } = {}) {
+        async create({ email, name, role = "member", password } = {}) {
           await wait(400)
-          const actor = requireOwner()
+          const actor = requireAdmin()
           const address = String(email || "").trim().toLowerCase()
 
           if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(address)) {
             throw new CmsError("invalid", "Zadejte platnou e-mailovou adresu.", { email: "Neplatný formát" })
+          }
+          // The same refusal the real port gives (users.js ROLES) — without it
+          // the stub accepted the stale "editor" default for months while the
+          // server answered "Neznámá role", which is exactly the drift a stub
+          // exists to prevent.
+          if (!["owner", "member"].includes(role)) {
+            throw new CmsError("invalid", "Neplatná role.", { role: "Neznámá role" })
           }
           if (store.users.some((user) => user.email.toLowerCase() === address)) {
             throw new CmsError("conflict", "Uživatel s touto adresou už existuje.")
@@ -777,15 +800,21 @@ export function createDevPort({ signedIn = false } = {}) {
           }
           store.users.push(entry)
           persist()
-          return { user: publicUser(entry), temporaryPassword: generated ? secret : null }
+          return {
+            user: publicUser(entry),
+            temporaryPassword: generated ? secret : null,
+            // The real handler reports how the invite mail went; a stub has no
+            // mail, and answering the shape keeps the dialog's wording honest.
+            invite: { sent: false, reason: "dev-port" },
+          }
         },
 
         async updateRole({ id, role }) {
           await wait(200)
-          requireOwner()
+          requireAdmin()
           const target = findUser(id)
           if (target.role === role) return clone(publicUser(target))
-          if (role !== "owner") assertNotLastOwner(target)
+          if (role !== "admin") assertNotLastAdmin(target)
           target.role = role
           target.updatedAt = now()
           persist()
@@ -794,9 +823,9 @@ export function createDevPort({ signedIn = false } = {}) {
 
         async setDisabled({ id, disabled }) {
           await wait(200)
-          requireOwner()
+          requireAdmin()
           const target = findUser(id)
-          if (disabled) assertNotLastOwner(target)
+          if (disabled) assertNotLastAdmin(target)
           target.disabledAt = disabled ? now() : null
           target.updatedAt = now()
           persist()
@@ -805,9 +834,9 @@ export function createDevPort({ signedIn = false } = {}) {
 
         async remove({ id }) {
           await wait(260)
-          requireOwner()
+          requireAdmin()
           const target = findUser(id)
-          assertNotLastOwner(target)
+          assertNotLastAdmin(target)
           store.users = store.users.filter((user) => user.id !== id)
           // Deleting your own account ends your own session, exactly as the
           // ON DELETE CASCADE on cms_session does.
@@ -831,6 +860,13 @@ export function createDevPort({ signedIn = false } = {}) {
     settings: notInDevPort([
       "status",
       "probe",
+      // Obojí sedí v `cms_setting`, což dev port nemá. Bez těchhle dvou jmen
+      // by obrazovka spadla na `undefined is not a function` místo na větu,
+      // že to vývojový režim neumí.
+      "languages.read",
+      "languages.save",
+      "studioLanguage.read",
+      "studioLanguage.save",
       "keys.list",
       "keys.create",
       "keys.revoke",
@@ -844,15 +880,6 @@ export function createDevPort({ signedIn = false } = {}) {
       // public site — which reads the real endpoint — does not use.
       "widget.read",
       "widget.save",
-      // Předvolby telefonu jsou ten druhý uložený případ a odmítají se ze
-      // stejného důvodu, slovo od slova: formuláře na webu čtou skutečný
-      // endpoint (/api/cms/dial-prefixes), takže seznam upravený proti stubu
-      // by žil jen v téhle záložce a obrazovka by hlásila země, které pole
-      // telefonu nenabízí. Čistá instalace navíc předvolby UMÍ i bez řádku
-      // v databázi — DIAL_PREFIX_DEFAULTS v server/dialPrefixes.js — takže
-      // „nedostupné v dev portu" tady nikoho o nic nepřipraví.
-      "dialPrefixes.read",
-      "dialPrefixes.save",
     ]),
 
     /** Dev-only escape hatch used by the "reset data" control in the shell. */

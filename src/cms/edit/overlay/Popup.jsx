@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
 import * as core from "../../core/index.js"
-import { StudioProvider } from "../../studio/context/StudioProvider.jsx"
+import { AuthProvider, StudioProvider } from "../../studio/context/StudioProvider.jsx"
 
 import { bodyFor, titleFor } from "./modules.js"
 import styles from "./sheet.js"
@@ -67,6 +67,11 @@ export default function Popup({
   hrefField,
   href,
   typeName,
+  // Povrch a jazyk. Obojí umí jen `kind: "surface"`, a obojí přichází
+  // z „Upravit kontent" — z konfigurace, respektive z `?lang=` v adrese
+  // Studia. Skořápka se na ně neptá, jen je podá tělu: viz modules.js.
+  surface,
+  lang,
   onClose,
   onPick,
   onAlt,
@@ -95,7 +100,7 @@ export default function Popup({
   const config = useMemo(() => ({ title: "Knihovna" }), [])
 
   const Body = bodyFor(kind, actions)
-  const title = titleFor(kind, actions, core.findType?.(typeName)?.title, field)
+  const title = titleFor(kind, actions, core.findType?.(typeName)?.title, field, surface)
 
   // One prop bag, spread into whichever body was picked. A body reads what it
   // needs and ignores the rest — which is what keeps adding one from touching
@@ -107,6 +112,8 @@ export default function Popup({
     hrefField,
     href,
     typeName,
+    surface,
+    lang,
     onClose,
     onPick,
     onAlt,
@@ -134,8 +141,20 @@ export default function Popup({
           ) : !port ? (
             <p className={styles.mediaLoading}>Načítám…</p>
           ) : (
+            // `AuthProvider` uvnitř, ne vedle: bere si `port` přes `usePort()`,
+            // takže musí být pod `StudioProvider`.
+            //
+            // A musí tu být vůbec, protože tenhle strom bývá VLASTNÍ React root
+            // v dokumentu rámu (edit/overlay/mount.jsx) — o `AuthProvider` ze
+            // Studio.jsx neví nic. Pole se ptají na roli toho, kdo je edituje
+            // (`editRoles` v core/defineField.js), takže bez tohohle spadne
+            // každý popup, který vykreslí FieldRenderer, na „useAuth must be
+            // used inside <AuthProvider>". Když je popup renderovaný uvnitř
+            // Studia, tenhle se pozná a pustí dál.
             <StudioProvider core={core} port={port} config={config}>
-              <Body {...props} />
+              <AuthProvider>
+                <Body {...props} />
+              </AuthProvider>
             </StudioProvider>
           )}
         </div>

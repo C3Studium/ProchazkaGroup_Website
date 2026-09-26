@@ -16,8 +16,8 @@ Supabase Auth that nothing else in the project uses.
 
 ```
 cms_user     id, email (citext unique), password_hash, name,
-             role ('owner' | 'editor'), created_at, updated_at,
-             last_login_at, disabled_at, created_by
+             role ('admin' | 'owner' | 'member', od 0011), created_at,
+             updated_at, last_login_at, disabled_at, created_by
 cms_session  id, user_id, token_hash, created_at, expires_at,
              revoked_at, user_agent, ip_hash
 ```
@@ -262,15 +262,17 @@ vizitku v cizí peněžence už nikdo neopraví.
 
 ## Pozvánka do Studia
 
-Založení účtu odešle e-mail — šablona `src/modules/resend/emails/cms-pozvanka.jsx`
+Založení účtu odešle e-mail — šablona `src/emails/cms-pozvanka.jsx`
 (React Email), vzhledem podle Studia, ne podle webu: příjemce má za chvíli
 otevřít tmavou administraci a pozvánka, která vypadá jako marketingový e-mail,
 je o jeden důvod k nedůvěře víc.
 
 **Jeden odesílatel, ne druhý.** `server/mail.js` se napojuje na Resend, který
-projekt už má (`RESEND_API_KEY`, `RESEND_FROM_EMAIL`) a kterým odchází deset
-formulářových e-mailů webu. Vlastní nastavení pro CMS by znamenalo druhou doménu
-k ověření a druhý klíč k rotaci.
+projekt už má (`RESEND_API_KEY`) a kterým odchází deset formulářových e-mailů
+webu. Adresa odesílatele je `CMS_MAIL_FROM` (tu zapisuje instalátor do
+.env.local) s fallbackem na `RESEND_FROM_EMAIL` pro weby, které sdílejí
+odesílatele s vlastními formuláři. Vlastní doména pro CMS by znamenala druhou
+doménu k ověření a druhý klíč k rotaci.
 
 **Bez odesílatele se nic neposílá a nic se nerozbije.** `hasSender()` je celá
 podmínka; web, který ho nemá, zakládá účty dál, jen bez pozvánky. Odesílání je
@@ -279,10 +281,15 @@ vygenerováno, takže `sendInvite` nikdy nevyhodí výjimku. Odpověď na založ
 proto veze `invite: { sent }`, aby rozhraní mohlo říct nahlas, jestli má správce
 heslo předat sám.
 
-**Heslo v pozvánce není.** Heslo poslané e-mailem zůstane ve schránce napořád —
-v odeslané poště správce i v doručené příjemce. Pozvánka veze adresu, roli a
-odkaz; heslo předá správce jinou cestou. Odkaz na nastavení vlastního hesla je
-lepší a je to další krok, ne tenhle.
+**Heslo v pozvánce JE.** Původní rozhodnutí znělo opačně — heslo poslané
+e-mailem zůstane ve schránce napořád, v odeslané poště správce i v doručené
+příjemce. Majitel knihovny ale rozhodl, že pozvánka má vézt celý přístup:
+adresu, heslo a odkaz do Studia. Důvod je praktický: heslo „předané jinou
+cestou" se v praxi předávalo stejným e-mailem, jen ručně, bez upozornění na
+výměnu. Šablona proto heslo ukazuje a hned pod ním i v patičce říká, ať si ho
+příjemce po prvním přihlášení změní a zprávu smaže. Heslo šablonou jen
+protéká — neloguje se a mimo hash v `cms_user` se nikam nezapisuje. Odkaz na
+nastavení vlastního hesla zůstává lepším dalším krokem.
 
 ## Hlášení o publikované změně
 
@@ -302,7 +309,18 @@ s `unchanged` a sem nedojde.
 
 **Jedno omezení, které stojí za vědomí:** publikuje se po dokumentech, takže
 zveřejnění stránky o šesti blocích pošle šest e-mailů. Zatím to tak je. Sloučit
-je do jednoho by znamenalo frontu nebo naplánovaný souhrn — a přesně na to je
-připravená šablona `cms-statistiky.jsx`, která zatím čeká, protože pravidelný
-e-mail potřebuje něco, co ho spustí (cron na Vercelu). Šablona je hotová, čísla
-dostane hotová, měnit se na ní nebude nic.
+je do jednoho by znamenalo frontu nebo naplánovaný souhrn.
+
+## Srdeční tep a pravidelný přehled
+
+Šablona `cms-statistiky.jsx` svůj spouštěč dostala: `/api/cms/heartbeat`
+(`server/heartbeat.js`). Endpoint bez session, autentizovaný `CMS_CRON_SECRET`
+konstantním časem, volaný zvenčí čímkoli, co už někde běží (naplánovaná úloha
+Medusy, cron na Vercelu). Každé zavolání sáhne přes Supabase API na několik
+počtů — to na free plánu drží projekt vzhůru, protože Supabase uspává po
+~7 dnech bez provozu přes API bránu a pg_cron uvnitř databáze se nepočítá.
+Jednou za 5 dní (razítko `heartbeat` v `cms_setting`) navíc pošle správcům
+a majiteli přehled: publikované změny, nové recenze, přírůstky v knihovně.
+Doporučený rytmus volání je denně — ping je levný, e-mail si rozestup hlídá
+sám, a pětidenní kadence proti sedmidennímu prahu nemá rezervu na jediný
+nepovedený běh.

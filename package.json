@@ -18,7 +18,9 @@
     "dev:email": "email dev --dir ./src/modules/resend/emails --port 3002",
     "dev:apptest": "pnpm run sync:styles && node scripts/run-with-env.js --env .env.apptest --env .env.test dev -p 3700",
     "build:apptest": "pnpm run sync:styles && node scripts/run-with-env.js --env .env.apptest --env .env.test build",
-    "start:apptest": "node scripts/run-with-env.js --env .env.apptest --env .env.test start -p 3700"
+    "start:apptest": "node scripts/run-with-env.js --env .env.apptest --env .env.test start -p 3700",
+    "cms:migrate": "node scripts/cms-migrate-sql.mjs",
+    "cms:seed-copy": "node scripts/cms-seed-copy.mjs"
   },
   "dependencies": {
     "@babel/core": "^7.28.5",

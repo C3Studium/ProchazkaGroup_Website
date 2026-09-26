@@ -1,5 +1,9 @@
 // Document repository — every read and write of cms_document.
 //
+// A od 0.1.50 i cms_document_translation, protože překlad je část dokumentu
+// a ne druhý dokument: stejné `id`, stejná Smlouva 3, jen jiný řádek. Kdo čte
+// nebo píše bez `lang`, tu tabulku vůbec nepotká — viz blok „překlady" níž.
+//
 // Draft model (Contract 3): the editable body always lives in `draft` once a
 // document has been touched; `data` is the last published body and nothing but
 // publish() ever writes it. That is what lets an editor rework a published page
@@ -11,8 +15,18 @@
 // badge, the `state` filter in query.js and the publish dialog read it that way,
 // so a draft that merely repeats `data` is not stored and can be thrown away.
 
-import { cmsErrorFromPostgrest, conflict, notFound, serverError } from './errors.js'
-import { sameJson } from './validation.js'
+import { cmsErrorFromPostgrest, conflict, forbidden, invalid, notFound, serverError } from './errors.js'
+import { patchBody } from './fieldPatch.js'
+import { assertValid, findType, sameJson } from './validation.js'
+// Která pole se překládají, rozhoduje SCHÉMA, a odpověď na to je jedna
+// (core/translate.js): čtení podle ní přebírá, zápis podle ní odmítá. Kdyby si
+// ji každá strana počítala po svém, vznikl by zápis, který projde, a čtení,
+// které jeho výsledek zahodí.
+//
+// Sahá se na jádro přímo a ne přes ./validation.js, které je jinak jediná
+// serverová branka do Contract 1. Patří to tam — až se ten soubor bude příště
+// otevírat, má se sem dovážet odtud.
+import { isTranslatable } from '../core/index.js'
 import {
     DOCUMENT_COLUMNS,
     PUBLIC_DOCUMENT_COLUMNS,
@@ -22,6 +36,214 @@ import {
 } from './query.js'
 
 const TABLE = 'cms_document'
+
+/* ------------------------------------------------------------- překlady --- */
+//
+// migrations/0013. Základní řádek `cms_document` JE výchozí jazyk; `cms_document_translation`
+// je overlay nad ním, jeden řádek na dvojici (dokument, jazyk), a platí v něm
+// stejná Smlouva 3 — `draft ?? data`, `data` píše jenom publikace.
+//
+// Celý tenhle blok se zapojí jen tehdy, když volající pojmenuje `lang`. Bez něj
+// se na tabulku nikdo nepodívá, a to je podmínka, za které se dva běžící weby
+// po 0.1.50 chovají stejně jako předtím: žádný dotaz navíc, žádná větev navíc.
+
+const TRANSLATION_TABLE = 'cms_document_translation'
+
+const TRANSLATION_COLUMNS = 'document_id, lang, data, draft, status, published_at, updated_at'
+
+// Co z toho smí anonymní klíč (grant v 0013). `draft` v něm není — rozdělaný
+// překlad je nezveřejněná práce — a sloupcový grant je absolutní, takže
+// vyjmenovat ho v SELECTu by veřejné čtení neoslabilo, ale rovnou shodilo.
+const PUBLIC_TRANSLATION_COLUMNS = 'document_id, lang, data, status, published_at, updated_at'
+
+// BCP 47, ve tvaru, který přijme i CHECK v 0013. Kód se nijak neopravuje:
+// „EN" se nepřeklápí na „en", protože tiše opravený jazyk je jazyk, který se
+// zadá špatně dvakrát — jednou při zápisu a podruhé při hledání, proč tam ten
+// text není.
+const LANG = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/
+
+/**
+ * Cokoli -> kód jazyka, nebo `null`.
+ *
+ * `null` znamená VÝCHOZÍ JAZYK, tedy základní řádek — ne „chyba". Tak to čte
+ * celá čtecí cesta: bez jazyka se čte základ, což je přesně dnešní chování.
+ * Zápis si neplatný kód hlídá sám (`assertLang`), protože tam je rozdíl mezi
+ * „nepojmenoval jsi jazyk" a „pojmenoval jsi ho špatně" rozdíl mezi dvěma
+ * různými řádky.
+ */
+export const normalizeLang = (value) => {
+    if (value === null || value === undefined) return null
+    const raw = String(value).trim()
+    if (!raw) return null
+    return LANG.test(raw) ? raw : null
+}
+
+/** Zápisová varianta: neprázdná, ale nesmyslná hodnota je chyba, ne výchozí jazyk. */
+export const assertLang = (value) => {
+    const lang = normalizeLang(value)
+    if (lang) return lang
+    throw invalid(`Neplatný kód jazyka: ${JSON.stringify(value)}`)
+}
+
+/** Řádek překladu -> tvar, ve kterém o něm mluví zbytek serveru. */
+export const toTranslation = (row) => {
+    if (!row) return null
+    return {
+        documentId: row.document_id,
+        lang: row.lang,
+        data: row.data || {},
+        // U veřejného čtení sloupec vůbec nepřijde (není v grantu), takže
+        // `undefined` a „žádný koncept" musí dopadnout stejně.
+        draft: row.draft ?? null,
+        status: row.status,
+        publishedAt: row.published_at ?? null,
+        updatedAt: row.updated_at ?? null,
+    }
+}
+
+/**
+ * Prázdný překlad není překlad.
+ *
+ * Řádek překladu vzniká, jakmile někdo přeloží JEDNO pole, takže v něm chybí
+ * všechno ostatní — a chybějící překlad má podle I18N.md spadnout na výchozí
+ * jazyk. Kdyby `null` nebo `""` z overlaye přebilo základ, přidání druhého
+ * jazyka by weby nevyprázdnilo najednou, ale postupně, pole po poli, jak by
+ * se řádky zakládaly. To je ten druh škody, který nikdo nespojí s příčinou.
+ */
+const isFilled = (value) => {
+    if (value === null || value === undefined) return false
+    if (typeof value === 'string') return value.trim() !== ''
+    return true
+}
+
+const mergeValue = (field, base, overlay) => {
+    if (field.type === 'object') {
+        if (!overlay || typeof overlay !== 'object' || Array.isArray(overlay)) return undefined
+        return mergeFields(field.fields || [], base && typeof base === 'object' ? base : {}, overlay)
+    }
+
+    if (field.type === 'array') {
+        const members = field.members || []
+        // Polymorfní pole by se párovalo podle `_type` položky, což je fakt
+        // o těle, ne o schématu. Stejná odmítnutá větev jako v fieldPatch.js —
+        // žádný typ v téhle knihovně takové pole nemá a tohle je drát, o který
+        // zakopne ten, kdo první takový založí.
+        if (members.length !== 1) return undefined
+        if (!Array.isArray(base) || !Array.isArray(overlay)) return undefined
+        // Délku určuje ZÁKLAD. Překlad je overlay, ne druhý obsah: položka,
+        // kterou základ nemá, by na webu vznikla jen v jednom jazyce a v ostatních
+        // by po ní zbyla díra.
+        return base.map((item, index) => {
+            const translated = mergeValue(members[0], item, overlay[index])
+            return translated === undefined ? item : translated
+        })
+    }
+
+    return isFilled(overlay) ? overlay : undefined
+}
+
+const mergeFields = (fields, base, overlay) => {
+    let out = base
+    for (const field of fields) {
+        if (!isTranslatable(field)) continue          // jedna pravda, jedno místo
+        if (!(field.name in overlay)) continue        // nepřeložené pole = základ
+        const merged = mergeValue(field, base?.[field.name], overlay[field.name])
+        if (merged === undefined) continue
+        // Overlay, ve kterém pro tohle pole nakonec nic přeloženého nebylo
+        // (prázdný objekt, samé `null` v položkách), nesmí vyrobit kopii —
+        // jinak by se „nepřeloženo" nedalo poznat od „přeloženo na totéž".
+        if (merged === base?.[field.name]) continue
+        // Kopie až ve chvíli, kdy se opravdu něco mění: tělo bez jediného
+        // překladu má projít čtením jako tentýž objekt, který přišel.
+        if (out === base) out = { ...base }
+        out[field.name] = merged
+    }
+    return out
+}
+
+// Neznámý typ nahlásí každý proces jednou, ne jednou za požadavek — stejná
+// politika jako u chybějící tabulky v server/site/read.js.
+const reportedTypes = new Set()
+
+/**
+ * `read(lang) = základní řádek ⊕ překlad(lang) přes přeložitelná pole`.
+ *
+ * Nepřeložitelné pole se z překladu IGNORUJE, i kdyby v něm bylo — jedna pravda
+ * o slugu, ceně a referenci, a ta leží v základním řádku.
+ *
+ * Co je přeložitelné, ví schéma. Když typ není zaregistrovaný, nedá se to zjistit
+ * a odpovědí je základní tělo: pustit přes něj celý overlay „aspoň nějak" by
+ * znamenalo přepsat i slug, tedy adresu stránky.
+ */
+export const mergeTranslation = (typeName, base, overlay) => {
+    const body = base && typeof base === 'object' ? base : {}
+    if (!overlay || typeof overlay !== 'object' || !Object.keys(overlay).length) return body
+
+    const type = findType(typeName)
+    if (!type) {
+        if (!reportedTypes.has(typeName)) {
+            reportedTypes.add(typeName)
+            console.warn(
+                `[cms] typ "${typeName}" není zaregistrovaný, překlad se nepoužije — ` +
+                'bez schématu nejde poznat, která pole se překládají.'
+            )
+        }
+        return body
+    }
+
+    return mergeFields(type.fields || [], body, overlay)
+}
+
+/**
+ * `setAt` z fieldPatch.js, které je tam privátní.
+ *
+ * Kopíruje jen uzly na cestě, stejně jako tam. Není to druhá implementace
+ * záplaty — validace, rozlišení cesty přes schéma i kontrola dosažitelnosti
+ * indexů zůstávají v fieldPatch.js a běží nad SLOUČENÝM tělem; tohle jen uloží
+ * jednu hodnotu do overlaye, který je z podstaty děravý (má jen přeložená pole).
+ * Díra v poli tady nevadí a nesmí vadět: jsonb ji uloží jako `null` a merge
+ * čte `null` jako „nepřeloženo".
+ */
+const setPath = (target, segments, value) => {
+    const [head, ...rest] = segments
+    if (head === undefined) return value
+
+    if (/^(0|[1-9][0-9]*)$/.test(head)) {
+        const list = Array.isArray(target) ? [...target] : []
+        list[Number(head)] = rest.length ? setPath(list[Number(head)], rest, value) : value
+        return list
+    }
+
+    const next = target && typeof target === 'object' && !Array.isArray(target) ? { ...target } : {}
+    next[head] = rest.length ? setPath(next[head], rest, value) : value
+    return next
+}
+
+const valueAtPath = (body, segments) =>
+    segments.reduce((node, key) => (node == null ? undefined : node[key]), body)
+
+/**
+ * Totéž pravidlo, které u zápisu do výchozího jazyka drží `assertMayWriteFields`
+ * v adapter.js, jen na jedno pojmenované pole.
+ *
+ * Je tu proto, že zápis překladu jde do repozitáře přímo (viz poznámka
+ * u `patchField` v handlers/documents.js) a role se nesmí ztratit cestou.
+ * Kontrolují se DVĚ pole — to, které cesta pojmenovala, i to horní, do kterého
+ * patří: `review.text` je zamčený na horní úrovni a členovi by nemělo pomoct,
+ * že napíše cestu k jeho vnitřku. Až se `lang` naučí adapter, obě kontroly se
+ * slijí zpátky do jedné.
+ */
+const assertFieldRole = (typeName, segments, field, role) => {
+    if (!role) return
+    const type = findType(typeName)
+    const top = (type?.fields || []).find((entry) => entry.name === segments[0]) || null
+
+    for (const guarded of [top, field]) {
+        if (!guarded?.editRoles || guarded.editRoles.includes(role)) continue
+        const who = guarded.editRoles.includes('owner') ? 'správce nebo majitel' : 'správce'
+        throw forbidden(`Pole „${guarded.title || guarded.name}" smí měnit jen ${who}`)
+    }
+}
 
 /**
  * The one refusal this module makes about versions, worded once.
@@ -101,6 +323,58 @@ export const createDocumentRepository = ({ client }) => {
             if (error) throw cmsErrorFromPostgrest(error, 'Načtení dokumentu selhalo')
             if (!data) throw notFound('Dokument nenalezen')
             return toDocument(data)
+        },
+
+        /* ------------------------------------------------------ překlady --- */
+
+        /**
+         * Překlady daných dokumentů do jednoho jazyka, klíčované `document_id`.
+         *
+         * Mapa a ne pole, protože volající je pokaždé stejný: má řádky
+         * dokumentů a potřebuje k nim dohledat overlay. Jeden dotaz na stránku
+         * výsledků — ne jeden na dokument.
+         *
+         * `published` je tu ze stejného důvodu jako `archived` u `list()`:
+         * rozhodnutí, na kterou stranu publikace se volající ptá, je první
+         * třídy. Veřejné čtení bere jen publikované překlady A jen sloupce
+         * z anon grantu; kdyby si o `draft` řeklo, Postgres ho odmítne jako
+         * chybu oprávnění, ne prázdnou hodnotou.
+         *
+         * @returns {Promise<Map<string, object>>}
+         */
+        async listTranslations({ ids, lang, published = false } = {}) {
+            const unique = [...new Set((ids || []).filter(Boolean))]
+            const code = normalizeLang(lang)
+            if (!code || !unique.length) return new Map()
+
+            let query = client
+                .from(TRANSLATION_TABLE)
+                .select(published ? PUBLIC_TRANSLATION_COLUMNS : TRANSLATION_COLUMNS)
+                .eq('lang', code)
+                .in('document_id', unique)
+            if (published) query = query.eq('status', 'published')
+
+            const { data, error } = await query
+            if (error) throw cmsErrorFromPostgrest(error, 'Načtení překladů selhalo')
+
+            const out = new Map()
+            for (const row of data || []) out.set(row.document_id, toTranslation(row))
+            return out
+        },
+
+        /** Jeden překlad, nebo `null`. Chybějící řádek není chyba — je to nepřeložený dokument. */
+        async getTranslation({ id, lang }) {
+            if (!id) throw notFound()
+            const code = assertLang(lang)
+
+            const { data, error } = await client
+                .from(TRANSLATION_TABLE)
+                .select(TRANSLATION_COLUMNS)
+                .eq('document_id', id)
+                .eq('lang', code)
+                .maybeSingle()
+            if (error) throw cmsErrorFromPostgrest(error, 'Načtení překladu selhalo')
+            return toTranslation(data)
         },
 
         async getByLegacy({ source, legacyId }) {
@@ -317,6 +591,123 @@ export const createDocumentRepository = ({ client }) => {
             return toDocument(updated)
         },
 
+        /**
+         * Jedno pole jednoho dokumentu v jednom jazyce — zápisová půlka I18N.md,
+         * oddílu 4.
+         *
+         * Proč je to tady a ne vedle `patchField` v adapter.js: tohle je jediná
+         * cesta, která sahá na `cms_document_translation`, a tahle tabulka je
+         * repozitářova. Záplata samotná se ale NEDUPLIKUJE — rozlišení cesty
+         * přes schéma, kontrola dosažitelnosti indexů i validace hodnoty jsou
+         * `patchBody` z fieldPatch.js, tedy tentýž kód, kterým prochází zápis
+         * do výchozího jazyka.
+         *
+         * `lang` je POVINNÝ. Bez jazyka se zapisuje do základního řádku a to už
+         * umí `update()` o patro výš; volitelný `lang` by z týhle metody udělal
+         * druhou implementaci téhož a první místo, kde se obě rozejdou.
+         *
+         * ------------------------------------------------------------------
+         * Co se validuje proti čemu
+         * ------------------------------------------------------------------
+         *
+         * Nad SLOUČENÝM tělem (`základ ⊕ překlad`), protože to je tělo, na které
+         * se editor dívá. Nad holým overlayem by neprošel `items.2.label`
+         * u bloku, jehož první dvě položky nejsou přeložené — overlay je
+         * z podstaty děravý — a `custom` pravidlo porovnávající dvě pole téže
+         * položky by dostalo polovinu dokumentu.
+         *
+         * Uloží se ale jen ta jedna hodnota, do overlaye. Překlad nesmí být kopie
+         * dokumentu: to, co se nepřekládá, má mít jednu pravdu v základním řádku.
+         *
+         * Souběh se hlídá porovnáním verze (`updated_at` řádku překladu), ale
+         * NEOPAKUJE se, jak to dělá `patchField` v adapter.js: dva editoři nad
+         * jedním jazykem jednoho dokumentu jsou situace, která zatím nenastala,
+         * a slepé přenesení té smyčky sem by byla druhá kopie netriviálního
+         * kódu. Až se `lang` naučí adapter, zdědí se i ta smyčka.
+         */
+        async patchField({ id, field, value, lang, role = null, updatedBy = null, baseVersion = null }) {
+            const code = assertLang(lang)
+            const document = await repo.get({ id })
+            const existing = await repo.getTranslation({ id, lang: code })
+
+            const base = document.draft ?? document.data ?? {}
+            const overlay = existing?.draft ?? existing?.data ?? {}
+            const next = patchBody(document.type, mergeTranslation(document.type, base, overlay), field, value)
+
+            // CHYBA, ne tiché přesměrování do základu (I18N.md, oddíl 4).
+            // Uložit slug pod `lang` a mlčky ho zapsat do výchozího jazyka
+            // znamená přepsat adresu stránky v okamžiku, kdy si někdo myslí, že
+            // pracuje na překladu — a zjistí se to na cizím webu.
+            if (!isTranslatable(next.field)) {
+                throw invalid(
+                    `Pole „${next.field.title || next.field.name}" se nepřekládá. ` +
+                    'Zapisuje se do výchozího jazyka, tedy bez „lang".'
+                )
+            }
+
+            assertFieldRole(document.type, next.segments, next.field, role)
+
+            const body = setPath(overlay, next.segments, value)
+            const saved = await repo.saveTranslation({ id, lang: code, body, updatedBy, baseVersion, existing })
+
+            // Uložená hodnota přečtená zpátky, ne ta, která přišla — u typů,
+            // které normalizují, se ty dvě liší a náhled potřebuje tu, která
+            // tam bude při dalším vykreslení. Stejně jako u výchozího jazyka.
+            return {
+                document,
+                translation: saved,
+                lang: code,
+                field: next.segments.join('.'),
+                value: valueAtPath(saved.draft ?? saved.data ?? {}, next.segments) ?? null,
+            }
+        },
+
+        /**
+         * Overlay dovnitř, řádek překladu ven. Smlouva 3 platí i tady: `draft`
+         * je neprázdný právě tehdy, když v tom jazyce leží něco, co veřejnost
+         * neviděla, a překlad, který jen opakuje `data`, se neukládá.
+         *
+         * Select-then-insert-or-update a ne `upsert`, ze stejného důvodu jako
+         * v manageWidget.js: souborové úložiště umí jen slovesa, která repozitář
+         * opravdu používá, a `upsert` mezi ně nepatří.
+         */
+        async saveTranslation({ id, lang, body, updatedBy = null, baseVersion = null, existing = undefined }) {
+            const code = assertLang(lang)
+            const current = existing === undefined ? await repo.getTranslation({ id, lang: code }) : existing
+            const draft = sameJson(body, current?.data ?? {}) ? null : body
+
+            // Zápis, který by uložil to, co už tam je, se odpoví a neprovede —
+            // stejné pořadí jako v `update()`, a ze stejného důvodu: dvojklik
+            // ani zopakovaný požadavek nesmí umět vyrobit konflikt.
+            if (current && sameJson(draft, current.draft)) return current
+            if (baseVersion != null && baseVersion !== (current?.updatedAt ?? null)) throw versionConflict()
+
+            if (!current) {
+                const { data: inserted, error } = await client
+                    .from(TRANSLATION_TABLE)
+                    .insert({ document_id: id, lang: code, draft, updated_by: updatedBy })
+                    .select(TRANSLATION_COLUMNS)
+                    .single()
+                if (error) throw cmsErrorFromPostgrest(error, 'Uložení překladu selhalo')
+                return toTranslation(inserted)
+            }
+
+            const { data: updated, error } = await client
+                .from(TRANSLATION_TABLE)
+                .update({ draft, updated_by: updatedBy })
+                .eq('document_id', id)
+                .eq('lang', code)
+                // Druhá půlka téhož porovnání jako v `update()`: mezi čtením
+                // a zápisem je zpáteční cesta po síti a kontrola, která by běžela
+                // jen v JavaScriptu, by měla přesně to okno, které zavírá.
+                .eq('updated_at', current.updatedAt)
+                .select(TRANSLATION_COLUMNS)
+                .maybeSingle()
+            if (error) throw cmsErrorFromPostgrest(error, 'Uložení překladu selhalo')
+            if (!updated) throw versionConflict()
+            return toTranslation(updated)
+        },
+
         // Used by the public review route and the migration, both of which need
         // to write `data` directly rather than stage a draft.
         async replacePublished({ id, data, publishedAt = null }) {
@@ -343,7 +734,20 @@ export const createDocumentRepository = ({ client }) => {
             if (!count) throw notFound('Dokument nenalezen')
         },
 
-        async publish({ id, updatedBy = null }) {
+        /**
+         * Publikuje se po jazycích (I18N.md, oddíl 1).
+         *
+         * `lang` je jediný přepínač a mění právě jednu věc: který řádek se
+         * překlápí. Bez něj to je tahle metoda beze změny — základní řádek, tedy
+         * výchozí jazyk — a to je podmínka, za kterou se dnešní „Publikovat"
+         * chová přesně jako dosud.
+         *
+         * Publikovat češtinu a pustit tím ven i rozdělanou angličtinu je přesně
+         * to, čemu vlastní `status` na řádku překladu brání.
+         */
+        async publish({ id, lang = null, updatedBy = null }) {
+            if (lang != null) return repo.publishTranslation({ id, lang, updatedBy })
+
             const current = await repo.get({ id })
             const body = current.draft ?? current.data
             if (!body || !Object.keys(body).length) {
@@ -402,6 +806,75 @@ export const createDocumentRepository = ({ client }) => {
             if (error) throw cmsErrorFromPostgrest(error, 'Publikování selhalo')
             if (!updated) throw notFound('Dokument nenalezen')
             return toDocument(updated)
+        },
+
+        /**
+         * Publikace jednoho jazyka. Odpovídá DOKUMENTEM, ne řádkem překladu,
+         * a to schválně: volající — handler, revalidace, Studio — mluví
+         * o dokumentu, a jazyk je jeho vlastnost, ne jiná věc. Přeložený řádek
+         * jede vedle jako `translation`.
+         *
+         * Základní řádek se nedotkne ani jedním sloupcem. Publikovat překlad
+         * proto nemůže dostat na web nepublikovaný dokument (základ dál rozhoduje
+         * o tom, jestli je dokument vidět) a nemůže ani posunout `published_at`
+         * výchozího jazyka, které znamená „kdy veřejnost naposled viděla něco
+         * nového" — a tohle pro ni nové nebylo.
+         */
+        async publishTranslation({ id, lang, updatedBy = null }) {
+            const code = assertLang(lang)
+            const document = await repo.get({ id })
+            const current = await repo.getTranslation({ id, lang: code })
+
+            const body = current?.draft ?? current?.data ?? null
+            if (!body || !Object.keys(body).length) {
+                throw conflict(`Prázdný překlad (${code}) nelze publikovat`)
+            }
+
+            // Validuje se TADY a ne o patro výš, protože tudy adapter.js zatím
+            // nevede (viz handlers/documents.js). Kontroluje se to, co uvidí
+            // návštěvník — publikovaný základ s položeným překladem — a jen
+            // tehdy, když je co vidět: překlad nepublikovaného dokumentu se
+            // ven nedostane tak jako tak a odmítnout ho seznamem chybějících
+            // povinných polí základu by byla odpověď na jinou otázku.
+            if (document.status === 'published' && Object.keys(document.data || {}).length) {
+                assertValid(document.type, mergeTranslation(document.type, document.data, body))
+            }
+
+            // „Publikovat to, co už je publikované" není publikace — stejná
+            // odpověď jako u výchozího jazyka: dokument s `unchanged`, aby
+            // handler přeskočil revizi i revalidaci, a žádná červená hláška
+            // za stisk tlačítka, které se nabízelo.
+            if (current.status === 'published' && sameJson(body, current.data)) {
+                if (!current.draft) return { ...document, lang: code, translation: current, unchanged: true }
+
+                const { data: tidied, error: tidyError } = await client
+                    .from(TRANSLATION_TABLE)
+                    .update({ draft: null, updated_by: updatedBy })
+                    .eq('document_id', id)
+                    .eq('lang', code)
+                    .select(TRANSLATION_COLUMNS)
+                    .maybeSingle()
+                if (tidyError) throw cmsErrorFromPostgrest(tidyError, 'Publikování překladu selhalo')
+                if (!tidied) throw notFound('Překlad nenalezen')
+                return { ...document, lang: code, translation: toTranslation(tidied), unchanged: true }
+            }
+
+            const { data: updated, error } = await client
+                .from(TRANSLATION_TABLE)
+                .update({
+                    data: body,
+                    draft: null,
+                    status: 'published',
+                    published_at: new Date().toISOString(),
+                    updated_by: updatedBy,
+                })
+                .eq('document_id', id)
+                .eq('lang', code)
+                .select(TRANSLATION_COLUMNS)
+                .maybeSingle()
+            if (error) throw cmsErrorFromPostgrest(error, 'Publikování překladu selhalo')
+            if (!updated) throw notFound('Překlad nenalezen')
+            return { ...document, lang: code, translation: toTranslation(updated) }
         },
 
         /**

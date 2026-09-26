@@ -43,11 +43,13 @@ export const hasSender = () =>
 /**
  * Adresa, ze které se odesílá.
  *
- * `RESEND_FROM_EMAIL` je totéž, co používají formuláře webu (viz
- * src/pages/api/resend.js). Vlastní proměnná pro CMS by byla druhá adresa
- * k ověření u poskytovatele kvůli jednomu e-mailu za měsíc.
+ * Dvě proměnné, jedna odpověď. `CMS_MAIL_FROM` je to, co do .env.local zapisuje
+ * instalátor (install/choices.mjs) — a do této opravy ji NIC nečetlo, takže
+ * čerstvě nainstalovaný web s vyplněnou poštou stejně nic neposlal.
+ * `RESEND_FROM_EMAIL` zůstává pro weby, které sdílejí odesílatele s vlastními
+ * formuláři (viz src/pages/api/resend.js) a proměnnou už mají.
  */
-export const senderAddress = () => optional('RESEND_FROM_EMAIL')
+export const senderAddress = () => optional('CMS_MAIL_FROM') || optional('RESEND_FROM_EMAIL')
 
 /** Kam vede Studio. Odvozeno z adresy webu, ne psáno zvlášť. */
 export const studioUrl = () => `${siteUrl().replace(/\/+$/, '')}/studio`
@@ -62,7 +64,7 @@ export const studioUrl = () => `${siteUrl().replace(/\/+$/, '')}/studio`
  *
  * @returns {Promise<{sent: boolean, reason?: string}>}
  */
-export const sendInvite = async ({ to, name, role, invitedBy }) => {
+export const sendInvite = async ({ to, name, role, invitedBy, password }) => {
     assertServer('sendInvite')
 
     if (!hasSender()) return { sent: false, reason: 'no-sender' }
@@ -76,8 +78,11 @@ export const sendInvite = async ({ to, name, role, invitedBy }) => {
         ])
 
         const Component = template.default
+        // Heslo jde šablonou dál a nikam jinam: neloguje se, neukládá se, žije
+        // v tomto volání a v odeslaném e-mailu. Rozhodnutí je majitelovo — viz
+        // AUTH.md, „Pozvánka do Studia".
         const html = await render(
-            Component({ name, email: to, role, invitedBy, studioUrl: studioUrl() }),
+            Component({ name, email: to, role, invitedBy, password, studioUrl: studioUrl() }),
         )
 
         const resend = new Resend(optional('RESEND_API_KEY'))
@@ -133,6 +138,52 @@ export const staffRecipients = async (exclude = '') => {
     if (skip) wanted.delete(skip)
 
     return [...wanted]
+}
+
+/**
+ * Pravidelný přehled — šablona cms-statistiky.jsx konečně dostává spouštěč
+ * (server/heartbeat.js). Stejná smlouva jako ostatní odchozí pošta: nikdy
+ * nevyhodí výjimku, bez odesílatele se nic neposílá a výsledek se vrací,
+ * aby volající (a jeho log) věděl, jak to dopadlo.
+ *
+ * Čísla jsou volitelná po jednom — co je null, šablona vynechá.
+ *
+ * @returns {Promise<{sent: number, reason?: string}>}
+ */
+export const sendDigest = async ({ period, published, reviewsNew, reviewsPending, mediaAdded }) => {
+    assertServer('sendDigest')
+
+    if (!hasSender()) return { sent: 0, reason: 'no-sender' }
+
+    try {
+        const to = await staffRecipients()
+        if (!to.length) return { sent: 0, reason: 'no-recipients' }
+
+        const [{ Resend }, { render }, template] = await Promise.all([
+            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
+            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
+            import('@/modules/resend/emails/cms-statistiky.jsx'),
+        ])
+
+        const html = await render(
+            template.default({ period, published, reviewsNew, reviewsPending, mediaAdded, siteUrl: siteUrl() }),
+        )
+
+        const resend = new Resend(optional('RESEND_API_KEY'))
+        const { error } = await resend.emails.send({
+            from: senderAddress(),
+            to,
+            subject: template.subject({ period }),
+            html,
+        })
+        if (error) throw new Error(error.message || String(error))
+
+        return { sent: to.length }
+    } catch (error) {
+        const message = String(error?.message || error)
+        console.warn(`[cms] přehled se neodeslal — ${message}`)
+        return { sent: 0, reason: message }
+    }
 }
 
 /**

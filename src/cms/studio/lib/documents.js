@@ -24,7 +24,7 @@
  * `hasUnpublishedChanges` is the real question and everything below asks it.
  */
 
-import { sameJson } from "@/cms/core"
+import { sameJson } from "../../core/index.js"
 
 /** An editor always edits `draft ?? data`. */
 export const bodyOf = (doc) => (doc ? (doc.draft ?? doc.data ?? {}) : {})

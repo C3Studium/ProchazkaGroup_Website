@@ -79,3 +79,17 @@ export default function ContactPage() {
     </>
   )
 }
+
+
+/**
+ * Patička, kontaktní list a texty panelu menu.
+ *
+ * Tahle routa nemá obsah z CMS, ale lišta nad ní ho má — `_app` ji vykresluje
+ * pod každou routou a props si sám načíst neumí. Bez tohohle by menu právě tady
+ * ukazovalo texty zadrátované v kódu, zatímco všude jinde ty upravené, a lišilo
+ * by se to jen na dvou adresách z jedenácti. To je přesně ten druh rozdílu, co
+ * se najde až u zákazníka.
+ *
+ * `footerStaticProps` je na to napsaný — viz lib/site/footer.js.
+ */
+export { footerStaticProps as getStaticProps } from "@/lib/site"

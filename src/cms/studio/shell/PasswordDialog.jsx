@@ -1,10 +1,10 @@
 import { useState } from "react"
-import { useAuth } from "../context/StudioProvider"
-import { useToast } from "../context/ToastProvider"
-import { Button, FieldShell } from "../ui/controls"
-import Icon from "../ui/Icon"
+import { useAuth } from "../context/StudioProvider.jsx"
+import { useToast } from "../context/ToastProvider.jsx"
+import { Button, FieldShell } from "../ui/controls.jsx"
+import Icon from "../ui/Icon.jsx"
 import styles from "./PasswordDialog.module.scss"
-import { Modal } from "../ui/Modal"
+import { Modal } from "../ui/Modal.jsx"
 
 const MIN_LENGTH = 10
 

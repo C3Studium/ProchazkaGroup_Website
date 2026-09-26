@@ -26,7 +26,7 @@
 //      that the preview is broken, when what is true is that there is nothing
 //      staged yet.
 
-import { createDocumentRepository } from '../documents.js'
+import { createDocumentRepository, mergeTranslation, normalizeLang } from '../documents.js'
 import { getAdminClient } from '../supabaseAdmin.js'
 import { MAX_PER_PAGE } from '../query.js'
 // The predicate and the ordering are shared with the archive reader, which has
@@ -56,8 +56,32 @@ const report = (type, error) => {
 }
 
 // Contract 3, one line: the editor's body is the draft if there is one, and the
-// last published body otherwise.
-const editableBody = (row) => row?.draft ?? row?.data ?? null
+// last published body otherwise. Platí stejně pro dokument i pro řádek překladu,
+// takže druhé pravidlo pro jazyky nevzniklo — jen se totéž přečte dvakrát
+// a přeložitelná pole se položí přes základ.
+const editableBody = (row, overlay = null, type = null) => {
+    const base = row?.draft ?? row?.data ?? null
+    if (!base || !overlay) return base
+    return mergeTranslation(type ?? row?.type, base, overlay.draft ?? overlay.data ?? null)
+}
+
+/**
+ * Redakční překlady k načtené stránce dokumentů, nebo prázdná mapa.
+ *
+ * Selhání se polyká zvlášť a nepropadá do `[]`: nepřečtený překlad znamená
+ * podle I18N.md pád na výchozí jazyk, ne prázdný náhled. Nepřidat sem catch by
+ * znamenalo, že databáze bez migrace 0013 nevrací českou stránku, ale žádnou.
+ */
+const translations = async (rows, lang) => {
+    const code = normalizeLang(lang)
+    if (!code || !rows.length) return new Map()
+    try {
+        return await documents().listTranslations({ ids: rows.map((row) => row?.id), lang: code })
+    } catch (error) {
+        report(`překlady:${code}`, error)
+        return new Map()
+    }
+}
 
 /**
  * The draft-mode counterpart of `readPublished`. Same signature, same promise:
@@ -79,13 +103,20 @@ const editableBody = (row) => row?.draft ?? row?.data ?? null
  * it is writing to, and this is the only reader whose answers are ever rendered
  * with editing switched on. See DOCUMENT_ID in read.js.
  *
+ * `lang` je i tady jediný přepínač a nemění nic jiného: bez něj se čte základní
+ * řádek, tedy dnešní chování do posledního řádku. S ním se přes něj položí
+ * REDAKČNÍ tělo překladu — `draft ?? data` toho jazyka, ne to publikované —
+ * protože náhled má ukázat, co by šlo ven, kdyby se publikovalo všechno
+ * rozpracované. Ta věta platila pro dokument a překlad na ní nic nemění.
+ *
  * @returns {Promise<object[]>} `draft ?? data` bodies with `_id`, or `[]`.
  */
-export const readEditable = async ({ type, sort, filters, perPage = 50 } = {}) => {
+export const readEditable = async ({ type, sort, filters, perPage = 50, lang = null } = {}) => {
     try {
         const { rows } = await documents().list({ type, perPage: MAX_PER_PAGE })
+        const overlays = await translations(rows, lang)
         const bodies = rows
-            .map((row) => ({ id: row?.id, body: editableBody(row) }))
+            .map((row) => ({ id: row?.id, body: editableBody(row, overlays.get(row?.id), type) }))
             .filter((entry) => entry.body && typeof entry.body === 'object')
             // An unpublished document whose draft was emptied has nothing to
             // show; treating it as content puts a blank row on the preview.

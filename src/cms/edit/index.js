@@ -1,6 +1,6 @@
 // Visual editing — the half of it the site itself is allowed to import.
 //
-// `import { editable } from "@/cms/edit"` appears in components that are on the
+// `import { editable } from "./index.js"` appears in components that are on the
 // public homepage, so this barrel is deliberately three lines long and reaches
 // nothing else. The overlay, the media module and the Studio components they
 // pull in are behind `./overlay/mount`, which only the preview host imports, and
@@ -22,12 +22,19 @@ export {
   editable,
   editable as default,
   editableDoc,
+  editableIn,
   editableLines,
   editableLink,
   editableList,
+  editableMirror,
   editableSet,
-} from "./editable"
-export { isEditMode } from "./mode"
+  interactive,
+} from "./editable.js"
+export { isEditMode } from "./mode.js"
+// Živý náhled povrchu (docs/I18N.md §7.3). Tady smí být ze stejného důvodu jako
+// `isEditMode`: sahá na `react` a na ../preview/frame.js, což je seznam
+// řetězců, a na nic z `overlay/`. Na veřejném webu vrací vždycky `false`.
+export { SURFACE_ATTR, surfaceRoot, useStudioSurface } from "./surface.js"
 export {
   ACTIONS_ATTR,
   ACTIONS_MODERATE,
@@ -38,5 +45,6 @@ export {
   HREF_ATTR,
   KIND_ATTR,
   MARK_ATTR,
+  MIRROR_ATTR,
   TYPE_ATTR,
-} from "./attrs"
+} from "./attrs.js"

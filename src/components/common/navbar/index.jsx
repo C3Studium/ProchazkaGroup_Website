@@ -6,11 +6,20 @@ import Menu from './menu';
 import ContactModal from '@/components/common/ContactModal';
 import { onContactRequest } from '@/components/common/ContactModal/open';
 import { AnimatePresence } from 'framer-motion';
+import { surfaceRoot, useStudioSurface } from '@/cms/edit';
 
-export default function Navbar({ assistant, contactCopy, roster }) {
+export default function Navbar({ assistant, contactCopy, roster, navCopy }) {
     const [menu, setMenu] = useState(false);
     const [contact, setContact] = useState(false);
     const pathname = usePathname();
+
+    // Dva povrchy, jeden panel. Ve Studiu se panel otevře, jakmile si editor
+    // vybere jeden z nich; `navbar.advisors` ho navíc rovnou přepne na stěnu
+    // poradců, protože ta je druhý POHLED téhož panelu a jinak se k ní editor
+    // musí proklikat. Na webu vrací obojí `false`, viz cms/edit/surface.js.
+    const studioMenu = useStudioSurface('navbar');
+    const studioAdvisors = useStudioSurface('navbar.advisors');
+    const studioOpen = studioMenu || studioAdvisors;
 
     // Opening one closes the other. Two full-screen things over the page at
     // once is two ways out and no way to tell which the Escape key meant.
@@ -65,7 +74,25 @@ export default function Navbar({ assistant, contactCopy, roster }) {
             <Menu menu={menu} setMenu={setMenu} onContact={openContact} />
             <ContactModal open={contact} onClose={() => setContact(false)} assistant={assistant} copy={contactCopy} />
             <AnimatePresence mode='wait'>
-                {menu && <NavbarBody key='navPanel' setMenu={setMenu} onSheet={openSheet} roster={roster} />}
+                {(menu || studioOpen) && (
+                    <NavbarBody
+                        key='navPanel'
+                        setMenu={setMenu}
+                        onSheet={openSheet}
+                        roster={roster}
+                        copy={navCopy}
+                        studioView={studioAdvisors ? 'advisors' : null}
+                        // Hranice výběru. Panel leží NAD stránkou, ale stránka
+                        // pod ním zůstává — patičku kreslí `_app` dál — a bez
+                        // tohohle ji překryv najde a označí, protože hledá
+                        // geometricky přes celý dokument. Editor pak vidí
+                        // rámeček kolem textu, na který se vůbec nedívá.
+                        //
+                        // Který z obou povrchů se zrovna edituje, se pozná samo:
+                        // `surfaceRoot` se porovnává se jménem na `<html>`.
+                        studioRoot={studioAdvisors ? 'navbar.advisors' : 'navbar'}
+                    />
+                )}
             </AnimatePresence>
         </>
     )

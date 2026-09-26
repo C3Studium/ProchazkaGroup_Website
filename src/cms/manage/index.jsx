@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react"
 import dynamic from "next/dynamic"
 
-import { frameHost } from "@/cms/preview/frame"
-import { hasManageHint } from "./hint"
+import { frameHost } from "../preview/frame.js"
+import { hasManageHint } from "./hint.js"
 
 /**
  * The one thing about the Studio that a visitor's browser downloads — SITE-SAFE.
@@ -50,7 +50,7 @@ import { hasManageHint } from "./hint"
  * so "the shell decides" and "the path decides" are not the same rule and this
  * component should survive either.
  */
-const ManageWidget = dynamic(() => import("./ManageWidget"), { ssr: false })
+const ManageWidget = dynamic(() => import("./ManageWidget.jsx"), { ssr: false })
 
 export default function ManageBadge() {
   const [armed, setArmed] = useState(false)

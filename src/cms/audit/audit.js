@@ -53,8 +53,8 @@
 // All of those come out as counts, not as findings. A finding is a claim that
 // something is wrong, and this file makes as few of them as it can.
 
-import { fieldAtPath } from '@/cms/schemas/marks'
-import { pageFor, readsAt, undeclaredCustom } from '@/cms/site'
+import { fieldAtPath } from '../schemas/marks.js'
+import { pageFor, readsAt, undeclaredCustom } from '../site/index.js'
 
 import { isWholeDocument } from './annotations.js'
 

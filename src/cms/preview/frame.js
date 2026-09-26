@@ -192,9 +192,18 @@ export const frameUrl = (sitePath, { edit = true, bust, homePreview = null } = {
  * following a link out of the preview and into /studio would otherwise put the
  * admin inside its own frame.
  */
-export const sitePathFromFrame = (pathname, { homePreview = null } = {}) => {
+export const sitePathFromFrame = (pathname, { homePreview = null, allowed = [] } = {}) => {
     const path = normalise(pathname)
     if (homePreview && path === normalise(homePreview)) return "/"
+    // Náhledy povrchů, a musí to být PŘED oběma zákazy pod tímhle řádkem: bydlí
+    // pod `/studio/preview/`, takže je jinak odmítne kontrola hostitele dřív,
+    // než se na výčet vůbec dojde. (Přesně to se stalo napoprvé.)
+    //
+    // Výčet, ne předpona. `/studio/preview/` jako povolená předpona by znamenala,
+    // že si rám smí načíst cokoli, co tam kdo příště založí, a `?p=` je parametr
+    // v adrese: osmnáct znaků a rám ukazuje obrazovku Studia sám v sobě. Tady
+    // procházejí jedině cesty, které stojí v `defineSurface({ preview })`.
+    if (allowed.length && allowed.some((entry) => normalise(entry) === path)) return path
     if (path === HOST_PATH || path.startsWith(`${HOST_PATH}/`)) return null
     if (path === "/studio" || path.startsWith("/studio/")) return null
     if (path.startsWith("/api/")) return null

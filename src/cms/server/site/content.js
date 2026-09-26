@@ -17,6 +17,7 @@
 // away from what an editor was shown before they published.
 
 
+import { getUiText as shapeUiText } from '../../site/uiText.js'
 import { documentId, imageValue, plainText, readPublished, slugValue, stringValue } from './read.js'
 
 /**
@@ -52,15 +53,32 @@ const provenance = (data) => {
  * Studio preview can hand a section something to write back to; what decides
  * whether it reaches a component is homepage.js, not this function.
  *
+ * `lang` jde do čtečky a nikam jinam. Tvarování pod tím je pro všechny jazyky
+ * totéž, protože překlad mění hodnoty polí, ne jejich význam — a `key`, podle
+ * kterého se bloky hledají, je slug, tedy nepřeložitelný. Čtečka z `readerFor`
+ * už jazyk zavázaný mít může; pak tenhle argument říká totéž a nic nepřepíše.
+ * Bez něj se čte výchozí jazyk, přesně jako dosud.
+ *
  * @returns {Promise<Record<string, {id, key, title, headline, body, bodyText,
  *                                   image, gallery, questions, items}>>}
  */
-export const getSiteCopy = async ({ page = 'index', read = readPublished } = {}) => {
+/**
+ * Slovník klíč → text, volitelně jen jedna skupina.
+ *
+ * Tvarování je v `site/uiText.js`, protože je to čistá funkce nad řádky a na
+ * server nepatří. Tady je jen napojení na čtečku — jedna definice toho, co
+ * znamená „přečti to v tomhle jazyce", a ta bydlí ve `read`.
+ */
+export const getUiText = ({ group = null, lang = null, read = readPublished } = {}) =>
+    shapeUiText({ read, group, lang })
+
+export const getSiteCopy = async ({ page = 'index', read = readPublished, lang = null } = {}) => {
     const rows = await read({
         type: 'siteCopy',
         filters: page ? { 'data.page': page } : undefined,
         sort: { field: 'data.key', direction: 'asc' },
         perPage: 100,
+        lang,
     })
 
     const blocks = {}

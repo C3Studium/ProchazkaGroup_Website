@@ -11,7 +11,7 @@
 // the anon key itself still carries insert/update rights on `reviews`, `people`
 // and `total`, so anyone holding it (it ships in every page) can still write
 // there with curl. Only the database can close that, which is what
-// src/cms/server/migrations/0004_legacy_lockdown.sql is for.
+// server/migrations/manual/0004_legacy_lockdown.sql is for.
 //
 // What the cut-over bought:
 //
@@ -34,9 +34,16 @@
 //     `data` is world-readable for published documents, so an approved review
 //     would publish the submitter's address.
 
-import { displayNameOf, reviewSubjectType } from '@/cms/site/types'
+import { displayNameOf, reviewSubjectType } from '../../site/types.js'
 
 import { createSupabaseDataPort } from '../adapter.js'
+// Everything this route says out loud goes through the catalogue. It is the
+// one place in the library where a *visitor* of somebody else's site reads a
+// sentence the library wrote, so "Děkujeme za váš názor!" on an English site
+// was a bug nobody could fix from outside. The language comes from whatever
+// the host set with `setLanguageSource()` — typically the request — and is cs
+// until it does. See docs/I18N.md §8.
+import { t } from '../../i18n/index.js'
 import { conflict, invalid } from '../errors.js'
 import { assertValid } from '../validation.js'
 import { clientKey, consume } from '../rateLimit.js'
@@ -116,7 +123,7 @@ export const handleReviews = async (req, res) => {
     const gate = consume(`review:${clientKey(req)}`, RATE)
     if (!gate.allowed) {
         res.setHeader('Retry-After', String(gate.retryAfter))
-        throw conflict('Recenzi jste už odeslali. Zkuste to prosím později.')
+        throw conflict(t('review.rateLimited'))
     }
 
     const submitted = await readJson(req, REVIEW_BODY_LIMIT)
@@ -150,8 +157,8 @@ export const handleReviews = async (req, res) => {
     // "Václav Procházka" for "Mgr. Václav Procházka" is accepted rather than
     // rejected for a prefix nobody typed.
     if (!(await isKnownConsultant(port, data.consultantName))) {
-        throw invalid('Vybraný poradce neexistuje', [
-            { path: 'consultantName', message: 'Neznámý poradce' },
+        throw invalid(t('review.unknownConsultant'), [
+            { path: 'consultantName', message: t('review.unknownConsultant.field') },
         ])
     }
 
@@ -159,5 +166,5 @@ export const handleReviews = async (req, res) => {
 
     // 202, and no document id in the response: the submitter has no business
     // knowing the identifier of a row they cannot read.
-    return sendJson(res, 202, { ok: true, message: 'Děkujeme za váš názor!' })
+    return sendJson(res, 202, { ok: true, message: t('review.thanks') })
 }

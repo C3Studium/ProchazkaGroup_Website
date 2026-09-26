@@ -64,8 +64,13 @@ export const rosterFromCms = (people) =>
             src: person?.portrait?.src || person?.src || "",
             srcAlt: person?.portraitAlt?.src || person?.portraitDetail?.src || null,
             tel: person?.phone || person?.tel || "",
-            // Only ever present while the Studio is previewing — see
-            // cms/server/site/read.js.
+            // Pozor: tohle NIC nenastavuje.
+            //
+            // Čtečka poradců připojuje `id` (`provenance` v lib/site/people.js),
+            // ne `docId`, takže tahle větev nikdy neproběhne. Zůstává pro zdroje,
+            // které by `docId` přinesly — ale kdo chce dokument poradce, ať čte
+            // `id`. Dvě komponenty se na tom spálily: karta v panelu menu
+            // a kolegové na /o-nas se neotevíraly, protože se ptaly na `docId`.
             ...(person?.docId ? { docId: person.docId } : {}),
             id: person?.id || null,
             likes: Number.isFinite(person?.likes) ? person.likes : 0,

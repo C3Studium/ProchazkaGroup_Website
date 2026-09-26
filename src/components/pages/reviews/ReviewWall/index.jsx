@@ -53,7 +53,8 @@ const sizeOf = (message) => {
 //
 // @param {object} [copy]     this grid's own block, from `getPageContent`.
 // @param {object} [formCopy] the ask's block, handed straight to AddReview.
-export default function ReviewWall({ reviews, consultants = [], copy = {}, formCopy = {} }) {
+// @param {object} [notices]  hlášky formuláře, taktéž rovnou do AddReview.
+export default function ReviewWall({ reviews, consultants = [], copy = {}, formCopy = {}, notices = null }) {
     const [count, setCount] = useState(BATCH);
     const [hover, setHover] = useState(null);
     const [open, setOpen] = useState(null);
@@ -169,7 +170,7 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
             {/* Above the wall, not under it: it is the one thing this page asks
                 for, and asking at the bottom is asking after the answer. */}
             <div className="RevWall__bar">
-                <AddReview consultants={consultants} copy={formCopy} />
+                <AddReview consultants={consultants} copy={formCopy} notices={notices} />
                 <span className="RevWall__bar__rule" aria-hidden="true" />
                 {/* Unannotated: both numbers are how many reviews came back
                     and how many are on screen, so nothing here is stored. */}

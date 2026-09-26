@@ -11,11 +11,22 @@
    public sheet; named `EditView.scss`, this file would ship the admin's CSS to
    every visitor. */
 
+/* Sloupec, ne mřížka — a je to oprava, ne úklid.
+
+   Mřížka tu měla `grid-template-rows: auto auto auto minmax(0, 1fr)`, tedy
+   napevno napsané „čtvrtý potomek je jeviště". Drželo to jenom proto, že se
+   počet potomků nikdy neměnil, a rozpadalo se to pokaždé, když se změnil: dvě
+   místa níž v tomhle souboru přepisují ten seznam kvůli jedinému odstavci, který
+   se na úzké obrazovce schová nebo objeví. Přibyly řádky pro povrchy
+   a pro vybraný jazyk, oba podmíněné, a čtyři stopy by je počítat přestaly —
+   jeviště by spadlo do implicitní `auto` stopy a přestalo by být tím, co dostane
+   zbytek obrazovky.
+
+   Ve sloupci to říká jeviště samo (`flex: 1` níž). Kolik je nad ním odstavců,
+   pak nikoho nezajímá. */
 .view {
-  display: grid;
-  /* head / toolbar / strip / stage. Everything above the stage is `auto` and the
-     stage takes what is left — the page is the tool, so it gets the room. */
-  grid-template-rows: auto auto auto minmax(0, 1fr);
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   height: 100%;
   min-height: 0;
@@ -177,6 +188,25 @@
   color: var(--st-ink-4);
 }
 
+/* Křížek vpravo, `margin-left: auto` místo vlastního sloupce: rada je jeden
+   odstavec proměnlivé délky a cokoli s pevnou šířkou by u krátké věty leželo
+   uprostřed prázdna.
+
+   Plocha na kliknutí je 22px, tedy víc než těch 12px, co je vidět. Tahle
+   ikonka je nejmenší cíl na obrazovce a jediné, co se stane omylem, je že
+   rada zmizí — vrátí ji smazání dat webu, což nikdo hledat nebude. */
+/* Jen umístění a velikost. Vzhled — zrušený výchozí styl prohlížeče, barva,
+   hover — dodává `.iconButton` z ui/controls, protože tohle je jedno z mnoha
+   ikonových tlačítek Studia a druhá definice téhož by se s ní dřív nebo později
+   rozešla. */
+.stripClose {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -2px;
+  margin-left: auto;
+}
+
 /* A Náhled that did not happen, in the strip's own place rather than beside it.
    The accent, because this is the one line on the screen that is about something
    the editor has to act on: their text is still only in the page. */
@@ -184,6 +214,10 @@
   color: var(--st-accent);
 
   .stripIcon {
+    color: var(--st-accent);
+  }
+
+  .stripClose:hover {
     color: var(--st-accent);
   }
 }
@@ -217,6 +251,43 @@
 
   strong {
     font-weight: var(--st-w-medium);
+    color: var(--st-ink-2);
+  }
+}
+
+/* ---------------------------------------------------------------- povrchy --- */
+
+/* Řada povrchů nad jevištěm. Vodorovně a zalomitelně, protože jich je pár —
+   modály webu se počítají na jednotky, ne na desítky — a svislý sloupec by vedle
+   postranního panelu Studia zabral šířku, kterou celá tahle obrazovka existuje,
+   aby dala stránce. */
+.surfaces {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s2) var(--st-gutter);
+  background: var(--st-rail);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.surfacesEmpty {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+
+  svg {
+    flex: none;
+    color: var(--st-ink-4);
+  }
+
+  code {
+    font-family: var(--st-mono);
+    font-size: var(--st-text-tiny);
     color: var(--st-ink-2);
   }
 }
@@ -308,6 +379,10 @@
    loading states something to sit in the middle of. */
 .stage {
   position: relative;
+  /* To, co dřív říkala poslední stopa mřížky: jeviště bere, co zbylo. Řádky nad
+     ním se můžou objevovat a mizet, aniž by to tenhle soubor musel počítat. */
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .booting {
@@ -347,10 +422,6 @@
    editor works and the sentence is something they read once. It stays reachable
    as the sidebar row's title and in the document editor's own notice. */
 @include t.compact {
-  .view {
-    grid-template-rows: auto auto minmax(0, 1fr);
-  }
-
   .strip {
     display: none;
   }
@@ -371,14 +442,6 @@
    seam: given the whole line it forces exactly one break, in the one place where
    a break says something — what this is, then what you can do to it. */
 @include t.stacked {
-  /* Back to four tracks. `compact` above drops to three because `.strip` is
-     hidden; here the note below takes that slot, and with only three tracks
-     declared the stage would fall into an implicit `auto` row and stop being the
-     thing that gets the rest of the screen. */
-  .view {
-    grid-template-rows: auto auto auto minmax(0, 1fr);
-  }
-
   .head {
     flex-wrap: wrap;
     height: auto;

@@ -11,10 +11,21 @@
 // `getType`/`listTypes`, exactly as before.
 //
 // What is left in this directory are the types that are mechanisms rather than
-// content — `siteCopy`, `review`, and the mark encoding in marks.js — because
-// the config system and the moderation queue are written against them.
+// content — `siteCopy`, `review`, `uiText`, and the mark encoding in marks.js —
+// because the config system, the moderation queue and the key→text dictionary
+// are written against them.
+//
+// Být v téhle složce ale NEZNAMENÁ být zaregistrovaný: registruje se tím, že se
+// modul vyhodnotí, a vyhodnotí ho jedině import. Pro tyhle tři ho dělá
+// `valecms.types.mjs` v kořeni webu —
+//
+//     import uiText from '@c3studium/valecms/schemas/uiText.js'
+//     export const types = [siteCopy, review, uiText, …]
+//
+// — takže web, který slovník nechce, ho nepřidá a žádný typ navíc ve Studiu
+// nemá.
 
-import { types } from '@/cms/site/types'
+import { types } from '../site/types.js'
 
 export const schemas = types
 

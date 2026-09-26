@@ -17,7 +17,7 @@ import {
     KIND_ATTR,
     KIND_DOCUMENT,
     TYPE_ATTR,
-} from '@/cms/edit/attrs'
+} from '../edit/attrs.js'
 
 /**
  * The addresses one annotation carries, and which attribute each came from.

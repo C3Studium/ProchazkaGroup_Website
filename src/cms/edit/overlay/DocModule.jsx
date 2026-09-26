@@ -1,16 +1,16 @@
 import { useCallback, useMemo, useRef, useState } from "react"
 
-import { useCore, usePort, useRevision, useAuth } from "@/cms/studio/context/StudioProvider"
-import { useToast } from "@/cms/studio/context/ToastProvider"
-import FieldRenderer from "@/cms/studio/fields/FieldRenderer"
-import { useAsync } from "@/cms/studio/hooks/useAsync"
-import { defaultGroup, errorsForGroup, fieldGroups } from "@/cms/studio/lib/core"
-import { bodyOf, isEqual, setPath } from "@/cms/studio/lib/documents"
-import { Button } from "@/cms/studio/ui/controls"
-import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
-import editor from "@/cms/studio/views/DocumentEditorView.module.scss"
+import { useCore, usePort, useRevision, useAuth } from "../../studio/context/StudioProvider.jsx"
+import { useToast } from "../../studio/context/ToastProvider.jsx"
+import FieldRenderer from "../../studio/fields/FieldRenderer.jsx"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { defaultGroup, errorsForGroup, fieldGroups } from "../../studio/lib/core.js"
+import { bodyOf, isEqual, setPath } from "../../studio/lib/documents.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
+import editor from "../../studio/views/DocumentEditorView.module.scss"
 
-import styles from "./sheet"
+import styles from "./sheet.js"
 
 /**
  * A partner, an offer or a consultant — the type's own form, over the page.

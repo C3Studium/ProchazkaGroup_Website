@@ -248,7 +248,10 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
     const editing = isEditMode();
     const roster = useMemo(
         () => numbered(cmsRoster?.length ? rosterFromCms(cmsRoster) : FALLBACK_ROSTER)
-            .map((entry) => ({ ...entry, cms: editableDoc(entry.docId, "consultant") })),
+            // `id`, ne `docId`: nic `docId` na poradci nenastavuje (viz
+            // constants/roster.js), takže tahle anotace byla celou dobu prázdná
+            // a karta kolegy se jako dokument neotevírala.
+            .map((entry) => ({ ...entry, cms: editableDoc(entry.id, "consultant") })),
         [cmsRoster, editing],
     );
 

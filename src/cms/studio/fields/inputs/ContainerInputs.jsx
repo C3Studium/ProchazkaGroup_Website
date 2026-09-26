@@ -1,9 +1,9 @@
 import { useState } from "react"
-import { registerInput, registerKind } from "../registry"
-import FieldRenderer from "../FieldRenderer"
-import { useCore } from "../../context/StudioProvider"
-import { Button, IconButton } from "../../ui/controls"
-import Icon from "../../ui/Icon"
+import { registerInput, registerKind } from "../registry.js"
+import FieldRenderer from "../FieldRenderer.jsx"
+import { useCore } from "../../context/StudioProvider.jsx"
+import { Button, IconButton } from "../../ui/controls.jsx"
+import Icon from "../../ui/Icon.jsx"
 import styles from "./inputs.module.scss"
 
 /**

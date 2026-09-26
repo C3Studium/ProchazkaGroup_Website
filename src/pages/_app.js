@@ -225,6 +225,10 @@ function SiteShell({ Component, pageProps }) {
             <Navbar
                 assistant={pageProps.assistant || null}
                 contactCopy={pageProps.contact || null}
+                // Texty panelu menu. Každá routa je čte ve svém getStaticProps
+                // (viz getNavbarContent) — `_app` vlastní načítání nemá, a tohle
+                // je jediný kanál, kterým se k navigaci dostanou.
+                navCopy={pageProps.navbar || null}
                 /* Poradci pro seznam, který lišta otevírá. Stejná cesta jako u
                    asistentky a patičky, a ze stejného důvodu: lišta je
                    namountovaná tady vedle stránky, ne uvnitř ní, takže si sama

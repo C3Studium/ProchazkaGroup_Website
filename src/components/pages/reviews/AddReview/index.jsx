@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import Arrow from "@/components/common/ui/Arrow";
 import Dropdown from "@/components/common/ui/Dropdown";
-import { editable } from "@/cms/edit";
+import { editable, surfaceRoot, useStudioSurface } from "@/cms/edit";
 import { toast } from "sonner";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
@@ -25,6 +25,26 @@ const SHIPPED = {
     note: "Recenze se zveřejní až po schválení.",
 };
 
+// Co formulář řekne po stisku, a dvě slova, na která v zavřeném listu nikdo
+// neukáže myší. Vlastní blok v CMS (`recenze.hlasky`), sdílený s kartou poradce
+// — obě routy posílají recenzi stejnou cestou a odpovídají na totéž.
+const SHIPPED_NOTICES = {
+    needName: "Doplňte prosím jméno.",
+    needAdvisor: "Vyberte prosím poradce.",
+    needMessage: "Napište prosím pár slov.",
+    thanks: "Děkujeme. Recenzi zveřejníme, jakmile ji projdeme.",
+    failed: "Odeslání se nepovedlo. Zkuste to prosím znovu.",
+    copyFailed: "Zkopírování se nepovedlo, označte prosím text ručně.",
+    pickHint: "Vyberte poradce",
+    close: "Zavřít",
+};
+
+/** Jedna hláška: uložená, když něco říká, jinak ta, se kterou stránka přišla. */
+export const noticeOf = (notices, name) => {
+    const stored = notices?.[name];
+    return typeof stored === "string" && stored.trim() ? stored.trim() : SHIPPED_NOTICES[name];
+};
+
 // The one thing this page asks of the reader, kept where it can always be
 // reached: a fixed plate in the corner rather than a button somewhere down the
 // wall. Hairline, dimmed, square — the plate the partners page uses.
@@ -36,8 +56,13 @@ const SHIPPED = {
 // deleted, so nothing can land a review in a database this page never reads.
 //
 // @param {object} [copy] this block, from `getPageContent("/recenze")`.
-export default function AddReview({ consultants = [], copy = {} }) {
+export default function AddReview({ consultants = [], copy = {}, notices = null, studioRoot = null }) {
     const [open, setOpen] = useState(false);
+    // Ve Studiu se formulář rozbalí sám, jakmile si editor vybere povrch
+    // „Formulář — napsat recenzi". Sbalený je tady výchozí stav a na webu tak
+    // zůstane: `useStudioSurface` vrací mimo rám vždycky `false`.
+    const studioOpen = useStudioSurface("recenze.form");
+    const shown = open || studioOpen;
     // Calm, not killed: the sheet still fades, it just stops travelling.
     const calm = useReducedMotion();
     const [busy, setBusy] = useState(false);
@@ -54,6 +79,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
         sending: copy.sending || SHIPPED.sending,
         note: copy.note || SHIPPED.note,
     };
+    const says = (name) => noticeOf(notices, name);
     const [form, setForm] = useState({
         customerName: "",
         consultantName: "",
@@ -70,7 +96,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
     const roster = consultants.filter(Boolean);
 
     useEffect(() => {
-        if (!open) return;
+        if (!shown) return;
         window.lenis?.stop();
         const onKey = (e) => { if (e.key === "Escape") setOpen(false); };
         window.addEventListener("keydown", onKey);
@@ -78,15 +104,15 @@ export default function AddReview({ consultants = [], copy = {} }) {
             window.lenis?.start();
             window.removeEventListener("keydown", onKey);
         };
-    }, [open]);
+    }, [shown]);
 
     const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
     const submit = async (e) => {
         e.preventDefault();
-        if (!form.customerName.trim()) return toast.error("Doplňte prosím jméno.");
-        if (!form.consultantName.trim()) return toast.error("Vyberte prosím poradce.");
-        if (!form.message.trim()) return toast.error("Napište prosím pár slov.");
+        if (!form.customerName.trim()) return toast.error(says("needName"));
+        if (!form.consultantName.trim()) return toast.error(says("needAdvisor"));
+        if (!form.message.trim()) return toast.error(says("needMessage"));
 
         setBusy(true);
         try {
@@ -96,11 +122,11 @@ export default function AddReview({ consultants = [], copy = {} }) {
                 body: JSON.stringify(form),
             });
             if (!res.ok) throw new Error(String(res.status));
-            toast.success("Děkujeme. Recenzi zveřejníme, jakmile ji projdeme.");
+            toast.success(says("thanks"));
             setForm({ customerName: "", consultantName: "", message: "", website: "" });
             setOpen(false);
         } catch {
-            toast.error("Odeslání se nepovedlo. Zkuste to prosím znovu.");
+            toast.error(says("failed"));
         } finally {
             setBusy(false);
         }
@@ -148,7 +174,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
                 Nothing about the sheet's own CSS changes. */}
             {mounted && createPortal(
             <AnimatePresence>
-                {open && (
+                {shown && (
                     <>
                         <motion.div
                             className="AddRev__backdrop"
@@ -173,6 +199,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
                             Only the card takes pointer events; taps beside it
                             reach the backdrop and close. */}
                         <motion.form
+                            {...surfaceRoot(studioRoot)}
                             className="AddRev__sheet"
                             onSubmit={submit}
                             initial={{ opacity: 0, y: calm ? 0 : "3vh" }}
@@ -200,7 +227,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
                                     className="AddRev__close"
                                     onClick={() => setOpen(false)}
                                     data-cursor="frame"
-                                    aria-label="Zavřít"
+                                    aria-label={says("close")}
                                 >
                                     <span /><span />
                                 </button>
@@ -269,7 +296,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
                                                 className="AddRev__pick__select"
                                                 value={form.consultantName}
                                                 onChange={set("consultantName")}
-                                                placeholder="Vyberte poradce"
+                                                placeholder={says("pickHint")}
                                                 label="Koho se recenze týká"
                                                 size={20}
                                                 // Výzva je v seznamu jako
@@ -280,7 +307,7 @@ export default function AddReview({ consultants = [], copy = {} }) {
                                                 // nevrací. Je to zároveň to, na co
                                                 // se pole nastaví po odeslání.
                                                 options={[
-                                                    { value: "", label: "Vyberte poradce", disabled: true },
+                                                    { value: "", label: says("pickHint"), disabled: true },
                                                     ...roster.map((name) => ({ value: name, label: name })),
                                                     { value: "Benefit Program", label: "Benefit Program" },
                                                 ]}

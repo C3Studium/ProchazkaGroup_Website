@@ -10,6 +10,7 @@ import {
   EDITABLE_SELECTOR,
   FIELD_ATTR,
   HREF_ATTR,
+  INTERACTIVE_ATTR,
   KIND_ATTR,
   KIND_DOCUMENT,
   KIND_IMAGE,
@@ -22,16 +23,19 @@ import {
   lineLeafPath,
   linePath,
   MARK_ATTR,
+  SURFACE_ROOT_ATTR,
   TYPE_ATTR,
 } from "../attrs.js"
 import { anchor, isOnScreen } from "./anchor.js"
 import { imageValue } from "./assets.js"
 import { checkHref, isCreditLink } from "./href.js"
 import { keepScroll } from "./keepScroll.js"
+import { SURFACE_ATTR } from "../surface.js"
 import { studioSurface } from "../../studio/styles/surface.js"
 import { reportFixedTrap } from "../../studio/lib/fixedTrap.js"
 import styles from "./sheet.js"
 import { applyStored, beginTextEdit, fieldValue } from "./text.js"
+import { beginMirrors } from "./mirror.js"
 
 // One popup, a body per kind, one async chunk. It is loaded when an editor first
 // opens one rather than with the overlay: it drags in the Studio's provider, its
@@ -141,8 +145,17 @@ const popupContainer = () => studioSurface() || hostDocument()?.body || null
  *                           stored at a path right now. Only `lines` needs it,
  *                           and only to write a whole array back: see `openLines`.
  * @param {function} [onSelect]  told what an editor picked, for the host's own UI
+ * @param {string|null} [lang]  jazyk obsahu, do kterého se píše (docs/I18N.md §4).
+ *                           `null` je výchozí jazyk, tedy základní řádek — a je
+ *                           to výchozí hodnota, takže web s jedním jazykem se
+ *                           chová přesně jako dosud. Překryv s ním nic nedělá
+ *                           kromě toho, že ho přiloží ke každému zápisu: KTERÝ
+ *                           jazyk to je, rozhoduje „Upravit kontent", a druhé
+ *                           místo, kde by se to dalo rozhodnout, by znamenalo
+ *                           dvě pravdy a zápis do jiného jazyka, než jaký je
+ *                           vidět v adrese.
  */
-export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
+export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect, lang = null }) {
   const win = frame
   const doc = frame.document
 
@@ -176,10 +189,17 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
   const hoverBoxRef = useRef(null)
   const selectBoxRef = useRef(null)
   const controlRef = useRef(null)
+  // Štít a jeho odpojovač — stejný vzor jako detachScroll u kořene.
+  const shieldRef = useRef(null)
+  const detachShield = useRef(null)
 
   const hoverElRef = useRef(null)
   const selectElRef = useRef(null)
   const editorRef = useRef(null)
+  // The mirrors of the field being edited (mirror.js), alive exactly as long
+  // as editorRef: created when the edit opens, resolved on the same three
+  // paths — commit keeps, cancel restores, unmount restores.
+  const mirrorsRef = useRef(null)
   const editingRef = useRef(false)
   const zoomRef = useRef(zoom || 1)
   // Layout size of the control, from a ResizeObserver rather than a rect read:
@@ -243,6 +263,17 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
     paintBox(hoverBoxRef.current, editingRef.current ? null : hoveredRect, frameBox)
     paintBox(selectBoxRef.current, selectedRect, frameBox)
     paintControl(controlRef.current, selectedRect, frameBox, zoomNow, controlSizeRef.current)
+
+    const shield = shieldRef.current
+    if (shield) {
+      // Kurzor je jediná zpětná vazba, že pod štítem něco editovatelného je —
+      // hover animace stránky, které to dřív prozrazovaly, jsou schválně mrtvé.
+      shield.style.cursor = !editingRef.current && hovered ? "pointer" : ""
+      // Rozepsaná editace potřebuje skutečné události (caret, tažení výběru)
+      // na skutečném prvku — štít nad ním dostane díru. Mimo editaci se díra
+      // zase zacelí; smyčka běží po celou dobu výběru, takže rect nezastará.
+      applyShieldHole(shield, editingRef.current ? editorRef.current?.element : null, frameBox, doc)
+    }
 
     if (hoverElRef.current || selectElRef.current || pointer.pending) {
       rafRef.current = win.requestAnimationFrame(tickRef.current)
@@ -398,12 +429,12 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
         onSaveResult({ docId, field, status: "failed", value: null, error: new Error("Ukládání není zapojeno") })
         return
       }
-      Promise.resolve(onSave({ docId, field, value })).then(
+      Promise.resolve(onSave({ docId, field, value, lang })).then(
         (entry) => onSaveResult({ docId, field, ...entry }),
         (error) => onSaveResult({ docId, field, status: "failed", value: null, error }),
       )
     },
-    [onSave, onSaveResult, showFlash],
+    [lang, onSave, onSaveResult, showFlash],
   )
 
   // See `onSaveResult`: retrying is a save, and a save answers through it.
@@ -619,6 +650,10 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
       onInput: () => {
         const now = editorRef.current ? editorRef.current.value() : before
         setTextDirty(!sameValue(now, before))
+        // The same beat carries the words to every mirror of this field, so
+        // a table of contents or a flip face never shows a stale copy while
+        // the editor watches themselves type.
+        mirrorsRef.current?.sync()
       },
       // `meta.shown` is `beginTextEdit`'s answer to the only question this
       // surface cannot answer for itself: is the value now on the page? It is
@@ -627,6 +662,10 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
       // rides along with the save so the flash can say so instead of reporting
       // a clean "Uloženo" over the previous copy.
       onCommit: (value, meta) => {
+        // Mirrors end the edit showing what was committed, exactly like the
+        // element itself; the parked originals are theirs to drop.
+        mirrorsRef.current?.commit()
+        mirrorsRef.current = null
         finishEdit()
         if (sameValue(value, before)) showFlash("Beze změny")
         else if (isLines) saveLines(current, value, before, meta)
@@ -638,9 +677,16 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
             shown: meta?.shown !== false,
           })
       },
-      onCancel: finishEdit,
+      onCancel: () => {
+        // Cancelling always restores, and "always" includes the reflections:
+        // every touched mirror gets its own nodes back beside the element's.
+        mirrorsRef.current?.restore()
+        mirrorsRef.current = null
+        finishEdit()
+      },
       onSelection: setMarkState,
     })
+    mirrorsRef.current = beginMirrors(element, current.docId, current.field)
     editingRef.current = true
     setEditing(true)
     setTextDirty(false)
@@ -835,8 +881,14 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
       wake()
     }
 
+    // Chrome overlaye události konzumuje sám; ŠTÍT je ale výjimka — jeho
+    // zásahy jsou stránka, ne chrome, jinak by tyhle stráže spolkly každý
+    // klik a hover by umřel.
+    const isChrome = (target) =>
+      rootRef.current?.contains(target) && target !== shieldRef.current
+
     const onPointerDown = (event) => {
-      if (rootRef.current?.contains(event.target)) return
+      if (isChrome(event.target)) return
       if (editingRef.current) return
       if (hitTest(doc, event.clientX, event.clientY, rootRef.current)) {
         // Stops the page starting a text selection or an image drag on
@@ -846,7 +898,7 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
     }
 
     const onClick = (event) => {
-      if (rootRef.current?.contains(event.target)) return
+      if (isChrome(event.target)) return
 
       if (editingRef.current) {
         const edited = editorRef.current?.element
@@ -859,15 +911,33 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
 
       const target = hitTest(doc, event.clientX, event.clientY, rootRef.current)
       if (target) {
-        // Editable things stop being links while the overlay is up. Everything
-        // else on the page keeps working — an editor has to be able to open the
-        // menu and drive the horizontal section to reach what they came for.
+        // V režimu úprav je stránka exponát: odkazy, shadery i hover animace
+        // drží pod štítem (viz `silencePage`) a klik znamená jediné — výběr
+        // editovatelného prvku. K obsahu za menu či karuselem se editor
+        // dostane scrollem, který štítem prochází.
         event.preventDefault()
         event.stopPropagation()
         select(target)
-      } else if (selectElRef.current) {
-        clearSelection()
+        return
       }
+
+      // Klik mimo editovatelný prvek, ale uvnitř živého (INTERACTIVE_ATTR).
+      //
+      // Štít tu má díru, takže tenhle klik k prvku doopravdy doletí a jeho
+      // vlastní handler proběhne — dlaždice se rozbalí, karta se otevře. To je
+      // celý smysl. Zrušit se musí jen VÝCHOZÍ akce: kdyby to byl odkaz, editor
+      // by uprostřed úprav skončil na jiné stránce a nepochopil proč.
+      //
+      // `preventDefault` bez `stopPropagation` schválně: capture fáze běží před
+      // cílovou, takže handlery stránky teprve přijdou na řadu a zastavit
+      // šíření by je umlčelo — tedy přesně to, co tahle větev povoluje.
+      const live = event.target?.closest?.(`[${INTERACTIVE_ATTR}]`)
+      if (live) {
+        event.preventDefault()
+        return
+      }
+
+      if (selectElRef.current) clearSelection()
     }
 
     const onKeyDown = (event) => {
@@ -884,8 +954,21 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
 
     doc.addEventListener("pointermove", onPointerMove, { capture: true, passive: true })
     doc.addEventListener("pointerleave", onPointerLeave, { capture: true, passive: true })
-    doc.addEventListener("pointerdown", onPointerDown, true)
-    doc.addEventListener("click", onClick, true)
+    // Na `window`, ne na `doc`, a je to podstatné.
+    //
+    // Stránka si umí zaregistrovat vlastní capture listener na document — tenhle
+    // web to dělá (PageVeil chytá každý klik na `<a>`, aby odjezd ze stránky
+    // odanimoval). Dva capture listenery na témže uzlu běží v pořadí registrace,
+    // a stránka se registruje dřív než překryv, který do ní hostitel vkládá až
+    // po načtení. Dokud každý klik trefil štít, nevadilo to: `closest("a")` na
+    // štítu nenašel nic. Díra pro živé prvky (INTERACTIVE_ATTR) ale odkryla
+    // skutečný odkaz, PageVeil ho uviděl první a odvezl rám pryč dřív, než
+    // tady stihl proběhnout `stopPropagation`.
+    //
+    // Capture fáze na `window` předchází té na `document` vždycky, bez ohledu
+    // na to, kdo se zaregistroval kdy. Překryv je tak první v řadě z konstrukce.
+    win.addEventListener("pointerdown", onPointerDown, true)
+    win.addEventListener("click", onClick, true)
     doc.addEventListener("keydown", onKeyDown, true)
     win.addEventListener("resize", onResize, { passive: true })
 
@@ -900,8 +983,8 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
     return () => {
       doc.removeEventListener("pointermove", onPointerMove, true)
       doc.removeEventListener("pointerleave", onPointerLeave, true)
-      doc.removeEventListener("pointerdown", onPointerDown, true)
-      doc.removeEventListener("click", onClick, true)
+      win.removeEventListener("pointerdown", onPointerDown, true)
+      win.removeEventListener("click", onClick, true)
       doc.removeEventListener("keydown", onKeyDown, true)
       win.removeEventListener("resize", onResize)
       host?.removeEventListener("keydown", onKeyDown, true)
@@ -944,8 +1027,11 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
     () => () => {
       // Cancelling always restores, and that has to include the overlay being
       // torn down mid-edit — a hot reload, the frame navigating, the host
-      // unmounting it. The element goes back to what it was either way.
+      // unmounting it. The element goes back to what it was either way, and
+      // its mirrors with it.
       editorRef.current?.dispose()
+      mirrorsRef.current?.restore()
+      mirrorsRef.current = null
       win.cancelAnimationFrame(rafRef.current)
       // Clearing the handle is not tidiness. `wake()` treats a non-zero handle
       // as "a frame is already booked", and StrictMode mounts, tears down and
@@ -999,6 +1085,25 @@ export default function Overlay({ frame, zoom = 1, onSave, onRead, onSelect }) {
           {/* Named parts. The overlay is chrome with no accessible surface of
               its own, so these attributes are how a test — or the next person with
               devtools open — says "that box, the one tracking the selection". */}
+
+          {/* Interakční štít, první pod kořenem. V režimu úprav je stránka
+              exponát, ne aplikace: shader nemá reagovat na myš, odkaz nemá
+              vést pryč, hover animace nemají hrát. Nativní listenery (viz
+              `silencePage`) zastaví bublání už na cílové fázi, takže se
+              pohyb myši nedostane ani k window listenerům stránky; capture
+              fáze overlaye běží dřív, takže hover a výběr editovatelných
+              prvků fungují dál. Hit-test štít nevidí — je uvnitř kořene,
+              který `hitTest` přeskakuje. */}
+          <div
+            ref={(node) => {
+              shieldRef.current = node
+              detachShield.current?.()
+              detachShield.current = node ? silencePage(node) : null
+            }}
+            data-cms-part="shield"
+            className={styles.shield}
+          />
+
           <div ref={hoverBoxRef} data-cms-part="hover" className={`${styles.box} ${styles.boxHover}`} />
           <div ref={selectBoxRef} data-cms-part="selection" className={`${styles.box} ${styles.boxSelected}`} />
 
@@ -1346,6 +1451,112 @@ function paintControl(node, rect, frame, zoom, size) {
   }
 }
 
+/* -------------------------------------------------------------- shield -- */
+
+/**
+ * Umlčení stránky pod štítem.
+ *
+ * Proč listenery a ne `pointer-events: none` na stránce: none by vyřadilo
+ * i `elementsFromPoint`, na kterém stojí hit-test — editovatelné prvky by
+ * zmizely spolu se vším ostatním. Štít s `auto` naopak stránku jen zakryje:
+ * cílem každé události je štít, takže element listenery stránky (shader na
+ * vlastním canvasu, odkaz, hover) nedostanou nic — a `stopPropagation` na
+ * cílové fázi zastaví bublání dřív, než doletí k listenerům na document či
+ * window (kurzorové shadery, delegované handlery). Capture fáze overlaye na
+ * dokumentu běží před cílovou, takže vlastní detekce jede beze změny.
+ *
+ * Co záměrně prochází: `wheel` a `touchmove` — výchozí scroll není pointer
+ * event a bez posouvání se editor na dlouhé stránce nikam nedostane;
+ * klávesnice — Escape už konzumuje overlay a zbytek nikam neteče myší.
+ * `contextmenu` se nezastavuje kvůli devtools („Prozkoumat prvek" je při
+ * ladění anotací k nezaplacení).
+ */
+const SILENCED_EVENTS = [
+  "pointermove",
+  "pointerdown",
+  "pointerup",
+  "pointerover",
+  "pointerout",
+  "mousemove",
+  "mousedown",
+  "mouseup",
+  "mouseover",
+  "mouseout",
+  "click",
+  "dblclick",
+  "auxclick",
+  "dragstart",
+  "touchstart",
+  "touchend",
+]
+
+function silencePage(node) {
+  const stop = (event) => {
+    event.stopPropagation()
+    // Aktivace nemá kam vést — štít není odkaz — ale prohlížeče umí
+    // ledacos (middle-click autoscroll, tažení „obrázku" pozadí).
+    if (event.type === "click" || event.type === "auxclick" || event.type === "dragstart") {
+      event.preventDefault()
+    }
+  }
+  for (const type of SILENCED_EVENTS) node.addEventListener(type, stop)
+  return () => {
+    for (const type of SILENCED_EVENTS) node.removeEventListener(type, stop)
+  }
+}
+
+/**
+ * Díra ve štítu nad prvkem, který se právě edituje v místě.
+ *
+ * Caret, tažení výběru i dvojklik na slovo potřebují SKUTEČNÉ události na
+ * skutečném prvku — syntetické přeposílání neumí umístit kurzor. `path()`
+ * s evenodd vyřeže z celoplošného štítu obdélník prvku (s malým přesahem,
+ * ať jde trefit i okraj řádku); zbytek stránky zůstává mrtvý. Zapisuje se
+ * jen při změně — smyčka běží každý frame a stylový zápis by jinak dělal
+ * zbytečnou práci.
+ */
+function applyShieldHole(shield, element, frameBox, doc) {
+  const rects = []
+
+  // Prvek, který se zrovna edituje v místě. Přesah 6px, ať jde trefit i okraj
+  // řádku — caret na první písmeno se jinak chytá hůř, než by měl.
+  if (element && element.isConnected) rects.push(boxOf(element.getBoundingClientRect(), frameBox, 6))
+
+  // A všechno, co se prohlásilo za živé. Bez přesahu: tyhle obdélníky sousedí
+  // (osm dlaždic v mřížce) a přesah by z nich udělal jednu díru, ve které by se
+  // hover přeléval mezi sousedy.
+  if (doc) {
+    for (const node of doc.querySelectorAll(`[${INTERACTIVE_ATTR}]`)) {
+      const box = boxOf(node.getBoundingClientRect(), frameBox, 0)
+      if (box) rects.push(box)
+    }
+  }
+
+  const live = rects.filter(Boolean)
+  const hole = live.length
+    ? `path(evenodd, "M0 0H${frameBox.width}V${frameBox.height}H0Z ${live
+        .map((r) => `M${r.left} ${r.top}H${r.right}V${r.bottom}H${r.left}Z`)
+        .join(' ')}")`
+    : ""
+
+  // Zapisuje se jen při změně — smyčka běží každý frame a `clipPath` je
+  // vlastnost, jejíž přepsání si prohlížeč přepočítá i tehdy, když je stejná.
+  if ((shield.dataset.cmsHole || "") !== hole) {
+    shield.style.clipPath = hole
+    if (hole) shield.dataset.cmsHole = hole
+    else delete shield.dataset.cmsHole
+  }
+}
+
+/** Obdélník oříznutý na rám; `null`, když z něj po oříznutí nic nezbude. */
+function boxOf(rect, frameBox, pad) {
+  const left = Math.max(0, Math.floor(rect.left - pad))
+  const top = Math.max(0, Math.floor(rect.top - pad))
+  const right = Math.min(frameBox.width, Math.ceil(rect.right + pad))
+  const bottom = Math.min(frameBox.height, Math.ceil(rect.bottom + pad))
+  return right > left && bottom > top ? { left, top, right, bottom } : null
+}
+
 /* --------------------------------------------------------- hit testing -- */
 
 /**
@@ -1391,10 +1602,50 @@ function paintControl(node, rect, frame, zoom, size) {
  * null there, and a geometric sweep would happily answer with an element
  * scrolled off the side of a horizontal section.
  */
+/**
+ * Hranice právě editovaného povrchu, nebo `null`.
+ *
+ * Jméno povrchu píše Studio na `<html>` rámu (viz edit/surface.js), kořen si
+ * označuje sama komponenta. Musí sedět obojí: atribut bez kořene znamená
+ * povrch, který hranici nedeklaroval, a to je platný stav — ne chyba.
+ */
+function surfaceScope(doc) {
+  const named = doc.documentElement?.getAttribute(SURFACE_ATTR)
+  if (!named) return null
+  // Víc kořenů, ne jeden. Modál, který se portáluje, vykresluje závoj a list
+  // jako SOUROZENCE — společného rodiče nemají a vyrobit jim ho znamená sáhnout
+  // na rozvržení kvůli editaci. Obsah přitom bývá v jednom z nich, takže se
+  // označí oba, nebo jen ten s obsahem, a hranice je jejich sjednocení.
+  const roots = doc.querySelectorAll(`[${SURFACE_ROOT_ATTR}="${CSS.escape(named)}"]`)
+  if (!roots.length) return null
+  return {
+    contains: (element) => {
+      for (const node of roots) if (node.contains(element)) return true
+      return false
+    },
+    querySelectorAll: (selector) => {
+      const out = []
+      for (const node of roots) out.push(...node.querySelectorAll(selector))
+      return out
+    },
+  }
+}
+
 function hitTest(doc, x, y, root) {
   if (!(x >= 0) || !(y >= 0)) return null
   const win = doc.defaultView
   if (win && (x > win.innerWidth || y > win.innerHeight)) return null
+
+  // Edituje se povrch, který si řekl o svou hranici? Pak dál než k ní ne.
+  //
+  // Modál leží NAD stránkou, ale stránka pod ním nikam nezmizela — patičku
+  // i zbytek `_app` vykresluje dál a obě půlky hledání níž (stack i sweep) je
+  // najdou. Editor pak vidí rámeček kolem textu, na který se nedívá, protože
+  // je o dvě vrstvy pod otevřeným modálem.
+  //
+  // Bez kořene se nic nemění: povrch, který si o hranici neřekl, se chová jako
+  // dosud. Je to tedy rozšíření, ne nová podmínka pro všechny.
+  const scope = surfaceScope(doc)
 
   // Annotations the stack implicates. Kept as a set because their usefulness is
   // "this one is certainly painted here", not "this one is the answer".
@@ -1404,6 +1655,7 @@ function hitTest(doc, x, y, root) {
   let onTop = null
   for (const element of doc.elementsFromPoint(x, y)) {
     if (root && root.contains(element)) continue
+    if (scope && !scope.contains(element)) continue
     const found = element.closest?.(EDITABLE_SELECTOR)
     if (found) painted.add(found)
     if (!onTop && found === element) onTop = element
@@ -1447,7 +1699,7 @@ function hitTest(doc, x, y, root) {
     bestRank = rank
   }
 
-  for (const element of doc.querySelectorAll(EDITABLE_SELECTOR)) consider(element, boxAt(element, x, y))
+  for (const element of (scope || doc).querySelectorAll(EDITABLE_SELECTOR)) consider(element, boxAt(element, x, y))
   // An annotation the stack reached whose own boxes do not contain the point —
   // a child painting outside its parent, a clip path. Rare, and free to keep.
   for (const element of painted) consider(element, areaOf(element))

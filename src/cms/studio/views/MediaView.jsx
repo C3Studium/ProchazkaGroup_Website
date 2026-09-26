@@ -1,5 +1,5 @@
-import MediaLibrary from "../media/MediaLibrary"
-import { ViewHeader } from "./ViewLayout"
+import MediaLibrary from "../media/MediaLibrary.jsx"
+import { ViewHeader } from "./ViewLayout.jsx"
 
 /**
  * The media screen is the library component at full size. The picker used by

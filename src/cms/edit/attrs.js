@@ -37,6 +37,34 @@ export const TYPE_ATTR = "data-cms-type"
 export const MARK_ATTR = "data-cms-mark"
 
 /**
+ * An element that only REFLECTS a field it does not edit.
+ *
+ * The overlay's optimistic state is the DOM of the one element the annotation
+ * sits on — so when the same value is drawn on the page a second time (a table
+ * of contents, a breadcrumb, the other faces of a flip animation), that copy
+ * learns about a keystroke only after save-and-rerender, and an editor watches
+ * two "same" texts disagree while typing. Before this attribute every project
+ * solved that with its own MutationObserver on the edited element.
+ *
+ * Value: `"<doc>:<field>"` — the same id and field path the source element's
+ * annotation carries, split at the FIRST colon (a field path can contain dots
+ * but never a colon). While that field is being edited in place, the overlay
+ * rewrites the mirror's text alongside the edited element; on cancel it puts
+ * the mirror's own nodes back, exactly as it does for the element itself.
+ *
+ * A mirror is a reflection, not a second place to edit: it is deliberately NOT
+ * part of EDITABLE_SELECTOR, the hit-test never offers it, and an element that
+ * carries both a mirror and a field annotation is treated as a source (the
+ * mirror half is ignored) — reflecting a field into the element that edits it
+ * would feed the editor its own output.
+ */
+export const MIRROR_ATTR = "data-cms-mirror"
+
+/** The attribute's value for one field of one document — the one spelling,
+ *  written here so the helper and the overlay cannot drift. */
+export const mirrorValue = (docId, field) => `${docId}:${field}`
+
+/**
  * Every annotated element.
  *
  * Three alternatives rather than one, because "a document id plus a field path"
@@ -58,6 +86,39 @@ export const EDITABLE_SELECTOR =
  * form — and what differs is which of that form's actions an editor is allowed.
  * Absent means "everything this kind offers".
  */
+/**
+ * „Tenhle prvek zůstává v režimu úprav živý."
+ *
+ * V režimu úprav je stránka exponát: štít přes celou plochu pohltí hover i klik,
+ * takže se k prvkům nedostane nic (viz `silencePage` v overlay/Overlay.jsx).
+ * U většiny stránky je to správně — shader nemá reagovat, odkaz nemá vést pryč.
+ *
+ * Jenže některý obsah je vidět teprve potom, co se na něj sáhne: dlaždice, která
+ * ukáže popisek až při najetí, karta poradce, která se rozbalí až po kliknutí.
+ * Ten obsah je editovatelný, ale editor se k němu nedostane, protože se k němu
+ * nedostane ukazatel — a vypadá to, že úpravy nefungují.
+ *
+ * Prvek s tímhle atributem dostane ve štítu díru: události k němu chodí
+ * doopravdy, takže jeho vlastní hover i klik fungují jako na webu. Co se
+ * NEDĚJE, je navigace — odkaz uvnitř se aktivuje, ale nikam nevede, protože
+ * odejít ze stránky uprostřed úprav není totéž co rozbalit dlaždici.
+ */
+/**
+ * Kořen povrchu — „když se edituje TENHLE povrch, platí jen to, co je uvnitř".
+ *
+ * Modál leží nad stránkou, ale stránka pod ním nezmizela: patičku i hero
+ * vykresluje `_app` dál a hit-test je hledá geometricky po celém dokumentu.
+ * Editor pak klikne vedle dlaždice a označí se mu text, který je o dvě vrstvy
+ * níž a v modálu vůbec není — nebo hůř, uloží do něj to, co psal do modálu.
+ *
+ * Hodnotou je jméno povrchu, aby se kořeny dvou povrchů na téže stránce
+ * nepletly. Platí jen tehdy, když Studio ten povrch opravdu edituje; jindy se
+ * hit-test chová jako vždycky, tedy přes celou stránku.
+ */
+export const SURFACE_ROOT_ATTR = "data-cms-surface-root"
+
+export const INTERACTIVE_ATTR = "data-cms-interactive"
+
 export const ACTIONS_ATTR = "data-cms-actions"
 export const ACTIONS_MODERATE = "moderate"
 

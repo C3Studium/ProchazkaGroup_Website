@@ -108,17 +108,24 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
         // is now stored, which is not always what was sent. The visual editor
         // reconciles its optimistic update against that rather than against its
         // own input; see studio/lib/visualSave.js.
-        patchField: ({ id, field, value }) =>
+        patchField: ({ id, field, value, lang = null }) =>
             request(`/documents/${encodeURIComponent(id)}/field`, {
                 method: 'PATCH',
-                body: { field, value },
+                // `lang` se posílá jen když nějaký je. Výchozí jazyk JE základní
+                // řádek dokumentu, takže poslat ho jménem by založilo druhou
+                // pravdu o tomtéž — a server by pak hledal překladový řádek,
+                // který nemá vzniknout.
+                body: lang ? { field, value, lang } : { field, value },
             }),
 
         remove: ({ id }) =>
             request(`/documents/${encodeURIComponent(id)}`, { method: 'DELETE' }),
 
-        publish: ({ id }) =>
-            request(`/documents/${encodeURIComponent(id)}/publish`, { method: 'POST' }),
+        publish: ({ id, lang = null }) =>
+            request(`/documents/${encodeURIComponent(id)}/publish`, {
+                method: 'POST',
+                body: lang ? { lang } : undefined,
+            }),
 
         unpublish: ({ id }) =>
             request(`/documents/${encodeURIComponent(id)}/unpublish`, { method: 'POST' }),
@@ -323,6 +330,29 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
         settings: {
             status: () => request('/settings/status'),
 
+            /**
+             * Jazyky obsahu. Čtení smí i redaktor — potřebuje ho výběr jazyka
+             * v editaci; zápis jen vlastník, o tom rozhoduje server.
+             *
+             * Tvar `{ default, list }` je týž, jaký leží v `cms_setting` pod
+             * klíčem `site.languages`, takže se hodnota z databáze dá poslat
+             * beze změny a nevzniká druhá definice toho, co je jazyk.
+             */
+            languages: {
+                read: () => request('/settings/languages'),
+                save: (value) => request('/settings/languages', { method: 'PUT', body: value }),
+            },
+
+            /**
+             * Řeč, kterou mluví samo Studio — vlastní věc, nezávislá na jazyce
+             * obsahu. Dva klíče, dva endpointy, schválně: redaktor může spravovat
+             * anglický web v češtině a naopak.
+             */
+            studioLanguage: {
+                read: () => request('/settings/studio-language'),
+                save: ({ code }) => request('/settings/studio-language', { method: 'PUT', body: { code } }),
+            },
+
             // Explicitly, from a button. It makes live requests to Supabase, so
             // it must not be wired to a render.
             probe: ({ force } = {}) => request('/settings/probe', { query: { force: force ? '1' : undefined } }),
@@ -350,22 +380,6 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
             widget: {
                 read: () => request('/widget'),
                 save: (value) => request('/widget', { method: 'PUT', body: value }),
-            },
-
-            /**
-             * Telefonní předvolby, které nabízí každé pole s telefonem. Mimo
-             * /settings z téhož důvodu jako widget nad tím — čtení je veřejné,
-             * protože ho potřebuje formulář v prohlížeči návštěvníka.
-             *
-             * Rozbaluje se `{ items }` na pole: na drátě má odpověď jméno, ať
-             * se dá později rozšířit, ale panel v nastavení pracuje se
-             * seznamem a obal by protekl do každého jeho řádku.
-             */
-            dialPrefixes: {
-                read: () => request('/dial-prefixes').then((body) => body?.items || []),
-                save: (items) =>
-                    request('/dial-prefixes', { method: 'PUT', body: { items } })
-                        .then((body) => body?.items || []),
             },
 
             sessions: {

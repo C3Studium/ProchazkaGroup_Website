@@ -463,84 +463,68 @@
   color: var(--st-ink-4);
 }
 
-/* ------------------------------------------------- telefonní předvolby -- */
+/* ---------------------------------------------------------------- jazyky -- */
 
-/* Řádek seznamu předvoleb. Dědí .row (výška, linka, mezera) a přidává jen to,
-   čím se liší: jsou to editovatelná pole vedle sebe, ne text a stav. */
-.dialRow {
+/* Kód jazyka vedle jeho názvu. Neproporcionální a v rámečku, protože `cs`
+   a `Čeština` jsou dvě různé věci a v jedné větě by splynuly. */
+.langCode {
+  padding: 1px 6px;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-3);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line-soft);
+  border-radius: 2px;
+}
+
+/* Přidání jazyka: krátké pole na kód, dlouhé na název, tlačítko na konci
+   řádku. Zarovnané na spodní hranu, aby tlačítko sedělo na řádku s poli
+   a ne s jejich popisky. */
+.addForm {
+  display: grid;
+  grid-template-columns: 14ch minmax(0, 1fr) auto;
   gap: var(--st-s3);
+  align-items: end;
+  margin-top: var(--st-s6);
 }
 
-/* Pořadové číslo. Je to údaj, ne ovládání — pořadí se mění šipkami vpravo —
-   ale bez něj se v deseti stejně vypadajících řádcích nepozná, který je
-   který, a hlášky serveru mluví o číslech řádků. */
-.dialIndex {
-  flex: none;
-  width: 2ch;
+.codeInput {
+  font-family: var(--st-mono);
+}
+
+/* Věta o nasazení. Rámeček a ne šedá poznámka pod polem schválně: je to jediná
+   informace na téhle obrazovce, jejíž přehlédnutí vypadá jako porucha webu. */
+.notice {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  max-width: 78ch;
+  padding: 10px 12px;
+  margin: var(--st-s4) 0 0;
   font-size: var(--st-text-small);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  color: var(--st-ink-4);
-}
+  line-height: 1.55;
+  color: var(--st-ink-3);
+  background: var(--st-accent-soft);
+  border: 1px solid var(--st-accent-line);
+  border-radius: var(--st-radius);
 
-.dialLabel {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Devět znaků by stačilo na +420, ale pole, které vypadá přesně na svůj obsah,
-   svádí k tomu psát do něj bez plus. Tohle je zřetelně pole na krátkou hodnotu
-   a pořád je v něm vidět, že tam plus patří. */
-.dialCode {
-  flex: none;
-  width: 11ch;
-  font-family: var(--st-mono);
-}
-
-.dialIso {
-  flex: none;
-  width: 8ch;
-  font-family: var(--st-mono);
-  text-transform: uppercase;
-}
-
-/* Místo po štítku „výchozí", který má jen první řádek. Bez něj by se ostatním
-   řádkům tlačítka odskočila doleva a sloupec by přestal být sloupec. */
-.dialGap {
-  flex: none;
-  width: 62px;
-}
-
-/* Úzké okno: pole se zalomí pod sebe a řádek přestane být řádek. Ta tři pole
-   mají dané šířky, takže se to stane dřív, než se zdá — sloupec s Nastavením
-   je v dokovaném Studiu širší než obrazovka. */
-@media (max-width: 900px) {
-  .dialRow {
-    flex-wrap: wrap;
-    align-items: flex-start;
-    padding: 12px 0;
+  svg {
+    flex: none;
+    margin-top: 2px;
+    color: var(--st-accent);
   }
 
-  .dialLabel {
-    flex: 1 1 100%;
-    order: 1;
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
   }
+}
 
-  .dialIndex {
-    order: 0;
-  }
-
-  .dialCode,
-  .dialIso {
-    order: 2;
-  }
-
-  .dialGap {
-    display: none;
-  }
-
-  .dialRow .rowActions {
-    order: 3;
-    margin-left: auto;
+@include t.compact {
+  /* Tři sloupce se do šířky telefonu nevejdou; pod sebou zůstane pořadí
+     kód → název → tlačítko, což je pořád to, v jakém se to vyplňuje. */
+  .addForm {
+    grid-template-columns: 1fr;
+    align-items: stretch;
   }
 }

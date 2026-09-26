@@ -92,7 +92,10 @@ const scaleFor = ([w, h]) =>
 const FLAG_OF = 12 / 850;
 const flagFor = (width) => Math.round(Math.min(34, Math.max(10, width * FLAG_OF)));
 
-export default function EuropeMap({ ride, at, step, width = 850, caption = false, coarse = false, ground = false, focus = false, visible = 1 }) {
+// `hint` je věta, kterou kapitola říká o mapě, dokud se nikoho nedotkl prst —
+// přichází z CMS přes OfferStrip. Záloha je tady, aby mapa bez kapitoly (a bez
+// databáze) neztichla úplně.
+export default function EuropeMap({ ride, at, step, width = 850, caption = false, coarse = false, ground = false, focus = false, visible = 1, hint = "Ťukněte na zemi a uvidíte, odkdy tam jsme" }) {
     const [held, setHeld] = useState(-1);
     const flagW = flagFor(width);
     // What one unit of the map is worth against what the reader can see.
@@ -212,9 +215,7 @@ export default function EuropeMap({ ride, at, step, width = 850, caption = false
                             <span className="EuropeMap__read__year">{market.year ?? "—"}</span>
                         </>
                     ) : (
-                        <span className="EuropeMap__read__hint">
-                            Ťukněte na zemi a uvidíte, odkdy tam jsme
-                        </span>
+                        <span className="EuropeMap__read__hint">{hint}</span>
                     )}
                 </p>
             ) : null}

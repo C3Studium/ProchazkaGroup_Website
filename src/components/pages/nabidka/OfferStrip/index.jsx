@@ -72,6 +72,10 @@ export function useCoarsePointer() {
 const SLOT_H = 0.8;
 const SLOT_TOP = 0.1;
 
+// Dvě kapitoly pásu. Co je tu napsané, je ZÁLOHA — texty přicházejí z bloků
+// `nabidka.pas.*` (cms.config.js) a tohle je to, co pás řekne, když CMS mlčí.
+// Geometrie zůstává tady celá: kolik je kapitol, kde stojí slova, kolik je
+// čtverců a ve kterém řádku a sloupci — to jsou míry roviny, ne text.
 const SECTIONS = [
     {
         n: "01",
@@ -151,6 +155,10 @@ const SECTIONS = [
         n: "02",
         name: "Historie našeho systému",
         lead: "Naše organizace roste už od roku 1970. Šestnáct trhů, na které jsme přišli jeden po druhém — najeďte na zemi a uvidíte, odkdy.",
+        // Výzva pod mapou, dokud se nikoho nedotkl prst. Bydlí u kapitoly, ne
+        // u mapy: mapa je obrázek, který si kreslí sám, a tohle je věta, kterou
+        // kapitola říká o tom, co se s ním dá dělat.
+        mapHint: "Ťukněte na zemi a uvidíte, odkdy tam jsme",
         span: 1,
         // Above the map, not beside it: it is what tells somebody what they are
         // looking at, and a caption that arrives after the picture is a caption
@@ -276,7 +284,39 @@ const slotsOf = (view, mode) => {
     });
 };
 
-export default function OfferStrip({ ride, view, mode = "wide", coarse = false }) {
+/** Uložený řetězec, když něco říká; jinak ten, se kterým pás přišel. */
+const said = (value, zaloha) => (typeof value === "string" && value.trim() ? value.trim() : zaloha);
+
+/**
+ * Jedna kapitola s texty z CMS přes ty vlastní.
+ *
+ * Čtverce se párují POŘADÍM: jejich `kind`, řádek a sloupec jsou míry roviny
+ * a v CMS nejsou, takže jediné, co blok a čtverec spojuje, je pozice. Přehodit
+ * položky proto znamená dát počtu klientů popisek smluv.
+ */
+const withCopy = (section, block) => {
+    if (!block) return section;
+    return {
+        ...section,
+        n: said(block.n, section.n),
+        name: said(block.title, section.name),
+        lead: said(block.lead, section.lead),
+        mapHint: said(block.mapHint, section.mapHint),
+        blocks: section.blocks.map((entry, index) => {
+            if (entry.kind !== "square") return entry;
+            const row = block.stats?.[index];
+            return {
+                ...entry,
+                value: said(row?.value, entry.value),
+                label: said(row?.label, entry.label),
+            };
+        }),
+    };
+};
+
+// @param {object[]} [copy] bloky `nabidka.pas.*`, v pořadí kapitol.
+export default function OfferStrip({ ride, view, mode = "wide", coarse = false, copy = null }) {
+    const sections = SECTIONS.map((section, index) => withCopy(section, copy?.[index]));
     const slots = slotsOf(view, mode);
     const rule = ruleOf(view, mode);
     const last = slots[slots.length - 1];
@@ -297,7 +337,7 @@ export default function OfferStrip({ ride, view, mode = "wide", coarse = false }
                 className="OfferStrip__plane"
                 style={{ width: planeW, height: view.h, x }}
             >
-                {SECTIONS.map((section, index) => (
+                {sections.map((section, index) => (
                     <Section
                         key={section.n}
                         section={shapeOf(section, mode)}
@@ -316,7 +356,7 @@ export default function OfferStrip({ ride, view, mode = "wide", coarse = false }
                     style={{ top: rule, scaleX: ruleIn }}
                     aria-hidden="true"
                 />
-                {SECTIONS.map((section, index) => (
+                {sections.map((section, index) => (
                     <Stop
                         key={section.n}
                         section={section}
@@ -766,6 +806,7 @@ function Block({ block, slot, section, at, ride, coarse, mode, view }) {
                     step={STEP}
                     width={mapW}
                     caption={stacked}
+                    hint={section.mapHint}
                     coarse={coarse}
                     ground={!!block.bleed}
                     // A window onto the plate rather than the whole of it —

@@ -2,7 +2,7 @@ import Head from "next/head";
 
 import ReviewsHero from "@/components/pages/reviews/ReviewsHero";
 import ReviewWall from "@/components/pages/reviews/ReviewWall";
-import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { getApprovedReviews, getConsultants, getAssistant, getContactContent, getNavbarContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
 import { rosterFromCms } from "@/constants/roster"
 
 // ISR on the same terms as the other pages: reviews are approved by an editor a
@@ -25,7 +25,7 @@ export async function getStaticProps(context) {
     // Cannot reject — every read inside answers with empty rather than throwing,
     // so an unreachable database yields the page with an empty wall rather than
     // a build failure. See @/cms/server/site.
-    const [content, reviews, consultants, footer, contact, assistant] = await Promise.all([
+    const [content, reviews, consultants, footer, contact, navbar, assistant] = await Promise.all([
         // This page's own blocks — the head, the word the grid ends on, and the
         // ask. `cms.config.js` says which documents those are and where each
         // field lands; the reviews and the roster stay their own reads because
@@ -39,6 +39,7 @@ export async function getStaticProps(context) {
         getConsultants({ kind: 'consultant', read }),
         getFooterContent(view),
         getContactContent(view),
+        getNavbarContent(view),
         getAssistant({ read }),
     ])
 
@@ -60,6 +61,7 @@ export async function getStaticProps(context) {
             roster: rosterFromCms(consultants),
             footer,
             contact,
+            navbar,
             assistant,
         },
         revalidate: REVALIDATE_SECONDS,
@@ -153,6 +155,10 @@ export default function ReviewsPage({ reviews = [], consultants = [], content })
                     consultants={consultants}
                     copy={content?.wall}
                     formCopy={content?.form}
+                    /* Hlášky formuláře. Vlastní blok, protože se objeví až po
+                       odeslání — na stránce pro ně prvek není. Tentýž dokument
+                       čte i karta poradce; viz `recenze.hlasky`. */
+                    notices={content?.notices}
                 />
             </main>
         </>

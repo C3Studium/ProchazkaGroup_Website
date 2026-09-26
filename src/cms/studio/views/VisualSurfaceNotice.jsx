@@ -1,7 +1,7 @@
 import Link from "next/link"
 
-import { hrefs } from "../lib/routes"
-import Icon from "../ui/Icon"
+import { hrefs } from "../lib/routes.js"
+import Icon from "../ui/Icon.jsx"
 import styles from "./VisualSurfaceNotice.module.scss"
 
 /**

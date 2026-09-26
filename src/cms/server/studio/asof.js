@@ -83,5 +83,5 @@ export const handleAsof = async function handler(req, res) {
     // bundle. The response is per-request and carries a cookie, so nothing in
     // front of it may cache it.
     res.setHeader('Cache-Control', 'no-store')
-    return res.status(200).json({ at, pages: listSitePages() })
+    return res.status(200).json({ at, pages: await listSitePages() })
 }

@@ -10,6 +10,7 @@ import {
 import { editable, editableLines } from "@/cms/edit";
 import { CookiesSections } from "@/constants/cookiesTerms";
 import CookiesModem from "@/components/modems/Cookies";
+import { useStudioSurface } from "@/cms/edit";
 import CornerButton from "@/components/common/ui/CornerButton";
 import { useGlobalContext } from "@/context/LoadProvider";
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
@@ -72,7 +73,8 @@ const SHIPPED = {
  *   and an unreachable database both render the page that was here before any
  *   of this existed.
  */
-export default function CookiesContent({ content }) {
+export default function CookiesContent({ content, cookiesModal = null }) {
+    const studioOpen = useStudioSurface("cookies");
     const { gate } = useGlobalContext();
     const go = gate === "go";
     const [activeSection, setActiveSection] = useState(CookiesSections[0].id);
@@ -348,9 +350,18 @@ export default function CookiesContent({ content }) {
                     </motion.div>
                 </motion.div>
 
+                {/* Ve Studiu se modál otevře sám, jakmile si editor vybere
+                    povrch „Nastavení cookies". Hook patří sem a ne dovnitř
+                    modálu, protože o tom, jestli vůbec vznikne, se rozhoduje
+                    tady — zavřený modál není v DOM a hook v něm by se nikdy
+                    nezavolal. Na webu vrací vždycky `false`, viz cms/edit/surface.js. */}
                 <AnimatePresence mode="wait">
-                    {isOpen && (
-                        <CookiesModem setSettings={setIsOpen} settings={isOpen} />
+                    {(isOpen || studioOpen) && (
+                        <CookiesModem
+                            setSettings={setIsOpen}
+                            settings={isOpen || studioOpen}
+                            copy={cookiesModal}
+                        />
                     )}
                 </AnimatePresence>
             </section>

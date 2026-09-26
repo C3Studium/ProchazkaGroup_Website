@@ -50,6 +50,11 @@ const handleUsers = async (req, res, segments) => {
                 name: result.user?.name,
                 role: result.user?.role,
                 invitedBy: actor?.name || '',
+                // Vygenerované, nebo to, které správce napsal — pozvánka veze
+                // celý přístup: adresu, heslo a odkaz do Studia. Je to vědomé
+                // rozhodnutí majitele knihovny, zdůvodnění a protiargument
+                // (heslo zůstane ve schránce) drží AUTH.md.
+                password: result.temporaryPassword || body.password || '',
             })
             // 201 with the generated password in the body. It is in a no-store
             // response over TLS to the owner who asked for it, and this is the

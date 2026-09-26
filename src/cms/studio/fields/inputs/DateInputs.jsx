@@ -1,5 +1,5 @@
-import { registerInput, registerKind } from "../registry"
-import { formatDateTime } from "../../lib/format"
+import { registerInput, registerKind } from "../registry.js"
+import { formatDateTime } from "../../lib/format.js"
 import styles from "./inputs.module.scss"
 
 /**

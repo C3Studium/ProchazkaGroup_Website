@@ -31,6 +31,7 @@ import {
     defineList,
     definePage,
     defineSite,
+    defineSurface,
     f,
     OMIT,
 } from '@/cms/site'
@@ -42,9 +43,25 @@ import {
     OFFER_COPY_KEYS,
     PARTNERS_COPY_KEYS,
     PRIVACY_COPY_KEYS,
+    GLOBAL_COPY_KEYS,
     REVIEWS_COPY_KEYS,
 } from '@/cms/visualEditing'
 import { reviewCredit } from '@/constants/reviews'
+
+// Klíče a pojmenované pozice bloků, které tomuhle webu přibyly později, jsou
+// v `@/lib/copyKeys` — čte je i server-only vrstva (`@/lib/site/footer`,
+// `@/lib/site/notFound`), která do tohohle souboru sáhnout nemůže, aniž by
+// vznikl kruh: `cms.config.js` importuje `@/cms/site` a ten zpátky `cms.config`.
+// Viz hlavičku toho modulu.
+import {
+    CONTACT_NOTICE_KEY,
+    CONTACT_NOTICES,
+    COOKIES_CHROME_KEY,
+    COOKIES_CHROME,
+    OFFER_STRIP_KEYS,
+    REVIEW_NOTICE_KEY,
+    REVIEW_NOTICES,
+} from '@/lib/copyKeys'
 
 const K = HOMEPAGE_COPY_KEYS
 const A = ABOUT_COPY_KEYS
@@ -54,6 +71,33 @@ const R = REVIEWS_COPY_KEYS
 const B = BENEFIT_COPY_KEYS
 const PT = PARTNERS_COPY_KEYS
 const N = OFFER_COPY_KEYS
+
+/**
+ * Ten samý blok, deklarovaný na obou routách recenzí.
+ *
+ * Deklaruje ho každá stránka zvlášť, protože `resolvePage` prochází bloky jedné
+ * stránky a nic nedědí — sdílený je dokument, ne deklarace. Funkce místo dvou
+ * opsaných volání: kdyby se pozice rozešly, rozešly by se dvě stránky, které
+ * čtou týž řádek v databázi.
+ */
+const reviewNotices = (at) =>
+    defineBlock({
+        at,
+        key: REVIEW_NOTICE_KEY,
+        title: 'Recenze — hlášky formuláře',
+        // Bez `docId`: na stránce není co anotovat, takže by to byl původ
+        // cestující do sekce, která ho nemá kam dát. Viz `nabidka.realita.cisla`.
+        fields: {
+            needName: f.label(REVIEW_NOTICES.needName),
+            needAdvisor: f.label(REVIEW_NOTICES.needAdvisor),
+            needMessage: f.label(REVIEW_NOTICES.needMessage),
+            thanks: f.label(REVIEW_NOTICES.thanks),
+            failed: f.label(REVIEW_NOTICES.failed),
+            copyFailed: f.label(REVIEW_NOTICES.copyFailed),
+            pickHint: f.label(REVIEW_NOTICES.pickHint),
+            close: f.label(REVIEW_NOTICES.close),
+        },
+    })
 
 /* -------------------------------------------------------------------------- */
 /*  The three shape mismatches on the homepage that the reader vocabulary does */
@@ -1038,6 +1082,7 @@ const reviewsPage = definePage({
                 docId: f.docId(),
             },
         }),
+        reviewNotices('notices'),
     ],
 })
 
@@ -1102,6 +1147,9 @@ const advisorPage = definePage({
                 docId: f.docId(),
             },
         }),
+        // Tentýž dokument jako na /recenze — obě routy posílají recenzi stejnou
+        // cestou a odpovídají na totéž. Viz `reviewNotices`.
+        reviewNotices('notices'),
     ],
 })
 
@@ -1242,6 +1290,37 @@ const offerPage = definePage({
             title: 'Realita — čísla',
             fields: {
                 rows: f.rows({ from: 0, count: 3, pick: ['lead', 'label', 'value', 'note'] }),
+            },
+        }),
+        // Pás pod čísly: dvě kapitoly, které jely přes celou šířku a v CMS
+        // neměly ani slovo.
+        //
+        //   items[0]  pořadové číslo kapitoly
+        //   items[1..4]  čtyři počty prvního pásu — `value` je číslo, `label`
+        //                věta pod ním. Druhá kapitola je nemá a čte tu prázdno.
+        //   items[5]  výzva pod mapou. Jen druhá kapitola; první tu čte prázdno.
+        //
+        // Bez `docId`, a je to totéž rozhodnutí jako u `nabidka.realita.cisla`:
+        // nadpis i pořadové číslo se kreslí DVAKRÁT — jednou v kapitole a jednou
+        // na liště zastávek u paty pásu — a počty taky, na čtverci i na dlaždici.
+        // Pole zapisuje jeden prvek; dva prvky s touž adresou jsou dvě ovládání
+        // jedné hodnoty. Celý pás se tedy upravuje ve formuláři.
+        //
+        // Proč pozice 5 a ne 1, když první kapitola položku 5 nemá: pole platí
+        // pro oba bloky seznamu, a kdyby `items[1]` znamenal jednou počet
+        // a jednou výzvu pod mapou, byla by to jedna adresa se dvěma významy —
+        // přesně ten druh vazby, kterou tenhle soubor jinde odmítá.
+        defineBlockList({
+            at: 'strip',
+            keys: OFFER_STRIP_KEYS,
+            title: 'Pás — působení a historie',
+            fields: {
+                n: f.label(0),
+                title: f.text('title'),
+                // Plain reading: věta se sází do odstavce bez vlastních značek.
+                lead: f.plain(),
+                stats: f.rows({ from: 1, count: 4, pick: ['value', 'label'] }),
+                mapHint: f.label(5),
             },
         }),
         //   items[0]  the numeral
@@ -1614,6 +1693,25 @@ const benefitPage = definePage({
 })
 
 /* -------------------------------------------------------------------------- */
+/*  /404 — a proč tu není jako stránka                                         */
+/* -------------------------------------------------------------------------- */
+//
+// Rozcestník texty z CMS má — `404.uvod` a `404.tipy`, klíče jsou
+// v @/lib/copyKeys — ale `definePage` pro něj tady záměrně NENÍ, a je to jediné místo na webu, kde se od pravidla
+// „co stránka čte, to deklaruje" ustupuje. Důvod je pod námi, ne v nás:
+//
+//   1. `discoverRoutes` (@/cms/server/routes.js) `/404` přeskakuje — je to
+//      routa, kterou si Next obsluhuje sám. Deklarace bez souboru se hlásí při
+//      každém buildu, a hlášení, které nikdy nepřestane, přestane být hlášením.
+//   2. Horší: publikace by na `/404` zavolala `res.revalidate`. Ten si stránku
+//      sám vyžádá a trvá na stavu 200 — jenže `/404` vrací 404, takže by každé
+//      publikování těch dvou bloků skončilo chybou v editorově přehledu. Chyba,
+//      která je v pořádku, je nejdražší druh chyby.
+//
+// Čte je proto vlastní čtečka, `getNotFoundContent` v @/lib/site/notFound.js, na
+// stejný způsob jako `getNavbarContent` čte panel menu. Cena je jedna a je
+// napsaná i tam: publikace tu stránku nepřegeneruje, takže se změna objeví až
+// s dalším oknem ISR. Proto má `/404` okno kratší než zbytek webu.
 
 export default defineSite({
     pages: [homepage, aboutUs, cookiesPage, privacyPage, reviewsPage, advisorPage, offerPage, partnersPage, benefitPage],
@@ -1639,5 +1737,197 @@ export default defineSite({
     globals: defineGlobals({
         copy: 'global',
         sources: { assistant: { type: 'assistant' } },
+        blocks: [
+            // Nastavení cookies.
+            //
+            // Pod `global`, ne pod /cookies: modál se otevírá z patičky i z lišty
+            // o souhlasu, tedy zpod každé routy. Čtyři položky jsou čtyři
+            // kategorie a jejich POŘADÍ je vazba na technické klíče v kódu
+            // (`necessary`, `functional`, `analytics`, `marketing`) — ty se
+            // nepřekládají, protože se podle nich ukládá souhlas. Přehodit
+            // položky znamená dát analytickým cookies popis marketingových.
+            defineBlock({
+                at: 'cookiesModal',
+                key: GLOBAL_COPY_KEYS.cookies,
+                title: 'Nastavení cookies — modál',
+                fields: {
+                    title: f.text('title'),
+                    body: f.plain(),
+                    items: f.pairs(),
+                    docId: f.docId(),
+                },
+            }),
+            // Popisky, které v modálu stojí vedle kategorií.
+            //
+            // Vlastní blok, a ne dalších šest položek na `global.cookies`:
+            // tamní `items` JSOU čtyři kategorie, vázané pořadím na klíče
+            // souhlasu, a sedmá položka by v editorově seznamu stála vedle nich
+            // jako pátá kategorie. Tyhle popisky navíc nic nevážou — dají se
+            // přeformulovat, aniž by se cokoli rozpojilo.
+            //
+            //   items[0]  nadhoz nad nadpisem. Holý textový uzel vedle
+            //             `<em>§</em>`, takže se upravuje formulářem.
+            //   items[1]  „vždy zapnuto" u kategorie, kterou vypnout nejde
+            //   items[2]  návěští seznamu poskytovatelů
+            //   items[3]  návěští seznamu souborů cookies
+            //   items[4]  slova na ukládacím tlačítku
+            //   items[5]  popisek zavíracího křížku. Není na stránce vidět —
+            //             je to `aria-label` nad dvěma prázdnými `<span>`y — ale
+            //             je to jediné, co o tom tlačítku řekne odečítač
+            //             obrazovky, takže je to text a patří klientovi.
+            defineBlock({
+                at: 'cookiesChrome',
+                key: COOKIES_CHROME_KEY,
+                title: 'Nastavení cookies — popisky',
+                fields: {
+                    eyebrow: f.label(COOKIES_CHROME.eyebrow),
+                    always: f.label(COOKIES_CHROME.always),
+                    providers: f.label(COOKIES_CHROME.providers),
+                    cookies: f.label(COOKIES_CHROME.cookies),
+                    save: f.label(COOKIES_CHROME.save),
+                    close: f.label(COOKIES_CHROME.close),
+                    docId: f.docId(),
+                },
+            }),
+            // Hlášky kontaktního listu.
+            //
+            // Pod `global` ze stejného důvodu jako list sám: otevírá se z lišty,
+            // tedy zpod každé routy. Vlastní blok, a ne konec `global.contact`:
+            // tamních dvanáct pozic jsou popisky polí, ke kterým na listu patří
+            // prvek, na který jde kliknout. Tyhle věty se objeví až po odeslání
+            // a prvek na stránce nemají, takže blok bez `docId` a formulář.
+            //
+            //   items[0]  chybí povinné pole
+            //   items[1]  e-mail nevypadá jako e-mail
+            //   items[2]  co list řekne, dokud odesílání není napojené
+            defineBlock({
+                at: 'contactNotices',
+                key: CONTACT_NOTICE_KEY,
+                title: 'Kontakt — hlášky formuláře',
+                fields: {
+                    missing: f.label(CONTACT_NOTICES.missing),
+                    badEmail: f.label(CONTACT_NOTICES.badEmail),
+                    notWired: f.label(CONTACT_NOTICES.notWired),
+                },
+            }),
+            // Panel hlavního menu.
+            //
+            // Pod `global` ze stejného důvodu jako cookies: navigaci vykresluje
+            // `_app` pod každou routou, takže nepatří žádné stránce zvlášť.
+            //
+            // Osm položek jsou osm dlaždic a jejich POŘADÍ je vazba na `href`
+            // v constants/common.js — adresa se nepřekládá a odkaz podle ní
+            // vede. `label` je slovo na dlaždici, `value` popisek pod ním.
+            // Přehodit položky znamená poslat „Kontakt" na /nabidka.
+            defineBlock({
+                at: 'navbarPanel',
+                key: GLOBAL_COPY_KEYS.navbar,
+                title: 'Menu — podtexty',
+                // Osm podtextů, nic víc.
+                //
+                // Názvy dlaždic tu schválně NEJSOU. Jsou to jména stránek — mění
+                // se s tím, co ta stránka je, ne s tím, jak se o ní zrovna píše —
+                // a k jednomu z nich (`Kontakt`) vede modál, ne adresa. Nabídnout
+                // je k přepsání znamená nabídnout rozejití menu s webem.
+                //
+                // `label` v datech přesto zůstává: v `items` je to jediné, podle
+                // čeho editor pozná, ke které dlaždici podtext patří. Čte se jen
+                // jako popisek řádku, na stránku nejde.
+                fields: {
+                    hlavni: f.value(0),
+                    nabidka: f.value(1),
+                    benefit: f.value(2),
+                    kontakt: f.value(3),
+                    onas: f.value(4),
+                    poradci: f.value(5),
+                    recenze: f.value(6),
+                    partneri: f.value(7),
+                    docId: f.docId(),
+                },
+            }),
+        ],
     }),
+
+    /**
+     * Povrchy, které nejsou stránka.
+     *
+     * Modál v rámu vidět není — výběr prvku je geometrický, a co má
+     * `display: none`, nemá obdélník. Povrch se proto ve Studiu vybírá ze
+     * seznamu a edituje v okně nad stránkou. Viz VALECMS/docs/I18N.md, oddíl 7.
+     */
+    surfaces: [
+        defineSurface({
+            name: 'cookies',
+            title: 'Nastavení cookies',
+            kind: 'modal',
+            copy: GLOBAL_COPY_KEYS.cookies,
+            preview: '/studio/preview/surface/cookies',
+        }),
+        // Druhý blok téhož modálu, a proto tentýž náhled: `preview` je adresa,
+        // ne jméno povrchu, takže obě záložky otevřou jeden otevřený modál.
+        // Kliknout jde v něm do obojího — anotace si dokument nese s sebou.
+        defineSurface({
+            name: 'navbar',
+            title: 'Menu — podtexty',
+            kind: 'modal',
+            copy: GLOBAL_COPY_KEYS.navbar,
+            preview: '/studio/preview/surface/navbar',
+        }),
+        // Stejný blok jako výš, a je to úmysl.
+        //
+        // Poradci nejsou jiný text — je to druhý POHLED téhož panelu a vlastní
+        // texty nemá skoro žádné; co se v něm ukazuje, jsou poradci, a ti se
+        // upravují jako dokumenty `consultant` tam, kde bydlí. Povrch tu je
+        // proto, aby šel ten pohled ve Studiu otevřít a vidět. Kdyby dostal
+        // vlastní prázdný blok, byl by to formulář bez polí.
+        defineSurface({
+            name: 'navbar.advisors',
+            title: 'Menu — poradci',
+            // Modál, ne seznam: je to druhý POHLED panelu menu, který je modál.
+            // Pod „Seznamy" patří formuláře — věci s poli, ne s dlaždicemi.
+            kind: 'modal',
+            copy: GLOBAL_COPY_KEYS.navbar,
+            preview: '/studio/preview/surface/navbar.advisors',
+        }),
+        // Kontaktní list. Otevírá ho lišta i tlačítka na stránkách, takže na
+        // žádné routě není vidět, dokud ho něco nevyvolá — přesně případ, kvůli
+        // kterému povrchy existují.
+        defineSurface({
+            name: 'contact',
+            title: 'Kontaktní list',
+            kind: 'modal',
+            copy: GLOBAL_COPY_KEYS.contact,
+            preview: '/studio/preview/surface/contact',
+        }),
+
+        /* ------------------------------------------------------------------ */
+        /* Formuláře. Záložka „Seznamy", protože to jsou pole, ne dlaždice.    */
+        /*                                                                     */
+        /* Formulář recenze je sbalený za „Napsat recenzi" (stav `open`        */
+        /* v AddReview), takže se na stránce kliknout nedá. Zbylé dva na       */
+        /* stránce vidět jsou; povrch u nich není nutnost, ale zkratka —       */
+        /* editor je najde na jednom místě místo hledání v dlouhé stránce.     */
+        /* ------------------------------------------------------------------ */
+        defineSurface({
+            name: 'recenze.form',
+            title: 'Formulář — napsat recenzi',
+            kind: 'list',
+            copy: R.form,
+            preview: '/studio/preview/surface/recenze.form',
+        }),
+        defineSurface({
+            name: 'index.advisorForm',
+            title: 'Formulář — zvolit poradce',
+            kind: 'list',
+            copy: K.advisorForm,
+            preview: '/studio/preview/surface/index.advisorForm',
+        }),
+        defineSurface({
+            name: 'index.qnaForm',
+            title: 'Formulář — časté dotazy',
+            kind: 'list',
+            copy: K.qnaForm,
+            preview: '/studio/preview/surface/index.qnaForm',
+        }),
+    ],
 })

@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 
-import { Button } from "@/cms/studio/ui/controls"
+import { Button } from "../../studio/ui/controls.jsx"
 
-import styles from "./sheet"
+import styles from "./sheet.js"
 
 /**
  * Framing a picture, the way a design tool does it.

@@ -38,6 +38,8 @@ import {
     storageDriver,
     supabaseUrl,
 } from './env.js'
+import { invalid, serverError } from './errors.js'
+import { getAdminClient } from './supabaseAdmin.js'
 
 /**
  * `https://gkzobudtjpucpstclmli.supabase.co` -> `gkzobudtjpucpstclmli`.
@@ -124,4 +126,187 @@ export const readStatus = () => {
         },
 
     }
+}
+
+
+/* --------------------------------------------------------- jazyky webu --- */
+//
+// Tady končí to, co říká prostředí, a začíná to, co si vybral majitel. Dvě
+// odlišné otázky a schválně dva různé zdroje — nahoře `process.env`, tady řádek
+// v `cms_setting` (migrations/0006). Je to v jednom souboru proto, že obojí
+// odpovídá jedné obrazovce Nastavení, ne proto, že by to bylo totéž.
+//
+// Proč v databázi a ne v konfiguraci: jazyk přidává majitel z prohlížeče a má
+// se to projevit při dalším požadavku, ne při dalším nasazení (I18N.md, oddíl 1).
+// Konfigurační soubor by znamenal, že přidání jazyka je práce pro programátora.
+//
+// POZOR, a Nastavení to musí říct nahlas: nový jazyk v téhle tabulce NEVYROBÍ
+// novou routu. Stránky vznikají při buildu, takže přidání jazyka je vždycky
+// dvoukrokové — tady a pak nasazení.
+
+const SETTING_TABLE = 'cms_setting'
+
+/** Stabilní klíč, napsaný doslova tady a nikde jinde. */
+export const SITE_LANGUAGES_KEY = 'site.languages'
+
+/**
+ * Jak vypadá web, do kterého nikdo nesáhl: jeden jazyk, čeština, zapnutá.
+ *
+ * Jeden jazyk není zvláštní případ, je to výchozí stav — všechno kolem musí
+ * fungovat i pro něj, protože tak to pojede dřív, než někdo přidá druhý.
+ */
+export const SITE_LANGUAGES_DEFAULTS = Object.freeze({
+    default: 'cs',
+    list: Object.freeze([Object.freeze({ code: 'cs', label: 'Čeština', enabled: true })]),
+})
+
+// BCP 47, týž tvar, jaký přijme CHECK v migrations/0013. Kdyby se tyhle dva
+// rozešly, dal by se v Nastavení přidat jazyk, do kterého pak nejde uložit
+// jediné slovo — a chyba by se ukázala až u prvního překladu.
+const CODE = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/
+
+const LABEL_MAX = 60
+
+/**
+ * Cokoli -> platný seznam jazyků.
+ *
+ * Používá se na cestě z databáze, ne do ní — stejná asymetrie jako
+ * u manageWidget.js: kdo napíše nesmysl, ten se to dozví (`validate`), ale řádek,
+ * který nesmysl z jakéhokoli důvodu obsahuje, nesmí shodit veřejnou stránku.
+ * Nejhorší, co se smí stát, je web v češtině.
+ */
+const coerce = (value) => {
+    const source = value && typeof value === 'object' && !Array.isArray(value) ? value : {}
+    const seen = new Set()
+    const list = (Array.isArray(source.list) ? source.list : [])
+        .map((entry) => {
+            const code = String(entry?.code || '').trim()
+            if (!CODE.test(code) || seen.has(code)) return null
+            seen.add(code)
+            return {
+                code,
+                label: String(entry?.label || code).trim().slice(0, LABEL_MAX) || code,
+                enabled: entry?.enabled !== false,
+            }
+        })
+        .filter(Boolean)
+
+    if (!list.length) return { ...SITE_LANGUAGES_DEFAULTS, list: [...SITE_LANGUAGES_DEFAULTS.list] }
+
+    // Výchozí jazyk musí v seznamu být. Je to ten, jehož obsah leží v základním
+    // řádku `cms_document`; kdyby ukazoval jinam, četl by se obsah, který tam
+    // nikdo nenapsal.
+    const fallback = String(source.default || '').trim()
+    return {
+        default: list.some((entry) => entry.code === fallback) ? fallback : list[0].code,
+        list,
+    }
+}
+
+/**
+ * Totéž, ale odmítá to, co by `coerce` tiše opravil.
+ *
+ * Výchozí jazyk se nedá smazat ani přejmenovat bez migrace dat, takže se to
+ * refuzuje tady — ne až v okamžiku, kdy web přestane mít texty.
+ */
+const validate = (patch) => {
+    const source = patch && typeof patch === 'object' && !Array.isArray(patch) ? patch : {}
+    const list = Array.isArray(source.list) ? source.list : null
+    if (!list || !list.length) throw invalid('Seznam jazyků nesmí být prázdný')
+
+    const seen = new Set()
+    for (const entry of list) {
+        const code = String(entry?.code || '').trim()
+        if (!CODE.test(code)) {
+            throw invalid(`Neplatný kód jazyka: ${JSON.stringify(entry?.code)}`, {
+                code: 'Kód je BCP 47, například cs, en, de nebo pt-BR.',
+            })
+        }
+        if (seen.has(code)) throw invalid(`Jazyk „${code}" je v seznamu dvakrát`)
+        seen.add(code)
+
+        if (entry?.label != null && String(entry.label).length > LABEL_MAX) {
+            throw invalid(`Název jazyka „${code}" je delší než ${LABEL_MAX} znaků`)
+        }
+        if (entry?.enabled != null && typeof entry.enabled !== 'boolean') {
+            throw invalid(`Hodnota „enabled" u jazyka „${code}" musí být true nebo false`)
+        }
+    }
+
+    const fallback = String(source.default || '').trim()
+    if (!seen.has(fallback)) {
+        throw invalid('Výchozí jazyk musí být v seznamu', {
+            default: `Vyberte jeden z: ${[...seen].join(', ')}`,
+        })
+    }
+    // Vypnutý výchozí jazyk by znamenal web bez jediného jazyka, ve kterém
+    // obsah opravdu je.
+    if (list.some((entry) => String(entry?.code).trim() === fallback && entry?.enabled === false)) {
+        throw invalid('Výchozí jazyk nejde vypnout')
+    }
+
+    return coerce(source)
+}
+
+/**
+ * Jazyky, jak je má tenhle web nastavené.
+ *
+ * Chybějící řádek, nezmigrovaná databáze i úložiště, které odmítne běžet,
+ * odpovídají výchozím hodnotami, ne chybou — stejná pozice jako
+ * `readManageWidget`. Čte to cesta, po které se vykresluje veřejná stránka,
+ * a „web je česky" je na každou z těch situací správná odpověď; 500 na veřejné
+ * routě proto, že si nikdo neotevřel Nastavení, není.
+ */
+export const readSiteLanguages = async () => {
+    assertServer('readSiteLanguages')
+
+    try {
+        const { data, error } = await getAdminClient()
+            .from(SETTING_TABLE)
+            .select('value')
+            .eq('key', SITE_LANGUAGES_KEY)
+            .maybeSingle()
+
+        if (error) throw new Error(error.message)
+        return coerce(data?.value)
+    } catch (failure) {
+        console.warn(
+            `[cms] ${SETTING_TABLE}/${SITE_LANGUAGES_KEY} nelze přečíst, použity výchozí hodnoty:`,
+            failure.message
+        )
+        return { ...SITE_LANGUAGES_DEFAULTS, list: [...SITE_LANGUAGES_DEFAULTS.list] }
+    }
+}
+
+/** Kódy zapnutých jazyků, v pořadí ze seznamu — to, na co se ptá routování. */
+export const readEnabledLanguages = async () => {
+    const languages = await readSiteLanguages()
+    return languages.list.filter((entry) => entry.enabled).map((entry) => entry.code)
+}
+
+/**
+ * Zápis. Jen pro majitele — kontroluje se to v handleru, dřív než se sem dojde,
+ * tedy tam, kde v tomhle serveru bydlí každá autorizace.
+ *
+ * Select-then-insert-or-update a ne `upsert`, ze stejného důvodu jako
+ * v manageWidget.js: souborové úložiště umí jen slovesa, která repozitář
+ * opravdu používá.
+ */
+export const writeSiteLanguages = async (actor, patch) => {
+    assertServer('writeSiteLanguages')
+
+    const value = validate(patch)
+    const stamp = { value, updated_by: actor?.id ?? null, updated_at: new Date().toISOString() }
+    const db = getAdminClient()
+
+    const existing = await db.from(SETTING_TABLE).select('key').eq('key', SITE_LANGUAGES_KEY).maybeSingle()
+    if (existing.error) throw serverError('Uložení jazyků selhalo')
+
+    const { error } = existing.data
+        ? await db.from(SETTING_TABLE).update(stamp).eq('key', SITE_LANGUAGES_KEY)
+        : await db.from(SETTING_TABLE).insert({ key: SITE_LANGUAGES_KEY, ...stamp })
+
+    if (error) throw serverError('Uložení jazyků selhalo')
+
+    return value
 }

@@ -4,6 +4,7 @@
 
 import { requireUser } from '../auth.js'
 import { createSupabaseDataPort } from '../adapter.js'
+import { assertLang } from '../documents.js'
 import { publishedBody, revalidateForDocuments } from '../revalidate.js'
 import { jsonParam, methodNotAllowed, readJson, sendJson } from './http.js'
 import { sendUpdateNotice } from '../mail.js'
@@ -62,22 +63,24 @@ const TRANSITIONS = new Set(['publish', 'unpublish', 'archive', 'restore', 'reje
  * and says so; the hole in the archive is named in the response and in the
  * server log rather than being silent.
  */
-const recordRevision = async (port, document, reason, at) => {
+const recordRevision = async (port, document, reason, at, lang = null) => {
     try {
         const revision = await port.revisions.record({
             document,
             reason,
             at: new Date(at).toISOString(),
+            lang,
         })
-        return { ok: true, id: revision.id, reason: revision.reason, buildId: revision.buildId }
+        return { ok: true, id: revision.id, reason: revision.reason, buildId: revision.buildId, lang: revision.lang ?? null }
     } catch (error) {
         const message = String(error?.message || error)
         console.warn(
-            `[cms] archiv: revize k dokumentu ${document?.id} (${reason}) se nezapsala — ${message}`
+            `[cms] archiv: revize k dokumentu ${document?.id} (${reason}${lang ? `, ${lang}` : ''}) se nezapsala — ${message}`
         )
-        return { ok: false, reason, error: message }
+        return { ok: false, reason, lang, error: message }
     }
 }
+
 
 export const handleDocuments = async (req, res, segments) => {
     const user = await requireUser(req, res)
@@ -124,10 +127,18 @@ export const handleDocuments = async (req, res, segments) => {
         const body = await readJson(req)
         // `value` may legitimately be null (clearing an image), so its presence
         // is checked rather than its truthiness. `field` may not be empty.
+        const value = body.value === undefined ? null : body.value
+
+        // Bez `lang` míří zápis do základního řádku, protože ten JE výchozí
+        // jazyk (I18N.md, oddíl 4). Prázdná hodnota se čte jako „bez jazyka",
+        // nesmyslná jako chyba — `assertLang` je od toho. Jedna větev, jeden
+        // port: `patchField` v adapteru si `lang` přebere sám a překlad pošle
+        // do vlastního řádku i s kontrolou rolí.
         return sendJson(res, 200, await port.patchField({
             id,
             field: body.field,
-            value: body.value === undefined ? null : body.value,
+            value,
+            lang: body.lang == null || body.lang === '' ? null : assertLang(body.lang),
         }))
     }
 
@@ -174,13 +185,27 @@ export const handleDocuments = async (req, res, segments) => {
         // fields can move a page" is a question that grows a case a year.
         // Failure is not fatal — the after-body still names most of the routes.
         const before = await port.get({ id }).catch(() => null)
-        // The one transition that takes an argument. `reason` is the closed set
-        // in schemas/review.js and the adapter refuses anything else, so it is
-        // read here and validated there rather than being checked twice with two
-        // chances to disagree. readJson answers {} for the other five, which
-        // send no body at all.
-        const payload = action === 'reject' ? { reason: (await readJson(req)).reason } : {}
-        const document = await port[action]({ id, ...payload })
+        // Dva přechody berou argument z těla a požadavek je proud, takže se čte
+        // jednou pro oba. `reason` je uzavřený seznam ze schemas/review.js
+        // a odmítá ho adapter, takže se tu jen přečte a kontroluje se tam —
+        // dvě kontroly na dvou místech jsou dvě příležitosti, jak se rozejít.
+        // readJson odpoví `{}` u zbylých čtyř, které tělo neposílají vůbec.
+        const sent = action === 'reject' || action === 'publish' ? await readJson(req) : {}
+
+        // Publikuje se po jazycích (I18N.md, oddíl 1). Bez `lang` je to dnešní
+        // publikace výchozího jazyka, do posledního řádku; s ním se překlápí
+        // jenom řádek překladu a základní řádek se nedotkne.
+        //
+        // Stejný dočasný šev jako u `field` výš: `port.publish` v adapter.js
+        // `lang` ještě nezná, takže se sahá na repozitář přímo. Validace, kterou
+        // by jinak dělal adapter, běží uvnitř `publishTranslation`.
+        const lang = action === 'publish' && sent.lang != null && sent.lang !== ''
+            ? assertLang(sent.lang)
+            : null
+
+        const document = lang
+            ? await port.documents.publish({ id, lang, updatedBy: user?.id ?? null })
+            : await port[action]({ id, ...(action === 'reject' ? { reason: sent.reason } : {}) })
         // The instant the change is in the store, which is what decides whether
         // an already-running render can be waited for instead of a new one.
         const at = Date.now()
@@ -203,7 +228,7 @@ export const handleDocuments = async (req, res, segments) => {
             })
         }
 
-        const revision = await recordRevision(port, document, action, at)
+        const revision = await recordRevision(port, document, action, at, lang)
         const revalidation = await revalidateForDocuments(
             req,
             res,

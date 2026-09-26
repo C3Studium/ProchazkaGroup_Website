@@ -1,6 +1,6 @@
 import Head from "next/head"
 
-import { getAssistant, getContactContent, getFooterContent, getPageContent, getRoster, readerFor, viewOf } from "@/lib/site"
+import { getAssistant, getContactContent, getNavbarContent, getFooterContent, getPageContent, getRoster, readerFor, viewOf } from "@/lib/site"
 
 import TermsContent from "@/components/pages/gdpr/TermsPage"
 
@@ -28,16 +28,17 @@ const REVALIDATE_SECONDS = 600
 export async function getStaticProps(context) {
     const view = viewOf(context)
 
-    const [content, footer, contact, assistant, roster] = await Promise.all([
+    const [content, footer, contact, navbar, assistant, roster] = await Promise.all([
         getPageContent("/ochrana-soukromi", view),
         getFooterContent(view),
         getContactContent(view),
+        getNavbarContent(view),
         getAssistant({ read: readerFor(view) }),
         getRoster({ read: readerFor(view) }),
     ])
 
     return {
-        props: { content, footer, contact, assistant, roster },
+        props: { content, footer, contact, navbar, assistant, roster },
         revalidate: REVALIDATE_SECONDS,
     }
 }

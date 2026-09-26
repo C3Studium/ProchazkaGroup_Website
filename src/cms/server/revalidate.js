@@ -24,8 +24,9 @@
 // handler alone, and `res.revalidate` only exists on an API route's response.
 
 import site from '../site/config.js'
-import { addressesOf, dynamicPages, routesForDocument, sourceHolds } from '../site/index.js'
+import { addressesOf, routesForDocument } from '../site/index.js'
 
+import { allDynamicPaths } from './dynamicPaths.js'
 import { listRegeneratingRoutes } from './pages.js'
 import { readPublished } from './site/read.js'
 
@@ -80,26 +81,6 @@ const stripDraftCookies = (req) => {
  * publish hands it, and this has to hand it the same shape. `sourceHolds` is the
  * same predicate that decided the page held the document in the first place.
  */
-const allDynamicPaths = async (routes = null) => {
-    const out = []
-    for (const page of dynamicPages(site)) {
-        if (routes && !routes.has(page.route)) continue
-        const rows = await readPublished({ type: page.query.type, perPage: 200 })
-        for (const body of rows) {
-            if (!sourceHolds(page.query, page.query.type, body)) continue
-            for (const path of [].concat(page.resolve(body) || [])) {
-                // Rozšíření na regiony i tady. `routesForDocument` si to řeší
-                // samo, ale tahle větev jde mimo něj — je pro `everywhere`,
-                // tedy pro patičku a další globální bloky, které jsou na
-                // KAŽDÉ stránce. Kdyby se rozšíření vynechalo, byla by
-                // regenerace globálního bloku ta jediná, která deset regionů
-                // přeskočí.
-                if (typeof path === 'string' && path.startsWith('/')) out.push(...addressesOf(site, path))
-            }
-        }
-    }
-    return out
-}
 
 /**
  * The paths one transition made stale, from the bodies it moved between.
@@ -128,7 +109,7 @@ export const pathsForDocuments = async (docs) => {
     }
 
     if (everywhere) {
-        listRegeneratingRoutes().forEach((path) => paths.add(path))
+        (await listRegeneratingRoutes()).forEach((path) => paths.add(path))
         for (const path of await allDynamicPaths()) {
             paths.add(path)
             dynamic.add(path)

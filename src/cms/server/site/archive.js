@@ -63,10 +63,11 @@
 // `getHomepageContent()` with no arguments — one step stronger, because here
 // there is no parameter to type.
 
-import site from '@/cms/site/config'
-import { pageFor } from '@/cms/site'
+import site from '../../site/config.js'
+import { pageFor } from '../../site/index.js'
 
 import { currentBuildId } from '../buildId.js'
+import { mergeTranslation, normalizeLang } from '../documents.js'
 import { REVISION_COLUMNS } from '../query.js'
 import { getAdminClient } from '../supabaseAdmin.js'
 import { matchesBody, sortBodies } from './bodies.js'
@@ -137,18 +138,24 @@ export const momentOf = (value) => {
  * written in the same millisecond would otherwise reconstruct differently on
  * two renders of the same moment.
  */
-const revisionsUpTo = async ({ type, at }) => {
+const revisionsUpTo = async ({ type, at, lang = null }) => {
     const query = db()
         .from(TABLE)
         .select(REVISION_COLUMNS)
         .lte('changed_at', at)
+        // Jedna vrstva jazyka, ne obě dohromady (migrations/0013). Bez tohohle
+        // filtru by revize překladu zastínila revizi základu téhož dokumentu —
+        // redukce níž bere první řádek na dokument — a okamžik by v každém
+        // jazyce vracel poslední změněný. Na dnešních datech nemění nic: každá
+        // dosavadní revize má `lang` prázdné, protože je to výchozí jazyk.
         .order('changed_at', { ascending: false })
         .order('id', { ascending: false })
         // One more than the cap, so that "the scan was truncated" is a fact
         // about the answer rather than a guess from a full page.
         .limit(REVISION_SCAN_LIMIT + 1)
 
-    const { data, error } = type ? await query.eq('type', type) : await query
+    const scoped = lang ? query.eq('lang', lang) : query.is('lang', null)
+    const { data, error } = type ? await scoped.eq('type', type) : await scoped
     if (error) throw new Error(error.message || 'čtení revizí selhalo')
     const rows = data || []
     if (rows.length > REVISION_SCAN_LIMIT) {
@@ -174,10 +181,15 @@ const revisionsUpTo = async ({ type, at }) => {
  * nothing to name a document for — and a body with no `_id` is the same body the
  * public reader produces, which is what lets `at` = now be compared byte for
  * byte against the published page.
+ *
+ * Vrací se DVOJICE (dokument, tělo) a ne jen těla, protože okamžik v jednom
+ * jazyce se skládá ze dvou takových seznamů — základ a překlad — a spárovat je
+ * jde jedině přes `document_id`. Bez jazyka se z nich hned vezmou jen těla,
+ * takže výchozí cesta je řádek za řádkem tatáž, jaká tu byla.
  */
-const bodiesAsPublished = (rows) => {
+const entriesAsPublished = (rows) => {
     const seen = new Set()
-    const bodies = []
+    const entries = []
     for (const row of rows) {
         const id = row?.document_id
         if (!id || seen.has(id)) continue
@@ -186,9 +198,27 @@ const bodiesAsPublished = (rows) => {
         if (row.archived_at != null) continue
         const body = row.body
         if (!body || typeof body !== 'object' || !Object.keys(body).length) continue
-        bodies.push(body)
+        entries.push({ id, body })
     }
-    return bodies
+    return entries
+}
+
+/**
+ * Okamžik v jednom jazyce: druhý průchod týmiž revizemi, jen po řádcích
+ * s `lang`, a výsledek položený přes základ.
+ *
+ * Dva dotazy a ne jeden s `or`: nepřeložitelná pole mají mít jednu pravdu
+ * i v archivu, takže se přes základ pokládají jen přeložitelná (`mergeTranslation`)
+ * — a to je rozhodnutí, které se dělá nad dvěma hotovými seznamy, ne uvnitř
+ * jednoho dotazu. Dokument bez revize překladu k danému okamžiku zůstane ve
+ * výchozím jazyce, což je totéž, co uvidí návštěvník dneska.
+ */
+const translatedEntries = async ({ type, at, lang, entries }) => {
+    const overlays = new Map(
+        entriesAsPublished(await revisionsUpTo({ type, at, lang })).map((entry) => [entry.id, entry.body])
+    )
+    if (!overlays.size) return entries.map((entry) => entry.body)
+    return entries.map((entry) => mergeTranslation(type, entry.body, overlays.get(entry.id)))
 }
 
 /**
@@ -199,16 +229,29 @@ const bodiesAsPublished = (rows) => {
  * sorted, exactly as `readEditable` applies it — see the limit caveat in
  * `getArchiveMoment`, which is where the honest answer about it lives.
  *
+ * `lang` je i tady jediný přepínač: bez něj se čtou revize základního jazyka,
+ * tedy všechny, které dnes existují. Filtruje se i tak (`lang is null`), protože
+ * jinak by první přeložená revize začala zastiňovat základ — na dnešních datech
+ * to ale nemění ani jeden řádek. Viz `revisionsUpTo`.
+ *
+ * Filtr a řazení běží až nad SLOŽENÝM tělem. `data.order` i `data.slug` jsou
+ * nepřeložitelné, takže na tom dneska nic nestojí — ale kdyby se filtrovalo
+ * před překladem, řadil by se jeden jazyk podle druhého a nikdo by se nedopočítal.
+ *
  * @returns {Promise<object[]>} the bodies published at `at`, or `[]`.
  */
-export const readAt = async ({ type, sort, filters, perPage = 50, at } = {}) => {
+export const readAt = async ({ type, sort, filters, perPage = 50, at, lang = null } = {}) => {
     const moment = momentOf(at)
     if (!moment) {
         report(`${type}@${at}`, new Error('neplatný okamžik'))
         return []
     }
+    const code = normalizeLang(lang)
     try {
-        const bodies = bodiesAsPublished(await revisionsUpTo({ type, at: moment }))
+        const entries = entriesAsPublished(await revisionsUpTo({ type, at: moment }))
+        const bodies = (code
+            ? await translatedEntries({ type, at: moment, lang: code, entries })
+            : entries.map((entry) => entry.body))
             .filter((body) => matchesBody(body, filters))
         return sortBodies(bodies, sort).slice(0, perPage)
     } catch (error) {
@@ -225,7 +268,7 @@ export const readAt = async ({ type, sort, filters, perPage = 50, at } = {}) => 
 const UNREADABLE_MOMENT = 'unreadable'
 
 /** `readAt` with the moment already bound — the shape every reader has. */
-export const readerAt = (at) => (args) => readAt({ ...args, at })
+export const readerAt = (at, lang = null) => (args) => readAt({ ...args, at, lang: args?.lang ?? lang })
 
 /**
  * Which of the three readers a view wants.
@@ -238,12 +281,22 @@ export const readerAt = (at) => (args) => readAt({ ...args, at })
  *
  * An `at` that is present and unreadable answers empty rather than falling back
  * to the published site. See `momentOf`.
+ *
+ * `lang` je na tom kolmo: nevybírá čtenáře, jen se do vybraného zaváže, takže
+ * jazyk a to, jestli se čte koncept nebo okamžik, se nemají jak poprat. Bez
+ * jazyka se vrací TATÁŽ funkce co dosud — `readEditable` nebo `readPublished`,
+ * ne obal kolem nich — aby volající, který si čtenáře porovnává, nepoznal, že
+ * se tu něco přidalo.
  */
-export const readerFor = ({ draft = false, at = null } = {}) => {
-    if (at === null || at === undefined || at === '') return draft ? readEditable : readPublished
+export const readerFor = ({ draft = false, at = null, lang = null } = {}) => {
+    const code = normalizeLang(lang)
+    // Zdroj si smí jazyk přebít vlastním argumentem; nepřebije, pokud ho nemá.
+    const bind = (reader) => (code ? (args) => reader({ ...args, lang: args?.lang ?? code }) : reader)
+
+    if (at === null || at === undefined || at === '') return bind(draft ? readEditable : readPublished)
     const moment = momentOf(at)
     if (!moment) return async () => []
-    return readerAt(moment)
+    return readerAt(moment, code)
 }
 
 /**

@@ -1,6 +1,6 @@
 import Head from "next/head"
 
-import { getAssistant, getContactContent, getFooterContent, getPageContent, getRoster, readerFor, viewOf } from "@/lib/site"
+import { getAssistant, getContactContent, getNavbarContent, getCookiesContent, getFooterContent, getPageContent, getRoster, readerFor, viewOf } from "@/lib/site"
 
 import CookiesContent from "@/components/pages/cookies/CookiesPage"
 
@@ -28,10 +28,12 @@ const REVALIDATE_SECONDS = 600
 export async function getStaticProps(context) {
     const view = viewOf(context)
 
-    const [content, footer, contact, assistant, roster] = await Promise.all([
+    const [content, footer, contact, navbar, cookiesModal, assistant, roster] = await Promise.all([
         getPageContent("/cookies", view),
         getFooterContent(view),
         getContactContent(view),
+        getNavbarContent(view),
+        getCookiesContent(view),
         // The same read the rest of this page uses. Read published even for an
         // editor, she would arrive with no document id and the contact sheet
         // would have nothing on it to click.
@@ -40,12 +42,12 @@ export async function getStaticProps(context) {
     ])
 
     return {
-        props: { content, footer, contact, assistant, roster },
+        props: { content, footer, contact, navbar, cookiesModal, assistant, roster },
         revalidate: REVALIDATE_SECONDS,
     }
 }
 
-export default function CookiesPage({ content }) {
+export default function CookiesPage({ content, cookiesModal }) {
     return (
         <>
             <Head>
@@ -122,7 +124,7 @@ export default function CookiesPage({ content }) {
                     being rendered for the Studio's editing frame — see
                     `f.docId()` in @/cms/site/fields. On the public page it is
                     absent and every annotation helper answers with nothing. */}
-                <CookiesContent content={content} />
+                <CookiesContent content={content} cookiesModal={cookiesModal} />
             </main>
         </>
     )

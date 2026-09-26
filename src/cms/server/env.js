@@ -45,7 +45,53 @@ export const siteUrl = () =>
 // migrations/0001_cms_tables.sql is void.
 export const supabaseServiceRoleKey = () => {
     assertServer('SUPABASE_SERVICE_ROLE_KEY')
-    return required('SUPABASE_SERVICE_ROLE_KEY')
+    const key = required('SUPABASE_SERVICE_ROLE_KEY')
+    const wrong = wrongKind(key)
+    if (wrong) {
+        throw new Error(
+            `SUPABASE_SERVICE_ROLE_KEY: ${wrong}\n\n` +
+            'Supabase → Project Settings → API Keys. V novém rozhraní je to klíč\n' +
+            '`sb_secret_…`; staré JWT klíče jsou pod „Legacy API keys" jako\n' +
+            '`service_role`. Ten druhý ve výpisu, ne první — první je anon.',
+        )
+    }
+    return key
+}
+
+/**
+ * Je v proměnné pro service role opravdu klíč service role?
+ *
+ * Záměna s anon klíčem je nejsnazší chyba v celém nastavení: obě hodnoty leží
+ * v dashboardu pod sebou, vypadají stejně a obě jsou platné. Rozdíl se projeví
+ * až voláním, které anon nesmí — a to hlásí `permission denied for function
+ * cms_bootstrap_owner`, což o záměně klíčů neřekne nic.
+ *
+ * Claim se jen ČTE, neověřuje. Není to bezpečnostní kontrola — podpis stejně
+ * ověřuje Supabase a falešný klíč tam neprojde. Je to kontrola překlepu, a ta
+ * smí věřit tomu, co v klíči stojí: kdo si do `.env` napíše `role: service_role`
+ * a nemá k němu podpis, nedostane se dál tak jako tak.
+ */
+const wrongKind = (key) => {
+    if (key.startsWith('sb_publishable_')) {
+        return 'je to publishable klíč, tedy veřejný protějšek anon klíče'
+    }
+    // Nový tajný formát se přečíst nedá a nemusí — je tajný, tedy ten správný.
+    if (key.startsWith('sb_secret_')) return null
+    if (!key.startsWith('eyJ')) return null
+
+    let role
+    try {
+        role = JSON.parse(
+            Buffer.from(key.split('.')[1] || '', 'base64url').toString('utf8'),
+        ).role
+    } catch {
+        // Nepřečetl se — mlčet. Tahle funkce hlídá překlep, ne tvar JWT, a
+        // odmítnout klíč kvůli tomu, že mu nerozumíme, by zastavilo i nasazení,
+        // které funguje.
+        return null
+    }
+    if (!role || role === 'service_role') return null
+    return `je v ní klíč s rolí „${role}", ne „service_role"`
 }
 
 /**
@@ -229,6 +275,16 @@ export const ENV_REFERENCE = Object.freeze([
         required: false,
         exists: false,
         note: 'NEW, optional. Defaults to 8388608 (8 MiB).',
+    },
+    {
+        name: 'CMS_CRON_SECRET',
+        required: false,
+        exists: false,
+        note: 'NEW, optional. Enables /api/cms/heartbeat: an external scheduler ' +
+              'presents it (Authorization: Bearer) and the endpoint touches the ' +
+              'database — which is what keeps a free Supabase project from ' +
+              'pausing — and mails the periodic digest. Unset, the endpoint ' +
+              'refuses every call. See server/heartbeat.js.',
     },
     {
         name: 'CMS_BUILD_ID',

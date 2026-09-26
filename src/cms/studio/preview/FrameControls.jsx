@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 
-import Icon from "../ui/Icon"
-import { CUSTOM, CUSTOM_LABEL, CUSTOM_LIMITS, GROUPS, ZOOM_MAX, ZOOM_MIN, canRotate } from "./presets"
+import Icon from "../ui/Icon.jsx"
+import { CUSTOM, CUSTOM_LABEL, CUSTOM_LIMITS, GROUPS, ZOOM_MAX, ZOOM_MIN, canRotate } from "./presets.js"
 import styles from "./preview.module.scss"
 
 /**

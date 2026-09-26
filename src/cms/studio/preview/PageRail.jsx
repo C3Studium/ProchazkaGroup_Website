@@ -1,9 +1,9 @@
 import { useMemo } from "react"
-import { getType } from "@/cms/core"
+import { getType } from "../../core/index.js"
 
-import { hrefs, parsePreviewFrom } from "../lib/routes"
-import Icon from "../ui/Icon"
-import { split } from "./FrameControls"
+import { hrefs, parsePreviewFrom } from "../lib/routes.js"
+import Icon from "../ui/Icon.jsx"
+import { split } from "./FrameControls.jsx"
 import styles from "./preview.module.scss"
 
 /**

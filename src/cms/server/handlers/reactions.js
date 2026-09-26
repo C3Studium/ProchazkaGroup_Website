@@ -16,6 +16,9 @@
  * browser can send is a number anybody can send.
  */
 import { invalid } from '../errors.js'
+// Read by a visitor, not by an editor — so it comes from the catalogue and not
+// from a Czech string literal. See docs/I18N.md §8.
+import { t } from '../../i18n/index.js'
 import { clientKey, consume } from '../rateLimit.js'
 import { assertTarget, fingerprint, likedAmong, react, totalsFor, unreact } from '../reactions.js'
 import { methodNotAllowed, readJson, sendJson } from './http.js'
@@ -60,7 +63,7 @@ export const handleReactions = async (req, res) => {
     const gate = consume(`reaction:${client}`, RATE)
     if (!gate.allowed) {
         res.setHeader('Retry-After', String(gate.retryAfter))
-        throw invalid('Příliš mnoho hlasů z jednoho místa, zkuste to prosím za chvíli')
+        throw invalid(t('reaction.rateLimited'))
     }
 
     const body = await readJson(req)

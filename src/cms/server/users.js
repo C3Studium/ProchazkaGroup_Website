@@ -6,9 +6,10 @@
 //
 // Two invariants are enforced twice on purpose:
 //
-//   - There is always at least one active owner. The message a person reads
-//     comes from here; the guarantee comes from the constraint trigger in
-//     0002_cms_auth.sql. A UI check that is the only check is a suggestion.
+//   - There is always at least one active admin. The message a person reads
+//     comes from here; the guarantee comes from the constraint trigger as
+//     0011_cms_roles.sql redefined it. A UI check that is the only check is a
+//     suggestion.
 //   - A password never leaves this layer in plaintext except once, at the
 //     moment an account is created, to the owner who created it. It is not
 //     stored, and there is no endpoint that can produce it a second time.
@@ -56,15 +57,16 @@ const toUser = (row) => ({
 
 const normaliseEmail = (value) => String(value || '').trim().toLowerCase()
 
-/** How many owners could still sign in. The number the lock-out rule is about. */
-const activeOwnerCount = async () => {
+/** How many admins could still sign in. The number the lock-out rule is about —
+ *  since 0011 the role that carries the rights is `admin`, not `owner`. */
+const activeAdminCount = async () => {
     const { count, error } = await db()
         .from('cms_user')
         .select('id', { count: 'exact', head: true })
-        .eq('role', 'owner')
+        .eq('role', 'admin')
         .is('disabled_at', null)
 
-    if (error) throw serverError('Nepodařilo se ověřit počet vlastníků')
+    if (error) throw serverError('Nepodařilo se ověřit počet správců')
     return count || 0
 }
 
@@ -80,12 +82,12 @@ const fetchUser = async (id) => {
  * before demoting, disabling and deleting, so all three give the same
  * explanation instead of three different database errors.
  */
-const assertNotLastOwner = async (target, { stillActiveOwner }) => {
-    if (target.role !== 'owner' || target.disabled_at) return
-    if (stillActiveOwner) return
-    if ((await activeOwnerCount()) <= 1) {
+const assertNotLastAdmin = async (target, { stillActiveAdmin }) => {
+    if (target.role !== 'admin' || target.disabled_at) return
+    if (stillActiveAdmin) return
+    if ((await activeAdminCount()) <= 1) {
         throw conflict(
-            'Toto je poslední aktivní vlastník. Nejdřív pověřte někoho dalšího, jinak by se systém uzamkl.'
+            'Toto je poslední aktivní správce. Nejdřív pověřte někoho dalšího, jinak by se systém uzamkl.'
         )
     }
 }
@@ -170,7 +172,10 @@ export const updateUserRole = async (actor, id, role) => {
     const target = await fetchUser(id)
     if (target.role === role) return toUser(target)
 
-    await assertNotLastOwner(target, { stillActiveOwner: role === 'owner' })
+    // ROLES cannot grant admin, so a role change on an admin row is always a
+    // demotion — stillActiveAdmin is spelled out rather than hardcoded false so
+    // the rule survives if admin ever becomes grantable here.
+    await assertNotLastAdmin(target, { stillActiveAdmin: role === 'admin' })
 
     const { data, error } = await db()
         .from('cms_user')
@@ -195,7 +200,7 @@ export const updateUserRole = async (actor, id, role) => {
 export const setUserDisabled = async (actor, id, disabled) => {
     const target = await fetchUser(id)
 
-    if (disabled) await assertNotLastOwner(target, { stillActiveOwner: false })
+    if (disabled) await assertNotLastAdmin(target, { stillActiveAdmin: false })
 
     const { data, error } = await db()
         .from('cms_user')
@@ -220,7 +225,7 @@ export const setUserDisabled = async (actor, id, disabled) => {
  */
 export const deleteUser = async (actor, id) => {
     const target = await fetchUser(id)
-    await assertNotLastOwner(target, { stillActiveOwner: false })
+    await assertNotLastAdmin(target, { stillActiveAdmin: false })
 
     const { error } = await db().from('cms_user').delete().eq('id', id)
     if (error) throw serverError('Smazání uživatele selhalo')

@@ -97,9 +97,33 @@ const BLOCKED = [
 /** The ones whose default action is the thing being prevented. See above. */
 const CANCELLED = new Set(["click", "auxclick", "dragstart"])
 
-/** The overlay's chrome, and the field an editor is typing into. */
+/**
+ * Pole, do kterých se píše.
+ *
+ * Zámek má stránce vzít GESTA — odkaz, magnet, kurzor, tažení obrázku ven.
+ * Textové pole žádné z nich není: kliknutí do něj neposune stránku, nic
+ * neotevře a nikam nenaviguje, jen postaví kurzor. Dokud tudy zámek jel taky,
+ * nešlo v rámu označit obsah inputu — ani tažením, ani dvojklikem —, takže
+ * přihlašovací formulář se v editaci nedal použít a redaktor si stránku
+ * nemohl prohlédnout přihlášený.
+ *
+ * Výčtem typů, ne holým `input`: tlačítka, odesílací pole, zaškrtávátka
+ * a výběr souboru MAJÍ zůstat zamčené — jejich výchozí akce je přesně ta
+ * věc, kterou zámek zadržuje (odeslat formulář, otevřít dialog).
+ * `select` a `textarea` jsou v tom stejné jako textový input.
+ *
+ * (Přeneseno z pnpm patche eshopu Keramická zahrada, kde se to změřilo.)
+ */
+const TEXT_FIELDS =
+  "textarea,select," +
+  "[contenteditable]:not([contenteditable='false'])," +
+  "input:not([type='button']):not([type='submit']):not([type='reset'])" +
+  ":not([type='checkbox']):not([type='radio'])" +
+  ":not([type='image']):not([type='file'])"
 
-const EXEMPT = "[data-cms-overlay],[data-cms-editing]"
+/** The overlay's chrome, the field an editor is typing into, and form fields. */
+
+const EXEMPT = "[data-cms-overlay],[data-cms-editing]," + TEXT_FIELDS
 
 /**
  * Set on the framed `<html>` while the lock is up. Not read by any stylesheet —

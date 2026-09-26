@@ -24,7 +24,7 @@ export const MEDIA_COLUMNS =
 // document it describes — there is no foreign key back to cms_document, and the
 // migration's header says why neither available one is right.
 export const REVISION_COLUMNS =
-    'id, document_id, type, body, status, archived_at, changed_at, changed_by, reason, build_id'
+    'id, document_id, type, body, status, archived_at, changed_at, changed_by, reason, build_id, lang'
 
 export const MEDIA_ARCHIVE_COLUMNS =
     'media_id, uploaded_at, archived_at, first_published_at'
@@ -382,6 +382,9 @@ export const toRevision = (row) => {
         changedBy: row.changed_by ?? null,
         reason: row.reason,
         buildId: row.build_id ?? null,
+        // `null` je výchozí jazyk, tedy základní řádek dokumentu. Archiv se
+        // podle toho rozhoduje, kterou řadu revizí skládá — viz 0013.
+        lang: row.lang ?? null,
     }
 }
 

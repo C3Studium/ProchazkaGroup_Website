@@ -18,7 +18,7 @@ import QnaContact from "@/components/pages/index/QnaContact";
 
 import {
     getAssistant,
-    getContactContent,
+    getContactContent, getNavbarContent,
     getFooterContent,
     getHomepageContent,
     getPageContent,
@@ -49,11 +49,12 @@ export async function getStaticProps(context) {
     // route declares `reviews` as one of its sources in cms.config.js, so
     // `getPageContent` already runs that query, and a second
     // `getApprovedReviews` here would be the same read twice per regeneration.
-    const [content, home, footer, contact, assistant, roster] = await Promise.all([
+    const [content, home, footer, contact, navbar, assistant, roster] = await Promise.all([
         getPageContent("/benefit-program", view),
         getHomepageContent(view),
         getFooterContent(view),
         getContactContent(view),
+        getNavbarContent(view),
         getAssistant({ read }),
         getRoster({ read }),
     ])
@@ -70,6 +71,7 @@ export async function getStaticProps(context) {
             advisorFormCopy: home?.advisorFormCopy || {},
             footer,
             contact,
+            navbar,
             assistant,
             roster,
         },

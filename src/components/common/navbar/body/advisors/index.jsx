@@ -9,6 +9,7 @@ import LikeButton from '@/components/common/ui/LikeButton'
 import { useReactions } from '@/components/common/ui/LikeButton/useReactions'
 import { CURTAIN } from '@/components/common/ui/entrance'
 import { FALLBACK_ROSTER, dial } from '@/constants/roster'
+import { editableDoc, interactive, isEditMode } from '@/cms/edit'
 import { usePhoneOrTabletUpright } from '@/helpers/usePhone'
 
 // The roster, inside the menu's own panel.
@@ -298,6 +299,16 @@ const Cell = memo(function Cell({
                 animate={{ flexGrow: share }}
                 transition={calm ? CALM_SIZE : WIDTH_SPRING}
                 onPointerEnter={() => { if (!touch) onHover(index); }}
+                // Dvě anotace naráz, obě spočítané v rodiči (viz `people`):
+                //
+                //   živá karta   jinak se přes štít nerozbalí a motto
+                //                s telefonem uvnitř nejdou ani vidět
+                //   celý záznam  klik otevře poradce jako dokument, ne pole po
+                //                poli — jméno, motto, telefon i portrét bydlí
+                //                v jednom `consultant`
+                //
+                // Na webu je `cms` prázdný objekt, takže se nerozprostře nic.
+                {...person.cms}
             >
                 <Tile
                     className="navAdv__cell__link"
@@ -427,7 +438,26 @@ export default function Advisors({ roster, calm, touch, onPick }) {
     // @/helpers/usePhone, which is its own constant rather than a wider PHONE
     // because two other components read that one and neither wants this.
     const phone = usePhoneOrTabletUpright({ eager: true });
-    const people = useMemo(() => (roster?.length ? roster : FALLBACK_ROSTER), [roster]);
+    // `isEditMode()` jde false → true o jeden render po hydrataci, a `Cell` je
+    // memoizovaná. Kdyby se anotace počítaly uvnitř ní — a chvíli se počítaly —
+    // zamrzly by na té první odpovědi, tedy na prázdném objektu: karta by ve
+    // Studiu nebyla ani živá, ani klikací. Musí se tedy počítat TADY a projít
+    // memem jako součást dat.
+    //
+    // Přesně ten samý důvod a ten samý tvar má `Colleagues` na /o-nas; je to
+    // tentýž člověk na jiné stěně.
+    const editing = isEditMode();
+    const people = useMemo(
+        () => (roster?.length ? roster : FALLBACK_ROSTER).map((person) => ({
+            ...person,
+            // `id`, ne `docId`. `rosterFromCms` sice `docId` umí přenést, ale
+            // nic ho nikdy nenastaví — `provenance` v lib/site/people.js
+            // připojuje `id`. Na `docId` tady dřív stálo `editableDoc`, a proto
+            // se karta neotevírala: dostávala prázdný objekt.
+            cms: { ...interactive(), ...editableDoc(person.id, 'consultant') },
+        })),
+        [roster, editing],
+    );
     const [lead, ...rest] = people;
 
     // „Líbí se" u vybraného poradce — stejné tlačítko a stejný počet jako

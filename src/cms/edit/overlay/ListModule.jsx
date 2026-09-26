@@ -1,13 +1,13 @@
 import { useMemo, useRef, useState } from "react"
 
-import { useCore, usePort } from "@/cms/studio/context/StudioProvider"
-import FieldRenderer from "@/cms/studio/fields/FieldRenderer"
-import { useAsync } from "@/cms/studio/hooks/useAsync"
-import { bodyOf, getPath, isEqual, setPath } from "@/cms/studio/lib/documents"
-import { Button } from "@/cms/studio/ui/controls"
-import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
+import { useCore, usePort } from "../../studio/context/StudioProvider.jsx"
+import FieldRenderer from "../../studio/fields/FieldRenderer.jsx"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { bodyOf, getPath, isEqual, setPath } from "../../studio/lib/documents.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
 
-import styles from "./sheet"
+import styles from "./sheet.js"
 
 /**
  * An array of objects, edited whole — and one member of it, edited whole.

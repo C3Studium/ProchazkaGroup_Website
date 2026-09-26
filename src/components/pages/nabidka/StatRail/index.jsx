@@ -271,7 +271,9 @@ const modeFor = (vw, vh) => (vh <= 520 ? "short" : isStacked(vw, vh) ? "stacked"
  *   other silently.
  * @param {object[]} [cells] `nabidka.realita.cisla`, one row per count.
  */
-export default function StatRail({ copy = {}, close: closing = {}, cells = [] }) {
+// `strip` jsou bloky vodorovného pásu (`nabidka.pas.*`). Jede tudy, protože
+// OfferStrip mountuje tahle sekce — stránka na něj přímo nedosáhne.
+export default function StatRail({ copy = {}, close: closing = {}, cells = [], strip = null }) {
     const sectionRef = useRef(null);
 
     const docId = copy.docId;
@@ -770,7 +772,7 @@ export default function StatRail({ copy = {}, close: closing = {}, cells = [] })
                         finished becoming boxes — the two are one handover and
                         a band arriving over a move still in progress is two
                         things happening at once. */}
-                    <OfferStrip ride={stripIn} view={view} mode={modeFor(view.w, view.h)} coarse={coarse} />
+                    <OfferStrip ride={stripIn} view={view} mode={modeFor(view.w, view.h)} coarse={coarse} copy={strip} />
                 </motion.section>
             </motion.div>
 

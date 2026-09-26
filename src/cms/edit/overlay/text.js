@@ -88,7 +88,7 @@
 //
 // ---------------------------------------------------------------------------
 
-import { decodeLines, encodeLines } from "@/cms/schemas/marks"
+import { decodeLines, encodeLines } from "../../schemas/marks.js"
 
 // `plaintext-only` is what "plain text only" means when the browser implements
 // it: no rich paste, no execCommand bold, Enter inserts a newline rather than a

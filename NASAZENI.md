@@ -117,7 +117,10 @@ Tohle je nevratné a dělá se **až když obsah v CMS je**.
 ### 1. Udělej zálohu
 Supabase → Database → Backups.
 
-### 2. `0004_legacy_lockdown.sql`
+### 2. `migrations/manual/0004_legacy_lockdown.sql`
+
+Leží v `manual/`, a proto ho `pnpm run cms:migrate` **nespustí** — ani omylem,
+ani při prvním nasazení. Je to jediný soubor, který se pouští rukou.
 
 Má to v hlavičce napsané a platí to: **přečti si to, než to spustíš.**
 

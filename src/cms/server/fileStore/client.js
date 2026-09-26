@@ -115,7 +115,14 @@ const DOCUMENT_ANON_GRANT = [
 
 const REVISION_COLUMNS = [
     'id', 'document_id', 'type', 'body', 'status', 'archived_at',
-    'changed_at', 'changed_by', 'reason', 'build_id',
+    'changed_at', 'changed_by', 'reason', 'build_id', 'lang',
+]
+
+// Překlady. `null` u `lang` v revizích znamená výchozí jazyk; tady je `lang`
+// součástí klíče, takže null nedává smysl a tabulka ho nezná.
+const TRANSLATION_COLUMNS = [
+    'document_id', 'lang', 'data', 'draft', 'status', 'published_at',
+    'updated_at', 'updated_by',
 ]
 
 const MEDIA_COLUMNS = [
@@ -281,7 +288,9 @@ const SCHEMA = {
         defaults: () => ({
             id: randomUUID(),
             name: '',
-            role: 'editor',
+            // migrations/0011: `set default 'member'`. The old default was
+            // 'editor', a role that no longer exists anywhere above this line.
+            role: 'member',
             created_at: now(),
             updated_at: now(),
         }),
@@ -342,6 +351,47 @@ const SCHEMA = {
     // this table existed simply has no key in the snapshot — `#rows()` creates
     // the array on first use, so STORE_VERSION does not move and nobody's
     // documents are reseeded to add a table that starts empty.
+    // Přepis 0013. Bez tohohle záznamu odpoví souborové úložiště na čtení
+    // s jazykem chybou a na zápis spadne — tedy vývojový režim bez databáze
+    // by vícejazyčnost neuměl vůbec, zatímco Supabase ano.
+    cms_document_translation: {
+        columns: TRANSLATION_COLUMNS,
+        // Veřejné čtení smí vidět publikovaný překlad, ne rozdělaný. Stejné
+        // dělení jako u dokumentů: `draft` a `updated_by` ven nejdou.
+        // Přesně sloupcový grant z 0013. `updated_at` v něm JE a musí být:
+        // veřejné čtení ho vybírá, a bez něj se dotaz odmítne — dopadne to jako
+        // „Načtení překladů selhalo" a web tiše ukáže výchozí jazyk místo
+        // překladu. Tenhle seznam je přepis migrace, ne úvaha nad ním.
+        anonGrant: ['document_id', 'lang', 'data', 'status', 'published_at', 'updated_at'],
+        // Přepis politiky `using (status = 'published')` z 0013. Sloupcový grant
+        // výš říká, které SLOUPCE anonym vidí; tohle které ŘÁDKY. Bez toho se
+        // celé čtení překladů odmítne a web tiše ukáže výchozí jazyk — což
+        // vypadá jako hotový český web, ne jako chyba.
+        anonRows: (row) => row.status === 'published',
+        touch: 'updated_at',
+        defaults: () => ({
+            data: {},
+            draft: null,
+            status: 'draft',
+            published_at: null,
+            updated_at: now(),
+            updated_by: null,
+        }),
+        // Primární klíč je dvojice, a tady se vyjadřuje jako jedinečnost.
+        unique: [{ columns: ['document_id', 'lang'] }],
+        checks: [
+            {
+                name: 'cms_document_translation_status_check',
+                test: (row) => ['draft', 'published'].includes(String(row.status ?? '')),
+            },
+            {
+                // Tvar BCP 47, tentýž jako CHECK v 0013.
+                name: 'cms_document_translation_lang_check',
+                test: (row) => /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/.test(String(row.lang ?? '')),
+            },
+        ],
+    },
+
     cms_setting: {
         columns: SETTING_COLUMNS,
         anonGrant: [],
@@ -520,15 +570,19 @@ const assertConstraints = (table, rows, candidate) => {
 }
 
 /**
- * `cms_user_last_owner_guard` — the constraint trigger from migrations/0002.
+ * `cms_user_last_owner_guard` — the constraint trigger, as migrations/0011
+ * redefined it: the role that carries the rights is `admin` now, so that is the
+ * role that must never drop to zero. `owner` is a title (AUTH.md) and a system
+ * whose last owner leaves is administrable; one whose last admin is disabled is
+ * locked out of itself.
  *
- * `users.js` also refuses to demote, disable or delete the last owner and gives
+ * `users.js` also refuses to demote, disable or delete the last admin and gives
  * the person a sentence they can act on. This is the other half of the same
  * "enforced twice on purpose" pair: the message comes from the application, the
  * guarantee comes from the data. A store that dropped it would let a future
  * script lock the system out of itself.
  */
-const activeOwners = (rows) => rows.filter((row) => row.role === 'owner' && row.disabled_at == null)
+const activeAdmins = (rows) => rows.filter((row) => row.role === 'admin' && row.disabled_at == null)
 
 /* ----------------------------------------------------------- the builder --- */
 
@@ -805,11 +859,11 @@ class FileQuery {
                 touched.push(row)
             }
             // `for each row`: a statement that matched nothing does not fire it.
-            if (this.table === 'cms_user' && touched.length && !activeOwners(rows).length) {
+            if (this.table === 'cms_user' && touched.length && !activeAdmins(rows).length) {
                 before.forEach((snapshot, index) => Object.assign(candidates[index], snapshot))
                 return {
                     data: null,
-                    error: dbError('23514', 'cms_user: the last active owner cannot be demoted or disabled'),
+                    error: dbError('23514', 'cms_user: the last active admin cannot be demoted or disabled'),
                     count: null,
                 }
             }
@@ -820,10 +874,10 @@ class FileQuery {
         if (this.mode === 'delete') {
             const doomed = new Set(candidates)
             const kept = rows.filter((row) => !doomed.has(row))
-            if (this.table === 'cms_user' && candidates.length && !activeOwners(kept).length) {
+            if (this.table === 'cms_user' && candidates.length && !activeAdmins(kept).length) {
                 return {
                     data: null,
-                    error: dbError('23514', 'cms_user: the last active owner cannot be deleted'),
+                    error: dbError('23514', 'cms_user: the last active admin cannot be deleted'),
                     count: null,
                 }
             }
@@ -902,7 +956,10 @@ const RPC = {
             email,
             password_hash: p_password_hash,
             name: String(p_name || '').trim() || email.split('@')[0],
-            role: 'owner',
+            // migrations/0011: the first account is the developer's, and the
+            // developer's role is admin. Seeding 'owner' here is what left a
+            // fresh file-store site with a "Majitel" row and no Správce at all.
+            role: 'admin',
             created_at: now(),
             updated_at: now(),
             last_login_at: null,

@@ -53,9 +53,14 @@ registerSources({
 
 export { getPartners, getApprovedReviews, getConsultants, getAssistant, getRoster } from './people.js'
 export { getAboutContent, ABOUT_KEYS } from './aboutUs.js'
+// Rozcestník. Vlastní čtečka proto, že `/404` není stránka konfigurace — viz
+// hlavičku ./notFound.js.
+export { getNotFoundContent } from './notFound.js'
 export {
     getFooterContent,
     getContactContent,
+    getNavbarContent,
+    getCookiesContent,
     footerStaticProps,
     FOOTER_KEY,
     FOOTER_LINES,

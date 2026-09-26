@@ -28,11 +28,17 @@
 
 import { GLOBAL_COPY_KEYS } from '@/cms/visualEditing.js'
 
+// Klíče bloků, které tomuhle webu přibyly a knihovna o nich neví. Z modulu bez
+// závislostí, ne z `cms.config.js`: ten importuje `@/cms/site` a ten zpátky jeho,
+// takže server-only modul, který do toho kruhu vstoupí první, přečte `undefined`.
+// Viz hlavičku @/lib/copyKeys.
+import { CONTACT_NOTICE_KEY, CONTACT_NOTICES, COOKIES_CHROME_KEY, COOKIES_CHROME } from '@/lib/copyKeys'
+
 // One place decides which of the three readers answers a call — published,
 // draft or a moment in the archive. See ./archive.js.
 import { getSiteCopy, readerFor, viewOf } from '@/cms/server/site'
 
-import { getAssistant } from './people.js'
+import { getAssistant, getRoster } from './people.js'
 
 export const FOOTER_KEY = GLOBAL_COPY_KEYS.footer
 export const GLOBAL_KEYS = GLOBAL_COPY_KEYS
@@ -177,6 +183,11 @@ export const getContactContent = async ({ draft = false, at = null } = {}) => {
     const copy = await getSiteCopy({ page: 'global', read })
     const block = copy[GLOBAL_KEYS.contact] || null
 
+    // Hlášky formuláře jsou vlastní dokument — objeví se až po odeslání, takže
+    // na listu není co anotovat a s popisky polí je nic nespojuje. Jedou uvnitř
+    // téhle odpovědi, protože list otevírá lišta a ta má jediný prop.
+    const notices = copy[CONTACT_NOTICE_KEY] || null
+
     return {
         eyebrow: block?.title || '',
         // Plain reading. `body` is richText and this is set into a paragraph
@@ -186,6 +197,85 @@ export const getContactContent = async ({ draft = false, at = null } = {}) => {
         // label and a blank one must stay blank rather than promote the next.
         labels: labelsAt(block, 0, Object.keys(CONTACT_LINES).length),
         ...docOf(draft, block),
+        // Bez `docId`: hláška nemá na stránce prvek, ke kterému by se dal
+        // připnout, takže by to byl původ cestující tam, kde ho nikdo nepřečte.
+        notices: {
+            missing: labelsAt(notices, CONTACT_NOTICES.missing, 1)[0],
+            badEmail: labelsAt(notices, CONTACT_NOTICES.badEmail, 1)[0],
+            notWired: labelsAt(notices, CONTACT_NOTICES.notWired, 1)[0],
+        },
+    }
+}
+
+/**
+ * Texty povrchů, které `_app` vykresluje pod každou routou.
+ *
+ * Proč vlastní čtečka a ne `getPageContent`: ten prochází bloky JEDNÉ stránky
+ * (`resolvePage` v cms/site/define.js) a tyhle pod žádnou nepatří — jsou pod
+ * `globals`, protože panel menu i modál cookies visí nad každou routou. Stránka
+ * si je tedy nepřečte ani omylem; sáhnout pro ně musí ten, kdo je předává dál.
+ *
+ * Vrací se `id`, ne `docId`: komponenty čtou `copy?.id`, protože anotace se
+ * skládá z něj. `docOf` výš existuje pro patičku, která má tvar polí, a ta se
+ * s tímhle nemá slévat — dvě jména pro jednu věc jsou dvě místa, kde se to dá
+ * splést, ale sjednotit je znamená přepsat i patičku, a to je jiná změna.
+ *
+ * Bez `draft` se `id` nevrací vůbec. Veřejné HTML nesmí nést identifikátory
+ * dokumentů; je to totéž pravidlo jako `docOf`.
+ *
+ * @param {{ draft?: boolean, at?: string|null }} [options]
+ */
+const globalBlock = async (key, { draft = false, at = null } = {}) => {
+    const read = readerFor({ draft, at })
+    const copy = await getSiteCopy({ page: 'global', read })
+    const block = copy[key] || null
+    if (!block) return null
+
+    return {
+        ...(draft && block.id ? { id: block.id } : {}),
+        title: block.title || '',
+        // `bodyText`, ne `body`: obojí je tentýž text, ale tenhle se sází do
+        // odstavce bez značek. Viz `getContactContent` o pár řádků výš.
+        body: block.bodyText || '',
+        items: block.items || [],
+    }
+}
+
+/** Panel hlavního menu — osm dlaždic, vázaných pořadím. */
+export const getNavbarContent = (options) => globalBlock(GLOBAL_KEYS.navbar, options)
+
+/**
+ * Modál nastavení cookies — čtyři kategorie, vázané pořadím, a k nim popisky.
+ *
+ * Dva bloky, jedna odpověď. Modál je jedna komponenta a vykreslují ho dvě routy
+ * (/cookies a náhled povrchu); druhý prop by se musel dopsat na obou a čekat by
+ * se jen na to, na které se zapomene. Přesně tak dnes chybí `roster` na dvou
+ * routách z jedenácti.
+ *
+ * Když hlavní blok v CMS není, `chrome` jede stejně: popisky a kategorie spolu
+ * nesouvisí a komponenta si prázdnou půlku doplní ze zálohy.
+ */
+export const getCookiesContent = async (options) => {
+    const [block, chrome] = await Promise.all([
+        globalBlock(GLOBAL_KEYS.cookies, options),
+        globalBlock(COOKIES_CHROME_KEY, options),
+    ])
+    if (!block && !chrome) return null
+
+    const labels = (chrome?.items || []).map((item) => item.label || '')
+    return {
+        ...(block || { title: '', body: '', items: [] }),
+        chrome: chrome
+            ? {
+                ...(chrome.id ? { id: chrome.id } : {}),
+                eyebrow: labels[COOKIES_CHROME.eyebrow] || '',
+                always: labels[COOKIES_CHROME.always] || '',
+                providers: labels[COOKIES_CHROME.providers] || '',
+                cookies: labels[COOKIES_CHROME.cookies] || '',
+                save: labels[COOKIES_CHROME.save] || '',
+                close: labels[COOKIES_CHROME.close] || '',
+            }
+            : null,
     }
 }
 
@@ -220,16 +310,28 @@ export const footerStaticProps = async (context) => {
     // draft mode or an archived moment, and a request carrying neither — every
     // public request — gets the published site. See ./archive.js.
     const view = viewOf(context)
-    // Three things travel with every page rather than one now: the patička, the
-    // contact sheet's copy and the person it is addressed to. The sheet is
+    // Five things travel with every page rather than one now: the patička, the
+    // contact sheet's copy, the person it is addressed to, the menu's subtexts
+    // and the roster the menu opens. The sheet is
     // opened from the navigation and the navigation is mounted in _app — it has
     // no props of its own to read any of them from. A page that writes its own
     // getStaticProps has to call all three alongside its own reader; see /o-nas
     // and /recenze.
-    const [footer, contact, assistant] = await Promise.all([
+    const [footer, contact, assistant, navbar, roster] = await Promise.all([
         getFooterContent(view),
         getContactContent(view),
         getAssistant({ read: readerFor(view) }),
+        // Čtvrtá věc, která cestuje s každou stránkou: texty panelu menu.
+        // Ze stejného důvodu jako kontaktní list — navigaci mountuje `_app`
+        // a ten vlastní props nemá.
+        getNavbarContent(view),
+        // A pátá: poradci do seznamu, který lišta otevírá. Chyběli tu — routy,
+        // které si getStaticProps píšou samy, je vozí (viz /nabidky a /recenze),
+        // ale /kontakt a /404 berou tenhle sdílený, takže panel poradců na nich
+        // kreslil jména z @/constants/roster. Ta nemají `id`, a bez `id` nejde
+        // u nikoho zmáčknout „líbí se" — rozdíl na dvou adresách z jedenácti,
+        // tedy přesně ten, co se najde až u zákazníka.
+        getRoster({ read: readerFor(view) }),
     ])
-    return { props: { footer, contact, assistant }, revalidate: REVALIDATE_SECONDS }
+    return { props: { footer, contact, assistant, navbar, roster }, revalidate: REVALIDATE_SECONDS }
 }

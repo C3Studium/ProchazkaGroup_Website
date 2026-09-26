@@ -1,7 +1,7 @@
 import Head from "next/head"
 
 import AdvisorCard from "@/components/pages/advisor/AdvisorCard"
-import { getConsultants, getAssistant, getContactContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { getConsultants, getAssistant, getContactContent, getNavbarContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
 import { rosterFromCms } from "@/constants/roster"
 
 // One page per published consultant, and it exists to collect a review for that
@@ -41,7 +41,7 @@ export async function getStaticProps({ params, ...context }) {
     const view = viewOf(context)
     const read = readerFor(view)
 
-    const [content, consultants, footer, contact, assistant] = await Promise.all([
+    const [content, consultants, footer, contact, navbar, assistant] = await Promise.all([
         // The card's framing — the ask over the form, the office's city, the
         // words on the send button. ONE block behind every consultant's page,
         // declared under `page: 'recenze'` in cms.config.js: editing it once
@@ -53,6 +53,7 @@ export async function getStaticProps({ params, ...context }) {
         getConsultants({ kind: 'consultant', read }),
         getFooterContent(view),
         getContactContent(view),
+        getNavbarContent(view),
         getAssistant({ read }),
     ])
 
@@ -63,7 +64,7 @@ export async function getStaticProps({ params, ...context }) {
 
     // `roster` je pro lištu a jede na propech každé stránky — tady se
     // odvodí z poradců, kteří už jsou načtení, místo druhého čtení.
-    return { props: { advisor, content, footer, contact, assistant, roster: rosterFromCms(consultants) }, revalidate: REVALIDATE_SECONDS }
+    return { props: { advisor, content, footer, contact, navbar, assistant, roster: rosterFromCms(consultants) }, revalidate: REVALIDATE_SECONDS }
 }
 
 export default function AdvisorPage({ advisor, content }) {
@@ -108,7 +109,7 @@ export default function AdvisorPage({ advisor, content }) {
                 </script>
             </Head>
             <main lang="cs" key={`advisor-${advisor.slug}`}>
-                <AdvisorCard advisor={advisor} copy={content?.card} />
+                <AdvisorCard advisor={advisor} copy={content?.card} notices={content?.notices} />
             </main>
         </>
     )

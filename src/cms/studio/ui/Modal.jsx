@@ -1,5 +1,5 @@
 import { useEffect, useRef } from "react"
-import { IconButton, Button } from "./controls"
+import { IconButton, Button } from "./controls.jsx"
 import styles from "./Modal.module.scss"
 
 /**
@@ -10,6 +10,14 @@ import styles from "./Modal.module.scss"
  */
 export function Modal({ open, onClose, title, description, size = "md", children, footer }) {
   const panel = useRef(null)
+  const body = useRef(null)
+
+  // Zavírání drží ref, ne závislost efektu. Rodiče předávají `onClose` jako
+  // šipku vytvořenou při každém renderu — jako závislost spouštěla efekt
+  // znovu při KAŽDÉM úhozu do formuláře a fokus pokaždé přeskočil jinam:
+  // v „Přidat uživatele" šlo napsat jediné písmeno a pak znovu klikat do pole.
+  const closeRef = useRef(onClose)
+  closeRef.current = onClose
 
   useEffect(() => {
     if (!open) return undefined
@@ -17,17 +25,23 @@ export function Modal({ open, onClose, title, description, size = "md", children
     const onKeyDown = (event) => {
       if (event.key === "Escape") {
         event.stopPropagation()
-        onClose?.()
+        closeRef.current?.()
       }
     }
     window.addEventListener("keydown", onKeyDown)
 
     // Move focus in so Escape and Tab land inside the dialog immediately.
-    const focusable = panel.current?.querySelector("input, textarea, button, select, [tabindex]")
+    // Do TĚLA, ne do panelu: panel začíná hlavičkou s křížkem Zavřít a
+    // querySelector vybírá v dokumentovém pořadí — formulář by se otvíral
+    // s ohniskem na zavíracím tlačítku. Tělo bez ničeho fokusovatelného
+    // (ConfirmDialog) spadne na panel, tam je křížek správná odpověď.
+    const focusable =
+      body.current?.querySelector("input, textarea, select, button, [tabindex]") ||
+      panel.current?.querySelector("input, textarea, button, select, [tabindex]")
     focusable?.focus()
 
     return () => window.removeEventListener("keydown", onKeyDown)
-  }, [open, onClose])
+  }, [open])
 
   if (!open) return null
 
@@ -41,7 +55,7 @@ export function Modal({ open, onClose, title, description, size = "md", children
           </div>
           <IconButton icon="close" label="Zavřít" onClick={onClose} />
         </header>
-        <div className={styles.body}>{children}</div>
+        <div ref={body} className={styles.body}>{children}</div>
         {footer ? <footer className={styles.footer}>{footer}</footer> : null}
       </div>
     </div>

@@ -113,6 +113,22 @@ export function defineField(config, context = {}) {
      * decides what is drawn, and `editRoles` is what the server enforces.
      */
     viewRoles: normalizeRoles(config.viewRoles, config.adminOnly),
+    /**
+     * Překládá se tohle pole? `true` / `false` / `null` = „podle typu".
+     *
+     * Tři stavy, ne dva, a ten třetí je ten důležitý. `null` znamená, že
+     * deklarace mlčí a odpověď dá tabulka výchozích hodnot v ./translate.js —
+     * takže schéma napsané před vícejazyčností má správné odpovědi, aniž by se
+     * do něj sáhlo. `false` znamená, že to někdo vypnul schválně, a to je jiná
+     * informace: `isTranslatable` na ni nesmí sáhnout ani u `array`, jehož by
+     * členové jinak rozhodli za něj.
+     *
+     * Rozhodnutí se tu ZÁMĚRNĚ nepočítá dopředu. U `array`/`object` závisí na
+     * členech, a ti se normalizují až o pár řádků níž; spočítat to tady by
+     * znamenalo držet pořadí, které nikdo nevidí a které se při první úpravě
+     * rozbije. Viz ./translate.js.
+     */
+    translate: normalizeTranslate(config.translate, where),
     to: normalizeReferenceTargets(config, options, where),
     fields: [],
     members: [],
@@ -148,6 +164,22 @@ export function isField(value) {
 }
 
 /* ------------------------------------------------------------------ pieces -- */
+
+/**
+ * `translate` musí být boolean, nebo se nesmí uvést vůbec.
+ *
+ * `translate: 'ano'` je pravdivá hodnota, takže by tiše zapnula překlad —
+ * a `translate: 0` by ho tiše vypnula. Obojí je překlep, který by se projevil
+ * až chybějícím nebo přebývajícím jazykem na webu, takže padá tady, při importu
+ * schématu.
+ */
+function normalizeTranslate(value, where) {
+  if (value === undefined || value === null) return null
+  if (typeof value !== "boolean") {
+    fail("invalid_config", `${where}: \`translate\` musí být true nebo false (dostal jsem ${JSON.stringify(value)}).`)
+  }
+  return value
+}
 
 function normalizeReferenceTargets(config, options, where) {
   if (config.type !== "reference") return Object.freeze([])

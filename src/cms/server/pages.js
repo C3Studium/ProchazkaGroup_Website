@@ -23,6 +23,7 @@ import { discoverRoutes } from './routes.js'
 
 import site from '../site/config.js'
 import { addressesOf } from '../site/index.js'
+import { dynamicPageEntries } from './dynamicPaths.js'
 
 /**
  * The page's own <title>, when it is a plain string.
@@ -181,7 +182,7 @@ let cached = null
  * @returns {{ path: string, label: string, group: string | null,
  *             regenerates: boolean, configured: boolean, missing?: true }[]}
  */
-export const listSitePages = () => {
+export const listSitePages = async () => {
     if (cached && process.env.NODE_ENV === 'production') return cached
 
     const pages = collect(process.cwd())
@@ -193,6 +194,47 @@ export const listSitePages = () => {
         pages.length ? pages : [{ path: '/', label: 'Úvodní stránka', group: null, regenerates: true }],
         site,
     )
+
+    // Šablony nahradit jejich skutečnými adresami.
+    //
+    // `/recenze/[slug]` je v `src/pages` jeden soubor a na webu z něj je tolik
+    // stránek, kolik je poradců. Do téhle chvíle se sem nedostala žádná z nich:
+    // `walk` dynamické soubory přeskakuje a `join` je nechává být, takže editor
+    // měl v rámu všechno kromě poradců — a zrovna jejich stránky jsou ty, které
+    // se mění nejčastěji.
+    //
+    // Adresy se čtou z dokumentů (viz ./dynamicPaths.js), tedy z databáze. Když
+    // čtení selže, zůstane seznam statických stránek: horší než úplný, ale pořád
+    // použitelný. Prázdný rám kvůli nedostupné databázi by byl ta horší odpověď.
+    let dynamic = []
+    try {
+        dynamic = await dynamicPageEntries()
+    } catch (error) {
+        report(`konkrétní adresy dynamických rout se nepodařilo přečíst: ${error?.message || error}`)
+    }
+    // Šablonu ze seznamu vyhodit, ale jen tu, za kterou skutečně přišly adresy.
+    //
+    // Řádek `/recenze/[slug]` v rámu neotevře nic — je to soubor, ne stránka.
+    // Nechat ho tam vedle třinácti poradců by byl čtrnáctý řádek, který jediný
+    // nefunguje. Zůstává ale tehdy, když se adresy přečíst nepodařilo: to už
+    // není nadbytečný řádek, ale jediná stopa po tom, že ta routa existuje.
+    const expanded = new Set(dynamic.map((entry) => entry.route))
+    for (let i = list.length - 1; i >= 0; i -= 1) {
+        if (expanded.has(list[i].path)) list.splice(i, 1)
+    }
+
+    for (const entry of dynamic) {
+        const parts = entry.path.slice(1).split('/')
+        list.push({
+            path: entry.path,
+            label: entry.label,
+            group: parts.length > 1 ? parts[0] : null,
+            // Regeneruje se, a to je celý rozdíl proti šabloně: tohle je adresa,
+            // kterou `res.revalidate` umí zavolat.
+            regenerates: true,
+            configured: true,
+        })
+    }
 
     list.sort((a, b) => {
         if (a.path === '/') return -1
@@ -226,9 +268,9 @@ export const listSitePages = () => {
  * ne. Bez `prefixes` v konfiguraci se nic nemění — `addressesOf` vrací jednu
  * adresu.
  */
-export const listRegeneratingRoutes = () =>
+export const listRegeneratingRoutes = async () =>
     [...new Set(
-        listSitePages()
+        (await listSitePages())
             .filter((entry) => entry.regenerates && !entry.missing)
             .flatMap((entry) => addressesOf(site, entry.path)),
     )]

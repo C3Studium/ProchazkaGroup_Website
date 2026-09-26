@@ -1,11 +1,10 @@
 // Router for /api/cms/*. One catch-all page mounts this; the segments after
 // /api/cms select the handler.
 //
-// Only /reviews, the sign-in half of /auth, /content and the GET halves of
-// /widget and /dial-prefixes are reachable without a session — /content
-// requires an API key instead of one, /widget returns a corner and a colour,
-// and /dial-prefixes returns a list of countries and their dialling codes.
-// Each of those two argues in its own file why that is not a hole.
+// Only /reviews, the sign-in half of /auth, /content and the GET half of
+// /widget are reachable without a session — /content requires an API key
+// instead of one, and /widget returns a corner and a colour (handlers/widget.js
+// argues why that is not a hole).
 // Every other branch calls requireUser() or requireOwner() before it does
 // anything, and the default is 404 — an unknown path is not quietly handled by
 // whichever branch matched loosely.
@@ -14,7 +13,6 @@ import { CmsError } from '../errors.js'
 import { handleArchive } from './archive.js'
 import { handleAuth } from './auth.js'
 import { handleContent } from './content.js'
-import { handleDialPrefixes } from './dialPrefixes.js'
 import { handleDocuments } from './documents.js'
 import { handleMedia } from './media.js'
 import { handleReviews } from './reviews.js'
@@ -22,6 +20,7 @@ import { handleSettings } from './settings.js'
 import { handleStats } from './stats.js'
 import { handleReactions } from './reactions.js'
 import { handleWidget } from './widget.js'
+import { handleHeartbeat } from './heartbeat.js'
 import { sendError } from './http.js'
 
 export const handleCmsRequest = async (req, res) => {
@@ -53,12 +52,6 @@ export const handleCmsRequest = async (req, res) => {
             // namespace's "owner before any branch" rule stays exceptionless.
             case 'widget':
                 return await handleWidget(req, res, rest)
-            // Které předvolby nabízí pole s telefonem. Stejný tvar a stejný
-            // důvod jako /widget: GET je veřejný, protože ho potřebuje
-            // formulář v prohlížeči návštěvníka a odpovídá se číselníkem států;
-            // PUT je jen pro vlastníka — viz handlers/dialPrefixes.js.
-            case 'dial-prefixes':
-                return await handleDialPrefixes(req, res, rest)
             // The one branch that is not reached with a session cookie. It
             // authenticates an API key instead, and the port it constructs can
             // read published documents and nothing else — see handlers/content.js.
@@ -69,6 +62,11 @@ export const handleCmsRequest = async (req, res) => {
             // index in 0012 — see handlers/reactions.js.
             case 'reactions':
                 return await handleReactions(req, res, rest)
+            // Bez session — volá to cron, ne člověk. Autentizuje CMS_CRON_SECRET;
+            // drží Supabase projekt vzhůru a rozesílá pravidelný přehled.
+            // Viz server/heartbeat.js.
+            case 'heartbeat':
+                return await handleHeartbeat(req, res)
             default:
                 throw new CmsError('not_found', 'Neznámý endpoint')
         }
@@ -80,5 +78,4 @@ export const handleCmsRequest = async (req, res) => {
 export {
     handleReviews, handleDocuments, handleMedia, handleArchive,
     handleAuth, handleSettings, handleWidget, handleContent,
-    handleDialPrefixes,
 }

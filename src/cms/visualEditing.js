@@ -351,10 +351,15 @@ export const GLOBAL_COPY_KEYS = Object.freeze({
     footerClaim: 'global.footer.claim',
     footerLinks: 'global.footer.links',
     contact: 'global.contact',
-    // Telefonní předvolby tu byly taky, jako `global.dial-prefixes`, a už nejsou.
-    // Číselník států není text webu: "+420 je Česko" platí na každém webu
-    // a nikdo to nevymýšlí. Je z toho nativní funkce nástroje — jeden řádek
-    // v cms_setting a panel v Nastavení. Viz src/cms/DIAL-PREFIXES.md.
+    // Nastavení cookies. Pod `global`, protože modál se otevírá z patičky
+    // i z lišty, tedy zpod každé routy — ne ze stránky /cookies, kde jen taky
+    // je. Kategorie jsou položky toho bloku; jejich technický klíč v CMS není,
+    // váže je pořadí. Viz komentář v components/modems/Cookies.
+    cookies: 'global.cookies',
+    // Panel hlavního menu. Osm dlaždic; jejich POŘADÍ je vazba na `href`
+    // v constants/common.js, protože adresa se nepřekládá a odkaz podle ní
+    // vede. Přehodit položky znamená poslat „Kontakt" na /nabidka.
+    navbar: 'global.navbar',
 })
 
 /**

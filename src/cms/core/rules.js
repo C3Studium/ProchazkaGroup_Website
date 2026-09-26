@@ -18,6 +18,7 @@
  * this file, and why adding a field type does not mean editing it.
  */
 import { CmsSchemaError, fail } from "./errors.js"
+import { t } from "../i18n/index.js"
 
 export const RULE_FLAGS = Object.freeze([
   "required",
@@ -205,7 +206,11 @@ const parseUrl = (raw, options) => {
 
 /**
  * One entry per flag. Each returns `null` when the value passes, or a default
- * message when it fails. `required` is absent: emptiness is decided by the field
+ * message when it fails. The default messages are not written here — they come
+ * from the text catalogue (`src/i18n`), because on an English site this file
+ * used to say "Neplatný formát." and there was no way to change it. A message
+ * passed to the rule (`.min(2, "…")`) still wins over the catalogue, as before.
+ * See docs/I18N.md §8. `required` is absent: emptiness is decided by the field
  * type's `isEmpty`, and the engine gates on it before any rule runs.
  */
 const TESTS = {
@@ -231,15 +236,15 @@ const TESTS = {
     if (size === null || limit === null || size === limit) return null
     return ctx.measure.message("length", spec.bound)
   },
-  regex: (spec, value) => (spec.pattern.test(String(value)) ? null : "Neplatný formát."),
-  email: (spec, value) => (EMAIL_PATTERN.test(String(value).trim()) ? null : "Neplatná e-mailová adresa."),
-  url: (spec, value) => (parseUrl(value, spec.options) ? null : "Neplatná adresa odkazu."),
-  integer: (spec, value) => (Number.isInteger(asNumber(value)) ? null : "Musí být celé číslo."),
-  positive: (spec, value) => (asNumber(value) > 0 ? null : "Musí být kladné číslo."),
+  regex: (spec, value) => (spec.pattern.test(String(value)) ? null : t("rule.regex")),
+  email: (spec, value) => (EMAIL_PATTERN.test(String(value).trim()) ? null : t("rule.email")),
+  url: (spec, value) => (parseUrl(value, spec.options) ? null : t("rule.url")),
+  integer: (spec, value) => (Number.isInteger(asNumber(value)) ? null : t("rule.integer")),
+  positive: (spec, value) => (asNumber(value) > 0 ? null : t("rule.positive")),
   unique: (spec, value) => {
     if (!Array.isArray(value)) return null
     const seen = new Set(value.map(stableStringify))
-    return seen.size === value.length ? null : "Položky se nesmí opakovat."
+    return seen.size === value.length ? null : t("rule.unique")
   },
   custom: (spec, value, ctx) => {
     const verdict = spec.test(value, ctx)
@@ -252,7 +257,7 @@ const TESTS = {
     }
     if (verdict === true || verdict === undefined || verdict === null) return null
     if (typeof verdict === "string") return verdict
-    return "Neplatná hodnota."
+    return t("rule.custom")
   },
 }
 
@@ -269,7 +274,7 @@ export function runRules(specs, value, ctx) {
 
   for (const spec of specs) {
     if (spec.flag === "required") {
-      if (empty) errors.push(makeError(spec, "Povinné pole.", value, ctx))
+      if (empty) errors.push(makeError(spec, t("rule.required"), value, ctx))
       continue
     }
     if (empty) continue

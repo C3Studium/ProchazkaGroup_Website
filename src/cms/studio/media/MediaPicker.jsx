@@ -1,5 +1,5 @@
-import { Modal } from "../ui/Modal"
-import MediaLibrary from "./MediaLibrary"
+import { Modal } from "../ui/Modal.jsx"
+import MediaLibrary from "./MediaLibrary.jsx"
 
 /**
  * Picker mode for `image` and `file` fields. It is the same library, in a modal,

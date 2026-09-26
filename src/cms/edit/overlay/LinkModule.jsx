@@ -1,13 +1,13 @@
 import { useState } from "react"
 
-import { usePort } from "@/cms/studio/context/StudioProvider"
-import { useAsync } from "@/cms/studio/hooks/useAsync"
-import { Button } from "@/cms/studio/ui/controls"
-import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
+import { usePort } from "../../studio/context/StudioProvider.jsx"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
 
-import { bodyOfDoc, valueAt } from "./assets"
-import { checkHref } from "./href"
-import styles from "./sheet"
+import { bodyOfDoc, valueAt } from "./assets.js"
+import { checkHref } from "./href.js"
+import styles from "./sheet.js"
 
 /**
  * A link or a button — its label, its target, or both.

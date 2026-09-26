@@ -27,6 +27,7 @@
  * `array`/`object` are not special-cased in the engine.
  */
 import { fail } from "./errors.js"
+import { t } from "../i18n/index.js"
 
 /* -------------------------------------------------------------- primitives -- */
 
@@ -61,15 +62,18 @@ const richPlain = (value) => (typeof value === "string" ? value.replace(/<[^>]*>
 /* ----------------------------------------------------------------- measures -- */
 
 /**
- * Czech needs three forms for a count. Getting "2 znaků" in front of an editor
- * is the kind of small wrongness that makes a tool feel unfinished.
+ * Counting words used to be declined here, by a local `plural()` with the Czech
+ * rule baked in (1 / 2–4 / 5+). It has moved to the text catalogue, because the
+ * rule belongs to the language and not to the message: English has two forms, so
+ * the same function would have produced "1 characters". The message now names a
+ * list of forms (`{n|unit.characters}`) and the language picks one — see
+ * src/i18n/plural.js and docs/I18N.md §8.
+ *
+ * What a measure's `message` does here is therefore one catalogue lookup.
+ * `length` is the fallback branch, exactly as it was when the three cases were
+ * written out.
  */
-const plural = (count, [one, few, many]) => {
-  const n = Math.abs(count)
-  if (n === 1) return one
-  if (n >= 2 && n <= 4) return few
-  return many
-}
+const boundKey = (flag) => (flag === "min" || flag === "max" ? flag : "length")
 
 const numericBound = (bound) => (typeof bound === "number" && Number.isFinite(bound) ? bound : null)
 
@@ -77,12 +81,7 @@ const CHARACTERS = Object.freeze({
   unit: "characters",
   value: (value, field) => (field?.type === "slug" ? slugText(value).length : plainText(value).length),
   bound: numericBound,
-  message: (flag, bound) => {
-    const noun = plural(bound, ["znak", "znaky", "znaků"])
-    if (flag === "min") return `Musí mít alespoň ${bound} ${noun}.`
-    if (flag === "max") return `Může mít nejvýše ${bound} ${noun}.`
-    return `Musí mít přesně ${bound} ${noun}.`
-  },
+  message: (flag, bound) => t(`measure.characters.${boundKey(flag)}`, { n: bound }),
 })
 
 const RICH_TEXT = Object.freeze({ ...CHARACTERS, value: (value) => richPlain(value).length })
@@ -91,23 +90,14 @@ const ITEMS = Object.freeze({
   unit: "items",
   value: (value) => (Array.isArray(value) ? value.length : null),
   bound: numericBound,
-  message: (flag, bound) => {
-    const noun = plural(bound, ["položku", "položky", "položek"])
-    if (flag === "min") return `Musí obsahovat alespoň ${bound} ${noun}.`
-    if (flag === "max") return `Může obsahovat nejvýše ${bound} ${noun}.`
-    return `Musí obsahovat přesně ${bound} ${noun}.`
-  },
+  message: (flag, bound) => t(`measure.items.${boundKey(flag)}`, { n: bound }),
 })
 
 const MAGNITUDE = Object.freeze({
   unit: "value",
   value: (value) => (typeof value === "number" && Number.isFinite(value) ? value : null),
   bound: numericBound,
-  message: (flag, bound) => {
-    if (flag === "min") return `Musí být alespoň ${bound}.`
-    if (flag === "max") return `Může být nejvýše ${bound}.`
-    return `Musí být přesně ${bound}.`
-  },
+  message: (flag, bound) => t(`measure.value.${boundKey(flag)}`, { n: bound }),
 })
 
 /**
@@ -128,12 +118,7 @@ const instant = (render) =>
       const parsed = Date.parse(bound)
       return Number.isNaN(parsed) ? null : parsed
     },
-    message: (flag, bound) => {
-      const shown = render(bound)
-      if (flag === "min") return `Nesmí být dříve než ${shown}.`
-      if (flag === "max") return `Nesmí být později než ${shown}.`
-      return `Musí být přesně ${shown}.`
-    },
+    message: (flag, bound) => t(`measure.instant.${boundKey(flag)}`, { at: render(bound) }),
   })
 
 const DAY = instant((bound) => String(bound).slice(0, 10))
@@ -176,6 +161,13 @@ const textUi = (entry, field, extra) =>
 
 /* ------------------------------------------------------------------ entries -- */
 
+// Every message an entry produces — `check` and the measures above — comes from
+// the text catalogue, so a site in another language does not get Czech from the
+// library. `title` and boolean's "Ano"/"Ne" deliberately do not: they are
+// labels the Studio shows an editor, and the Studio's language is its own
+// setting (`studio.language`, docs/I18N.md §8), not the content's. Moving them
+// now would tie them to the wrong switch.
+
 const definitions = [
   {
     name: "string",
@@ -184,7 +176,7 @@ const definitions = [
     input: "string",
     scalar: true,
     zero: () => "",
-    check: (value) => (typeof value === "string" ? null : "Očekáván text."),
+    check: (value) => (typeof value === "string" ? null : t("check.string")),
     measure: CHARACTERS,
     supports: ["min", "max", "length", "regex", "email", "url"],
     ui: (entry, field) => textUi(entry, field),
@@ -198,7 +190,7 @@ const definitions = [
     scalar: true,
     options: { rows: 4 },
     zero: () => "",
-    check: (value) => (typeof value === "string" ? null : "Očekáván text."),
+    check: (value) => (typeof value === "string" ? null : t("check.string")),
     measure: CHARACTERS,
     supports: ["min", "max", "length", "regex"],
     ui: (entry, field) => textUi(entry, field, { multiline: true, rows: field.options.rows }),
@@ -216,7 +208,7 @@ const definitions = [
     options: { toolbar: ["bold", "italic", "link", "h2", "h3", "ul", "ol"] },
     zero: () => "",
     check: (value) =>
-      typeof value === "string" || Array.isArray(value) ? null : "Očekáván formátovaný text.",
+      typeof value === "string" || Array.isArray(value) ? null : t("check.richText"),
     isEmpty: (value) => richPlain(value).trim() === "",
     measure: RICH_TEXT,
     supports: ["min", "max", "length", "regex"],
@@ -237,7 +229,7 @@ const definitions = [
     // null, not 0 — an untouched rating and a rating of zero are different
     // answers, and `required` has to be able to tell them apart.
     zero: () => null,
-    check: (value) => (typeof value === "number" && Number.isFinite(value) ? null : "Očekáváno číslo."),
+    check: (value) => (typeof value === "number" && Number.isFinite(value) ? null : t("check.number")),
     measure: MAGNITUDE,
     supports: ["min", "max", "integer", "positive"],
     ui: (entry, field) =>
@@ -259,7 +251,7 @@ const definitions = [
     input: "boolean",
     scalar: true,
     zero: () => false,
-    check: (value) => (typeof value === "boolean" ? null : "Očekávána hodnota ano/ne."),
+    check: (value) => (typeof value === "boolean" ? null : t("check.boolean")),
     // `false` is an answer, not a blank. A checkbox that must be ticked is
     // `.custom((v) => v === true)`, not `.required()`.
     isEmpty: (value) => value === undefined || value === null,
@@ -277,7 +269,7 @@ const definitions = [
     check: (value) =>
       typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && !Number.isNaN(Date.parse(value))
         ? null
-        : "Očekáváno datum ve tvaru RRRR-MM-DD.",
+        : t("check.date"),
     measure: DAY,
     supports: ["min", "max"],
     ui: (entry, field) => baseUi(entry, field, { withTime: false, min: field.options.min ?? null, max: field.options.max ?? null }),
@@ -291,7 +283,7 @@ const definitions = [
     scalar: true,
     zero: () => null,
     check: (value) =>
-      typeof value === "string" && !Number.isNaN(Date.parse(value)) ? null : "Očekáváno datum a čas v ISO 8601.",
+      typeof value === "string" && !Number.isNaN(Date.parse(value)) ? null : t("check.datetime"),
     measure: MOMENT,
     supports: ["min", "max"],
     ui: (entry, field) => baseUi(entry, field, { withTime: true, min: field.options.min ?? null, max: field.options.max ?? null }),
@@ -309,9 +301,9 @@ const definitions = [
     zero: () => "",
     check: (value) => {
       if (typeof value === "string" || (isPlainObject(value) && typeof value.current === "string")) {
-        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugText(value)) ? null : "Jen malá písmena, číslice a pomlčky."
+        return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slugText(value)) ? null : t("check.slug.format")
       }
-      return "Očekávána URL adresa."
+      return t("check.slug")
     },
     isEmpty: (value) => slugText(value).trim() === "",
     measure: CHARACTERS,
@@ -335,9 +327,9 @@ const definitions = [
     // The asset object Contract 2's `media.upload` returns, kept whole in the
     // document so the public site renders without a second lookup.
     check: (value) => {
-      if (typeof value === "string") return isFilledString(value) ? null : "Očekáván obrázek z knihovny médií."
+      if (typeof value === "string") return isFilledString(value) ? null : t("check.image")
       if (isPlainObject(value) && (isFilledString(value.id) || isFilledString(value.url))) return null
-      return "Očekáván obrázek z knihovny médií."
+      return t("check.image")
     },
     // Only null is empty. A present object missing its id is corrupt data from a
     // migration, not a cleared field, and saying so is more use than silence.
@@ -355,9 +347,9 @@ const definitions = [
     options: { accept: "*/*" },
     zero: () => null,
     check: (value) => {
-      if (typeof value === "string") return isFilledString(value) ? null : "Očekáván soubor z knihovny médií."
+      if (typeof value === "string") return isFilledString(value) ? null : t("check.file")
       if (isPlainObject(value) && (isFilledString(value.id) || isFilledString(value.url))) return null
-      return "Očekáván soubor z knihovny médií."
+      return t("check.file")
     },
     supports: [],
     ui: (entry, field) => baseUi(entry, field, { assetKind: "file", accept: field.options.accept }),
@@ -373,11 +365,11 @@ const definitions = [
     // Shape only. Whether the id exists is a database question and this layer
     // never asks one — the server checks referential integrity on write.
     check: (value, field) => {
-      if (!isPlainObject(value)) return "Očekáván odkaz ve tvaru { _ref, _type }."
-      if (!isFilledString(value._ref)) return "Odkaz nemá vyplněné _ref."
-      if (!isFilledString(value._type)) return "Odkaz nemá vyplněné _type."
+      if (!isPlainObject(value)) return t("check.reference")
+      if (!isFilledString(value._ref)) return t("check.reference.ref")
+      if (!isFilledString(value._type)) return t("check.reference.type")
       if (field.to.length > 0 && !field.to.includes(value._type)) {
-        return `Odkaz musí mířit na typ ${field.to.join(" nebo ")}.`
+        return t("check.reference.to", { types: field.to.join(t("list.or")) })
       }
       return null
     },
@@ -394,7 +386,7 @@ const definitions = [
     scalar: false,
     options: { sortable: true, layout: "list" },
     zero: () => [],
-    check: (value) => (Array.isArray(value) ? null : "Očekáván seznam."),
+    check: (value) => (Array.isArray(value) ? null : t("check.array")),
     isEmpty: (value) => !Array.isArray(value) || value.length === 0,
     measure: ITEMS,
     supports: ["min", "max", "length", "unique"],
@@ -403,7 +395,7 @@ const definitions = [
         const member = pickMember(field, item)
         return member
           ? { key: String(index), field: member, value: item }
-          : { key: String(index), error: `Neznámý typ položky${item?._type ? ` "${item._type}"` : ""}.` }
+          : { key: String(index), error: unknownMember(item) }
       }),
     ui: (entry, field) =>
       baseUi(entry, field, {
@@ -441,7 +433,7 @@ const definitions = [
       for (const child of field.fields) value[child.name] = zeroOf(child)
       return value
     },
-    check: (value) => (isPlainObject(value) ? null : "Očekávána skupina polí."),
+    check: (value) => (isPlainObject(value) ? null : t("check.object")),
     isEmpty: (value, field) => {
       if (!isPlainObject(value)) return true
       return field.fields.every((child) => getFieldType(child.type).isEmpty(value[child.name], child))
@@ -475,10 +467,10 @@ const definitions = [
     check: (value, field) => {
       const allowed = choicesOf(field).map((choice) => choice.value)
       if (field.options.multiple) {
-        if (!Array.isArray(value)) return "Očekáván seznam voleb."
-        return value.every((item) => allowed.includes(item)) ? null : "Neplatná volba."
+        if (!Array.isArray(value)) return t("check.select.multiple")
+        return value.every((item) => allowed.includes(item)) ? null : t("check.select")
       }
-      return allowed.includes(value) ? null : "Neplatná volba."
+      return allowed.includes(value) ? null : t("check.select")
     },
     isEmpty: (value, field) => (field.options.multiple ? !Array.isArray(value) || value.length === 0 : blank(value)),
     measure: ITEMS,
@@ -516,14 +508,14 @@ const definitions = [
     options: { schemes: ["http", "https"], allowRelative: true },
     zero: () => "",
     check: (value, field) => {
-      if (typeof value !== "string") return "Očekávána adresa odkazu."
+      if (typeof value !== "string") return t("check.url")
       const raw = value.trim()
       if (field.options.allowRelative && (raw.startsWith("/") || raw.startsWith("#"))) return null
       try {
         const parsed = new URL(raw)
-        return field.options.schemes.includes(parsed.protocol.replace(":", "")) ? null : "Nepodporovaný protokol odkazu."
+        return field.options.schemes.includes(parsed.protocol.replace(":", "")) ? null : t("check.url.scheme")
       } catch {
-        return "Neplatná adresa odkazu."
+        return t("check.url.invalid")
       }
     },
     measure: CHARACTERS,
@@ -539,8 +531,8 @@ const definitions = [
     scalar: true,
     zero: () => "",
     check: (value) => {
-      if (typeof value !== "string") return "Očekávána e-mailová adresa."
-      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim()) ? null : "Neplatná e-mailová adresa."
+      if (typeof value !== "string") return t("check.email")
+      return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value.trim()) ? null : t("check.email.invalid")
     },
     measure: CHARACTERS,
     supports: ["min", "max", "regex", "email"],
@@ -645,6 +637,14 @@ export const FIELD_TYPES = Object.freeze(
 )
 
 /* ------------------------------------------------------------------ helpers -- */
+
+/**
+ * "Neznámý typ položky" — the item's type in quotes, but only when it carries
+ * one. Two catalogue keys rather than one with an optional placeholder: a gap
+ * in the middle of a sentence is a gap a translator cannot see.
+ */
+const unknownMember = (item) =>
+  item?._type ? t("check.array.memberNamed", { type: item._type }) : t("check.array.member")
 
 /** Which member definition an array item belongs to. */
 export function pickMember(field, item) {

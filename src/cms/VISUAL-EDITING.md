@@ -94,6 +94,23 @@ Outside preview the helper returns `{}`, so nothing reaches the public HTML.
 the whole reason it is attributes rather than wrapper elements — a wrapper adds
 a box to a tuned layout, an attribute does not.
 
+### Mirrors — the same value drawn twice
+
+The overlay's optimistic state is the DOM of the one annotated element, so a
+second rendering of the same field — a table of contents, a breadcrumb, the
+hidden faces of a flip animation — used to sit stale while the editor typed,
+and every consuming site was growing its own MutationObserver to close the gap.
+
+`editableMirror(doc, field)` closes it in the package: it emits
+`data-cms-mirror="<doc>:<field>"` (same id, same field path as the source's
+annotation) and the overlay rewrites that element's text alongside the edited
+one on every keystroke — plain words with line breaks, not markup. Cancel puts
+the mirror's own nodes back exactly as it does for the element; commit keeps
+the typed words. A mirror is a reflection, never a second place to edit: the
+hit-test cannot land on it, and an element annotated as a field ignores its
+own mirror attribute. `edit/overlay/mirror.js` holds the implementation and
+the full argument.
+
 ## Contract B — the overlay
 
 Drawn **inside** the iframe — and mounted there by the host, out of the host's

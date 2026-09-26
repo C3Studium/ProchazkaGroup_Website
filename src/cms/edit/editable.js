@@ -3,6 +3,7 @@ import {
   DOC_ATTR,
   FIELD_ATTR,
   HREF_ATTR,
+  INTERACTIVE_ATTR,
   KIND_ATTR,
   KIND_DOCUMENT,
   KIND_IMAGE,
@@ -13,9 +14,11 @@ import {
   KIND_TEXT,
   LINE_WILDCARD,
   MARK_ATTR,
+  MIRROR_ATTR,
+  mirrorValue,
   TYPE_ATTR,
-} from "./attrs"
-import { isEditMode } from "./mode"
+} from "./attrs.js"
+import { isEditMode } from "./mode.js"
 
 // Contract A′ — field provenance, and three shapes that are not a single field.
 //
@@ -250,4 +253,99 @@ export function editableLink(doc, { text, href } = {}) {
   return attrs
 }
 
+/**
+ * An element that only reflects a field — kept in step WHILE the field is
+ * edited in place, never itself editable.
+ *
+ *     <li {...editableMirror(doc, "sections.3.title")}>{section.title}</li>
+ *
+ * The value stays a plain render of the field: the component draws it from
+ * props exactly as before, and outside the editor this helper answers `{}`
+ * like every other one here. In the editor, the overlay rewrites this
+ * element's text alongside the annotated source on every keystroke, restores
+ * it on cancel, and keeps the committed text on save. See MIRROR_ATTR in
+ * ./attrs for the full argument, including why a mirror is not a second place
+ * to edit.
+ *
+ * Same `doc` and `field` the source's `editable()` call carries — a mirror of
+ * a `lines` block names the template path (`items.*.label`), because that is
+ * what the source is annotated with.
+ *
+ * @param {string|object} doc
+ * @param {string} field
+ */
+export function editableMirror(doc, field) {
+  if (!isEditMode()) return NONE
+
+  const id = docId(doc)
+  const name = fieldName(field)
+  if (!id || !name) return NONE
+
+  return { [MIRROR_ATTR]: mirrorValue(id, name) }
+}
+
 export default editable
+
+/**
+ * Tytéž pomocníky, jen s dokumentem už zadaným.
+ *
+ * Je to odpověď na „nešlo by mít Studio v jednom obalu jako Clerk". Obal by to
+ * neřešil — a co se doopravdy opakuje, je první argument: v ProchazkaGroup stojí
+ * `editable(doc, …)` třiadevadesátkrát. Tohle ho zadá jednou na komponentu.
+ *
+ *     const edit = editableIn(copy)
+ *
+ *     <h1 {...edit('title')}>{copy.title}</h1>
+ *     <p  {...edit('body')}>{copy.body}</p>
+ *     <li {...edit.doc('consultant')}>…</li>
+ *
+ * Proč ne React context, ačkoli tak zněla otázka:
+ *
+ *   1. Context se čte hookem, takže by z každé anotace byl hook. Anotace se
+ *      dnes dají použít i v cyklu, v ternárním výrazu a ve funkci, která není
+ *      komponenta — hook nic z toho nesmí.
+ *   2. Provider by do balíčku veřejné stránky přitáhl React context z CMS.
+ *      Dnes jsou to čisté funkce vracející objekt a `isEditMode()` je mimo rám
+ *      `false`, takže veřejný web z editace nenese prakticky nic. To je
+ *      pravidlo, které hlídá `pnpm run check`, ne náhoda.
+ *   3. Obal by stejně nestačil. Překryv běží ve VLASTNÍM React rootu uvnitř
+ *      rámu (edit/overlay/mount.jsx) — jiný dokument, jiný realm. Provider
+ *      zapsaný ve webu do něj nedosáhne; přesně tenhle rozdíl je to, co dnes
+ *      shazovalo popupy na chybějícím `AuthProvider`.
+ *
+ * Takže: žádný obal a o jeden argument míň. Staré volání platí dál — tohle jen
+ * přibylo.
+ *
+ * @param {object|string|null} doc  dokument nebo jeho id; `null` mimo Studio
+ */
+/**
+ * Prvek, který má v režimu úprav zůstat ovladatelný.
+ *
+ *     <div {...interactive()} onPointerEnter={open}>…</div>
+ *
+ * Nic to neukládá a žádný dokument to nepotřebuje — je to jediný pomocník
+ * z téhle rodiny, který není o obsahu, ale o tom, jak se k obsahu dostat.
+ * Dávej ho na prvek, který ten stav přepíná, ne na jeho potomky: díra ve
+ * štítu se vyřezává podle jeho obdélníku.
+ *
+ * Mimo Studio vrací prázdno jako všechno ostatní tady, takže na webu po něm
+ * nezůstane ani atribut.
+ */
+export function interactive() {
+    if (!isEditMode()) return NONE
+    return { [INTERACTIVE_ATTR]: "" }
+}
+
+export function editableIn(doc) {
+    const at = (field, kind, mark) => editable(doc, field, kind, mark)
+
+    at.image = (field, mark) => editable(doc, field, KIND_IMAGE, mark)
+    at.lines = (field, mark) => editableLines(doc, field, mark)
+    at.list = (field) => editableList(doc, field)
+    at.set = (field) => editableSet(doc, field)
+    at.mirror = (field) => editableMirror(doc, field)
+    at.doc = (type, actions) => editableDoc(doc, type, actions)
+    at.link = (parts) => editableLink(doc, parts)
+
+    return at
+}

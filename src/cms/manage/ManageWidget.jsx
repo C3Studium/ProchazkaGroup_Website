@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 
+import { t } from "../i18n/index.js"
 import styles from "./ManageWidget.module.scss"
 
 /**
@@ -13,6 +14,21 @@ import styles from "./ManageWidget.module.scss"
  *
  * The client should never have to type an address into a browser to reach the
  * thing that edits their own website. That is all this is.
+ *
+ * ---------------------------------------------------------------------------
+ * Why the four words come from the catalogue
+ *
+ * Because this is the library's own markup standing on somebody else's page,
+ * and until now it said "Spravovat web" there whatever language the page was
+ * written in. The four texts are the whole of `ManageBadge` in docs/I18N.md §8.
+ *
+ * The catalogue is two small objects and they land in this chunk, not in the
+ * stub — a visitor who never passes the four conditions in `./index.jsx` still
+ * downloads none of it. And because this component only ever renders after
+ * mount (see the stub's header), reading the language from the page — say
+ * `setLanguageSource(() => document.documentElement.lang)` — cannot produce a
+ * hydration mismatch: on the server and on the first client render there is
+ * nothing here to mismatch.
  *
  * ---------------------------------------------------------------------------
  * Why the appearance is fetched and not a prop
@@ -97,7 +113,7 @@ export default function ManageWidget() {
       data-corner={look.corner}
       data-blur={look.blur ? "on" : "off"}
       style={{ "--cms-manage-bg": look.background }}
-      aria-label="Správa webu"
+      aria-label={t("manage.region")}
       // Escape closes it, and only while focus is inside it. Bound here rather
       // than on the document because Escape belongs to whatever the visitor is
       // actually using — a fixed badge in a corner has no business intercepting
@@ -106,7 +122,7 @@ export default function ManageWidget() {
         if (event.key === "Escape") hide()
       }}
     >
-      <span className={styles.label}>Spravovat web</span>
+      <span className={styles.label}>{t("manage.label")}</span>
 
       {/* A plain anchor, not next/link. The Studio is a different application
           under the same build — it declares `studioChrome()` and throws away
@@ -123,10 +139,10 @@ export default function ManageWidget() {
           the client-side one this comment just argued against. The attribute is
           that component's own documented opt-out. */}
       <a className={styles.open} href="/studio" data-no-veil>
-        Otevřít Studio
+        {t("manage.open")}
       </a>
 
-      <button type="button" className={styles.hide} onClick={hide} aria-label="Skrýt do konce návštěvy">
+      <button type="button" className={styles.hide} onClick={hide} aria-label={t("manage.hide")}>
         <svg viewBox="0 0 12 12" width="11" height="11" aria-hidden="true" focusable="false">
           <path d="M2.5 2.5l7 7M9.5 2.5l-7 7" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         </svg>

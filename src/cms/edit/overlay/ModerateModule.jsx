@@ -1,15 +1,15 @@
 import { useState } from "react"
 
-import { usePort, useRevision } from "@/cms/studio/context/StudioProvider"
-import { useToast } from "@/cms/studio/context/ToastProvider"
-import { useAsync } from "@/cms/studio/hooks/useAsync"
-import { bodyOf, isArchived } from "@/cms/studio/lib/documents"
-import { formatRelative } from "@/cms/studio/lib/format"
-import { withdrawOutcome } from "@/cms/studio/lib/publishing"
-import { Button } from "@/cms/studio/ui/controls"
-import { ErrorState, Spinner } from "@/cms/studio/ui/feedback"
+import { usePort, useRevision } from "../../studio/context/StudioProvider.jsx"
+import { useToast } from "../../studio/context/ToastProvider.jsx"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { bodyOf, isArchived } from "../../studio/lib/documents.js"
+import { formatRelative } from "../../studio/lib/format.js"
+import { withdrawOutcome } from "../../studio/lib/publishing.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
 
-import styles from "./sheet"
+import styles from "./sheet.js"
 
 /**
  * A review, on the page — moderated, not edited.

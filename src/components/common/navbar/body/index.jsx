@@ -11,6 +11,7 @@ import CornerMarks from '@/components/common/ui/CornerMarks'
 import PixelReveal from '@/components/common/ui/PixelReveal'
 import { CURTAIN } from '@/components/common/ui/entrance'
 import { NavPages, NavAddLinks, NavIcons } from '@/constants/common'
+import { editableIn, interactive, surfaceRoot } from '@/cms/edit'
 
 // The menu.
 //
@@ -457,7 +458,29 @@ const useOfficeClock = () => {
     return time;
 };
 
-export default function NavbarBody({ setMenu, onSheet, roster }) {
+/**
+ * Podtext z CMS na dané pozici, jinak ten z kódu.
+ *
+ * Pozice, ne klíč: v bloku `global.navbar` je osm položek a spojuje je s
+ * dlaždicemi jedině pořadí. Adresa (`href`, `modal`) ani název dlaždice v CMS
+ * nejsou — název je jméno routy a `Kontakt` dokonce žádnou adresu nemá, otevírá
+ * list. Upravuje se jedině podtext.
+ *
+ * Prázdný řetězec se bere jako „nic nenapsáno" a vrací se záloha z kódu:
+ * vymazané pole ve Studiu nesmí vyrobit dlaždici s prázdným řádkem pod názvem.
+ */
+const textAt = (items, index, key, zaloha) => {
+    const value = items?.[index]?.[key]
+    return (typeof value === 'string' && value.trim()) || zaloha
+}
+
+export default function NavbarBody({ setMenu, onSheet, roster, copy = null, studioView = null, studioRoot = null }) {
+    // `copy` je blok `global.navbar`; `doc` je jeho dokument, aby šlo klikat.
+    const navDoc = copy?.id || null
+    const navItems = copy?.items || []
+    // Dokument zadaný jednou, ne u každé anotace zvlášť. Mimo Studio je `navDoc`
+    // null a `edit(...)` vrací prázdný objekt, takže se na web nerozprostře nic.
+    const edit = editableIn(navDoc)
     const pathname = usePathname();
     const time = useOfficeClock();
     const calm = useReducedMotion();
@@ -491,6 +514,15 @@ export default function NavbarBody({ setMenu, onSheet, roster }) {
     // Which of the two the panel is showing. The roster is not a second panel;
     // it is this one, larger, with different contents.
     const [view, setView] = useState('menu');
+
+    // Studio si vybralo povrch „Menu — poradci". Přes efekt, ne přes počáteční
+    // hodnotu: `useStudioSurface` vrací při prvním renderu vždycky `false`, aby
+    // se serverové HTML a to klientské shodly, takže v `useState` by se ta
+    // volba nikdy neprojevila. Editor si mezitím může přepnout zpátky na menu
+    // a tohle mu do toho nesahá — proto závislost na `studioView`, ne na `view`.
+    useEffect(() => {
+        if (studioView) setView(studioView);
+    }, [studioView]);
 
     // Whether the panel's own arrival is behind it. Read while rendering rather
     // than kept in state: nothing should re-render because this flipped, it only
@@ -580,6 +612,12 @@ export default function NavbarBody({ setMenu, onSheet, roster }) {
 
             <motion.div
                 id="navPanel"
+                // Hranice výběru — TADY, ne na závoji nad tím. Závoj je sourozenec
+                // panelu, ne jeho předek, a kořen na něm uzavřel výběr do prázdna:
+                // změřeno, nula z dvanácti karet a nula z osmi dlaždic uvnitř.
+                // Tenhle prvek drží `navPanel__frame` a v něm mřížku i stěnu
+                // poradců, takže oba povrchy končí přesně u jeho okraje.
+                {...surfaceRoot(studioRoot)}
                 className="navPanel"
                 animate={(shortLaptop ? SIZE_SHORT : SIZE)[view]}
                 transition={calm
@@ -632,6 +670,17 @@ export default function NavbarBody({ setMenu, onSheet, roster }) {
                         // On touch the pointer "leaves" the moment the finger
                         // lifts, which would close the box the tap just opened.
                         onPointerLeave={() => { if (!touch) setHovered(-1); }}
+                        // Žádná anotace seznamu tady NENÍ, a je to podstatné.
+                        //
+                        // Stála tu, a byla to chyba: `editableList` na obalu
+                        // znamená, že klik kamkoli dovnitř je klik na ten seznam,
+                        // takže se místo úpravy podtextu na místě otevřel formulář
+                        // se všemi osmi. Překryv hledá prvky geometricky a tenhle
+                        // obal je přes celou mřížku — přebil tím každou dlaždici
+                        // pod sebou.
+                        //
+                        // Potřeba nebyla ani k ničemu: `editable` na každém
+                        // podtextu nese id dokumentu samo.
                     >
                         {NavPages.map((item, index) => {
                             const area = AREAS[index];
@@ -714,6 +763,12 @@ export default function NavbarBody({ setMenu, onSheet, roster }) {
                                     animate="enter"
                                     exit="exit"
                                     onPointerEnter={() => { if (!touch) setHovered(index); }}
+                                    // Ve Studiu zůstává dlaždice živá: bez toho
+                                    // se k ní nedostane hover, který ji rozbaluje,
+                                    // a editor vidí sedm zavřených dlaždic a jednu
+                                    // otevřenou — tu, na které zrovna stojí.
+                                    // Odkaz uvnitř se přitom nikam nevydá.
+                                    {...interactive()}
                                 >
                                     <Inner
                                         {...innerProps}
@@ -776,9 +831,21 @@ export default function NavbarBody({ setMenu, onSheet, roster }) {
                                         </span>
 
                                         <span className="navPanel__foot">
+                                            {/* Jméno stránky, z kódu. Bez `editable`
+                                                schválně: je to název routy, ne
+                                                text — a `Kontakt` dokonce nevede
+                                                na adresu, ale otevírá list.
+                                                Upravovat se dá podtext pod ním. */}
                                             <span className="navPanel__label">{item.text}</span>
+                                            {/* `aria-hidden` zůstává: popisek je
+                                                pro oko, čtečka dostane název výš.
+                                                Upravit se dá i tak — překryv
+                                                Studia hledá prvky myší, ne
+                                                přístupnostním stromem. */}
                                             <span className="navPanel__note" aria-hidden="true">
-                                                <span>{item.note}</span>
+                                                <span {...edit(`items.${index}.value`)}>
+                                                    {textAt(navItems, index, 'value', item.note)}
+                                                </span>
                                             </span>
                                         </span>
                                     </Inner>
