@@ -39,7 +39,7 @@ import { setEditMode } from "./mode.js"
  * so nothing is set and nothing re-renders.
  */
 export function useEditArming() {
-  const [, setArmed] = useState(false)
+  const [armed, setArmed] = useState(false)
 
   useEffect(() => {
     // Both halves of Contract 0: `?edit=1` claims it, being framed by the
@@ -54,6 +54,13 @@ export function useEditArming() {
       setEditMode(false)
     }
   }, [])
+
+  // Vrací se schválně. Zapnutí příznaku samo o sobě nestačí: anotace se
+  // počítají při renderu a komponenta, kterou po zapnutí nikdo nepřekreslí,
+  // zůstane s prázdným objektem z prvního průchodu. Kdo tenhle hook volá, má
+  // tím pádem v ruce okamžik, kdy musí strom pod sebou donutit k novému
+  // renderu — viz withStudio.jsx, kde se to dělá přemountováním.
+  return armed
 }
 
 export default useEditArming

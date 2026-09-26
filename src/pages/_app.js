@@ -83,7 +83,13 @@ export default function App({ Component, pageProps, router }) {
 
 /** The managed site: everything a visitor gets, on every route that is one. */
 function SiteShell({ Component, pageProps }) {
-  useEditArming();
+  // Vrácená hodnota je důležitá: anotace se počítají při renderu a po zapnutí
+  // musí každá anotovaná komponenta projít renderem ZNOVU. Změna stavu tady
+  // k nim nemusí doletět — `React.memo` po cestě nebo React Compiler, který
+  // `<Component key={armed ? 'valecms-armed' : 'valecms-site'} {...pageProps} />` memoizuje sám, ji zastaví (změřeno na
+  // Sabině s `reactCompiler: true`: nula anotací). Proto níž `key`: jiný klíč
+  // stránku přemountuje a to nejde obejít ničím. Jednou, jen v rámu Studia.
+  const armed = useEditArming();
   // Které hodnoty shaderu platí pro tuhle obrazovku — svisle na dotyku jedna
   // sada, všude jinde druhá. Sledování orientace i obě sady jsou v
   // NeuralTunnel/presets; tady se jen dosadí.

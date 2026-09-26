@@ -25,7 +25,7 @@ import { useEffect } from "react"
  * out of the one render whose entire job is to be faithful.
  *
  * So the declaration lives on the **page component**, and the two directions
- * are deliberately unequal:
+ * are deliberately unequal: a
  *
  *   - the default is the site shell. A route that declares nothing is a page of
  *     the site, which is what a route is unless someone went out of their way.

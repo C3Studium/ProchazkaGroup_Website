@@ -41,7 +41,7 @@ export function withStudio(App, options = {}) {
 
     return function ValeCmsApp(props) {
         const router = useRouter()
-        useEditArming()
+        const armed = useEditArming()
 
         // Studio má vlastní chrome a vlastní stránku. Hostitelský `App` se
         // proto přeskočí úplně.
@@ -60,7 +60,25 @@ export function withStudio(App, options = {}) {
                     Studiu — jinak by opona zakryla to, co se upravuje. */}
                 <StudioMotionGuard />
                 {chrome.map((Item, i) => <Item key={i} />)}
-                <App {...props} />
+                {/* `key` podle zapnutí, a je to jádro věci.
+
+                    Anotace (`editable`, `editableIn`) se počítají při renderu
+                    a před zapnutím vracejí prázdno — první klientský render
+                    se musí shodovat se serverovým. Po zapnutí je tedy třeba
+                    každou anotovanou komponentu vykreslit ZNOVU. Změna stavu
+                    tady nahoře k nim ale nemusí doletět: stačí `React.memo`
+                    kdekoli po cestě, nebo React Compiler, který
+                    `<Component {...pageProps} />` v projektovém `_app`
+                    memoizuje sám — a stránka se nepřekreslí vůbec. Změřeno
+                    na projektu s `reactCompiler: true`: `App` se po zapnutí
+                    vykreslil dvakrát, stránka ani jednou, anotací nula.
+
+                    Jiný `key` přemountuje celý web, a přemountování nejde
+                    obejít ani memem, ani kompilátorem. Stane se jednou, jen
+                    v rámu Studia (`armed` je mimo něj napořád `false`),
+                    a v rámu preloader i přechody drží StudioMotionGuard,
+                    takže druhý mount není vidět. */}
+                <App key={armed ? 'valecms-armed' : 'valecms-site'} {...props} />
                 <ManageBadge />
             </>
         )
