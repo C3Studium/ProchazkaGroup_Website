@@ -29,12 +29,12 @@ export const UPRIGHT = Object.freeze({
     bands: 3,
     phase: 6,
     spread: 0,
-    gamut: 0.1,
+    gamut: 0.4,
     contrast: 2.5,
     vignette: 1,
     opacity: 1,
     color: "#020e15",
-    hotColor: "#98dbf8",
+    hotColor: "#45c1ca",
     backgroundColor: "#020e15",
     cursorInteraction: false
 });
@@ -81,13 +81,13 @@ export const LANDSCAPE = Object.freeze({
     bands: 3,
     phase: 6,
     spread: 0,
-    gamut: 0.35,
-    contrast: 1.25,
+    gamut: 0.15,
+    contrast: 2.5,
     vignette: 0.5,
     opacity: 1,
     color: "#071a30",
-    hotColor: "#5cc7ef",
-    backgroundColor: "#5cc7ef",
+    hotColor: "#45c1ca",
+    backgroundColor: "#45c1ca",
     cursorInteraction: false
 });
 
