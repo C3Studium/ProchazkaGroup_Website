@@ -7,6 +7,8 @@ import { useRef, useState } from "react";
 import { AnimatePresence, motion, useTransform } from "framer-motion";
 import DialPrefix from "@/components/common/ui/DialPrefix";
 import { DEFAULT_DIAL } from "@/cms/dialPrefixes";
+import useFormSubmit from "@/hooks/useFormSubmit";
+import { toast } from "sonner";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { editable, editableList, editableLink } from "@/cms/edit";
 
@@ -179,6 +181,66 @@ export default function QnaContact({ copy = {} }) {
 
     const [mode, setMode] = useState("qna"); // "qna" | "kontakt"
     const [activeQuestion, setActiveQuestion] = useState(0);
+    // Které téma je vybrané, nebo žádné. Ta tlačítka byla dekorace — kreslila
+    // se, nedala se zmáčknout a do e-mailu by nic neposlala.
+    const [topic, setTopic] = useState(null);
+
+    // Odeslání. Stejná šablona jako kontaktní arch v liště: obojí je „někdo
+    // nám píše". Schránku zná server — viz @/lib/mail/forms.
+    const { send, sending } = useFormSubmit("kontakt");
+
+    // Pole jsou nekontrolovaná a čtou se z FormData.
+    //
+    // Schválně: `textarea` se otevírá textem z CMS (`defaultValue={form.message}`)
+    // a převést ji na kontrolovanou by znamenalo nasadit ten text do stavu —
+    // tedy odeslat ukázkový odstavec jako zprávu každému, kdo ho nepřepsal.
+    // FormData čte, co ve polích doopravdy stojí.
+    const onSubmit = async (event) => {
+        event.preventDefault();
+
+        // Prvek se drží v proměnné, ne v `event.currentTarget`. React ho po
+        // skončení synchronní části handleru vynuluje, takže sáhnout na něj až
+        // za `await` je `null` a `reset()` na konci by spadlo.
+        const element = event.currentTarget;
+        const fields = new FormData(element);
+        const value = (name) => String(fields.get(name) || "").trim();
+
+        const name = value("name");
+        const email = value("email");
+
+        if (!name || !email) {
+            toast.error("Vyplňte prosím jméno a e-mail.");
+            return;
+        }
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+            toast.error("Zkontrolujte prosím e-mailovou adresu.");
+            return;
+        }
+
+        // Předmět a téma do jedné řádky: šablona má jedno pole na „čeho se to
+        // týká" a dvě hodnoty do něj patří obě.
+        const subject = [value("subject"), topic === null ? "" : form.topics[topic]]
+            .filter(Boolean)
+            .join(" — ");
+
+        const result = await send({
+            name,
+            email,
+            dial: value("dial"),
+            phone: value("phone"),
+            consultant: subject,
+            message: value("message"),
+        });
+
+        if (!result.ok) {
+            toast.error(result.error);
+            return;
+        }
+
+        toast.success("Děkujeme, zprávu jsme přijali. Ozveme se vám.");
+        element.reset();
+        setTopic(null);
+    };
     const direction = mode === "qna" ? 1 : -1;
 
     const sectionRef = useRef(null);
@@ -326,9 +388,11 @@ export default function QnaContact({ copy = {} }) {
                             </div>
                         </motion.div>
                     ) : (
-                        <motion.div
+                        <motion.form
                             key="kontakt"
                             className="QnaContact__panel QnaContact__panel--kontakt"
+                            onSubmit={onSubmit}
+                            noValidate
                             custom={direction}
                             variants={panelVariants}
                             initial="initial"
@@ -399,7 +463,11 @@ export default function QnaContact({ copy = {} }) {
                                                 key={index}
                                                 {...editable(formDoc, `items.${6 + index}.label`, "text")}
                                                 type="button"
-                                                className="topic"
+                                                className={`topic${topic === index ? " is-active" : ""}`}
+                                                aria-pressed={topic === index}
+                                                /* Druhý klik na vybrané téma ho odvybere: je to
+                                                   nepovinný údaj a jinak by nešel vzít zpátky. */
+                                                onClick={() => setTopic((current) => (current === index ? null : index))}
                                                 data-cursor="frame"
                                             >
                                                 <Corners />
@@ -441,16 +509,17 @@ export default function QnaContact({ copy = {} }) {
                                     </MoreLink>
                                     <button
                                         {...editable(formDoc, "items.15.label", "text")}
-                                        type="button"
+                                        type="submit"
                                         className="QnaContact__send"
                                         data-cursor="frame"
+                                        disabled={sending}
                                     >
                                         <Corners />
                                         {form.submit}
                                     </button>
                                 </div>
                             </div>
-                        </motion.div>
+                        </motion.form>
                     )}
 
                 </AnimatePresence>

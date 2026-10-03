@@ -9,6 +9,7 @@ import { RiMapPinLine, RiThumbUpLine, RiChat3Line, RiPhoneLine } from "@remixico
 import DialPrefix from "@/components/common/ui/DialPrefix";
 import Dropdown from "@/components/common/ui/Dropdown";
 import { DEFAULT_DIAL } from "@/cms/dialPrefixes";
+import useFormSubmit from "@/hooks/useFormSubmit";
 import { useSectionProgress } from "@/hooks/useSectionProgress";
 import { EXTERNAL_CLASS } from "@/components/common/ui/externalLink";
 import { usePhoneAny } from "@/helpers/usePhone";
@@ -176,7 +177,11 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
     const set = (field) => (event) =>
         setValues((prev) => ({ ...prev, [field]: event.target.value }));
 
-    const onSubmit = (event) => {
+    // Odeslání. Šablonu („zájem o služby") i schránku zná server — tenhle
+    // formulář o adrese neví nic. Viz @/lib/mail/forms.
+    const { send, sending } = useFormSubmit("zajem");
+
+    const onSubmit = async (event) => {
         event.preventDefault();
 
         const missing = REQUIRED.filter(([field]) => !values[field].trim());
@@ -195,15 +200,29 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
             return;
         }
 
-        // TODO: the send. `useResend` posts { template, to, data } to
-        // /api/resend, but which template and which mailbox is a content
-        // decision, not one to guess at — so the form validates and stops here
-        // rather than telling anyone their message went somewhere it did not.
-        //
-        // Telefon do zprávy složit přes `fullPhoneNumber(values.dial, values.phone)`
-        // z @/cms/dialPrefixes — předvolba je vlastní pole a do e-mailu
-        // musí jít s číslem, ne vedle něj.
-        toast.error("Odesílání formuláře zatím není napojené.");
+        // Jméno vybraného poradce jede s tím: na druhé straně má někdo
+        // zavolat, a „komu to patří" je u tohohle formuláře ta nejdůležitější
+        // řádka. Předvolbu s číslem skládá server (@/lib/mail/forms) — skládat
+        // ji tady by znamenalo věřit hodnotě od toho, kdo ji poslal.
+        const result = await send({
+            name: values.name,
+            email: values.email,
+            dial: values.dial,
+            phone: values.phone,
+            timeFrom: values.timeFrom,
+            timeTo: values.timeTo,
+            consultant: active?.name || "",
+        });
+
+        if (!result.ok) {
+            toast.error(result.error);
+            return;
+        }
+
+        toast.success("Děkujeme, poptávku jsme přijali. Ozveme se vám.");
+        // Předvolba zůstává na tom, co měl člověk vybrané: je to jeho země,
+        // ne hodnota formuláře.
+        setValues({ ...EMPTY, dial: values.dial });
     };
 
     // The two column rules carry on from ReviewsPreview above (31vw and 65vw),
@@ -391,6 +410,7 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                         className="cornerButton ChooseAdvisor__submit"
                         variants={RISE}
                         data-cursor="frame"
+                        disabled={sending}
                     >
                         <span className="corner corner--tl" />
                         <span className="corner corner--tr" />

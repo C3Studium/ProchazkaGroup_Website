@@ -85,6 +85,11 @@ export const CONTACT_NOTICES = Object.freeze({
     missing: 0,
     badEmail: 1,
     notWired: 2,
+    // Pripojene na konec, ne vlozene tam, kde se ctou. Jsou to pozice v poli,
+    // ktere uz editor vyplnil: dat "sent" index 2 by posunulo notWired o jeden
+    // a list by po odeslani rekl neco jineho, nez tam kdo napsal.
+    sent: 3,
+    failed: 4,
 })
 
 /**

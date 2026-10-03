@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
+import { notifyForm } from "@/hooks/useFormSubmit";
 // Hlášky obou formulářů recenzí jsou jeden blok (`recenze.hlasky`) — obě routy
 // posílají recenzi stejnou cestou. Čtečka bydlí u toho formuláře, který ji
 // potřeboval první; druhá kopie by byla druhé místo, kde se dá změnit jen jedno.
@@ -145,6 +146,12 @@ export default function AdvisorCard({ advisor, copy = {}, notices = null }) {
                 }),
             });
             if (!res.ok) throw new Error(String(res.status));
+            // Uložená recenze je ta akce; e-mail je zpráva o ní.
+            notifyForm("recenze", {
+                customerName: values.customerName,
+                consultantName: advisor.name,
+                message: values.message,
+            });
             setWritten(values.message);
             setSent(true);
         } catch {

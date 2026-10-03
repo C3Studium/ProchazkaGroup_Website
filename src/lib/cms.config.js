@@ -1800,6 +1800,8 @@ export default defineSite({
             //   items[0]  chybí povinné pole
             //   items[1]  e-mail nevypadá jako e-mail
             //   items[2]  co list řekne, dokud odesílání není napojené
+            //   items[3]  zpráva odešla
+            //   items[4]  odeslání selhalo
             defineBlock({
                 at: 'contactNotices',
                 key: CONTACT_NOTICE_KEY,
@@ -1808,6 +1810,8 @@ export default defineSite({
                     missing: f.label(CONTACT_NOTICES.missing),
                     badEmail: f.label(CONTACT_NOTICES.badEmail),
                     notWired: f.label(CONTACT_NOTICES.notWired),
+                    sent: f.label(CONTACT_NOTICES.sent),
+                    failed: f.label(CONTACT_NOTICES.failed),
                 },
             }),
             // Panel hlavního menu.

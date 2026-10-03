@@ -8,6 +8,7 @@ import { AnimatePresence, cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
 import DialPrefix from "@/components/common/ui/DialPrefix";
 import { DEFAULT_DIAL } from "@/cms/dialPrefixes";
+import useFormSubmit from "@/hooks/useFormSubmit";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import MoreLink from "@/components/common/ui/MoreLink";
 import Arrow from "@/components/common/ui/Arrow";
@@ -51,7 +52,12 @@ const FALLBACK = {
     notices: {
         missing: "Vyplňte prosím jméno, e-mail a telefon.",
         badEmail: "Zkontrolujte prosím e-mailovou adresu.",
+        // Zůstává, i když je odesílání napojené: je to hláška pro web, který
+        // nemá nastavené odesílání (chybí klíč nebo schránka), a trasa na to
+        // odpovídá 503. Viz /api/forms.
         notWired: "Odesílání formuláře zatím není napojené.",
+        sent: "Děkujeme, zprávu jsme přijali. Ozveme se vám.",
+        failed: "Zprávu se nepodařilo odeslat. Zkuste to prosím znovu.",
     },
 };
 
@@ -149,6 +155,8 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
     const [values, setValues] = useState({
         name: "", email: "", phone: "", dial: DEFAULT_DIAL, timeFrom: "", timeTo: "", message: "",
     });
+    // Odeslání. Šablonu i schránku zná server — viz @/lib/mail/forms.
+    const { send, sending } = useFormSubmit("kontakt");
 
     useEffect(() => {
         const mq = window.matchMedia(MQ_PHONE);
@@ -279,7 +287,7 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
 
     const set = (key) => (e) => setValues((v) => ({ ...v, [key]: e.target.value }));
 
-    const onSubmit = (event) => {
+    const onSubmit = async (event) => {
         event.preventDefault();
         if (!values.name.trim() || !values.email.trim() || !values.phone.trim()) {
             toast.error(noticeAt(copy, "missing"));
@@ -289,16 +297,30 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
             toast.error(noticeAt(copy, "badEmail"));
             return;
         }
-        // Stops in the same place the home page's CTA stops, and deliberately:
-        // `useResend` wants a template name and a mailbox that nobody has given
-        // yet. See TODO.md. Inventing a destination here would be worse than
-        // saying so.
-        //
-        // Až se odesílání napojí: telefon do zprávy patří jako
-        // `fullPhoneNumber(values.dial, values.phone)` z @/cms/dialPrefixes.
-        // `values.dial` a `values.phone` jsou dvě pole, protože to jsou dvě pole —
-        // ale číslo bez předvolby je číslo, na které se nedá zavolat.
-        toast.error(noticeAt(copy, "notWired"));
+
+        // Předvolba a číslo jdou zvlášť a server je složí (`joinPhone`
+        // v @/lib/mail/forms) — skládat to tady by znamenalo, že téhle
+        // hodnotě věří ten, kdo ji poslal.
+        const result = await send({
+            name: values.name,
+            email: values.email,
+            dial: values.dial,
+            phone: values.phone,
+            timeFrom: values.timeFrom,
+            timeTo: values.timeTo,
+            message: values.message,
+        });
+
+        if (!result.ok) {
+            toast.error(result.error);
+            return;
+        }
+
+        toast.success(noticeAt(copy, "sent"));
+        // Arch zůstane otevřený a prázdný. Zavřít ho pod rukou člověku, který
+        // právě odeslal, je pohyb, který nikdo nežádal — a prázdná pole jsou
+        // samy dost zřetelná zpráva o tom, že se to povedlo.
+        setValues({ name: "", email: "", phone: "", dial: values.dial, timeFrom: "", timeTo: "", message: "" });
     };
 
     if (!mounted) return null;
@@ -569,6 +591,11 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
                                             type="submit"
                                             className="cornerButton ContactModal__submit"
                                             data-cursor="frame"
+                                            // Dvojklik neposílá dvě zprávy.
+                                            // Hook si to hlídá i sám, protože
+                                            // `disabled` dorazí až po
+                                            // překreslení a prst je rychlejší.
+                                            disabled={sending}
                                         >
                                             <span className="corner corner--tl" />
                                             <span className="corner corner--tr" />

@@ -203,6 +203,8 @@ export const getContactContent = async ({ draft = false, at = null } = {}) => {
             missing: labelsAt(notices, CONTACT_NOTICES.missing, 1)[0],
             badEmail: labelsAt(notices, CONTACT_NOTICES.badEmail, 1)[0],
             notWired: labelsAt(notices, CONTACT_NOTICES.notWired, 1)[0],
+            sent: labelsAt(notices, CONTACT_NOTICES.sent, 1)[0],
+            failed: labelsAt(notices, CONTACT_NOTICES.failed, 1)[0],
         },
     }
 }
