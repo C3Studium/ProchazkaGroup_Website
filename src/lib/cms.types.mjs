@@ -27,11 +27,13 @@ import consultant from '@/content/types/consultant'
 import offer from '@/content/types/offer'
 import partner from '@/content/types/partner'
 import qna from '@/content/types/qna'
+import news from '@/content/types/news'
+import newsWidget from '@/content/types/newsWidget'
 
 // `uiText` je slovník klíč → text: popisky tlačítek, hlášky, texty v modálech.
 // Nejsou to bloky stránky, a proto mají vlastní typ — viz VALECMS/docs/I18N.md,
 // oddíl 6.
-export const types = [siteCopy, uiText, partner, consultant, assistant, review, offer, qna]
+export const types = [siteCopy, uiText, partner, consultant, assistant, review, offer, qna, news, newsWidget]
 
 /**
  * Who a review is about.

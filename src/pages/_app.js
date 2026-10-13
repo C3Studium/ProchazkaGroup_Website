@@ -54,6 +54,9 @@ const Cursor = dynamic(() => import("@/components/common/ui/Cursor"), {
 // Pravítko u pravého okraje: kde na stránce jsme, a dá se na něj kliknout.
 // Klientsky ze stejného důvodu jako kurzor — než se vykreslí, musí vědět, jestli
 // je tu vůbec ukazovátko, a na to se serveru zeptat nedá.
+// Okno novinek — jen v prohlížeči a až po načtení: data si bere samo
+// z /api/news a do serverového HTML nemá co přispět.
+const NewsWidget = dynamic(() => import("@/components/common/NewsWidget"), { ssr: false });
 const ScrollRail = dynamic(() => import("@/components/common/ui/ScrollRail"), {
     ssr: false,
 });
@@ -261,6 +264,7 @@ function SiteShell({ Component, pageProps }) {
                 rather than under it, and outside <Component> so switching pages
                 does not remount it. */}
             <ManageBadge />
+            <NewsWidget />
             <Toaster position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
           </CursorRefProvider>
         </LoadProvider>
