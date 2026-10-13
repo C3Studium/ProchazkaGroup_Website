@@ -21,6 +21,7 @@
 import { assertServer, bootstrapAdmin, siteUrl } from './env.js'
 import site from '../site/config.js'
 import { getAdminClient } from './supabaseAdmin.js'
+import { effectiveMailSender } from './settings.js'
 
 const optional = (name) => String(process.env[name] || '').trim()
 
@@ -37,19 +38,18 @@ const optional = (name) => String(process.env[name] || '').trim()
  * Volba, ne přepínač instalátoru: `--mail=no` se dal zvolit jednou a pak už
  * nešel vzít zpátky jinak než mazáním proměnných.
  */
-export const hasSender = () =>
-    site?.mail !== false && Boolean(optional('RESEND_API_KEY') && senderAddress())
+export const hasSender = async () =>
+    site?.mail !== false && Boolean(optional('RESEND_API_KEY') && (await senderAddress()))
 
 /**
  * Adresa, ze které se odesílá.
  *
- * Dvě proměnné, jedna odpověď. `CMS_MAIL_FROM` je to, co do .env.local zapisuje
- * instalátor (install/choices.mjs) — a do této opravy ji NIC nečetlo, takže
- * čerstvě nainstalovaný web s vyplněnou poštou stejně nic neposlal.
- * `RESEND_FROM_EMAIL` zůstává pro weby, které sdílejí odesílatele s vlastními
- * formuláři (viz src/pages/api/resend.js) a proměnnou už mají.
+ * Nastavuje ji majitel ve Studiu (Nastavení → E-maily, řádek `mail.sender`
+ * v `cms_setting`). Dokud tam nic není, platí prostředí: `CMS_MAIL_FROM`, které
+ * zapisuje instalátor, nebo `RESEND_FROM_EMAIL`, které sdílí formuláře webu.
+ * Pořadí a důvody drží server/settings.js, `effectiveMailSender`.
  */
-export const senderAddress = () => optional('CMS_MAIL_FROM') || optional('RESEND_FROM_EMAIL')
+export const senderAddress = () => effectiveMailSender()
 
 /**
  * Adresa webu, na kterou vedou odkazy v e-mailech.
@@ -85,7 +85,7 @@ export const studioUrl = () => `${mailSiteUrl()}/studio`
 export const sendInvite = async ({ to, name, role, invitedBy, password }) => {
     assertServer('sendInvite')
 
-    if (!hasSender()) return { sent: false, reason: 'no-sender' }
+    if (!(await hasSender())) return { sent: false, reason: 'no-sender' }
     if (!to) return { sent: false, reason: 'no-address' }
 
     try {
@@ -110,7 +110,7 @@ export const sendInvite = async ({ to, name, role, invitedBy, password }) => {
 
         const resend = new Resend(optional('RESEND_API_KEY'))
         const { error } = await resend.emails.send({
-            from: senderAddress(),
+            from: await senderAddress(),
             to,
             subject: template.subject,
             html,
@@ -176,7 +176,7 @@ export const staffRecipients = async (exclude = '') => {
 export const sendDigest = async ({ period, published, reviewsNew, reviewsPending, mediaAdded }) => {
     assertServer('sendDigest')
 
-    if (!hasSender()) return { sent: 0, reason: 'no-sender' }
+    if (!(await hasSender())) return { sent: 0, reason: 'no-sender' }
 
     try {
         const to = await staffRecipients()
@@ -194,7 +194,7 @@ export const sendDigest = async ({ period, published, reviewsNew, reviewsPending
 
         const resend = new Resend(optional('RESEND_API_KEY'))
         const { error } = await resend.emails.send({
-            from: senderAddress(),
+            from: await senderAddress(),
             to,
             subject: template.subject({ period }),
             html,
@@ -221,7 +221,7 @@ export const sendDigest = async ({ period, published, reviewsNew, reviewsPending
 export const sendUpdateNotice = async ({ what, typeTitle, who, actorEmail, pages }) => {
     assertServer('sendUpdateNotice')
 
-    if (!hasSender()) return { sent: 0, reason: 'no-sender' }
+    if (!(await hasSender())) return { sent: 0, reason: 'no-sender' }
 
     try {
         const to = await staffRecipients(actorEmail)
@@ -240,7 +240,7 @@ export const sendUpdateNotice = async ({ what, typeTitle, who, actorEmail, pages
 
         const resend = new Resend(optional('RESEND_API_KEY'))
         const { error } = await resend.emails.send({
-            from: senderAddress(),
+            from: await senderAddress(),
             to,
             subject: template.subject({ what }),
             html,

@@ -310,3 +310,158 @@ export const writeSiteLanguages = async (actor, patch) => {
 
     return value
 }
+
+/* ---------------------------------------------------- odesílatel e-mailů --- */
+//
+// Z jaké adresy chodí pozvánky, přehledy a e-maily z formulářů webu.
+//
+// V databázi, a ne jen v prostředí, ze stejného důvodu jako jazyky: adresa
+// není tajemství a mění ji majitel, ne programátor. Proměnná prostředí
+// (`CMS_MAIL_FROM`, dřív `RESEND_FROM_EMAIL`) zůstává jako záloha — platí,
+// dokud ve Studiu nikdo nic neuložil, a taky když databáze neodpoví. Web, který
+// dnes posílá z prostředí, proto posílá dál, i když na tuhle obrazovku nikdo
+// nesáhne.
+//
+// Klíč k Resendu (`RESEND_API_KEY`) sem nepatří a nikdy nebude: je to tajemství
+// a to v tomhle souboru nežije v databázi ani na obrazovce.
+//
+// Adresa musí být na doméně ověřené v Resendu, jinak ji Resend odmítne a
+// neodejde nic. Ověřuje se to proto už při uložení (`verifiedDomains`), ne až
+// při první pozvánce, která by tiše skončila jako neodeslaná.
+
+export const MAIL_SENDER_KEY = 'mail.sender'
+
+const envValue = (name) => String(process.env[name] || '').trim()
+
+/** Odesílatel z prostředí, nebo prázdný řetězec. */
+export const envMailSender = () => envValue('CMS_MAIL_FROM') || envValue('RESEND_FROM_EMAIL')
+
+const EMAIL = /^[^\s@<>",]+@[^\s@<>",]+\.[^\s@<>",]+$/
+
+/** `{ address, name }` → tvar, který čte Resend: `Jméno <adresa>`, nebo jen adresa. */
+export const formatSender = ({ address, name } = {}) => {
+    if (!address) return ''
+    // Uvozovky a lomené závorky by rozbily hlavičku From; jméno je jen popisek.
+    const clean = String(name || '').replace(/["<>\r\n]/g, '').trim()
+    return clean ? `${clean} <${address}>` : address
+}
+
+/** Holá adresa z `Jméno <adresa>` i z `adresa`. */
+export const senderAddressOf = (sender) => {
+    const text = String(sender || '').trim()
+    const match = text.match(/<([^>]+)>\s*$/)
+    return (match ? match[1] : text).trim()
+}
+
+const coerceSender = (value) => {
+    const address = String(value?.address || '').trim()
+    const name = String(value?.name || '').trim()
+    return EMAIL.test(address) ? { address, name } : null
+}
+
+/** Uložený odesílatel `{ address, name }`, nebo null. Selhání čtení = null. */
+export const readMailSender = async () => {
+    assertServer('readMailSender')
+    try {
+        const { data, error } = await getAdminClient()
+            .from(SETTING_TABLE)
+            .select('value')
+            .eq('key', MAIL_SENDER_KEY)
+            .maybeSingle()
+        if (error) throw new Error(error.message)
+        return coerceSender(data?.value)
+    } catch (failure) {
+        console.warn(`[cms] ${SETTING_TABLE}/${MAIL_SENDER_KEY} nelze přečíst, platí prostředí:`, failure.message)
+        return null
+    }
+}
+
+/**
+ * Odesílatel, se kterým se opravdu posílá: uložený ve Studiu, jinak z prostředí.
+ * Prázdný řetězec = není z čeho poslat.
+ */
+export const effectiveMailSender = async () => {
+    const stored = await readMailSender()
+    return stored ? formatSender(stored) : envMailSender()
+}
+
+/**
+ * Domény ověřené v Resendu, nebo null, když se to zjistit nedá.
+ *
+ * null není „žádná": klíč s oprávněním jen k odesílání seznam domén nevydá
+ * (Resend odpoví 401/403) a výpadek sítě taky není důvod odmítnout adresu.
+ * V tom případě se uloží bez kontroly a Nastavení to řekne.
+ */
+const verifiedDomains = async () => {
+    const key = envValue('RESEND_API_KEY')
+    if (!key) return null
+    try {
+        const response = await fetch('https://api.resend.com/domains', {
+            headers: { Authorization: `Bearer ${key}` },
+            signal: AbortSignal.timeout(5000),
+        })
+        if (!response.ok) return null
+        const body = await response.json()
+        const list = Array.isArray(body?.data) ? body.data : []
+        return list.filter((d) => d?.status === 'verified' && d?.name).map((d) => String(d.name).toLowerCase())
+    } catch {
+        return null
+    }
+}
+
+/** Co ukazuje Nastavení: uložená hodnota, záloha z prostředí a co z toho platí. */
+export const mailSenderView = async () => {
+    const stored = await readMailSender()
+    const env = envMailSender()
+    return {
+        stored,
+        env: env || null,
+        effective: stored ? formatSender(stored) : env || null,
+        source: stored ? 'studio' : env ? 'env' : null,
+        hasApiKey: Boolean(envValue('RESEND_API_KEY')),
+        domains: await verifiedDomains(),
+    }
+}
+
+/**
+ * Zápis. Prázdná adresa = smazat vlastní nastavení a vrátit se k prostředí.
+ * Jen pro majitele — kontroluje handler.
+ */
+export const writeMailSender = async (actor, patch) => {
+    assertServer('writeMailSender')
+
+    const address = String(patch?.address || '').trim()
+    const name = String(patch?.name || '').trim().slice(0, 80)
+
+    if (address) {
+        if (!EMAIL.test(address)) {
+            throw invalid('Adresa odesílatele není platný e-mail', [{ path: 'address', message: 'Zadejte e-mail, např. noreply@vasedomena.cz' }])
+        }
+        const domains = await verifiedDomains()
+        const domain = address.split('@')[1].toLowerCase()
+        if (domains && !domains.includes(domain)) {
+            throw invalid(
+                domains.length
+                    ? `Doména ${domain} není v Resendu ověřená. Ověřené: ${domains.join(', ')}.`
+                    : `Doména ${domain} není v Resendu ověřená a žádná jiná taky ne.`,
+                [{ path: 'address', message: `Použijte adresu na ověřené doméně${domains.length ? ` (${domains.join(', ')})` : ''}.` }],
+            )
+        }
+    }
+
+    // Vymazání se ukládá jako prázdná hodnota, ne smazáním řádku: souborové
+    // úložiště umí jen slovesa, která repozitář opravdu používá (viz jazyky).
+    const value = address ? { address, name } : { address: '', name: '' }
+    const stamp = { value, updated_by: actor?.id ?? null, updated_at: new Date().toISOString() }
+    const db = getAdminClient()
+
+    const existing = await db.from(SETTING_TABLE).select('key').eq('key', MAIL_SENDER_KEY).maybeSingle()
+    if (existing.error) throw serverError('Uložení odesílatele selhalo')
+
+    const { error } = existing.data
+        ? await db.from(SETTING_TABLE).update(stamp).eq('key', MAIL_SENDER_KEY)
+        : await db.from(SETTING_TABLE).insert({ key: MAIL_SENDER_KEY, ...stamp })
+    if (error) throw serverError('Uložení odesílatele selhalo')
+
+    return mailSenderView()
+}

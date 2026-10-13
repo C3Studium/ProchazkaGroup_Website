@@ -71,6 +71,7 @@ export default function SettingsView() {
   const sections = [
     isAdmin && { id: "prostredi", label: "Prostředí" },
     { id: "spravovat", label: "Odkaz na správu" },
+    { id: "posta", label: "E-maily" },
     { id: "jazyky", label: "Jazyky" },
     { id: "jazyk-studia", label: "Jazyk Studia" },
     isAdmin && { id: "pristup", label: "Veřejný přístup" },
@@ -91,7 +92,7 @@ export default function SettingsView() {
     <>
       <ViewHeader
         title="Nastavení"
-        subtitle={isAdmin ? "Co je v systému nastavené, kdo je přihlášený a co smí číst zvenčí." : "Jazyky webu, odkaz na správu a váš účet."}
+        subtitle={isAdmin ? "Co je v systému nastavené, kdo je přihlášený a co smí číst zvenčí." : "Jazyky webu, odkaz na správu, odesílání e-mailů a váš účet."}
       />
 
       <ViewToolbar>
@@ -111,6 +112,7 @@ export default function SettingsView() {
         <div className={styles.sections} ref={bodyRef}>
           {isAdmin ? <EnvironmentSection /> : null}
           <ManageWidgetSection />
+          <MailSenderSection />
           <LanguagesSection />
           <StudioLanguageSection />
           {isAdmin ? <ExposureSection /> : null}
@@ -439,6 +441,264 @@ function ManageWidgetSection() {
       ) : null}
     </Section>
   )
+}
+
+/* ----------------------------------------------------------- e-maily -- */
+
+/**
+ * Z jaké adresy chodí pozvánky do Studia, přehledy a e-maily z formulářů.
+ *
+ * Dvě adresy. Kam chodí zprávy z formulářů — to je pole v kartě asistentky,
+ * tady jen druhý vchod k němu (MailRecipientBlock). A odesílatel, ten
+ * „noreply@…" v hlavičce Od, stejný pro všechnu poštu. Resend je služba, přes
+ * kterou se odesílá; jeho klíč tu není, je tajný a zůstává v prostředí.
+ */
+function MailSenderSection() {
+  const port = usePort()
+  const toast = useToast()
+  const { data, error, loading, reload, setData } = useAsync(() => port.settings.mailSender.read(), [])
+  const [draft, setDraft] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [failure, setFailure] = useState(null)
+
+  const stored = data?.stored || { address: "", name: "" }
+  const value = draft || stored
+  const dirty = Boolean(draft) && (draft.address.trim() !== stored.address || draft.name.trim() !== stored.name)
+  const edit = (patch) => {
+    setFailure(null)
+    setDraft({ ...value, ...patch })
+  }
+
+  const save = async () => {
+    setSaving(true)
+    setFailure(null)
+    try {
+      const next = await port.settings.mailSender.save({ address: value.address.trim(), name: value.name.trim() })
+      setData(next)
+      setDraft(null)
+      toast.success(next.source === "studio" ? "Odesílatel uložen." : "Vlastní odesílatel smazán, platí hodnota z prostředí.")
+    } catch (caught) {
+      setFailure(caught?.message || "Uložení se nezdařilo.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const sourceBadge =
+    data?.source === "studio" ? (
+      <Badge tone="positive" dot>nastaveno ve Studiu</Badge>
+    ) : data?.source === "env" ? (
+      <Badge tone="neutral" dot>z prostředí serveru</Badge>
+    ) : (
+      <Badge tone="danger" dot>nenastaveno</Badge>
+    )
+
+  return (
+    <Section
+      id="posta"
+      title="E-maily"
+      hint="Kam chodí zprávy z formulářů webu a z jaké adresy odchází všechna pošta — pozvánky do Studia, přehledy i potvrzení zákazníkům."
+      action={<IconButton icon="refresh" label="Načíst znovu" onClick={reload} />}
+    >
+      {loading && !data ? (
+        <SkeletonRows count={2} height={44} />
+      ) : error ? (
+        <ErrorState error={error} onRetry={reload} compact />
+      ) : data ? (
+        <div className={styles.form}>
+          <MailRecipientBlock />
+
+          <div className={styles.facts}>
+            <Fact
+              wide
+              label="Odesílá se z"
+              value={data.effective ? <code>{data.effective}</code> : "—"}
+              note={sourceBadge}
+            />
+            {!data.hasApiKey ? (
+              <Fact
+                wide
+                label="Klíč k Resendu"
+                value={<Badge tone="danger" dot>chybí</Badge>}
+                tone="danger"
+                note="Bez klíče RESEND_API_KEY v prostředí serveru se neodešle nic, ať je tu nastaveno cokoli. Doplní ho správce webu."
+              />
+            ) : null}
+          </div>
+
+          <div className={styles.form}>
+            <FieldShell
+              label="Adresa odesílatele"
+              description={
+                data.domains?.length
+                  ? `Musí být na doméně ověřené v Resendu: ${data.domains.join(", ")}. Prázdné pole = hodnota z prostředí${data.env ? ` (${data.env})` : ""}.`
+                  : `Musí být na doméně ověřené v Resendu. Prázdné pole = hodnota z prostředí${data.env ? ` (${data.env})` : ""}.`
+              }
+            >
+              {(id) => (
+                <input
+                  id={id}
+                  type="email"
+                  className={styles.input}
+                  value={value.address}
+                  placeholder={data.env ? senderAddressOf(data.env) : "noreply@vasedomena.cz"}
+                  autoComplete="off"
+                  spellCheck={false}
+                  onChange={(event) => edit({ address: event.target.value })}
+                />
+              )}
+            </FieldShell>
+
+            <FieldShell label="Jméno odesílatele" description="Co uvidí příjemce místo adresy, např. „Procházka Group”. Nepovinné.">
+              {(id) => (
+                <input
+                  id={id}
+                  type="text"
+                  className={styles.input}
+                  value={value.name}
+                  maxLength={80}
+                  autoComplete="off"
+                  onChange={(event) => edit({ name: event.target.value })}
+                />
+              )}
+            </FieldShell>
+          </div>
+
+          {failure ? (
+            <p className={styles.failure} role="alert">
+              <Icon name="warning" size={13} />
+              {failure}
+            </p>
+          ) : null}
+
+          <div className={styles.saveRow}>
+            <Button variant="primary" icon="check" onClick={save} loading={saving} disabled={!dirty}>
+              Uložit odesílatele
+            </Button>
+            {dirty ? (
+              <Button variant="ghost" onClick={() => { setDraft(null); setFailure(null) }} disabled={saving}>
+                Zahodit změny
+              </Button>
+            ) : (
+              <span className={styles.savedNote}>Uložené nastavení.</span>
+            )}
+          </div>
+        </div>
+      ) : null}
+    </Section>
+  )
+}
+
+/**
+ * Kam chodí zprávy z formulářů.
+ *
+ * Není to vlastní nastavení: je to e-mail z karty asistentky, čtený a
+ * zapisovaný tamtéž (server/mailRecipient.js). Změna tady je změna v kartě
+ * a naopak — a web ji zároveň ukazuje v kontaktním panelu.
+ */
+function MailRecipientBlock() {
+  const port = usePort()
+  const toast = useToast()
+  const { data, error, loading, reload, setData } = useAsync(() => port.settings.mailRecipient.read(), [])
+  const [draft, setDraft] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [failure, setFailure] = useState(null)
+
+  const recipient = data?.recipient
+  if (loading && !data) return <SkeletonRows count={1} height={44} />
+  if (error) return <ErrorState error={error} onRetry={reload} compact />
+  // Web, který adresu ve Studiu nespravuje, tu nic neukazuje.
+  if (!recipient) return null
+
+  const current = recipient.pending ?? recipient.address
+  const value = draft ?? current
+  const dirty = draft !== null && draft.trim() !== current
+
+  const save = async () => {
+    setSaving(true)
+    setFailure(null)
+    try {
+      const next = await port.settings.mailRecipient.save({ address: value.trim() })
+      setData(next)
+      setDraft(null)
+      toast.success(
+        next.recipient?.published
+          ? "Uloženo. Zprávy z formulářů teď chodí na novou adresu."
+          : "Uloženo do konceptu karty. Platit začne, až kartu publikujete.",
+      )
+    } catch (caught) {
+      setFailure(caught?.message || "Uložení se nezdařilo.")
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const card = recipient.documentId ? hrefs.editor(recipient.type, recipient.documentId) : null
+
+  return (
+    <div className={styles.form}>
+      <FieldShell
+        label="Kam chodí zprávy z formulářů"
+        description={
+          <>
+            Totéž pole jako e-mail v kartě asistentky{recipient.documentTitle ? ` (${recipient.documentTitle})` : ""} — změna
+            tady je změna tam a web ji ukáže i v kontaktním panelu.{" "}
+            {card ? <a href={card}>Otevřít kartu</a> : null}
+          </>
+        }
+      >
+        {(id) => (
+          <input
+            id={id}
+            type="email"
+            className={styles.input}
+            value={value}
+            placeholder="asistentka@vasedomena.cz"
+            autoComplete="off"
+            spellCheck={false}
+            onChange={(event) => {
+              setFailure(null)
+              setDraft(event.target.value)
+            }}
+          />
+        )}
+      </FieldShell>
+
+      {recipient.pending ? (
+        <p className={styles.notice}>
+          <Icon name="warning" size={13} />
+          <span>
+            Karta má nepublikovaný koncept s adresou <strong>{recipient.pending}</strong>. Formuláře zatím chodí na{" "}
+            <strong>{recipient.address || "zálohu z prostředí"}</strong>, dokud kartu nepublikujete.
+          </span>
+        </p>
+      ) : null}
+
+      {failure ? (
+        <p className={styles.failure} role="alert">
+          <Icon name="warning" size={13} />
+          {failure}
+        </p>
+      ) : null}
+
+      <div className={styles.saveRow}>
+        <Button variant="primary" icon="check" onClick={save} loading={saving} disabled={!dirty}>
+          Uložit adresu
+        </Button>
+        {dirty ? (
+          <Button variant="ghost" onClick={() => { setDraft(null); setFailure(null) }} disabled={saving}>
+            Zahodit změny
+          </Button>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+/** Holá adresa z „Jméno <adresa>". */
+const senderAddressOf = (sender) => {
+  const match = String(sender || "").match(/<([^>]+)>\s*$/)
+  return (match ? match[1] : String(sender || "")).trim()
 }
 
 /* ---------------------------------------------------------------- jazyky -- */

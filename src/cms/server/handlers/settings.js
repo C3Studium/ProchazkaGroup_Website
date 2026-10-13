@@ -12,6 +12,10 @@
 //   PUT    /settings/languages           uložit seznam       (owner)
 //   GET    /settings/studio-language     jazyk Studia        (session)
 //   PUT    /settings/studio-language     přepnout ho         (owner)
+//   GET    /settings/mail-sender         odesílatel e-mailů  (owner)
+//   PUT    /settings/mail-sender         uložit ho           (owner)
+//   GET    /settings/mail-recipient      kam chodí formuláře (owner)
+//   PUT    /settings/mail-recipient      změnit adresu       (owner)
 //
 // requireOwner() is called ONCE, at the top, before any branch — so there is no
 // route below it that can be added without the check, and no second
@@ -43,8 +47,9 @@ import { currentSessionHash, requireAdmin, requireOwner, requireUser } from '../
 import { createApiKey, listApiKeys, revokeApiKey } from '../apiKeys.js'
 import { listSessions, revokeAllSessions, revokeSession } from '../sessions.js'
 import { probeAnonAccess } from '../anonProbe.js'
-import { readSiteLanguages, readStatus, writeSiteLanguages } from '../settings.js'
+import { mailSenderView, readSiteLanguages, readStatus, writeMailSender, writeSiteLanguages } from '../settings.js'
 import { getAdminClient } from '../supabaseAdmin.js'
+import { readMailRecipient, writeMailRecipient } from '../mailRecipient.js'
 import { invalid, notFound, serverError } from '../errors.js'
 import { methodNotAllowed, readJson, sendJson } from './http.js'
 
@@ -130,6 +135,35 @@ const handleLanguages = async (req, res, segments) => {
     // (ořeže názvy, doplní `enabled`, srovná výchozí jazyk) a obrazovka se má
     // dorovnat na jeho odpověď — stejně jako u widgetu.
     return sendJson(res, 200, await writeSiteLanguages(actor, body))
+}
+
+/* -------------------------------------------------- odesílatel e-mailů --- */
+//
+// Provozní věc, ne technická: adresu „noreply@…" mění majitel, stejně jako
+// e-mail asistentky, kam formuláře chodí. Klíč k Resendu tu není a nebude —
+// zůstává v prostředí a obrazovka vidí jen to, jestli je nastavený.
+const handleMailSender = async (req, res, segments) => {
+    if (segments.length) return methodNotAllowed(res, ['GET', 'PUT'])
+    if (req.method !== 'GET' && req.method !== 'PUT') return methodNotAllowed(res, ['GET', 'PUT'])
+
+    const actor = await requireOwner(req, res)
+    if (req.method === 'GET') return sendJson(res, 200, await mailSenderView())
+
+    const body = await readJson(req)
+    return sendJson(res, 200, await writeMailSender(actor, body))
+}
+
+// Adresa pro formuláře leží v dokumentu (karta asistentky), ne v `cms_setting`;
+// viz ../mailRecipient.js. Tady jen vstup: majitel a správce.
+const handleMailRecipient = async (req, res, segments) => {
+    if (segments.length) return methodNotAllowed(res, ['GET', 'PUT'])
+    if (req.method !== 'GET' && req.method !== 'PUT') return methodNotAllowed(res, ['GET', 'PUT'])
+
+    const actor = await requireOwner(req, res)
+    if (req.method === 'GET') return sendJson(res, 200, { recipient: await readMailRecipient(actor) })
+
+    const body = await readJson(req)
+    return sendJson(res, 200, { recipient: await writeMailRecipient(actor, body) })
 }
 
 /* -------------------------------------------------------- jazyk Studia --- */
@@ -248,6 +282,8 @@ export const handleSettings = async (req, res, segments) => {
     if (section === 'sessions') return handleSessions(req, res, rest)
     if (section === 'languages') return handleLanguages(req, res, rest)
     if (section === 'studio-language') return handleStudioLanguage(req, res, rest)
+    if (section === 'mail-sender') return handleMailSender(req, res, rest)
+    if (section === 'mail-recipient') return handleMailRecipient(req, res, rest)
 
     if (section === 'status') {
         await requireAdmin(req, res)

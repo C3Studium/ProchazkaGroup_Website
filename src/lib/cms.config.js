@@ -1715,6 +1715,10 @@ const benefitPage = definePage({
 
 export default defineSite({
     pages: [homepage, aboutUs, cookiesPage, privacyPage, reviewsPage, advisorPage, offerPage, partnersPage, benefitPage],
+    // Zprávy z formulářů chodí na e-mail asistentky. Tatáž adresa se ukazuje
+    // v kontaktním panelu webu a upravuje se v její kartě i v Nastavení →
+    // E-maily — je to jedno pole, ne dvě kopie. Viz src/lib/mail/forms.js.
+    mail: { recipient: { type: 'assistant', field: 'email' } },
     // Náhled úvodní stránky má vlastní adresu, a musí se o ni říct.
     //
     // Rám načítá každou stránku na její vlastní adrese — `/o-nas?edit=1` —

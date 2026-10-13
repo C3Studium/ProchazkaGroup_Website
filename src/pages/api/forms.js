@@ -22,7 +22,8 @@
 // (@/cms/server/rateLimit), aby na to byl v projektu jeden mechanismus.
 
 import { clientKey, consume } from '@/cms/server/rateLimit.js'
-import { adminRecipients, canSend, prepare, senderAddress } from '@/lib/mail/forms.js'
+import { adminRecipients, prepare } from '@/lib/mail/forms.js'
+import { effectiveMailSender } from '@/cms/server/settings.js'
 
 // Šablony se importují staticky a všechny: `import()` s proměnnou v cestě
 // webpack nedokáže rozbalit a trasa by za běhu hlásila nenalezený modul.
@@ -63,7 +64,7 @@ const LIMIT = {
  * cesta, kterou už jede pozvánka do Studia (@/cms/server/mail), takže se
  * šablony chovají v obou případech stejně.
  */
-const send = async ({ resend, render, name, to, data }) => {
+const send = async ({ resend, render, from, name, to, data }) => {
     const template = TEMPLATES[name]
     if (!template) throw new Error(`neznámá šablona ${name}`)
 
@@ -71,7 +72,7 @@ const send = async ({ resend, render, name, to, data }) => {
     const html = await render(Component(data))
 
     const { error } = await resend.emails.send({
-        from: senderAddress(),
+        from,
         to,
         subject: template.subject(data),
         html,
@@ -101,12 +102,17 @@ export default async function handler(req, res) {
     // asistentky ze Studia. Pořadí zdrojů a proč je v @/lib/mail/forms.
     const to = await adminRecipients()
 
-    if (!canSend() || !to.length) {
+    // Odesílatel jednou na požadavek: je to čtení z databáze (Nastavení → E-maily)
+    // a obě zprávy — do firmy i potvrzení — mají přijít z téže adresy.
+    const from = await effectiveMailSender()
+    const ready = Boolean(process.env.RESEND_API_KEY && from)
+
+    if (!ready || !to.length) {
         // Chybí klíč, odesílatel nebo schránka. Není to chyba odesílatele
         // a nemá se mu tvrdit, že se zpráva odeslala.
         console.error(
-            '[forms] odesílání není nastavené — klíč/odesílatel: ' + canSend() + ', příjemců: ' + to.length +
-            ' (RESEND_API_KEY, RESEND_FROM_EMAIL, a buď CONTACT_FORM_TO, nebo e-mail asistentky ve Studiu)',
+            '[forms] odesílání není nastavené — klíč/odesílatel: ' + ready + ', příjemců: ' + to.length +
+            ' (RESEND_API_KEY, odesílatel v Nastavení → E-maily nebo RESEND_FROM_EMAIL, a buď CONTACT_FORM_TO, nebo e-mail asistentky ve Studiu)',
         )
         return res.status(503).json({ error: 'Odesílání e-mailů není na tomto webu nastavené.' })
     }
@@ -130,14 +136,14 @@ export default async function handler(req, res) {
 
         // Zpráva do firmy. Na té záleží — když neprojde, odesílatel se to musí
         // dozvědět, protože jeho zpráva se nikam nedostala.
-        await send({ resend, render, name: definition.admin, to, data: body })
+        await send({ resend, render, from, name: definition.admin, to, data: body })
 
         // Potvrzení odesílateli. Doplněk: když neprojde, zpráva do firmy už
         // leží ve schránce a odpovědět chybou by bylo tvrzení, že se nic
         // nestalo. Loguje se, ať to není tiché.
         if (confirmTo && definition.user) {
             try {
-                await send({ resend, render, name: definition.user, to: confirmTo, data: body })
+                await send({ resend, render, from, name: definition.user, to: confirmTo, data: body })
             } catch (error) {
                 console.warn(`[forms] potvrzení pro ${confirmTo} se neodeslalo — ${error.message}`)
             }

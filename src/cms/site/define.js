@@ -384,6 +384,20 @@ export const defineSite = (config) => {
     // hlásil "Resend ✓" u projektu, kde e-maily posílá backend.
     const mail = config?.mail !== false
 
+    // Kam chodí zprávy z formulářů, když to web chce spravovat ve Studiu.
+    //
+    //     mail: { recipient: { type: 'assistant', field: 'email' } }
+    //
+    // Adresa pak NENÍ druhá kopie: leží v poli toho dokumentu (u Procházka
+    // Group v kartě asistentky, která ji zároveň ukazuje na webu) a Nastavení
+    // → E-maily ji čte a zapisuje tamtéž. Jedno místo, dvě obrazovky. Kdo ji
+    // smí měnit, říká `editRoles` toho pole — server to vynucuje u obou cest.
+    const recipientConfig = config?.mail && typeof config.mail === 'object' ? config.mail.recipient : null
+    const mailRecipient =
+        recipientConfig && typeof recipientConfig.type === 'string' && typeof recipientConfig.field === 'string'
+            ? Object.freeze({ type: recipientConfig.type, field: recipientConfig.field })
+            : null
+
     // `prefixes` a jazyky se nepletou — a když se přesto potkají, řekne se to.
     //
     // Stejný tvar URL, opačný význam (docs/I18N.md §9). `prefixes: ['cz','de']`
@@ -429,6 +443,7 @@ export const defineSite = (config) => {
         surfaces,
         reviews,
         mail,
+        mailRecipient,
     })
 }
 

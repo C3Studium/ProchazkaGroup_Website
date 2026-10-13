@@ -348,6 +348,25 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
              * obsahu. Dva klíče, dva endpointy, schválně: redaktor může spravovat
              * anglický web v češtině a naopak.
              */
+            /**
+             * Odesílatel e-mailů — pozvánek, přehledů i formulářů webu. Jen
+             * majitel a správce. Prázdná adresa vrací web k hodnotě z prostředí.
+             */
+            mailSender: {
+                read: () => request('/settings/mail-sender'),
+                save: ({ address, name }) => request('/settings/mail-sender', { method: 'PUT', body: { address, name } }),
+            },
+
+            /**
+             * Kam chodí zprávy z formulářů. Leží v dokumentu (u Procházka Group
+             * v kartě asistentky), takže je to totéž pole jako tam. `recipient`
+             * je null, když web tuhle adresu ve Studiu nespravuje.
+             */
+            mailRecipient: {
+                read: () => request('/settings/mail-recipient'),
+                save: ({ address }) => request('/settings/mail-recipient', { method: 'PUT', body: { address } }),
+            },
+
             studioLanguage: {
                 read: () => request('/settings/studio-language'),
                 save: ({ code }) => request('/settings/studio-language', { method: 'PUT', body: { code } }),

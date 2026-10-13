@@ -42,6 +42,10 @@ export default defineType({
             name: 'email',
             title: 'E-mail',
             type: 'string',
+            description: 'Sem chodí i všechny zprávy z formulářů webu. Totéž pole je v Nastavení → E-maily; měnit ho smí majitel a správce.',
+            // Adresa, kam odchází každá poptávka. Člen ji přepsat nesmí —
+            // server zápis odmítne, Studio pole zamkne (core/defineField.js).
+            editRoles: ['admin', 'owner'],
             validation: (rule) => rule.max(160),
         }),
         defineField({

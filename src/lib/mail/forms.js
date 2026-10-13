@@ -101,14 +101,9 @@ export const adminRecipients = async () => {
     return listFrom('CMS_ADMIN_EMAIL')
 }
 
-/** Adresa, ze které se odesílá. Stejné dvě proměnné jako @/cms/server/mail. */
-export const senderAddress = () => optional('CMS_MAIL_FROM') || optional('RESEND_FROM_EMAIL')
-
-/**
- * Je nastavený odesílatel? Příjemce se kontroluje zvlášť, až když je zjištěný —
- * je to dotaz do databáze a tenhle předpoklad musí jít ověřit bez něj.
- */
-export const canSend = () => Boolean(optional('RESEND_API_KEY') && senderAddress())
+// Odesílatel tu není: je to čtení z databáze (Nastavení → E-maily) a tenhle
+// modul importují i komponenty v prohlížeči kvůli validaci. Zjišťuje ho
+// serverová trasa, src/pages/api/forms.js, přes @/cms/server/settings.
 
 // Volný schválně. Striktnější vzor odmítá adresy, které jsou úplně v pořádku,
 // a jediné, co adresu opravdu ověří, je odeslání na ni. Stejný vzor jako

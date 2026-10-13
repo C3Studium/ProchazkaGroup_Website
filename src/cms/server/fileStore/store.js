@@ -107,7 +107,7 @@ export const assertFileStoreUsable = () => {
 const readFromDisk = () => {
     const parsed = JSON.parse(fs.readFileSync(FILE(), 'utf8'))
     if (!parsed || parsed.version !== STORE_VERSION || !parsed.tables) return null
-    return parsed.tables
+    return { tables: parsed.tables, roles: parsed.roles ?? 1 }
 }
 
 /**
@@ -123,6 +123,15 @@ const readFromDisk = () => {
  * so this is idempotent and stays cheap once the store is healed.
  */
 const RENAMED_ROLES = { owner: 'admin', editor: 'member' }
+
+/**
+ * Které pojmenování rolí soubor používá. 1 = před 0011 (`owner` měl plná
+ * práva), 2 = dnešní (`owner` je majitel pod správcem). Přejmenování výš smí
+ * běžet jen nad jedničkou: dřív běželo při každém načtení, takže z každého
+ * nově založeného majitele udělalo `admin` — a `effectiveRole` z něj pak
+ * člena, protože správce určuje CMS_ADMIN_EMAIL, ne řádek.
+ */
+const ROLE_SCHEME = 2
 
 const migrateRoles = (loadedTables) => {
     let changed = false
@@ -154,7 +163,7 @@ export const persist = () => {
     fs.mkdirSync(DIR(), { recursive: true })
     const target = FILE()
     const temp = `${target}.${process.pid}.tmp`
-    fs.writeFileSync(temp, `${JSON.stringify({ version: STORE_VERSION, tables: c.tables }, null, 2)}\n`)
+    fs.writeFileSync(temp, `${JSON.stringify({ version: STORE_VERSION, roles: ROLE_SCHEME, tables: c.tables }, null, 2)}\n`)
     fs.renameSync(temp, target)
     c.mtimeMs = fs.statSync(target).mtimeMs
 }
@@ -190,9 +199,13 @@ export const tables = () => {
     if (!c.tables || stat.mtimeMs !== c.mtimeMs) {
         const loaded = readFromDisk()
         if (loaded) {
-            c.tables = loaded
+            c.tables = loaded.tables
             c.mtimeMs = stat.mtimeMs
-            if (migrateRoles(loaded)) persist()
+            // Starý soubor se převede jednou a zapíše už se značkou.
+            if (loaded.roles < ROLE_SCHEME) {
+                migrateRoles(loaded.tables)
+                persist()
+            }
             announce('načteno z disku')
             return c.tables
         }
