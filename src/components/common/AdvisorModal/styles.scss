@@ -25,8 +25,8 @@
     position: relative;
     display: flex;
     width: 100%;
-    max-width: 62rem;
-    max-height: 82vh;
+    max-width: 64rem;
+    max-height: 84vh;
     border: 1px solid rgba(255, 255, 255, 0.22);
     background-color: rgba(2, 14, 21, 0.96);
     color: var(--wText);
@@ -43,15 +43,38 @@
     -webkit-overflow-scrolling: touch;
 }
 
-// Portrét drží výšku textu vedle sebe, ale nikdy pod 4:5 — krátký příběh
-// by jinak z fotky udělal pruh.
+// Portrét se roztáhne na výšku řádku a ořízne do SVÉHO sloupce.
+//
+// Dřív měl `aspect-ratio: 4/5` spolu s `min-height: 100%` — a když byl text
+// vedle vysoký (titul, dvouřádkové jméno, dlouhé motto), dopočítal si podle
+// výšky šířku větší, než měl sloupec, a přelezl přes text: „ORADCE", „MGR.".
+// Teď poměr neurčuje nic; výšku dává řádek mřížky a spodní mez `min-height`,
+// aby krátký text neudělal z fotky pruh.
 .AdvisorModal__photo {
     position: relative;
-    min-height: 100%;
-    aspect-ratio: 4 / 5;
+    min-width: 0;
+    min-height: min(34rem, 66vh);
     overflow: hidden;
     border-right: 1px solid rgba(255, 255, 255, 0.16);
     background-color: rgba(2, 14, 21, 0.5);
+
+    // Vnitřní vrstva kvůli animaci: přiblížení běží na ní, oříznutí drží obal.
+    .AdvisorModal__photo__in {
+        position: absolute;
+        inset: 0;
+        will-change: transform;
+    }
+
+    // Jemný přechod do tmavé plochy na pravém okraji — světlá fotka (bílé
+    // studio pozadí) jinak naráží na tmavý sloupec ostrou hranou.
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0 0 0 auto;
+        width: 18%;
+        background: linear-gradient(to right, rgba(2, 14, 21, 0), rgba(2, 14, 21, 0.35));
+        pointer-events: none;
+    }
 
     .AdvisorModal__photo__empty {
         position: absolute;
@@ -64,7 +87,8 @@
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    padding: 6vh 3.2vw 5vh;
+    min-width: 0;
+    padding: 7vh 3.6vw 5.5vh;
 }
 
 .AdvisorModal__eyebrow,
@@ -79,6 +103,8 @@
 
 .AdvisorModal__name {
     margin: 2.2vh 0 0;
+    // Místo pro křížek v rohu: dlouhé jméno do něj jinak vjede.
+    padding-right: 3rem;
     font-family: "Switzer-Light", sans-serif;
     font-weight: 300;
     text-transform: uppercase;
@@ -100,6 +126,7 @@
 
 .AdvisorModal__rule {
     display: block;
+    transform-origin: left center;
     width: 100%;
     height: 1px;
     margin: 3.6vh 0 3vh;
@@ -131,15 +158,43 @@
     font-family: "Switzer-Light", sans-serif;
     font-size: clamp(0.85rem, 1vw, 1.05rem);
     color: rgba(255, 255, 255, 0.85);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.24);
-    transition: border-color 0.35s ease, color 0.35s ease;
+    position: relative;
+    text-decoration: none;
+    transition: color 0.35s ease;
 
-    &:hover {
-        color: var(--wText);
-        border-bottom-color: var(--wText);
+    // Podtržení ve dvou vrstvách: tlumená linka stojí, světlá se při najetí
+    // dokreslí zleva. Stejný pohyb jako linka nad příběhem.
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+    }
+    &::before { background-color: rgba(255, 255, 255, 0.24); }
+    &::after {
+        background-color: var(--wText);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
     }
 
-    svg { flex: none; opacity: 0.7; }
+    &:hover,
+    &:focus-visible {
+        color: var(--wText);
+        &::after { transform: scaleX(1); }
+        svg { opacity: 1; transform: translateX(-1px) rotate(-8deg); }
+    }
+
+    svg { flex: none; opacity: 0.7; transition: opacity 0.35s ease, transform 0.35s ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after { transition-duration: 0.35s; }
+        svg { transition: opacity 0.35s ease; }
+        &:hover svg, &:focus-visible svg { transform: none; }
+    }
 }
 
 .AdvisorModal__close {
@@ -150,7 +205,6 @@
     width: 2.125rem;
     height: 2.125rem;
     padding: 0;
-    border: 0;
     background-color: rgba(2, 14, 21, 0.55);
     cursor: inherit;
 
@@ -167,7 +221,18 @@
         &:last-child { transform: rotate(-45deg); }
     }
 
-    &:hover span { background-color: var(--wText); }
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: border-color 0.35s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: rotate(90deg);
+        span { background-color: var(--wText); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &:hover { transform: none; }
+    }
     &:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 3px; }
 }
 
@@ -179,12 +244,12 @@
     .AdvisorModal__scroll { grid-template-columns: 1fr; }
     .AdvisorModal__photo {
         min-height: 0;
-        aspect-ratio: 16 / 10;
-        max-height: 38vh;
+        height: min(38vh, 26rem);
         border-right: 0;
         border-bottom: 1px solid rgba(255, 255, 255, 0.16);
     }
     .AdvisorModal__text { padding: 4vh 7vw 5vh; }
+    .AdvisorModal__photo::after { display: none; }
     .AdvisorModal__close { top: 1.6vh; right: 3vw; }
     .AdvisorModal__reach { margin-top: 0; }
 }

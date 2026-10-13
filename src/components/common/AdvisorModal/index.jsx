@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { AnimatePresence, cubicBezier, motion } from "framer-motion";
+import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import { RiMailLine, RiPhoneLine } from "@remixicon/react";
 import { dial } from "@/constants/roster";
 import { EXTERNAL_CLASS } from "@/components/common/ui/externalLink";
@@ -31,6 +31,26 @@ const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 //     klávesu (krok zpět ze stěny poradců do menu) a zaregistroval se dřív;
 //     bez toho by jedno Escape zavřelo modál i stěnu naráz.
 
+// Nástup obsahu. Rám se rozvine (clip-path, jako ContactModal) a teprve do
+// otevírajícího se rámu nastoupí text odshora po řádcích, linka se dokreslí
+// zleva a fotka se z mírného přiblížení usadí. Jedno gesto, ne pět efektů:
+// všechno jde stejným směrem a stejnou křivkou.
+//
+// S omezeným pohybem (macOS „Omezit pohyb") jen prolnutí, ~0,4 s — nikdy
+// skok z nuly, ten působí jako chyba, ne jako ohleduplnost.
+const textIn = (calm) => ({
+    hidden: {},
+    shown: { transition: { staggerChildren: calm ? 0 : 0.07, delayChildren: calm ? 0.1 : 0.32 } },
+});
+const lineIn = (calm) => ({
+    hidden: { opacity: 0, y: calm ? 0 : 14 },
+    shown: { opacity: 1, y: 0, transition: { duration: calm ? 0.4 : 0.7, ease: GLIDE } },
+});
+const ruleIn = (calm) => ({
+    hidden: { scaleX: calm ? 1 : 0, opacity: calm ? 0 : 1 },
+    shown: { scaleX: 1, opacity: 1, transition: { duration: calm ? 0.4 : 0.9, ease: GLIDE } },
+});
+
 const FOCUSABLE =
     'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
 
@@ -46,6 +66,7 @@ export default function AdvisorModal({ person, order = null, onClose, studioRoot
     const closeRef = useRef(null);
     const wrapRef = useRef(null);
     const open = Boolean(person);
+    const calm = useReducedMotion() ?? false;
 
     // Portál až po mountu: nic z modálu se na serveru nekreslí, takže první
     // klientský render je prázdný stejně jako serverový.
@@ -129,6 +150,7 @@ export default function AdvisorModal({ person, order = null, onClose, studioRoot
                         aria-label={person.name}
                     >
                         <motion.div
+                            key="sheet"
                             className="AdvisorModal"
                             initial={{ opacity: 0, clipPath: "inset(0% 0% 100% 0%)" }}
                             animate={{ opacity: 1, clipPath: "inset(0% 0% 0% 0%)" }}
@@ -150,39 +172,53 @@ export default function AdvisorModal({ person, order = null, onClose, studioRoot
                                 se na nízké obrazovce text posouvá; a
                                 `data-lenis-prevent`, protože zastavený Lenis
                                 kolečko pořád bere oknu — viz ContactModal__scroll. */}
-                            <div className="AdvisorModal__scroll" data-lenis-prevent>
+                            <div key={person.name} className="AdvisorModal__scroll" data-lenis-prevent>
                                 <div className="AdvisorModal__photo">
                                     {photo ? (
-                                        <Image
-                                            src={photo}
-                                            alt={person.name}
-                                            fill
-                                            sizes="(max-width: 900px) 90vw, 32vw"
-                                            quality={85}
-                                            style={{ objectFit: "cover", objectPosition: "center 18%" }}
-                                        />
+                                        <motion.div
+                                            className="AdvisorModal__photo__in"
+                                            initial={{ scale: calm ? 1 : 1.08, opacity: calm ? 0 : 1 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            transition={{ duration: calm ? 0.4 : 1.2, ease: GLIDE }}
+                                        >
+                                            <Image
+                                                src={photo}
+                                                alt={person.name}
+                                                fill
+                                                sizes="(max-width: 900px) 90vw, 36vw"
+                                                quality={85}
+                                                // Obličej je u všech portrétů v horní třetině;
+                                                // na střed by vysoký výřez useknul hlavu.
+                                                style={{ objectFit: "cover", objectPosition: "center 22%" }}
+                                            />
+                                        </motion.div>
                                     ) : (
                                         <span className="AdvisorModal__photo__empty" aria-hidden="true" />
                                     )}
                                 </div>
 
-                                <div className="AdvisorModal__text">
-                                    <span className="AdvisorModal__eyebrow">
+                                <motion.div
+                                    className="AdvisorModal__text"
+                                    variants={textIn(calm)}
+                                    initial="hidden"
+                                    animate="shown"
+                                >
+                                    <motion.span className="AdvisorModal__eyebrow" variants={lineIn(calm)}>
                                         Poradce{order ? <> &middot; {String(order).padStart(2, "0")}</> : null}
-                                    </span>
-                                    <h2 className="AdvisorModal__name">{person.name}</h2>
-                                    {moto && <p className="AdvisorModal__moto">{moto}</p>}
+                                    </motion.span>
+                                    <motion.h2 className="AdvisorModal__name" variants={lineIn(calm)}>{person.name}</motion.h2>
+                                    {moto && <motion.p className="AdvisorModal__moto" variants={lineIn(calm)}>{moto}</motion.p>}
 
                                     {story && (
                                         <>
-                                            <span className="AdvisorModal__rule" aria-hidden="true" />
-                                            <span className="AdvisorModal__label">Příběh</span>
-                                            <p className="AdvisorModal__story">{story}</p>
+                                            <motion.span className="AdvisorModal__rule" aria-hidden="true" variants={ruleIn(calm)} />
+                                            <motion.span className="AdvisorModal__label" variants={lineIn(calm)}>Příběh</motion.span>
+                                            <motion.p className="AdvisorModal__story" variants={lineIn(calm)}>{story}</motion.p>
                                         </>
                                     )}
 
                                     {(tel || person.email) && (
-                                        <div className="AdvisorModal__reach">
+                                        <motion.div className="AdvisorModal__reach" variants={lineIn(calm)}>
                                             {tel && (
                                                 <a href={tel} className={`AdvisorModal__link ${EXTERNAL_CLASS}`} data-cursor="frame">
                                                     <RiPhoneLine size={15} aria-hidden="true" />
@@ -195,9 +231,9 @@ export default function AdvisorModal({ person, order = null, onClose, studioRoot
                                                     {person.email}
                                                 </a>
                                             )}
-                                        </div>
+                                        </motion.div>
                                     )}
-                                </div>
+                                </motion.div>
                             </div>
                         </motion.div>
                     </div>
