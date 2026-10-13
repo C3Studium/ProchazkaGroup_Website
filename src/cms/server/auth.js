@@ -294,15 +294,26 @@ export const requireAdmin = async (req, res = null) => {
 }
 
 /**
- * The old name, kept as an alias for one reason: `requireOwner` is imported by
- * seven handlers and by server/index.js, and a rename that touches all of them
- * in the same change as the role model itself makes the diff impossible to
- * read. It means what it always meant — "the account that may administer this
- * CMS" — and that account is now called admin.
+ * Majitel, nebo správce nad ním.
  *
- * @deprecated Use requireAdmin.
+ * Do 0.1.52 tohle byl jen alias pro `requireAdmin` — z doby, kdy „owner" byl
+ * jen titul bez práv. Výsledek: všechno, co se v handlerech jmenovalo „pro
+ * majitele" (archiv, uživatelé, jazyky, odkaz na správu webu), pustilo jedině
+ * správce, a majitel klienta neviděl ani archiv svého vlastního webu.
+ *
+ * Teď platí hierarchie správce > majitel > člen:
+ *   - `requireAdmin`  technické věci — prostředí, API klíče, relace, sondy
+ *   - `requireOwner`  provozní věci — archiv, uživatelé (jen členové, viz
+ *                     users.js), jazyky, odkaz na správu webu
+ *   - `requireUser`   obsah — každý přihlášený
  */
-export const requireOwner = requireAdmin
+export const isOwnerRole = (role) => role === 'admin' || role === 'owner'
+
+export const requireOwner = async (req, res = null) => {
+    const user = await requireUser(req, res)
+    if (!isOwnerRole(user.role)) throw forbidden('Tuto akci může provést jen majitel nebo správce')
+    return user
+}
 
 /* ------------------------------------------------------------ bootstrap -- */
 

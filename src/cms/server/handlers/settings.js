@@ -39,7 +39,7 @@
 // namespace mít nesměl — handlers/widget.js vysvětluje, proč kvůli tomu bydlí
 // jinde.
 
-import { currentSessionHash, requireOwner, requireUser } from '../auth.js'
+import { currentSessionHash, requireAdmin, requireOwner, requireUser } from '../auth.js'
 import { createApiKey, listApiKeys, revokeApiKey } from '../apiKeys.js'
 import { listSessions, revokeAllSessions, revokeSession } from '../sessions.js'
 import { probeAnonAccess } from '../anonProbe.js'
@@ -48,8 +48,11 @@ import { getAdminClient } from '../supabaseAdmin.js'
 import { invalid, notFound, serverError } from '../errors.js'
 import { methodNotAllowed, readJson, sendJson } from './http.js'
 
+// Technické sekce (API klíče, relace, stav prostředí, sonda veřejného
+// přístupu) jsou jen pro správce. Provozní (jazyky, jazyk Studia) zvládne
+// i majitel — viz requireOwner v auth.js.
 const handleKeys = async (req, res, segments) => {
-    const actor = await requireOwner(req, res)
+    const actor = await requireAdmin(req, res)
     const [id] = segments
 
     if (!id) {
@@ -69,7 +72,7 @@ const handleKeys = async (req, res, segments) => {
 }
 
 const handleSessions = async (req, res, segments) => {
-    await requireOwner(req, res)
+    await requireAdmin(req, res)
     const [id] = segments
 
     if (!id) {
@@ -247,7 +250,7 @@ export const handleSettings = async (req, res, segments) => {
     if (section === 'studio-language') return handleStudioLanguage(req, res, rest)
 
     if (section === 'status') {
-        await requireOwner(req, res)
+        await requireAdmin(req, res)
         if (req.method !== 'GET') return methodNotAllowed(res, ['GET'])
         // Booleans and identifiers only. src/cms/server/settings.js holds the
         // rule and the reasoning; nothing here reads process.env itself.
@@ -255,7 +258,7 @@ export const handleSettings = async (req, res, segments) => {
     }
 
     if (section === 'probe') {
-        await requireOwner(req, res)
+        await requireAdmin(req, res)
         if (req.method !== 'GET') return methodNotAllowed(res, ['GET'])
         // Only when asked, never on render: the client calls this from a button
         // and the module holds its answer for a minute either way.

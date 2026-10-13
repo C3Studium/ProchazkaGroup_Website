@@ -35,7 +35,7 @@ export default function Sidebar() {
   const port = usePort()
   const { config } = useStudio()
   const { revision } = useRevision()
-  const { user, isAdmin, signOut } = useAuth()
+  const { user, isOwner, signOut } = useAuth()
   const [changingPassword, setChangingPassword] = useState(false)
   const [collapsed, setCollapsed] = usePersistedFlag(COLLAPSED_KEY, false)
 
@@ -164,7 +164,7 @@ export default function Sidebar() {
               which takes it off the site and leaves it in the database. Two
               different archives sharing one glyph is exactly the confusion this
               screen exists to remove. */}
-          {isAdmin ? <NavItem href={hrefs.archive()} icon="clock" label="Archiv" path={router.path} /> : null}
+          {isOwner ? <NavItem href={hrefs.archive()} icon="clock" label="Archiv" path={router.path} /> : null}
           {/* Owners only, both of them. Hiding them is a courtesy — each route
               renders an explanation for an editor who types the URL, and the
               server refuses the calls behind them either way.
@@ -174,8 +174,8 @@ export default function Sidebar() {
               find, and it is opened far more often than the rest of the portal.
               Nastavení links to it, so the two are one click apart in the
               direction that is actually travelled. */}
-          {isAdmin ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" path={router.path} /> : null}
-          {isAdmin ? (
+          {isOwner ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" path={router.path} /> : null}
+          {isOwner ? (
             <NavItem href={hrefs.settings()} icon="settings" label="Nastavení" path={router.path} />
           ) : null}
         </ul>

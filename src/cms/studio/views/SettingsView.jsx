@@ -62,16 +62,22 @@ export default function SettingsView() {
   const [changingPassword, setChangingPassword] = useState(false)
   const bodyRef = useRef(null)
 
+  // Technické sekce vidí jen správce: prostředí, veřejný přístup ke starým
+  // tabulkám, API klíče a přihlášení (relace všech účtů). Majitel z nastavení
+  // potřebuje jen provozní věci — odkaz na správu webu, jazyky a svůj účet.
+  // Server tytéž sekce chrání `requireAdmin`; tohle jen neukazuje tlačítka,
+  // která by vrátila 403.
+  const { isAdmin } = useAuth()
   const sections = [
-    { id: "prostredi", label: "Prostředí" },
+    isAdmin && { id: "prostredi", label: "Prostředí" },
     { id: "spravovat", label: "Odkaz na správu" },
     { id: "jazyky", label: "Jazyky" },
     { id: "jazyk-studia", label: "Jazyk Studia" },
-    { id: "pristup", label: "Veřejný přístup" },
-    { id: "klice", label: "API klíče" },
-    { id: "prihlaseni", label: "Přihlášení" },
+    isAdmin && { id: "pristup", label: "Veřejný přístup" },
+    isAdmin && { id: "klice", label: "API klíče" },
+    isAdmin && { id: "prihlaseni", label: "Přihlášení" },
     { id: "ucet", label: "Účet" },
-  ]
+  ].filter(Boolean)
 
   // Scrolling by ref rather than by `#hash`. The Studio's body is the scroll
   // container, not the document, and a hash would also push a history entry
@@ -85,7 +91,7 @@ export default function SettingsView() {
     <>
       <ViewHeader
         title="Nastavení"
-        subtitle="Co je v systému nastavené, kdo je přihlášený a co smí číst zvenčí."
+        subtitle={isAdmin ? "Co je v systému nastavené, kdo je přihlášený a co smí číst zvenčí." : "Jazyky webu, odkaz na správu a váš účet."}
       />
 
       <ViewToolbar>
@@ -103,13 +109,13 @@ export default function SettingsView() {
           through it would change a shared layout primitive for one screen. */}
       <ViewBody className={styles.body}>
         <div className={styles.sections} ref={bodyRef}>
-          <EnvironmentSection />
+          {isAdmin ? <EnvironmentSection /> : null}
           <ManageWidgetSection />
           <LanguagesSection />
           <StudioLanguageSection />
-          <ExposureSection />
-          <KeysSection />
-          <SessionsSection />
+          {isAdmin ? <ExposureSection /> : null}
+          {isAdmin ? <KeysSection /> : null}
+          {isAdmin ? <SessionsSection /> : null}
           <AccountSection onChangePassword={() => setChangingPassword(true)} />
         </div>
       </ViewBody>

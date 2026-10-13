@@ -42,7 +42,13 @@ const roleTitle = (role) => ROLE_TITLES[role] || role
 export default function UsersView() {
   const port = usePort()
   const toast = useToast()
-  const { user: me, refresh: refreshSession } = useAuth()
+  const { user: me, isAdmin, refresh: refreshSession } = useAuth()
+  // Koho smí tenhle účet spravovat — zrcadlo MANAGEABLE v server/users.js.
+  // Správce zakládá majitele i členy; majitel jen členy a na jiné majitele
+  // ani na správce nesahá. Server to vynucuje; tady jde jen o to, aby
+  // obrazovka nenabízela tlačítka, která skončí na 403.
+  const manageable = isAdmin ? ["owner", "member"] : ["member"]
+  const roleOptions = ROLES.filter((role) => manageable.includes(role.value))
 
   const [revision, setRevision] = useState(0)
   const { data, error, loading, reload } = useAsync(() => port.auth.users.list(), [port, revision])
@@ -92,7 +98,9 @@ export default function UsersView() {
       <ViewToolbar>
         <span className={styles.legend}>
           <Icon name="info" size={13} />
-          Správce spravuje uživatele, majitel a členové obsah. Obojí se ověřuje na serveru.
+          {isAdmin
+            ? "Správce přidává majitele i členy. Majitel spravuje členy a provoz webu, člen jen obsah."
+            : "Jako majitel přidáváte a spravujete členy. Majitele přidává správce."}
         </span>
         <Spacer />
         <ResultCount>
@@ -123,6 +131,10 @@ export default function UsersView() {
                 // Disabling the controls says so before the click; the server
                 // and a database trigger say so after it.
                 locked={row.role === "admin" && !row.disabledAt && activeOwners <= 1}
+                options={roleOptions}
+                // Správce je daný proměnnou CMS_ADMIN_EMAIL, ne tímhle seznamem,
+                // a majitel na jiné majitele nesahá. Takové řádky jen ukazují roli.
+                editable={row.role !== "admin" && manageable.includes(row.role)}
                 onRole={(role) =>
                   mutate(row.id, () => port.auth.users.updateRole({ id: row.id, role }), `Role změněna na „${roleTitle(role)}".`)
                 }
@@ -141,6 +153,7 @@ export default function UsersView() {
       </ViewBody>
 
       <InviteDialog
+        roleOptions={roleOptions}
         open={inviting}
         onClose={() => setInviting(false)}
         onCreate={async (input) => {
@@ -179,7 +192,7 @@ export default function UsersView() {
   )
 }
 
-function UserRow({ user, isMe, busy, locked, onRole, onDisabled, onRemove }) {
+function UserRow({ user, isMe, busy, locked, options, editable, onRole, onDisabled, onRemove }) {
   const disabled = Boolean(user.disabledAt)
 
   return (
@@ -211,27 +224,35 @@ function UserRow({ user, isMe, busy, locked, onRole, onDisabled, onRemove }) {
       </span>
 
       <span className={styles.role}>
-        <Select
-          value={user.role}
-          options={ROLES}
-          disabled={busy || locked}
-          onChange={(value) => value && value !== user.role && onRole(value)}
-          aria-label={`Role uživatele ${user.email}`}
-        />
+        {/* Výběr jen tam, kde se role měnit smí. Dřív byl u každého řádku a
+            nabízel jen „Majitel" a „Člen" — u správce tedy hodnotu, která
+            v nabídce nebyla, a nativní select místo ní ukázal první možnost:
+            správce v seznamu vypadal jako „Majitel". */}
+        {editable ? (
+          <Select
+            value={user.role}
+            options={options}
+            disabled={busy || locked}
+            onChange={(value) => value && value !== user.role && onRole(value)}
+            aria-label={`Role uživatele ${user.email}`}
+          />
+        ) : (
+          <Badge tone={user.role === "admin" ? "accent" : "neutral"}>{roleTitle(user.role)}</Badge>
+        )}
       </span>
 
       <span className={styles.actions}>
         <IconButton
           icon={disabled ? "refresh" : "lock"}
           label={disabled ? "Obnovit přístup" : "Deaktivovat"}
-          disabled={busy || (locked && !disabled)}
+          disabled={busy || !editable || (locked && !disabled)}
           onClick={() => onDisabled(!disabled)}
         />
         <IconButton
           icon="trash"
           label="Smazat"
           tone="danger"
-          disabled={busy || locked}
+          disabled={busy || !editable || locked}
           onClick={onRemove}
         />
       </span>
@@ -256,7 +277,7 @@ function UserRow({ user, isMe, busy, locked, onRole, onDisabled, onRemove }) {
  * server generate one — blank is the default because a password chosen by
  * someone else, in a hurry, for a colleague, is reliably a bad password.
  */
-function InviteDialog({ open, onClose, onCreate }) {
+function InviteDialog({ open, onClose, onCreate, roleOptions = ROLES }) {
   // "member", and it has to be a value ROLES actually contains: the field once
   // defaulted to "editor", a role 0011 renamed away — the native select then
   // DISPLAYED the first option while the form still held "editor", and
@@ -338,7 +359,7 @@ function InviteDialog({ open, onClose, onCreate }) {
         </FieldShell>
 
         <FieldShell label="Role" error={state.fields.role}>
-          <Select value={form.role} options={ROLES} onChange={(value) => set("role")(value || "member")} />
+          <Select value={form.role} options={roleOptions} onChange={(value) => set("role")(value || "member")} />
         </FieldShell>
 
         <FieldShell

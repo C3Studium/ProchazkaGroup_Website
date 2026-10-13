@@ -1,5 +1,6 @@
-// User management. Owner-only; the check is in the handler, before any of this
-// is reached, for the same reason adapter.js does not check authorisation —
+// User management. Owner or admin; the check is in the handler, before any of this
+// is reached — and WHICH accounts each of them may touch is decided here, see
+// MANAGEABLE, for the same reason adapter.js does not check authorisation —
 // a module that sometimes checks and sometimes does not is worse than one that
 // never does. Reaching this file means the caller has been established as an
 // owner.
@@ -14,7 +15,7 @@
 //     moment an account is created, to the owner who created it. It is not
 //     stored, and there is no endpoint that can produce it a second time.
 
-import { conflict, invalid, notFound, serverError } from './errors.js'
+import { conflict, forbidden, invalid, notFound, serverError } from './errors.js'
 import { generatePassword, hashPassword, passwordProblem } from './password.js'
 import { getAdminClient } from './supabaseAdmin.js'
 import { revokeSessionsForUser } from './auth.js'
@@ -38,6 +39,32 @@ const FIELDS = 'id, email, name, role, created_at, updated_at, last_login_at, di
  * meaning later without revisiting every account.
  */
 const ROLES = ['owner', 'member']
+
+/**
+ * Které role smí kdo rozdávat a čí účty smí měnit.
+ *
+ * Správce (CMS_ADMIN_EMAIL) zakládá majitele i členy. Majitel je provozní
+ * vedoucí klienta: přidává a spravuje členy, ale nesmí jmenovat dalšího
+ * majitele, sáhnout na jiného majitele ani na správce — jinak by se mohl
+ * povýšit, nebo správce zamknout z jeho vlastního systému. Člen nesmí nic
+ * z toho; sem se nedostane, handler ho odmítne dřív (`requireOwner`).
+ *
+ * Pravidlo je tady, ne v handleru, protože ho potřebují čtyři funkce níž
+ * a kontrola, která je jen v jednom z volajících, je kontrola, kterou ten
+ * druhý volající zapomene.
+ */
+const MANAGEABLE = { admin: ['owner', 'member'], owner: ['member'] }
+export const manageableRoles = (actor) => MANAGEABLE[actor?.role] || []
+
+const assertCanManage = (actor, role, what) => {
+    if (!manageableRoles(actor).includes(role)) {
+        throw forbidden(
+            actor?.role === 'owner'
+                ? `Majitel může ${what} jen členy. Majitele přidává a spravuje správce.`
+                : 'Nemáte oprávnění',
+        )
+    }
+}
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -130,6 +157,7 @@ export const createUser = async (actor, { email, name, role = 'member', password
         throw invalid('Zadejte platnou e-mailovou adresu', { email: 'Neplatný formát' })
     }
     if (!ROLES.includes(role)) throw invalid('Neplatná role', { role: 'Neznámá role' })
+    assertCanManage(actor, role, 'přidávat')
 
     const generated = !password
     const secret = generated ? generatePassword() : String(password)
@@ -171,6 +199,10 @@ export const updateUserRole = async (actor, id, role) => {
 
     const target = await fetchUser(id)
     if (target.role === role) return toUser(target)
+    // Obě strany změny: koho měním a na co. Majitel tak nesesadí jiného
+    // majitele na člena ani člena nepovýší na majitele.
+    assertCanManage(actor, target.role, 'měnit')
+    assertCanManage(actor, role, 'jmenovat')
 
     // ROLES cannot grant admin, so a role change on an admin row is always a
     // demotion — stillActiveAdmin is spelled out rather than hardcoded false so
@@ -199,6 +231,7 @@ export const updateUserRole = async (actor, id, role) => {
  */
 export const setUserDisabled = async (actor, id, disabled) => {
     const target = await fetchUser(id)
+    assertCanManage(actor, target.role, disabled ? 'deaktivovat' : 'obnovit')
 
     if (disabled) await assertNotLastAdmin(target, { stillActiveAdmin: false })
 
@@ -225,6 +258,7 @@ export const setUserDisabled = async (actor, id, disabled) => {
  */
 export const deleteUser = async (actor, id) => {
     const target = await fetchUser(id)
+    assertCanManage(actor, target.role, 'mazat')
     await assertNotLastAdmin(target, { stillActiveAdmin: false })
 
     const { error } = await db().from('cms_user').delete().eq('id', id)

@@ -129,6 +129,10 @@ export function AuthProvider({ children }) {
       // see server/auth.js effectiveRole() — so everything gated on "may
       // administer this CMS" asks for admin.
       isAdmin: state.user?.role === "admin",
+      // Majitel nebo správce: provozní obrazovky (archiv, uživatelé, provozní
+      // část nastavení). Stejné pravidlo jako isOwnerRole v server/auth.js —
+      // tady jen kvůli tomu, co se ukáže; povoluje server.
+      isOwner: state.user?.role === "admin" || state.user?.role === "owner",
       // The role itself, for the field-level rules — a field says which roles
       // may write it (core/defineField.js editRoles) and the renderer has to be
       // able to answer that, not just "am I the admin".

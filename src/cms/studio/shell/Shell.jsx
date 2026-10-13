@@ -26,20 +26,20 @@ import styles from "./Shell.module.scss"
 export default function Shell() {
   const router = useStudioRouter()
   const core = useCore()
-  const { isAdmin } = useAuth()
+  const { isOwner } = useAuth()
   const route = parseRoute(router.query.path)
 
   return (
     <div className={styles.shell}>
       <Sidebar />
       <main className={styles.workspace}>
-        <Workspace route={route} core={core} isAdmin={isAdmin} />
+        <Workspace route={route} core={core} isOwner={isOwner} />
       </main>
     </div>
   )
 }
 
-function Workspace({ route, core, isAdmin }) {
+function Workspace({ route, core, isOwner }) {
   if (route.view === "overview") return <OverviewView />
   // Fronta se schová i z adresy, ze stejného důvodu jako typ níž: schovaná
   // položka v menu není totéž co vypnutá obrazovka.
@@ -69,12 +69,12 @@ function Workspace({ route, core, isAdmin }) {
   // calls regardless; this only decides which of the two answers the person
   // reads.
   if (route.view === "users") {
-    if (!isAdmin) return <OwnerOnly what="Správa uživatelů" />
+    if (!isOwner) return <OwnerOnly what="Správa uživatelů" />
     return <UsersView />
   }
 
   if (route.view === "settings") {
-    if (!isAdmin) return <OwnerOnly what="Nastavení" />
+    if (!isOwner) return <OwnerOnly what="Nastavení" />
     return <SettingsView />
   }
 
@@ -84,7 +84,7 @@ function Workspace({ route, core, isAdmin }) {
   // calls requireOwner() on every request; this only decides which answer an
   // editor who typed the URL reads.
   if (route.view === "archive") {
-    if (!isAdmin) return <OwnerOnly what="Archiv" />
+    if (!isOwner) return <OwnerOnly what="Archiv" />
     return <ArchiveView section={route.section} />
   }
 
@@ -140,8 +140,8 @@ function OwnerOnly({ what }) {
   return (
     <EmptyState
       icon="lock"
-      title={`${what} je jen pro vlastníky`}
-      description="Váš účet má roli redaktora. O změnu požádejte někoho, kdo je v systému veden jako vlastník."
+      title={`${what} je jen pro majitele`}
+      description="Váš účet má roli člena. O změnu požádejte majitele webu."
       action={
         <Button href={BASE} variant="secondary" icon="arrowLeft">
           Zpět na přehled
