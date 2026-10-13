@@ -12,6 +12,7 @@ import QnaContact from "@/components/pages/index/QnaContact"
 import Head from "next/head"
 import { AnimatePresence } from "framer-motion"
 import { useCallback, useEffect, useState } from "react"
+import { isEditMode } from "@/cms/edit"
 import { getAboutContent, getAssistant, getContactContent, getNavbarContent, getFooterContent, getRoster, readerFor, viewOf } from "@/lib/site"
 
 // ISR, on the same terms as the homepage (src/pages/index.js): three
@@ -75,14 +76,26 @@ export default function AboutPage({ content }) {
   const [historyArmed, setHistoryArmed] = useState(false)
   const [historyOpen, setHistoryOpen] = useState(false)
 
+  // Ve Studiu celá stránka hned. Historie a FAQ se na webu otevírají až
+  // tlačítkem pod kolegy, takže v rámu by editor viděl stránku useknutou
+  // u výzvy a k textům historie by se nedostal — klik na tlačítko je štít
+  // překryvu stejně spolkne. Tady je tedy všechno otevřené najednou a výzva
+  // zůstává taky, protože i její texty se upravují.
+  //
+  // `isEditMode()` se při renderu dá číst bezpečně: první klientský render
+  // vrací `false` jako server a po zapnutí editace SiteShell stránku
+  // přemountuje (viz _app.js), takže tohle se přečte znovu už s `true`.
+  const editing = isEditMode()
+  const showHistory = historyOpen || editing
+
   // Until the history has been asked for, the page ends at the prompt: the
   // footer would put an ending under something that is offering to continue.
   // A body attribute rather than a prop, because the footer is mounted once in
   // _app and does not belong to this page.
   useEffect(() => {
-    document.body.dataset.footer = historyOpen ? "shown" : "hidden"
+    document.body.dataset.footer = showHistory ? "shown" : "hidden"
     return () => { delete document.body.dataset.footer }
-  }, [historyOpen])
+  }, [showHistory])
 
   // Called once the section has finished introducing itself, so the page is not
   // scrolling towards something that is still clipped shut. Lenis owns the
@@ -197,7 +210,7 @@ export default function AboutPage({ content }) {
             prompt is what arms it — that is a deliberate scroll to the end of
             the page, and from there it costs nothing until it is opened. */}
         <AnimatePresence>
-          {!historyOpen && (
+          {(!historyOpen || editing) && (
             <ContinuePrompt
               key="prompt"
               copy={prompt}
@@ -211,8 +224,10 @@ export default function AboutPage({ content }) {
             not sequenced after it: while it is closed it is fixed and invisible,
             so the two can share the page, and the prompt collapsing while the
             history opens is what removes the pause between them. */}
-        {(historyArmed || historyOpen) && (
-          <History open={historyOpen} onReady={scrollToHistory} panels={history} />
+        {(historyArmed || showHistory) && (
+          // Ve Studiu bez `onReady`: ten po otevření sjede stránkou k historii,
+          // a editor by se ocitl uprostřed stránky, kterou neotevíral.
+          <History open={showHistory} onReady={editing ? undefined : scrollToHistory} panels={history} />
         )}
 
         {/* The same questions the home page answers, and the page ends the way
@@ -220,7 +235,7 @@ export default function AboutPage({ content }) {
             is what comes after the last panel, so it appears when the history
             does and not before — the prompt above is still offering to continue,
             and putting an FAQ under that offer answers it for the reader. */}
-        {historyOpen && <QnaContact />}
+        {showHistory && <QnaContact />}
         {/* <AboutInto /> */}
         {/* <ParallaxExpanf /> */}
         {/* <QNA /> */}
