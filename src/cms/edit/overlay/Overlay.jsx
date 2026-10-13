@@ -1500,9 +1500,53 @@ function silencePage(node) {
     }
   }
   for (const type of SILENCED_EVENTS) node.addEventListener(type, stop)
+
+  // Kolečko nad posouvatelným prvkem posune ten prvek, ne stránku.
+  //
+  // `wheel` štít nezastavuje, aby se dalo posouvat stránkou — jenže cílem je
+  // štít, ne to, co leží pod ním, a výchozí posun prohlížeče se proto řetězí
+  // rovnou na dokument. Seznam s vlastním `overflow: auto` (poradci v CTA)
+  // se tak ve Studiu nedal posunout vůbec: změřeno 0 → 0. Tady se pod kurzorem
+  // najde nejbližší prvek, který se v tom směru ještě posunout DÁ, a posune
+  // se ručně; když takový není, nic se nezmění a kolečko jde na stránku jako
+  // dřív. `stopPropagation` při zásahu, aby ho zároveň nesebral Lenis stránky.
+  const onWheel = (event) => {
+    const doc = node.ownerDocument
+    const dx = event.deltaX
+    const dy = event.deltaY
+    const target = scrollableAt(doc, event.clientX, event.clientY, node, dx, dy)
+    if (!target) return
+    event.preventDefault()
+    event.stopPropagation()
+    target.scrollBy({ left: dx, top: dy, behavior: "instant" })
+  }
+  node.addEventListener("wheel", onWheel, { passive: false })
+
   return () => {
     for (const type of SILENCED_EVENTS) node.removeEventListener(type, stop)
+    node.removeEventListener("wheel", onWheel)
   }
+}
+
+/**
+ * Nejbližší prvek pod bodem, který se ve směru (dx, dy) ještě dá posunout.
+ *
+ * Bere se nejvyšší prvek stránky v bodě (mimo štít a chrome překryvu) a stoupá
+ * se k předkům. Kořen dokumentu se nevrací nikdy — jeho posun obstará výchozí
+ * chování a Lenis, a vrátit ho tady by obešlo plynulé posouvání stránky.
+ */
+function scrollableAt(doc, x, y, shield, dx, dy) {
+  const root = shield.parentElement
+  const hit = doc.elementsFromPoint(x, y).find((el) => el !== shield && !(root && root.contains(el)))
+  for (let el = hit; el && el !== doc.body && el !== doc.documentElement; el = el.parentElement) {
+    const style = el.ownerDocument.defaultView.getComputedStyle(el)
+    const canY = /(auto|scroll|overlay)/.test(style.overflowY) && el.scrollHeight > el.clientHeight
+    const canX = /(auto|scroll|overlay)/.test(style.overflowX) && el.scrollWidth > el.clientWidth
+    const roomY = dy > 0 ? el.scrollTop + el.clientHeight < el.scrollHeight - 1 : dy < 0 && el.scrollTop > 0
+    const roomX = dx > 0 ? el.scrollLeft + el.clientWidth < el.scrollWidth - 1 : dx < 0 && el.scrollLeft > 0
+    if ((canY && roomY) || (canX && roomX)) return el
+  }
+  return null
 }
 
 /**

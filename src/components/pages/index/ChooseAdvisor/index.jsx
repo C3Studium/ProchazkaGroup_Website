@@ -247,7 +247,12 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
             {/* Left column — advisor list */}
             <motion.div className="ChooseAdvisor__left" variants={LEFT}>
                 <motion.h2 variants={RISE}>Zvolit<br />poradce</motion.h2>
-                <motion.ul className="ChooseAdvisor__list" variants={LEFT}>
+                {/* `data-lenis-prevent`: seznam se posouvá sám (overflow-y: auto
+                    ve stylech), ale kolečko by jinak sebral Lenis a posunul celou
+                    stránku — dvanáct poradců by na nižší obrazovce končilo
+                    useknutých bez možnosti dojet k posledním. Stejně jako
+                    ContactModal__scroll a Dropdown. */}
+                <motion.ul className="ChooseAdvisor__list" variants={LEFT} data-lenis-prevent>
                     {/* A consultant is a document, not copy: the name on screen
                         is composed from three fields (see consultantFullName),
                         so there is no one field an in-place edit could write
