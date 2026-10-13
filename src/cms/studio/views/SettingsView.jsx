@@ -448,8 +448,9 @@ function ManageWidgetSection() {
 /**
  * Z jaké adresy chodí pozvánky do Studia, přehledy a e-maily z formulářů.
  *
- * Dvě adresy. Kam chodí zprávy z formulářů — to je pole v kartě asistentky,
- * tady jen druhý vchod k němu (MailRecipientBlock). A odesílatel, ten
+ * Dvě adresy. Kam chodí zprávy z formulářů — to je pole v dokumentu, který
+ * web určí v konfiguraci (`mail.recipient`), tady jen druhý vchod k němu
+ * (MailRecipientBlock); web bez té konfigurace tu tuhle část nemá. A odesílatel, ten
  * „noreply@…" v hlavičce Od, stejný pro všechnu poštu. Resend je služba, přes
  * kterou se odesílá; jeho klíč tu není, je tajný a zůstává v prostředí.
  */
@@ -592,9 +593,9 @@ function MailSenderSection() {
 /**
  * Kam chodí zprávy z formulářů.
  *
- * Není to vlastní nastavení: je to e-mail z karty asistentky, čtený a
- * zapisovaný tamtéž (server/mailRecipient.js). Změna tady je změna v kartě
- * a naopak — a web ji zároveň ukazuje v kontaktním panelu.
+ * Není to vlastní nastavení: je to pole dokumentu z `mail.recipient`
+ * (u Procházka Group e-mail v kartě asistentky), čtené a zapisované tamtéž
+ * (server/mailRecipient.js). Změna tady je změna v dokumentu a naopak.
  */
 function MailRecipientBlock() {
   const port = usePort()
@@ -624,7 +625,7 @@ function MailRecipientBlock() {
       toast.success(
         next.recipient?.published
           ? "Uloženo. Zprávy z formulářů teď chodí na novou adresu."
-          : "Uloženo do konceptu karty. Platit začne, až kartu publikujete.",
+          : "Uloženo do konceptu. Platit začne, až dokument publikujete.",
       )
     } catch (caught) {
       setFailure(caught?.message || "Uložení se nezdařilo.")
@@ -641,9 +642,9 @@ function MailRecipientBlock() {
         label="Kam chodí zprávy z formulářů"
         description={
           <>
-            Totéž pole jako e-mail v kartě asistentky{recipient.documentTitle ? ` (${recipient.documentTitle})` : ""} — změna
-            tady je změna tam a web ji ukáže i v kontaktním panelu.{" "}
-            {card ? <a href={card}>Otevřít kartu</a> : null}
+            Totéž pole jako „{recipient.fieldTitle}” v dokumentu {recipient.typeTitle}
+            {recipient.documentTitle ? ` (${recipient.documentTitle})` : ""} — změna tady je změna tam.{" "}
+            {card ? <a href={card}>Otevřít dokument</a> : null}
           </>
         }
       >
@@ -653,7 +654,7 @@ function MailRecipientBlock() {
             type="email"
             className={styles.input}
             value={value}
-            placeholder="asistentka@vasedomena.cz"
+            placeholder="info@vasedomena.cz"
             autoComplete="off"
             spellCheck={false}
             onChange={(event) => {
@@ -668,8 +669,8 @@ function MailRecipientBlock() {
         <p className={styles.notice}>
           <Icon name="warning" size={13} />
           <span>
-            Karta má nepublikovaný koncept s adresou <strong>{recipient.pending}</strong>. Formuláře zatím chodí na{" "}
-            <strong>{recipient.address || "zálohu z prostředí"}</strong>, dokud kartu nepublikujete.
+            Dokument má nepublikovaný koncept s adresou <strong>{recipient.pending}</strong>. Formuláře zatím chodí na{" "}
+            <strong>{recipient.address || "zálohu z prostředí"}</strong>, dokud ho nepublikujete.
           </span>
         </p>
       ) : null}

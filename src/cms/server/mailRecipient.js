@@ -2,11 +2,11 @@
 // v dokumentu.
 //
 // Web to zapíná v konfiguraci: `mail: { recipient: { type, field } }`
-// (site/define.js). U Procházka Group je to e-mail v kartě asistentky. Ta
-// adresa se zároveň ukazuje na webu a formuláře ji čtou z publikované karty
-// (src/lib/mail/forms.js), takže tady nevzniká žádná druhá kopie: Nastavení →
-// E-maily čte a zapisuje přesně to pole. Upravit ho v kartě, nebo tady, je
-// totéž.
+// (site/define.js) — třeba e-mail v kartě asistentky, kterou web zároveň
+// ukazuje v kontaktním panelu a ze které jeho formuláře berou příjemce. Tady
+// nevzniká žádná druhá kopie: Nastavení → E-maily čte a zapisuje přesně to
+// pole. Upravit ho v dokumentu, nebo tady, je totéž. Aby ho člen nepřepsal,
+// dá web tomu poli `editRoles: ['admin', 'owner']`.
 //
 // Zápis jde přes datový port Studia s přihlášeným uživatelem, ne přímo do
 // tabulky. Port kontroluje `editRoles` pole (člen adresu nezmění, ať přijde
@@ -17,6 +17,7 @@
 import site from '../site/config.js'
 import { createSupabaseDataPort } from './adapter.js'
 import { invalid } from './errors.js'
+import { findType } from './validation.js'
 
 const EMAIL = /^[^\s@<>",]+@[^\s@<>",]+\.[^\s@<>",]+$/
 
@@ -53,9 +54,13 @@ export const readMailRecipient = async (user) => {
         address: live,
         pending: draft !== null && draft !== live ? draft : null,
         documentId: doc?.id || null,
-        documentTitle: doc ? String(doc.data?.name || doc.draft?.name || '').trim() : '',
+        documentTitle: doc ? String(doc.data?.name || doc.data?.title || doc.draft?.name || doc.draft?.title || '').trim() : '',
         field: source.field,
         type: source.type,
+        // Jména pro obrazovku, ze schématu — Nastavení nemá vědět, že u tohohle
+        // webu jde o „Asistentku" a pole „E-mail".
+        typeTitle: findType(source.type)?.title || source.type,
+        fieldTitle: findType(source.type)?.fields?.find((f) => f.name === source.field)?.title || source.field,
     }
 }
 
@@ -74,7 +79,7 @@ export const writeMailRecipient = async (user, patch) => {
     const address = String(patch?.address || '').trim()
     if (!EMAIL.test(address)) {
         throw invalid('Adresa pro zprávy z formulářů není platný e-mail', [
-            { path: 'recipient', message: 'Zadejte e-mail, např. asistentka@vasedomena.cz' },
+            { path: 'recipient', message: 'Zadejte e-mail, např. info@vasedomena.cz' },
         ])
     }
 
