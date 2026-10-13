@@ -46,7 +46,13 @@
 .RevWall__bento {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    grid-auto-rows: 11vh;
+    // Spodní mez, ne pevná výška. Pevných 11vh stačilo na vysokém okně Macu,
+    // ale na notebooku s Windows (1536×730 při zvětšení 125 %) má karta přes
+    // dva řádky ~165 px a hlavička, linky a patička se srdíčkem ji zaplní celou
+    // — text recenze se smrskl na nulu a karta byla prázdná. Změřeno: 15 karet
+    // z 24 s textem vysokým 0 px. Řádek teď poroste, když se do karty nevejdou
+    // aspoň tři řádky textu (min-height u __text níž).
+    grid-auto-rows: minmax(11vh, auto);
     grid-auto-flow: dense;
     // The gutter in rem: 1.375rem is the 22px it has always been up to 1920,
     // and above that it grows with the reviews it separates (see globals.scss).
@@ -118,6 +124,14 @@
         // A cell is a fixed height and a review is not; what does not fit is
         // what the sheet is for.
         overflow: hidden;
+        // Vždycky aspoň tři řádky. Bez toho se text jako pružná položka
+        // s `overflow: hidden` smí smrsknout až na nulu (viz grid-auto-rows).
+        // `contain: size` je ta druhá polovina: do výšky řádku mřížky se počítá
+        // jen tahle mez, ne celá recenze — jinak by řádek vyrostl na celý text
+        // a ořez, kvůli kterému karta otvírá detail, by zmizel.
+        flex: 1 1 auto;
+        min-height: 4.8em;
+        contain: size;
     }
 
     .RevWall__cell__foot {
@@ -384,7 +398,7 @@
         grid-template-columns: repeat(2, 1fr);
         // Shorter rows, because a card is now twice as wide and the same review
         // needs half the lines it needed at four tracks.
-        grid-auto-rows: 8vh;
+        grid-auto-rows: minmax(8vh, auto);
         gap: 18px;
     }
 
@@ -420,7 +434,9 @@
 
         &.is-xl, &.is-wide, &.is-tall, &.is-sm { grid-column: auto; grid-row: auto; }
 
-        .RevWall__cell__text { overflow: visible; }
+        // Celý text, takže i jeho skutečná výška — bez `contain` by se z něj
+        // počítaly jen tři řádky a zbytek by přetekl přes patičku.
+        .RevWall__cell__text { overflow: visible; contain: none; min-height: 0; }
         .RevWall__cell__in { opacity: 1 !important; }
 
         // Nothing is clipped here, so a tap holds nothing the card is not
