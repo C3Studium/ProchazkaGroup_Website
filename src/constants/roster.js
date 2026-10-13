@@ -64,6 +64,12 @@ export const rosterFromCms = (people) =>
             src: person?.portrait?.src || person?.src || "",
             srcAlt: person?.portraitAlt?.src || person?.portraitDetail?.src || null,
             tel: person?.phone || person?.tel || "",
+            // Pro modál poradce (components/common/AdvisorModal). Dřív se cestou
+            // zahazovaly, takže příběh, který má v CMS každý poradce, se na webu
+            // neobjevil nikde. Prázdný řetězec, ne `null`: modál prázdný příběh
+            // prostě nevykreslí a getStaticProps `undefined` neserializuje.
+            story: person?.story || "",
+            email: person?.email || "",
             // Pozor: tohle NIC nenastavuje.
             //
             // Čtečka poradců připojuje `id` (`provenance` v lib/site/people.js),

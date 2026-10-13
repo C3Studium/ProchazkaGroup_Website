@@ -1,7 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { memo, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react'
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { RiPhoneLine } from '@remixicon/react'
 
 import CornerMarks from '@/components/common/ui/CornerMarks'
@@ -10,6 +10,7 @@ import { useReactions } from '@/components/common/ui/LikeButton/useReactions'
 import { CURTAIN } from '@/components/common/ui/entrance'
 import { FALLBACK_ROSTER, dial } from '@/constants/roster'
 import { editableDoc, interactive, isEditMode } from '@/cms/edit'
+import AdvisorModal from '@/components/common/AdvisorModal'
 import { usePhoneOrTabletUpright } from '@/helpers/usePhone'
 
 // The roster, inside the menu's own panel.
@@ -244,12 +245,12 @@ const wallIn = {
 // opouštěná a ta braná; zbylých deset nemá co nového říct.
 //
 // Aby memo drželo, musí být stabilní všechno, co sem chodí propem. `onHover`
-// a `onPick` drží useCallback v sekci níž, `likes` si svou identitu drží od
+// a `onOpen` drží useCallback v sekci níž, `likes` si svou identitu drží od
 // chvíle, kdy useReactions vrací memoizovaný objekt (viz jeho vlastní
 // poznámka) — předtím rozdával novou identitu při každém renderu a memo tu
 // bylo jen na ozdobu.
 const Cell = memo(function Cell({
-    person, index, opens, share, isOpen, calm, touch, phone, likes, onHover, onPick,
+    person, index, opens, share, isOpen, calm, touch, phone, likes, onHover, onOpen,
 }) {
         const href = dial(person.tel);
 
@@ -260,7 +261,11 @@ const Cell = memo(function Cell({
         // same gesture. A <button> and not a tel: link with its default
         // prevented: a link that never navigates is a lie told to everybody who
         // is not looking at the screen.
-        const Tile = phone ? 'button' : 'a';
+        // Na počítači a tabletu otevírá dlaždice modál poradce (příběh, telefon,
+        // e-mail) — viz components/common/AdvisorModal. Dřív to byl `tel:` odkaz
+        // a klik rovnou vytáčel; z počítače se ale nevolá, a „kdo to je" karta
+        // s mottem nezodpoví. Volá se teď z modálu, jedním klikem navíc.
+        const Tile = 'button';
         const tileProps = phone
             ? {
                 type: 'button',
@@ -271,20 +276,19 @@ const Cell = memo(function Cell({
                 onClick: () => onHover(index),
             }
             : {
-                href,
-                // These are tel: links, and on touch the hover cannot have
-                // happened first. So the tap is the reach: the first tap on
-                // a closed block opens it — portrait, motto, number — and
-                // only a tap on the block already open places the call.
-                // Ringing somebody because a thumb brushed their face is
-                // the one thing this wall must not do.
-                onClick: (e) => {
+                type: 'button',
+                'aria-haspopup': 'dialog',
+                'aria-label': `${person.name} — zobrazit detail`,
+                // Na dotyku nemohl hover proběhnout dřív, takže první ťuknutí
+                // na zavřenou dlaždici ji rozbalí (portrét, motto, číslo) a
+                // teprve ťuknutí na už otevřenou otevře modál. Stejné pravidlo,
+                // jaké dřív chránilo před nechtěným vytočením.
+                onClick: () => {
                     if (touch && !isOpen) {
-                        e.preventDefault();
                         onHover(index);
                         return;
                     }
-                    onPick?.(e);
+                    onOpen(index);
                 },
                 // Keyboard preview only: on touch a tap fires focus BEFORE
                 // click, and an unguarded focus would select the block
@@ -395,9 +399,9 @@ const Cell = memo(function Cell({
                     )}
                 </Tile>
 
-                {/* Na širokém plátně je dlaždice sama odkazem `tel:`, takže
-                    srdíčko dovnitř nesmí — <button> uvnitř <a> není ani jedno z
-                    toho: klávesnice z toho neudělá dvě věci a odečítač obrazovky
+                {/* Dlaždice je sama tlačítkem (otevírá modál), takže srdíčko
+                    dovnitř nesmí — <button> v <button> není platné HTML,
+                    klávesnice z toho neudělá dvě věci a odečítač obrazovky
                     ohlásí zmatek. Leží tedy VEDLE dlaždice a nad ní, a jen na
                     té otevřené: zavřená dlaždice je pruh široký pár desítek
                     pixelů a srdce v něm by bylo větší než ona.
@@ -420,24 +424,30 @@ const Cell = memo(function Cell({
 export default function Advisors({ roster, calm, touch, onPick }) {
     const [hovered, setHovered] = useState(0);
 
-    // Dvě ustálené funkce, bez kterých by memo na dlaždici nedrželo.
-    //
-    // Šipka zapsaná rovnou do JSX je při každém renderu nová, a nová funkce je
-    // přesně ten prop, který memo nepřežije — dlaždice by se překreslily
-    // všechny a memo by bylo jen dekorace.
-    //
-    // `onPick` chodí zvenčí a jeho stabilitu nemáme v ruce, takže se drží
-    // v refu a ven jde obal, který se nemění nikdy. Ref se přepisuje při
-    // renderu schválně: volá se až z obsluhy události, tedy dávno po něm.
+    // Ustálené funkce, bez kterých by memo na dlaždici nedrželo: šipka zapsaná
+    // rovnou do JSX je při každém renderu nová, a nová funkce je přesně ten
+    // prop, který memo nepřežije.
     const hover = useCallback((index) => setHovered(index), []);
-    const pickRef = useRef(onPick);
-    pickRef.current = onPick;
-    const pick = useCallback((event) => pickRef.current?.(event), []);
+    // Který poradce je v modálu (index do `people`), nebo null.
+    const [detail, setDetail] = useState(null);
+    const openDetail = useCallback((index) => setDetail(index), []);
+    const closeDetail = useCallback(() => setDetail(null), []);
     // Upright and no wider than a tablet. The sheet a phone gets is the sheet a
     // tablet upright wants too, only bigger — see PHONE_OR_TABLET_UPRIGHT in
     // @/helpers/usePhone, which is its own constant rather than a wider PHONE
     // because two other components read that one and neither wants this.
     const phone = usePhoneOrTabletUpright({ eager: true });
+    // Tablet na výšku dostává telefonní rozvržení (stěna + panel pod ní), ale
+    // není to telefon: tam se modál s příběhem nabízí z panelu. Skutečný
+    // telefon (< 750 px, stejná hranice jako MQ_PHONE v ContactModal) ho nemá.
+    const [wide, setWide] = useState(false);
+    useEffect(() => {
+        const mq = window.matchMedia('(min-width: 750px)');
+        const read = () => setWide(mq.matches);
+        read();
+        mq.addEventListener('change', read);
+        return () => mq.removeEventListener('change', read);
+    }, []);
     // `isEditMode()` jde false → true o jeden render po hydrataci, a `Cell` je
     // memoizovaná. Kdyby se anotace počítaly uvnitř ní — a chvíli se počítaly —
     // zamrzly by na té první odpovědi, tedy na prázdném objektu: karta by ve
@@ -536,7 +546,7 @@ export default function Advisors({ roster, calm, touch, onPick }) {
             phone={phone}
             likes={likes}
             onHover={hover}
-            onPick={pick}
+            onOpen={openDetail}
         />
     );
 
@@ -658,6 +668,17 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                                         {now.tel}
                                     </a>
                                 )}
+                                {wide && (now.story || now.email) ? (
+                                    <button
+                                        type="button"
+                                        className="navAdv__now__more"
+                                        data-cursor="frame"
+                                        aria-haspopup="dialog"
+                                        onClick={() => openDetail(nowIndex)}
+                                    >
+                                        Příběh
+                                    </button>
+                                ) : null}
                                 {/* Vedle čísla, ne pod ním: je to druhá věc,
                                     kterou s vybraným poradcem jde udělat, ne
                                     další údaj o něm. Bez id se nekreslí — viz
@@ -676,6 +697,16 @@ export default function Advisors({ roster, calm, touch, onPick }) {
                     </motion.div>
                 </div>
             )}
+
+            {/* Modál poradce. Portál do `body`, takže na místě ve stromu nezáleží;
+                tady je proto, že tady je stav. Ve Studiu nese hranici povrchu
+                „Menu — poradci", aby ho výběr nepřeskočil — viz surfaceRoot. */}
+            <AdvisorModal
+                person={detail === null ? null : people[detail] || null}
+                order={detail === null ? null : detail + 1}
+                onClose={closeDetail}
+                studioRoot="navbar.advisors"
+            />
         </motion.div>
     );
 }

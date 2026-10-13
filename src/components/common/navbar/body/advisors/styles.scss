@@ -120,6 +120,15 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .navAdv__cell__link {
+    // Na počítači a tabletu je karta <button> (otevírá modál poradce, viz
+    // index.jsx), na telefonu taky — reset prohlížečového tlačítka tedy patří
+    // sem, do základu, ne jen do telefonního bloku níž.
+    appearance: none;
+    margin: 0;
+    border: 0;
+    font: inherit;
+    text-align: left;
+    cursor: inherit;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -681,6 +690,29 @@ $curtain: cubic-bezier(0.22, 1, 0.36, 1);
 
             &:focus-visible {
                 outline: 1px solid var(--bgPrimary, #BBB788);
+                outline-offset: 2px;
+            }
+        }
+
+        // Odkaz na modál s příběhem — jen tablet na výšku (viz `wide`
+        // v index.jsx). Vedle čísla a ve stejném tvaru, ale ve světlé, ne
+        // akcentové barvě: hlavní věc v panelu je zavolat, tohle je „víc o něm".
+        .navAdv__now__more {
+            appearance: none;
+            display: inline-flex;
+            align-items: center;
+            min-height: 44px;
+            margin: 0;
+            padding: 0 0.9rem;
+            @include font(XSBody);
+            letter-spacing: 0.06em;
+            color: rgba(255, 255, 255, 0.85);
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            cursor: inherit;
+
+            &:focus-visible {
+                outline: 1px solid rgba(255, 255, 255, 0.7);
                 outline-offset: 2px;
             }
         }
