@@ -7,7 +7,7 @@ import Arrow from "@/components/common/ui/Arrow";
 import Dropdown from "@/components/common/ui/Dropdown";
 import { editable, surfaceRoot, useStudioSurface } from "@/cms/edit";
 import { toast } from "sonner";
-import { notifyForm } from "@/hooks/useFormSubmit";
+import { notifyForm, rejectionReason } from "@/hooks/useFormSubmit";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
@@ -122,7 +122,13 @@ export default function AddReview({ consultants = [], copy = {}, notices = null,
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(form),
             });
-            if (!res.ok) throw new Error(String(res.status));
+            if (!res.ok) {
+                // Důvod od serveru, když nějaký dal (krátká zpráva, neznámý
+                // poradce); jinak obecná věta z CMS. Viz rejectionReason.
+                const reason = await rejectionReason(res);
+                if (reason) return toast.error(reason);
+                throw new Error(String(res.status));
+            }
             // Recenze je uložená; tohle je jen oznámení do firmy. Bez
             // `await` a bez vlivu na výsledek — viz notifyForm.
             notifyForm("recenze", {

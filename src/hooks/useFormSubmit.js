@@ -72,3 +72,28 @@ export default function useFormSubmit(form) {
 
     return { send, sending };
 }
+
+/**
+ * Proč server zápis odmítl — věta, kterou jde ukázat člověku, nebo `null`.
+ *
+ * /api/cms/reviews odpovídá na neplatný vstup 422 s důvodem u konkrétního pole
+ * („Musí mít alespoň 10 znaků."). Formuláře ho dřív zahazovaly a ukazovaly jen
+ * obecné „nepodařilo se odeslat" — recenze „TEST" pak vypadala jako rozbitý web,
+ * ačkoli server přesně řekl, co chybí. Pravidla bydlí ve schématu recenze
+ * (cms/schemas/review.js); tady se jen přečtou, aby nebyla na dvou místech.
+ *
+ * Jen pro 4xx: chyba serveru (5xx) nese technické hlášení, které člověku nic
+ * neřekne, a tam má zůstat obecná věta z CMS.
+ */
+export const rejectionReason = async (res) => {
+    if (!res || res.status < 400 || res.status >= 500) return null
+    try {
+        const body = await res.json()
+        const error = body?.error || {}
+        const field = Array.isArray(error.fields) ? error.fields.find((f) => f?.message) : null
+        const text = field?.message || error.message
+        return typeof text === 'string' && text.trim() ? text.trim() : null
+    } catch {
+        return null
+    }
+}

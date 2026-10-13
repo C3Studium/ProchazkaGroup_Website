@@ -4,7 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import { cubicBezier, motion } from "framer-motion";
 import { toast } from "sonner";
-import { notifyForm } from "@/hooks/useFormSubmit";
+import { notifyForm, rejectionReason } from "@/hooks/useFormSubmit";
 // Hlášky obou formulářů recenzí jsou jeden blok (`recenze.hlasky`) — obě routy
 // posílají recenzi stejnou cestou. Čtečka bydlí u toho formuláře, který ji
 // potřeboval první; druhá kopie by byla druhé místo, kde se dá změnit jen jedno.
@@ -145,7 +145,13 @@ export default function AdvisorCard({ advisor, copy = {}, notices = null }) {
                     website: values.website,
                 }),
             });
-            if (!res.ok) throw new Error(String(res.status));
+            if (!res.ok) {
+                // Důvod od serveru, když nějaký dal (krátká zpráva, neznámý
+                // poradce); jinak obecná věta z CMS. Viz rejectionReason.
+                const reason = await rejectionReason(res);
+                if (reason) return toast.error(reason);
+                throw new Error(String(res.status));
+            }
             // Uložená recenze je ta akce; e-mail je zpráva o ní.
             notifyForm("recenze", {
                 customerName: values.customerName,
