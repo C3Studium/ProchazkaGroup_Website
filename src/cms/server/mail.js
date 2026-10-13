@@ -51,8 +51,26 @@ export const hasSender = () =>
  */
 export const senderAddress = () => optional('CMS_MAIL_FROM') || optional('RESEND_FROM_EMAIL')
 
+/**
+ * Adresa webu, na kterou vedou odkazy v e-mailech.
+ *
+ * Na produkci `NEXT_PUBLIC_SITE_URL`. Na náhledovém nasazení Vercelu ale ta
+ * proměnná ukazuje na ostrou doménu — a dokud na ní běží jiná verze webu,
+ * vedla by pozvánka do Studia, které tam není. Náhled proto posílá na svou
+ * vlastní adresu větve (`VERCEL_BRANCH_URL`, stálá napříč deployi), případně
+ * na adresu konkrétního deploye. Obojí nastavuje Vercel, ne požadavek, takže
+ * se odkaz nedá podvrhnout hlavičkou Host.
+ */
+export const mailSiteUrl = () => {
+    if (process.env.VERCEL_ENV === 'preview') {
+        const host = process.env.VERCEL_BRANCH_URL || process.env.VERCEL_URL
+        if (host) return `https://${host.replace(/^https?:\/\//, '').replace(/\/+$/, '')}`
+    }
+    return siteUrl().replace(/\/+$/, '')
+}
+
 /** Kam vede Studio. Odvozeno z adresy webu, ne psáno zvlášť. */
-export const studioUrl = () => `${siteUrl().replace(/\/+$/, '')}/studio`
+export const studioUrl = () => `${mailSiteUrl()}/studio`
 
 /**
  * Pošli pozvánku do Studia.
@@ -71,9 +89,14 @@ export const sendInvite = async ({ to, name, role, invitedBy, password }) => {
     if (!to) return { sent: false, reason: 'no-address' }
 
     try {
+        // Obyčejné `import('resend')`, žádné `webpackIgnore`. Ignorovaný import
+        // bundler nevidí, a co nevidí, to Vercel do funkce nezabalí: lokálně
+        // `node_modules` balíček má, nasazená funkce ne, a pozvánka tiše
+        // skončila jako `sent: false`. Balíček je v `serverExternalPackages`
+        // (next.config.mjs), takže se nebundluje, jen se do funkce přibalí.
         const [{ Resend }, { render }, template] = await Promise.all([
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
+            import('resend'),
+            import('@react-email/render'),
             import('@/modules/resend/emails/cms-pozvanka.jsx'),
         ])
 
@@ -160,13 +183,13 @@ export const sendDigest = async ({ period, published, reviewsNew, reviewsPending
         if (!to.length) return { sent: 0, reason: 'no-recipients' }
 
         const [{ Resend }, { render }, template] = await Promise.all([
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
+            import('resend'),
+            import('@react-email/render'),
             import('@/modules/resend/emails/cms-statistiky.jsx'),
         ])
 
         const html = await render(
-            template.default({ period, published, reviewsNew, reviewsPending, mediaAdded, siteUrl: siteUrl() }),
+            template.default({ period, published, reviewsNew, reviewsPending, mediaAdded, siteUrl: mailSiteUrl() }),
         )
 
         const resend = new Resend(optional('RESEND_API_KEY'))
@@ -205,14 +228,14 @@ export const sendUpdateNotice = async ({ what, typeTitle, who, actorEmail, pages
         if (!to.length) return { sent: 0, reason: 'no-recipients' }
 
         const [{ Resend }, { render }, template] = await Promise.all([
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
+            import('resend'),
+            import('@react-email/render'),
             import('@/modules/resend/emails/cms-aktualizace.jsx'),
         ])
 
         const when = new Date().toLocaleString('cs-CZ', { dateStyle: 'long', timeStyle: 'short' })
         const html = await render(
-            template.default({ what, typeTitle, who, when, pages, siteUrl: siteUrl() }),
+            template.default({ what, typeTitle, who, when, pages, siteUrl: mailSiteUrl() }),
         )
 
         const resend = new Resend(optional('RESEND_API_KEY'))

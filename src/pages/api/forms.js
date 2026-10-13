@@ -123,8 +123,8 @@ export default async function handler(req, res) {
 
     try {
         const [{ Resend }, { render }] = await Promise.all([
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ 'resend'),
-            import(/* webpackIgnore: true */ /* turbopackIgnore: true */ '@react-email/render'),
+            import('resend'),
+            import('@react-email/render'),
         ])
         const resend = new Resend(process.env.RESEND_API_KEY)
 

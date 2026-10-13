@@ -39,6 +39,15 @@ const roleTitle = (role) => ROLE_TITLES[role] || role
  * furniture. If that ever stops being true, the port already returns `{ rows }`
  * and can grow a `total` without the screen changing shape.
  */
+// Proč pozvánka neodešla, řečeno pro majitele, ne pro vývojáře. Server vrací
+// buď kód (nic k odeslání), nebo text chyby od Resendu.
+const inviteFailure = (invite) => {
+  const reason = invite?.reason
+  if (reason === "no-sender") return "Na webu není nastavené odesílání e-mailů."
+  if (reason === "no-address") return "Účet nemá e-mailovou adresu."
+  return reason ? `${String(reason).replace(/\.?$/, ".")}` : "Server nevrátil důvod."
+}
+
 export default function UsersView() {
   const port = usePort()
   const toast = useToast()
@@ -165,7 +174,11 @@ export default function UsersView() {
           // is shown even when the invite e-mail carried it too.
           if (result?.temporaryPassword) setIssued(result)
           else if (result?.invite?.sent) toast.success("Uživatel byl vytvořen a pozvánka s heslem odeslána.")
-          else toast.success("Uživatel byl vytvořen. E-mail se neodeslal — heslo mu předejte sami.")
+          else
+            toast.info("Uživatel byl vytvořen, pozvánka ale neodešla.", {
+              description: `${inviteFailure(result?.invite)} Přihlašovací údaje mu předejte sami.`,
+              duration: 12000,
+            })
         }}
       />
 
@@ -425,7 +438,7 @@ function IssuedDialog({ issued, onClose }) {
         Účet <strong>{issued?.user?.email}</strong> je vytvořen.{" "}
         {issued?.invite?.sent
           ? "Pozvánka s heslem a odkazem do Studia mu odešla e-mailem; tady je heslo pro jistotu ještě jednou."
-          : "Pozvánkový e-mail se neodeslal, takže mu toto heslo předejte sami — po přihlášení si ho může změnit."}
+          : `Pozvánkový e-mail se neodeslal: ${inviteFailure(issued?.invite)} Toto heslo mu proto předejte sami — po přihlášení si ho může změnit.`}
       </p>
       <div className={styles.secretRow}>
         <code className={styles.secret}>{issued?.temporaryPassword}</code>

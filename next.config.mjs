@@ -115,6 +115,11 @@ const nextConfig = {
   },
   // Add output: 'standalone' for better Vercel deployment
   output: 'standalone',
+  // Pošta CMS a formulářů (src/cms/server/mail.js, src/pages/api/forms.js).
+  // Nebundluje se, ale tracing ji vidí a přibalí do funkce na Vercelu. Dřív ji
+  // importy s `webpackIgnore` schovávaly, nasazená funkce balíčky neměla
+  // a pozvánky i kontaktní formuláře se tiše neodesílaly.
+  serverExternalPackages: ['resend', '@react-email/render'],
 
   // The Studio's preview lists the site's pages by reading src/pages at request
   // time (src/cms/server/pages.js) — the only way that list cannot drift from the
