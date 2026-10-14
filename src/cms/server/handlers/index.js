@@ -21,6 +21,7 @@ import { handleStats } from './stats.js'
 import { handleReactions } from './reactions.js'
 import { handleWidget } from './widget.js'
 import { handleHeartbeat } from './heartbeat.js'
+import { handleDialPrefixes } from './dialPrefixes.js'
 import { sendError } from './http.js'
 
 export const handleCmsRequest = async (req, res) => {
@@ -52,6 +53,13 @@ export const handleCmsRequest = async (req, res) => {
             // namespace's "owner before any branch" rule stays exceptionless.
             case 'widget':
                 return await handleWidget(req, res, rest)
+            // Phone dial prefixes the site's forms offer. GET is public (every
+            // form asks once per tab), PUT is owner-only — see
+            // handlers/dialPrefixes.js. Missing from this switch, the forms
+            // got a 404 and fell back to the shipped list, so an owner's edit
+            // in the Studio never reached the site.
+            case 'dial-prefixes':
+                return await handleDialPrefixes(req, res, rest)
             // The one branch that is not reached with a session cookie. It
             // authenticates an API key instead, and the port it constructs can
             // read published documents and nothing else — see handlers/content.js.
