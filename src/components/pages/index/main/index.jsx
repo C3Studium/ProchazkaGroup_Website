@@ -40,7 +40,7 @@ const FALLBACK_HEADING = [
 // obarvený text, jak to bylo dřív — viz components/common/ui/accentText.
 const FALLBACK_ACCENT = ["jednu dekádu", "12 let"];
 
-const FALLBACK_SCROLL_HINT = "Scroll down";
+const FALLBACK_SCROLL_HINT = "Posuňte dolů";
 const FALLBACK_BADGE = { label: "Nahlášení pojistného", href: "https://www.pojistnehlaseni.cz/" };
 const FALLBACK_REVIEWS_CTA = "Recenze";
 

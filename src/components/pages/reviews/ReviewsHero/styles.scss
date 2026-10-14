@@ -52,6 +52,7 @@
 
     .RevHero__line {
         margin: 0;
+        font-weight: inherit;
         font-family: "Switzer-Light", sans-serif;
         font-size: clamp(0.86rem, 1.05vw, 1.2rem);
         line-height: 1.5;

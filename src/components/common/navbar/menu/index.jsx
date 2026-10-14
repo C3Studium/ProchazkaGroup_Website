@@ -31,7 +31,7 @@ export default function Menu({ menu, setMenu, onContact }) {
     // its contents this button announces itself as the alphabet at every width;
     // measured. Below 380 across there is no visible word at all (see
     // styles.scss) and this is the only name it has.
-    const word = menu ? "Close" : "Menu";
+    const word = menu ? "Zavřít" : "Menu";
 
     return (
         <div className="navbar__container">

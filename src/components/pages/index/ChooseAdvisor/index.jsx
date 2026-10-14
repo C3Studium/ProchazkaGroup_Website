@@ -49,7 +49,7 @@ const OFFICE_PHONE = "+420 776 157 476";
 //                          element to one text node, so `textContent` of
 //                          `A<br />B` is "AB" and the first click would join the
 //                          two lines.
-//   Jméno / Email / Telčíslo   each is `Jméno<Req />&nbsp;|`: the asterisk and
+//   Jméno / E-mail / Tel. číslo   each is `Jméno<Req />&nbsp;|`: the asterisk and
 //                          the rule are drawn by elements inside the label
 //                          rather than characters in it, so an in-place edit
 //                          would read them back as part of the word and store
@@ -70,7 +70,7 @@ const COPY = {
 };
 
 const FORM_COPY = {
-    heading: "Vyplňte formu",
+    heading: "Vyplňte formulář",
     timeLabel: "Preferovaný čas hovoru",
     timeFrom: "Od",
     timeTo: "Do",
@@ -359,31 +359,34 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                         <input
                             type="text"
                             name="name"
-                            placeholder="Lorem ipsum"
+                            placeholder="Vaše jméno"
+                            autoComplete="name"
                             value={values.name}
                             onChange={set("name")}
                             data-cursor="frame"
                         />
                     </motion.label>
                     <motion.label variants={RISE}>
-                        <span className="label">Email<Req />&nbsp;|</span>
+                        <span className="label">E-mail<Req />&nbsp;|</span>
                         <input
                             type="email"
                             name="email"
-                            placeholder="Lorem ipsum"
+                            placeholder="Váš e-mail"
+                            autoComplete="email"
                             value={values.email}
                             onChange={set("email")}
                             data-cursor="frame"
                         />
                     </motion.label>
                     <motion.label variants={RISE}>
-                        <span className="label">Telčíslo<Req />&nbsp;|</span>
+                        <span className="label">Tel. číslo<Req />&nbsp;|</span>
                         <div className="telRow">
                             <DialPrefix value={values.dial} onChange={set("dial")} separator />
                             <input
                                 type="tel"
                                 name="phone"
-                                placeholder="Lorem ipsum"
+                                placeholder="Vaše telefonní číslo"
+                                autoComplete="tel-national"
                                 value={values.phone}
                                 onChange={set("phone")}
                                 data-cursor="frame"

@@ -30,34 +30,34 @@ import { editable, editableList, editableLink } from "@/cms/edit";
 const questions = [
     {
         q: "Jak nás můžete kontaktovat?",
-        a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+        a: "Napište nám přes formulář vedle, zavolejte nebo si rovnou vyberte svého poradce. Ozveme se vám a domluvíme schůzku – osobně v kanceláři, nebo online, jak vám to bude vyhovovat.",
     },
     {
         q: "S jakými společnostmi spolupracujeme?",
-        a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        a: "Spolupracujeme se 43 partnerskými společnostmi – bankami, pojišťovnami, investičními a penzijními společnostmi. Díky tomu vám můžeme porovnat nabídky napříč trhem a doporučit tu, která vám opravdu sedí.",
     },
     {
         q: "S čím se na nás můžete obracet?",
-        a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        a: "S čímkoli, co se týká vašich financí: hypotéka, úvěry a jejich konsolidace, pojištění, investice, spoření nebo zajištění na penzi. Pomůžeme vám i se sestavením rodinného rozpočtu.",
     },
     {
         q: "Je tato služba pro klienta zdarma?",
-        a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        a: "Ano. Konzultace i analýza vašich financí jsou pro vás zdarma a k ničemu vás nezavazují. Rozhodnutí, zda a jaký produkt sjednat, je vždy jen na vás.",
     },
     {
         q: "Co je to Benefit program?",
-        a: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+        a: "Program pro naše klienty: když nás doporučíte a z vašeho doporučení se stane nový klient, dostanete odměnu. Vyhráváte vy i ten, koho jste doporučili. Podrobnosti najdete na stránce Benefit program.",
     },
 ];
 
 // Six, for the same reason: the row's wrap is measured against them.
 const topics = [
-    "Otázky/odpovědi",
-    "Otázky/odpovědi",
-    "Otázky/odpovědi",
-    "Otázky/odpovědi",
-    "Otázky/odpovědi",
-    "Kontakt",
+    "Hypotéka",
+    "Investice",
+    "Pojištění",
+    "Penze",
+    "Úvěry",
+    "Jiné",
 ];
 
 // The section's own labels. What is NOT here: the four inputs' placeholders,
@@ -77,16 +77,16 @@ const HEAD = {
     text: "Některé z nich jsme už zodpověděli. Nebo se nás rovnou zeptejte",
     photo: { src: "/assets/backgrounds/conferenceFront.webp", alt: "" },
     contactTab: "Kontakt",
-    qnaTab: "QNA",
+    qnaTab: "Otázky",
     answerHeading: "Odpověď",
 };
 
 const FORM = {
-    fieldLabels: ["Jméno", "Email", "Tel. číslo", "Subjekt"],
+    fieldLabels: ["Jméno", "E-mail", "Tel. číslo", "Předmět"],
     prefix: "+420",
     topicsLabel: "Téma:",
     messageHeading: "Vaše zpráva:",
-    message: "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",
+    message: "",
     gdpr: "Kliknutím na tlačítko souhlasíte ke zpracování vašich osobních údajů",
     moreLabel: "více",
     submit: "Poslat zprávu",
@@ -401,8 +401,8 @@ export default function QnaContact({ copy = {} }) {
                         >
                             <div className="QnaContact__fields">
                                 {[
-                                    { label: form.fieldLabels[0], name: "name" },
-                                    { label: form.fieldLabels[1], name: "email" },
+                                    { label: form.fieldLabels[0], name: "name", type: "text", placeholder: "Vaše jméno", autoComplete: "name" },
+                                    { label: form.fieldLabels[1], name: "email", type: "email", placeholder: "Váš e-mail", autoComplete: "email" },
                                 ].map((field, index) => (
                                     <motion.label
                                         key={field.name}
@@ -413,7 +413,7 @@ export default function QnaContact({ copy = {} }) {
                                         className="QnaContact__field"
                                     >
                                         <span {...editable(formDoc, `items.${index}.label`, "text")} className="label">{field.label}</span>
-                                        <input type="text" name={field.name} placeholder="Lorem ipsum" data-cursor="frame" />
+                                        <input type={field.type} name={field.name} placeholder={field.placeholder} autoComplete={field.autoComplete} data-cursor="frame" />
                                     </motion.label>
                                 ))}
 
@@ -435,7 +435,7 @@ export default function QnaContact({ copy = {} }) {
                                         defaultValue={form.prefix || DEFAULT_DIAL}
                                         size={15}
                                     />
-                                    <input type="tel" name="phone" placeholder="Lorem ipsum" data-cursor="frame" />
+                                    <input type="tel" name="phone" placeholder="Vaše telefonní číslo" autoComplete="tel-national" data-cursor="frame" />
                                 </motion.label>
 
                                 <motion.label
@@ -446,7 +446,7 @@ export default function QnaContact({ copy = {} }) {
                                     className="QnaContact__field"
                                 >
                                     <span {...editable(formDoc, "items.3.label", "text")} className="label">{form.fieldLabels[3]}</span>
-                                    <input type="text" name="subject" placeholder="Lorem ipsum" data-cursor="frame" />
+                                    <input type="text" name="subject" placeholder="Předmět zprávy" data-cursor="frame" />
                                 </motion.label>
 
                                 <motion.div
@@ -490,6 +490,7 @@ export default function QnaContact({ copy = {} }) {
                                 <textarea
                                     data-cursor="frame"
                                     name="message"
+                                    placeholder="Vaše zpráva – s čím vám můžeme pomoct?"
                                     defaultValue={form.message}
                                 />
                                 <div className="QnaContact__message__foot">

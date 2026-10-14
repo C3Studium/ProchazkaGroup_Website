@@ -324,9 +324,9 @@ export default function NotFound404({ content = null }) {
                     — první uložení by značku i pomlčku sežralo. Jsou to `title`
                     bloku a upravují se ve formuláři. Stejná úvaha jako
                     u nadhozu /ochrana-soukromi. */}
-                <motion.p className="NotFound404__eyebrow" variants={rise(0.03)}>
+                <motion.h1 className="NotFound404__eyebrow" variants={rise(0.03)}>
                     <em>404</em> — {words.words}
-                </motion.p>
+                </motion.h1>
 
                 {/* One quiet off-grid tick opposite the eyebrow. */}
                 <motion.span

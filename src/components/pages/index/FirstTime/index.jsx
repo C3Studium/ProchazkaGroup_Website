@@ -24,7 +24,7 @@ const STATS = [
 
 const FALLBACK_LEAD = "Koukněte na to, jak vám můžeme pomoct, protože nejde jen o peníze.";
 const FALLBACK_HEADING = "Jste tu poprvé?";
-const FALLBACK_SCROLL_HINT = "Scroll down";
+const FALLBACK_SCROLL_HINT = "Posuňte dolů";
 const FALLBACK_CTA = "Mám zájem";
 
 // One stat block; own component so each can hold its own staggered transform.

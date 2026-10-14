@@ -198,6 +198,8 @@
         transition: border-color 0.35s ease;
 
         &:focus { border-bottom-color: rgba(255, 255, 255, 0.8); }
+
+        &::placeholder { color: rgba(255, 255, 255, 0.35); }
     }
 
     // The one thing the box does not share with the fields above it: a height,

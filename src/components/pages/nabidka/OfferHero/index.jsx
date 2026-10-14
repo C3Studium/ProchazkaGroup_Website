@@ -53,7 +53,7 @@ const FALLBACK_HEADING = [
 const FALLBACK_LEAD =
     "Každý den, kdy vaše dluhy nebo inflace rostou, ztrácíte peníze, které už nikdy neuvidíte.";
 const FALLBACK_CTA = "Spojit se hned";
-const FALLBACK_SCROLL = "Scroll";
+const FALLBACK_SCROLL = "Dolů";
 
 // The photograph is deliberately NOT read from the CMS, and this is the one
 // place that can say why: it is the first frame of the section below. StatRail's

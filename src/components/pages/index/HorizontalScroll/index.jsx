@@ -46,7 +46,7 @@ const CLIENTS = {
     heading: "Pro naše klienty",
     lines: ["Benefit program.", "Stačí, aby se z vašeho doporučení stal nový klient, a peníze jsou vaše. Vyhráváte jak vy tak i druhý."],
     cta: "Zobrazit",
-    scrollHint: "Scroll down",
+    scrollHint: "Posuňte dolů",
 };
 
 const JOIN = {

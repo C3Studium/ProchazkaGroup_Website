@@ -65,18 +65,41 @@ export default function AccentText({
     // has nothing to swap to.
     if (values.length === 1) return <span className={className}>{values[0]}</span>;
 
+    // The typed run is a picture of the words, not the words: rendered on the
+    // server (which is what a search engine reads) and to a screen reader it
+    // is a lone "_" cursor, and the homepage's h1 ended "už přes _". So the
+    // first wording is in the DOM whole, hidden only from the eye, and the
+    // animation is aria-hidden.
     return (
-        <TextType
-            className={className}
-            text={values}
-            typingSpeed={typingSpeed}
-            pauseDuration={pauseDuration}
-            deletingSpeed={32}
-            // The heading is above the fold and the swap is the point of it, so
-            // it starts on load rather than waiting to be scrolled to.
-            startOnVisible={false}
-            showCursor
-            cursorCharacter="_"
-        />
+        <>
+            <span style={VISUALLY_HIDDEN}>{values[0]}</span>
+            <span aria-hidden="true">
+                <TextType
+                    className={className}
+                    text={values}
+                    typingSpeed={typingSpeed}
+                    pauseDuration={pauseDuration}
+                    deletingSpeed={32}
+                    // The heading is above the fold and the swap is the point of it, so
+                    // it starts on load rather than waiting to be scrolled to.
+                    startOnVisible={false}
+                    showCursor
+                    cursorCharacter="_"
+                />
+            </span>
+        </>
     );
 }
+
+const VISUALLY_HIDDEN = {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    margin: -1,
+    padding: 0,
+    overflow: "hidden",
+    clip: "rect(0 0 0 0)",
+    clipPath: "inset(50%)",
+    whiteSpace: "nowrap",
+    border: 0,
+};

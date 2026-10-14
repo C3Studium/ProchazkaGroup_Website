@@ -8,15 +8,16 @@ module.exports = {
   // The Studio and its preview frames are the CMS's own surface — they are
   // for whoever edits this site, never for a search engine, and they were
   // being published in the sitemap.
-  exclude: ['/private-page', '/admin/*', '/api/*', '/studio', '/studio/*'],
+  // /recenze/<poradce> are the forms a client is sent to write a review; they
+  // carry noindex, so listing them here only told Google two opposite things.
+  exclude: ['/private-page', '/admin/*', '/api/*', '/studio', '/studio/*', '/recenze/*'],
   robotsTxtOptions: {
     policies: [
+      // One group: two `User-agent: *` groups are merged by Google but not by
+      // every crawler, and some read only the first one they meet.
       {
         userAgent: '*',
         allow: '/',
-      },
-      {
-        userAgent: '*',
         disallow: ['/private-page', '/admin', '/api', '/studio'],
       },
     ],
@@ -25,8 +26,8 @@ module.exports = {
     // Custom priority for important pages
     const customPriority = {
       '/': 1.0,
-      // No '/kontakt' — there is no such route. Contact is a sheet the bar
-      // opens on whichever page the reader is already on.
+      // '/kontakt' takes the default: it is the fallback address of the
+      // contact sheet the bar opens, and on arrival it opens that sheet.
       '/recenze': 0.9,
       '/o-nas': 0.8,
       '/benefit-program': 0.8,

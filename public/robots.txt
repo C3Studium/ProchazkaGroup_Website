@@ -1,9 +1,6 @@
 # *
 User-agent: *
 Allow: /
-
-# *
-User-agent: *
 Disallow: /private-page
 Disallow: /admin
 Disallow: /api

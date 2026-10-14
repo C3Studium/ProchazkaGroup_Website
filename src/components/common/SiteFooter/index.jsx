@@ -19,7 +19,7 @@ const FALLBACK = {
     where: "Kde nás\u00a0 najdete",
     contactLead: "Kontakt\u00a0| 8-16",
     address: "Smetanova 78/1, 39701 Písek\u00a0 |",
-    legal: "2024 © ProcházkaGroup Všechna práva udělena",
+    legal: "© Procházka Group. Všechna práva vyhrazena.",
 };
 
 // The left half of the top row — "global.footer.claim", a block of its own

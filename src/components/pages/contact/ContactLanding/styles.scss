@@ -1,0 +1,51 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// /kontakt — see index.jsx. One column, centred in the first screen, so the
+// patička with the actual numbers sits right under it.
+.ContactLanding {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    gap: clamp(1rem, 2.4vh, 1.75rem);
+
+    min-height: 80vh;
+    min-height: 80dvh;
+    width: min(calc(100% - 2rem), 52rem);
+    margin: 0 auto;
+    padding: clamp(6rem, 16vh, 10rem) 0 clamp(3rem, 8vh, 6rem);
+
+    color: var(--wText);
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+}
+
+.ContactLanding__eyebrow {
+    margin: 0;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+
+    em {
+        font-style: normal;
+        color: var(--hColor);
+    }
+}
+
+.ContactLanding__title {
+    margin: 0;
+    font-weight: 300;
+    font-size: clamp(2.4rem, 7vw, 5.5rem);
+    line-height: 1;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.ContactLanding__lead {
+    max-width: 36rem;
+    margin: 0;
+    font-size: clamp(1rem, 1.2vw, 1.2rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.8);
+}

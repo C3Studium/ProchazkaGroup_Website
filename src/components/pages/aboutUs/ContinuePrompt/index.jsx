@@ -20,7 +20,7 @@ const COPY = group(0.05);
 // selects on `span`, so nothing about the layout changes.
 const FALLBACK = {
     heading: ["Máte zájem pokračovat dál?", "Podívejte se na naši historii."],
-    body: ["Od modestních začátků", "pro vytváření hodnoty", "našim klientům"],
+    body: ["Od skromných začátků", "pro vytváření hodnoty", "našim klientům"],
     hold: ["Podržte", "pro", "pokračování"],
 };
 

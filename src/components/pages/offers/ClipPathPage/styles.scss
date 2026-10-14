@@ -69,7 +69,14 @@
     // photograph — costs the photograph.
     text-shadow: 0 1px 14px rgba(2, 14, 21, 0.85);
 
-    .Partners__mark__label { color: rgba(255, 255, 255, 0.75); }
+    // An h1 (the page's only one), drawn as the label it always was.
+    .Partners__mark__label {
+        margin: 0;
+        font: inherit;
+        letter-spacing: inherit;
+        text-transform: inherit;
+        color: rgba(255, 255, 255, 0.75);
+    }
 
     .Partners__mark__rule {
         position: relative;

@@ -1,4 +1,4 @@
-import Head from "next/head"
+import Seo from "@/components/common/Seo"
 
 import AdvisorCard from "@/components/pages/advisor/AdvisorCard"
 import { getConsultants, getAssistant, getContactContent, getNavbarContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
@@ -69,45 +69,33 @@ export async function getStaticProps({ params, ...context }) {
 
 export default function AdvisorPage({ advisor, content }) {
     const title = `Recenze — ${advisor.name} | Procházka Group`
-    const description = `Napište recenzi na ${advisor.name}, finančního poradce Procházka Group.`
+    // Bez skloňování: jméno přichází z CMS v 1. pádě a rod z něj nepoznáme.
+    const description = `${advisor.name}, Procházka Group — ohodnoťte spolupráci a napište recenzi.`
     const url = `https://prochazkagroup.cz/recenze/${advisor.slug}`
 
     return (
         <>
-            <Head>
-                <title>{title}</title>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <meta name="description" content={description} />
-                {/* Nothing to find here: it is a form for one person, reached from
-                    a printed code rather than from a search. */}
-                <meta name="robots" content="noindex, follow" />
-                <link rel="canonical" href={url} />
-
-                <meta property="og:type" content="profile" />
-                <meta property="og:url" content={url} />
-                <meta property="og:title" content={title} />
-                <meta property="og:description" content={description} />
-                {advisor.portrait?.src && (
-                    <meta property="og:image" content={`https://prochazkagroup.cz${advisor.portrait.src}`} />
-                )}
-
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "Person",
-                        name: advisor.name,
-                        jobTitle: "Finanční poradce",
-                        url,
-                        worksFor: {
-                            "@type": "Organization",
-                            name: "Procházka Group",
-                            url: "https://prochazkagroup.cz",
-                        },
-                        ...(advisor.phone ? { telephone: advisor.phone } : {}),
-                    })}
-                </script>
-            </Head>
+            <Seo
+                title={title}
+                description={description}
+                path={`/recenze/${advisor.slug}`}
+                type="profile"
+                noindex
+                image={advisor.portrait?.src ? { src: advisor.portrait.src, alt: advisor.name } : undefined}
+                jsonLd={{
+                    "@context": "https://schema.org",
+                    "@type": "Person",
+                    name: advisor.name,
+                    jobTitle: "Finanční poradce",
+                    url,
+                    worksFor: {
+                        "@type": "Organization",
+                        name: "Procházka Group",
+                        url: "https://prochazkagroup.cz",
+                    },
+                    ...(advisor.phone ? { telephone: advisor.phone } : {}),
+                }}
+            />
             <main lang="cs" key={`advisor-${advisor.slug}`}>
                 <AdvisorCard advisor={advisor} copy={content?.card} notices={content?.notices} />
             </main>

@@ -12,6 +12,20 @@
     white-space: nowrap;
 }
 
+// Řádek formuláře, ve kterém je seznam rozbalený, jde nad své sousedy.
+//
+// `z-index` seznamu níž platí jen uvnitř řádku: řádky jsou `motion.label`
+// a framer jim při animaci nasadí transformaci (a `will-change`), takže každý
+// je vlastní vrstva a pozdější sourozenec se kreslí přes dřívější — v Q&A
+// formuláři na hlavní stránce přetékal seznam předvoleb POD řádek „Téma"
+// a tlačítka témat ležela přes něj. Vyřešit to jde jen o úroveň výš, na
+// řádku samotném. Všechny dropdowny na webu stojí v `<label>`, a jen dokud
+// je seznam otevřený, takže zavřený formulář zůstává přesně, jak byl.
+label:has(.Dropdown.is-open) {
+    position: relative;
+    z-index: 60;
+}
+
 .Dropdown__button {
     display: inline-flex;
     align-items: center;

@@ -7,7 +7,7 @@
 // import BenefitProgramKeyframes from "@/components/pages/benefit/BenefitProgram";
 // import Reviews from "@/components/pages/benefit/Reviews";
 // import Contact from "@/components/pages/index/MainSection/Contact";
-import Head from "next/head";
+import Seo from "@/components/common/Seo";
 
 import BenefitIntro from "@/components/pages/benefit/BenefitIntro";
 import BenefitJourney from "@/components/pages/benefit/BenefitJourney";
@@ -90,62 +90,33 @@ export default function BenefitProgramPage({
 
     return (
         <>
-            <Head>
-                <title>Benefit Program | Procházka Group</title>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <meta name="description" content="Exkluzivní benefit program Procházka Group. Získejte přístup k VIP výhodám, speciálním nabídkám a osobním konzultacím. Staňte se součástí našeho prémiového programu." />
-                <meta name="keywords" content="benefit program, VIP výhody, finanční benefity, Procházka Group členství, prémiové služby, finanční poradenství výhody" />
-                <meta name="author" content="Procházka Group" />
-                <meta name="robots" content="index, follow" />
-                <link rel="canonical" href="https://prochazkagroup.cz/benefit-program" />
-
-                {/* Open Graph / Facebook */}
-                <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://prochazkagroup.cz/benefit-program" />
-                <meta property="og:title" content="Exkluzivní Benefit Program | Procházka Group" />
-                <meta property="og:description" content="Objevte výhody členství v benefit programu Procházka Group. Prémiové služby a VIP přístup." />
-                <meta property="og:image" content="https://prochazkagroup.cz/assets/seo/benefitprogram.webp" />
-
-                {/* Twitter */}
-                <meta property="twitter:card" content="summary_large_image" />
-                <meta property="twitter:url" content="https://prochazkagroup.cz/benefit-program" />
-                <meta property="twitter:title" content="Benefit Program | Procházka Group" />
-                <meta property="twitter:description" content="Prémiové výhody a VIP služby pro členy benefit programu." />
-                <meta property="twitter:image" content="https://prochazkagroup.cz/assets/seo/benefitprogram.webp" />
-
-                {/* Schema.org markup */}
-                <script type="application/ld+json">
-                    {JSON.stringify({
-                        "@context": "https://schema.org",
-                        "@type": "Product",
-                        "name": "Procházka Group Benefit Program",
-                        "description": "Exkluzivní členský program s VIP výhodami a prémiovými službami",
-                        "offers": {
-                            "@type": "Offer",
-                            "description": "Členství v benefitním programu",
-                            "url": "https://prochazkagroup.cz/benefit-program",
-                            "priceCurrency": "CZK",
-                            "availability": "https://schema.org/InStock",
-                            "seller": {
-                                "@type": "Organization",
-                                "name": "Procházka Group"
-                            }
-                        },
-                        "brand": {
-                            "@type": "Brand",
-                            "name": "Procházka Group"
-                        },
-                        "category": "Financial Services",
-                        "benefits": [
-                            "VIP finanční poradenství",
-                            "Prémiové konzultace",
-                            "Speciální nabídky",
-                            "Osobní přístup"
-                        ]
-                    })}
-                </script>
-            </Head>
+            <Seo
+                title="Benefit program – doporučte nás | Procházka Group"
+                description="Doporučte nás někomu, komu pomůžeme s financemi. Když se stane naším klientem, dostanete poukaz – v programu až 47 500 Kč v odměnách."
+                path="/benefit-program"
+                image={{ src: "/assets/seo/og/benefitprogram.jpg", width: 1200, height: 630, alt: "Benefit program Procházka Group – odměny za doporučení" }}
+                keywords="benefit program, doporučení, odměna za doporučení, poukazy, Procházka Group, finanční poradenství Písek"
+                // A WebPage, not a Product: the programme is not sold and has no
+                // price, and a Product without one is a rich-result error.
+                jsonLd={{
+                    "@context": "https://schema.org",
+                    "@type": "WebPage",
+                    "name": "Benefit program – doporučte nás",
+                    "description": "Program pro klienty Procházka Group: za doporučení, ze kterého se stane nový klient, dostanete poukaz. V programu je celkem až 47 500 Kč v odměnách.",
+                    "url": "https://prochazkagroup.cz/benefit-program",
+                    "inLanguage": "cs",
+                    "isPartOf": {
+                        "@type": "WebSite",
+                        "name": "Procházka Group",
+                        "url": "https://prochazkagroup.cz"
+                    },
+                    "publisher": {
+                        "@type": "Organization",
+                        "name": "Procházka Group",
+                        "url": "https://prochazkagroup.cz"
+                    }
+                }}
+            />
             {/* The order is the reader's questions, in the order they ask them,
                 and not the order the sections happen to look best in:
                   what is it → how do I get in → what do I actually get →

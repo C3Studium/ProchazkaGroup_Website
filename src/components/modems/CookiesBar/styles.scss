@@ -1,0 +1,119 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+
+// The consent bar — see index.jsx. A plate at the foot of the viewport, in the
+// same ground and hairline corners as the forms on the home page, so it reads as
+// part of the site rather than a third party's widget laid over it.
+.CookiesBar {
+    position: fixed;
+    left: 50%;
+    bottom: clamp(0.75rem, 2.5vh, 1.75rem);
+    // Above the navbar and the rail (150–160), under the modals (1000), which
+    // must be able to cover it — the settings sheet opens from this very bar.
+    z-index: 900;
+
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 2.5vw, 2.5rem);
+
+    width: min(calc(100% - 2rem), 62rem);
+    padding: clamp(1rem, 2.4vh, 1.5rem) clamp(1.1rem, 2.4vw, 2rem);
+    // framer-motion owns `transform` for the slide; the centring rides on
+    // `translate` so the two never overwrite each other.
+    translate: -50% 0;
+
+    background-color: var(--bgColor);
+    background-image: radial-gradient(
+        120% 140% at 0% 0%,
+        rgba(255, 255, 255, 0.07) 0%,
+        rgba(255, 255, 255, 0) 60%
+    );
+    box-shadow: 0 1.5rem 3rem rgba(0, 0, 0, 0.35);
+
+    color: var(--wText);
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+
+    > .corner {
+        position: absolute;
+        width: 0.5625rem;
+        height: 0.5625rem;
+        border: 0 solid var(--wText);
+    }
+
+    > .corner--tl { top: 0; left: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+    > .corner--tr { top: 0; right: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+    > .corner--bl { bottom: 0; left: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+    > .corner--br { bottom: 0; right: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+    @include below-px(820px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.CookiesBar__text {
+    flex: 1;
+    min-width: 0;
+}
+
+.CookiesBar__eyebrow {
+    margin: 0 0 0.45rem;
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+
+    em {
+        font-style: normal;
+        color: var(--hColor);
+    }
+}
+
+.CookiesBar__lead {
+    margin: 0;
+    font-size: clamp(0.85rem, 0.95vw, 1rem);
+    line-height: 1.5;
+
+    a {
+        color: var(--hColor);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+}
+
+.CookiesBar__actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+
+    .cornerButton {
+        white-space: nowrap;
+    }
+
+    @include below-px(820px) {
+        justify-content: space-between;
+    }
+}
+
+.CookiesBar__accept {
+    color: var(--hColor);
+}
+
+.CookiesBar__settings {
+    padding: 0.4rem 0;
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.7);
+    font: inherit;
+    font-size: 0.9rem;
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        color: var(--wText);
+    }
+}

@@ -83,11 +83,12 @@ export default function ReviewsHero({ count = 0, copy = {} }) {
                     a `\n` in it — the shape every hand-broken element on this
                     site has. One `<br />` between lines and no wrapper, because
                     the annotation goes on the element that holds them. */}
-                <p className="RevHero__line" {...editable(docId, "headline", "text")}>
+                {/* The page's h1. */}
+                <h1 className="RevHero__line" {...editable(docId, "headline", "text")}>
                     {line.map((text, at) => (
                         <Fragment key={at}>{at > 0 ? <br /> : null}{text}</Fragment>
                     ))}
-                </p>
+                </h1>
                 {/* Unannotated, and it has to be: the number is how many
                     reviews came back rather than a stored value, and the word
                     beside it is an `<em>` whose text begins with a space —

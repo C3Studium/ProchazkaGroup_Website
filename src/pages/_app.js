@@ -1,6 +1,7 @@
 import "@/styles/globals.scss";
 import { useEffect } from "react";
 import { useRouter } from "next/router";
+import Head from "next/head";
 import dynamic from "next/dynamic";
 import Lenis from "lenis";
 import { LoadProvider } from "@/context/LoadProvider";
@@ -25,7 +26,9 @@ import { useEditArming } from "@/cms/edit/arm";
 // cookie it reads is a convenience and can never be a control.
 import ManageBadge from "@/cms/manage";
 // import Transition from "@/components/common/Transition";
-// import CookiesBar from "@/components/modems/CookiesBar";
+import CookiesBar from "@/components/modems/CookiesBar";
+// GTM, GA a Clarity — vykreslí se až po souhlasu s analytickými cookies.
+import ConsentScripts from "@/components/common/ConsentScripts";
 import { Analytics } from "@vercel/analytics/react";
 // The shader ground for every page. Loaded client-side only: react-three-fiber
 // builds a WebGL context on mount and has nothing to render on the server.
@@ -73,15 +76,30 @@ import SiteFooter from "@/components/common/SiteFooter";
  * leaving half of it mounted behind an opaque layer.
  */
 export default function App({ Component, pageProps, router }) {
+  // Jednou pro web i Studio. Dřív ho psala každá stránka a k tomu _document,
+  // takže v hlavičce byl dvakrát; next/head duplicitu odstraní jen ve svém
+  // vlastním <Head>, ne napříč s _document.
+  const viewport = (
+    <Head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </Head>
+  );
+
   if (usesStudioChrome(Component, router.pathname)) {
     return (
       <StudioShell>
+        {viewport}
         <Component {...pageProps} />
       </StudioShell>
     );
   }
 
-  return <SiteShell Component={Component} pageProps={pageProps} />;
+  return (
+    <>
+      {viewport}
+      <SiteShell Component={Component} pageProps={pageProps} />
+    </>
+  );
 }
 
 /** The managed site: everything a visitor gets, on every route that is one. */
@@ -249,7 +267,8 @@ function SiteShell({ Component, pageProps }) {
             />
             <Cursor />
             <ScrollRail />
-            {/* <CookiesBar /> */}
+            <CookiesBar />
+            <ConsentScripts />
             {/* <BackgroundGradient /> */}
             <Component {...pageProps} />
             {/* The patička belongs to no page, so it travels on every page's
@@ -265,7 +284,8 @@ function SiteShell({ Component, pageProps }) {
                 does not remount it. */}
             <ManageBadge />
             <NewsWidget />
-            <Toaster position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
+            <Toaster containerAriaLabel="Oznámení" position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
+
           </CursorRefProvider>
         </LoadProvider>
       </PerformanceProvider>

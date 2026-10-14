@@ -39,8 +39,8 @@ const curtain = (a, from, to) => {
 const MILESTONES = [
     {
         n: "01",
-        date: "2023-11-15 | Annual Company Meeting",
-        body: "A weekend retreat focused on team-building activities to strengthen collaboration and communication among team members.",
+        date: "Tým | Začínáme u lidí",
+        body: "Za každou smlouvou stojí člověk, který vám ji srozumitelně vysvětlí. Stavíme na týmu poradců, kteří se navzájem učí a podporují.",
         image: "/assets/backgrounds/wheels/questRoom.webp",
         // Cut by the left edge on purpose.
         numeral: { left: -7, top: 8 },
@@ -60,8 +60,8 @@ const MILESTONES = [
     },
     {
         n: "02",
-        date: "2023-11-15 | Annual Company Meeting",
-        body: "A weekend retreat focused on team-building activities to strengthen collaboration and communication among team members.",
+        date: "Kancelář | Místo, kam se dá přijít",
+        body: "Naše kancelář v Písku je otevřená každému, kdo chce mít ve svých financích jasno – v klidu, bez spěchu a bez závazků.",
         image: "/assets/backgrounds/wheels/mainOffice.webp",
         numeral: { left: 30, top: 26 },
         layout: {
@@ -78,8 +78,8 @@ const MILESTONES = [
     },
     {
         n: "03",
-        date: "2023-11-15 | Annual Company Meeting",
-        body: "A weekend retreat focused on team-building activities to strengthen collaboration and communication among team members.",
+        date: "Klienti | Rodiny, ne čísla",
+        body: "Důvěřuje nám přes 3000 klientů. Ke každému přistupujeme individuálně, protože žádné dvě rodiny nemají stejné plány.",
         image: "/assets/backgrounds/wheels/family.webp",
         numeral: { left: 40, top: 2 },
         layout: {
@@ -97,8 +97,8 @@ const MILESTONES = [
     },
     {
         n: "04",
-        date: "2023-11-15 | Annual Company Meeting",
-        body: "A weekend retreat focused on team-building activities to strengthen collaboration and communication among team members.",
+        date: "Růst | Další kapitola",
+        body: "Rosteme spolu s našimi klienty. Přibývají noví poradci i místa, kde se s námi můžete potkat.",
         image: "/assets/backgrounds/secondOffice_1300.webp",
         numeral: { left: 44, top: 14 },
         layout: {

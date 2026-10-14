@@ -47,7 +47,10 @@ const CONSENT_DURATION = 180 * 24 * 60 * 60 * 1000; // 6 months
 
 export function CookiesProvider({ children }) {
   const [hasConsented, setHasConsented] = useState(false);
-  const [showBanner, setShowBanner] = useState(true);
+  // Lišta začíná schovaná a ukáže ji až efekt níž, když v cookies žádný platný
+  // souhlas nenajde. Obráceně (začít s `true`) by ji server vykreslil každému
+  // a kdo už souhlasil, viděl by ji při každém načtení na okamžik probleskout.
+  const [showBanner, setShowBanner] = useState(false);
   const [preferences, setPreferences] = useState(defaultPreferences);
   const [lastConsentDate, setLastConsentDate] = useState(null);
   const [showPreferencesModal, setShowPreferencesModal] = useState(false);
@@ -57,19 +60,23 @@ export function CookiesProvider({ children }) {
     const savedConsentDate = Cookies.get('cookieConsentDate');
 
     if (savedPreferences && savedConsentDate) {
-      const parsedPreferences = JSON.parse(savedPreferences);
-      const consentDate = new Date(savedConsentDate);
-      const now = new Date();
+      try {
+        const parsedPreferences = JSON.parse(savedPreferences);
+        const consentDate = new Date(savedConsentDate);
+        const now = new Date();
 
-      if (now.getTime() - consentDate.getTime() < CONSENT_DURATION) {
-        setPreferences(parsedPreferences);
-        setHasConsented(true);
-        setShowBanner(false);
-        setLastConsentDate(consentDate);
-      } else {
-        resetPreferences();
+        if (now.getTime() - consentDate.getTime() < CONSENT_DURATION) {
+          setPreferences({ ...defaultPreferences, ...parsedPreferences });
+          setHasConsented(true);
+          setShowBanner(false);
+          setLastConsentDate(consentDate);
+          return;
+        }
+      } catch {
+        // Poškozená cookie je totéž co žádná: zeptat se znovu.
       }
     }
+    resetPreferences();
   }, []);
 
   useEffect(() => {

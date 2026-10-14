@@ -1,4 +1,4 @@
-import Head from "next/head";
+import Seo from "@/components/common/Seo";
 
 import OfferHero from "@/components/pages/nabidka/OfferHero";
 import StatRail from "@/components/pages/nabidka/StatRail";
@@ -97,48 +97,12 @@ export default function NabidkaPage({
 
     return (
         <>
-            <Head>
-                <title>Naše nabídka | Procházka Group</title>
-                <meta charSet="utf-8" />
-                <meta name="viewport" content="width=device-width, initial-scale=1" />
-                <meta
-                    name="description"
-                    content="Osm z deseti domácností v ČR je v dluzích nebo je ignoruje. Podívejte se, jak vypadá spolupráce s finančním poradcem od Procházka Group a co pro vás vyřešíme."
-                />
-                <meta
-                    name="keywords"
-                    content="finanční poradenství, nabídka služeb, finanční plán, zadlužení domácností, spolupráce s poradcem, Procházka Group, OVB Allfinanz"
-                />
-                <meta name="author" content="Procházka Group" />
-                <meta name="robots" content="index, follow" />
-                <link rel="canonical" href="https://prochazkagroup.cz/nabidka" />
-
-                {/* Open Graph / Facebook */}
-                <meta property="og:type" content="website" />
-                <meta property="og:url" content="https://prochazkagroup.cz/nabidka" />
-                <meta property="og:title" content="Naše nabídka | Procházka Group" />
-                <meta
-                    property="og:description"
-                    content="Jak vypadá spolupráce s finančním poradcem a co pro vás vyřešíme. Procházka Group, součást OVB Allfinanz."
-                />
-                <meta
-                    property="og:image"
-                    content="https://prochazkagroup.cz/assets/seo/mainpage.webp"
-                />
-
-                {/* Twitter */}
-                <meta property="twitter:card" content="summary_large_image" />
-                <meta property="twitter:url" content="https://prochazkagroup.cz/nabidka" />
-                <meta property="twitter:title" content="Naše nabídka | Procházka Group" />
-                <meta
-                    property="twitter:description"
-                    content="Jak vypadá spolupráce s finančním poradcem a co pro vás vyřešíme."
-                />
-                <meta
-                    property="twitter:image"
-                    content="https://prochazkagroup.cz/assets/seo/mainpage.webp"
-                />
-            </Head>
+            <Seo
+                title="Naše nabídka – finanční plán na míru | Procházka Group"
+                description="Osm z deseti domácností v ČR je v dluzích. Podívejte se, jak s poradcem získáte plán, rezervy a klid. První schůzka i finanční plán jsou zdarma."
+                path="/nabidka"
+                image={{ src: "/assets/seo/og/mainpage.jpg", width: 1200, height: 630, alt: "Procházka Group – nabídka finančního poradenství" }}
+            />
 
             <main lang="cs" key="nabidka">
                 <OfferHero copy={hero} />

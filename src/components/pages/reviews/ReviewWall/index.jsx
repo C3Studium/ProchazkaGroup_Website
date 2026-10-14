@@ -303,7 +303,7 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
                                     <LikeButton
                                         liked={likes.isLiked(review.id)}
                                         count={likes.countOf(review.id, review.likes || 0)}
-                                        label={`Souhlasím s recenzí od ${review.customerName}`}
+                                        label={`Souhlasím s recenzí – ${review.customerName}`}
                                         onToggle={() => likes.toggle(review.id)}
                                     />
                                 </div>
@@ -386,7 +386,7 @@ function ReviewSheet({ review, onClose, likes, voteAsk }) {
                             <LikeButton
                                 liked={likes.isLiked(review.id)}
                                 count={likes.countOf(review.id, review.likes || 0)}
-                                label={`Souhlasím s recenzí od ${review.customerName}`}
+                                label={`Souhlasím s recenzí – ${review.customerName}`}
                                 onToggle={() => likes.toggle(review.id)}
                             />
                         </div>

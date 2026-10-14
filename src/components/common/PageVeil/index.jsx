@@ -32,6 +32,10 @@ import {
 const T_COVER = 550;
 const T_WALK = 1100;
 const T_FINAL = 400;
+// Kdyby nová stránka nedorazila ani za tuhle dobu (výpadek sítě, chyba
+// v getStaticProps), veil to vzdá a stránku načte prohlížeč sám — přechod
+// nesmí nikdy zůstat viset přes celou obrazovku.
+const T_GIVE_UP = 10000;
 
 export default function PageVeil() {
     const router = useRouter();
@@ -43,6 +47,14 @@ export default function PageVeil() {
     const [vp, setVp] = useState(null);
     const [winner, setWinner] = useState(null);
     const [maskRect, setMaskRect] = useState(null);
+    // Dvě podmínky konce „walk": uplynul čas A nová stránka je opravdu
+    // vykreslená. Dřív rozhodoval jen čas — a na pomalejší síti (data nebo
+    // chunk nové stránky přes 1,5 s) se okno otevřelo na STAROU stránku, nová
+    // naskočila uprostřed otevírání a bez okna, protože MaskReveal si `main`
+    // bere jednou při startu a ořezával ten starý. Měřeno na Vercelu se 4G:
+    // otevření ve 2,1 s, výměna stránky ve 2,4 s.
+    const [walked, setWalked] = useState(false);
+    const [arrived, setArrived] = useState(false);
     const phaseRef = useRef("idle");
     phaseRef.current = phase;
     const boxRefs = useRef([]);
@@ -133,9 +145,14 @@ export default function PageVeil() {
             sc.w.set(1);
             sc.h.set(1);
         });
+        // Stahovat data a kód nové stránky hned, ne až po zatmění — 550 ms,
+        // které by jinak připadly na nic.
+        router.prefetch(path).catch(() => {});
         setVp({ w: window.innerWidth, h: window.innerHeight });
         setWinner(null);
         setMaskRect(null);
+        setWalked(false);
+        setArrived(false);
         if (window.lenis) window.lenis.stop();
         // scale the old page out around what the visitor is looking at
         const mainEl = document.querySelector("main");
@@ -154,52 +171,62 @@ export default function PageVeil() {
         if (phase === "cover" && job) {
             const t = setTimeout(() => {
                 // swap the route while nothing can be seen
-                router.push(job.href);
+                const href = job.href;
+                router
+                    .push(href)
+                    .then(() => {
+                        // `push` se splní, až je nová stránka v Reactu; dva
+                        // snímky navíc, aby byla i NAMALOVANÁ, než se nad ní
+                        // otevře okno. (`false` = navigaci přebila jiná; ani pak
+                        // nesmí veil čekat donekonečna.)
+                        requestAnimationFrame(() =>
+                            requestAnimationFrame(() => setArrived(true)),
+                        );
+                    })
+                    .catch(() => window.location.assign(href));
                 setHots({ primary: job.destSlot, others: [] });
                 setPhase("walk");
             }, T_COVER);
             return () => clearTimeout(t);
         }
-        if (phase === "walk" && job) {
-            const t = setTimeout(() => {
-                // brake everything, pick the window near the centre
-                const cx = window.innerWidth / 2;
-                const cy = window.innerHeight / 2;
-                // A tiny mute frame makes a degenerate window (and can't
-                // carry the destination's name) — a qualifying candidate is
-                // a PAGE box, or a mute at least a fifth of the screen's
-                // short side. The pick stays random among the qualifiers.
-                const minWin = Math.min(window.innerWidth, window.innerHeight) * 0.2;
-                const cand = [];
-                const qual = [];
-                let best = null;
-                SLOTS.forEach((sl, si) => {
-                    const el = boxRefs.current[si];
-                    if (!el) return;
-                    const r = el.getBoundingClientRect();
-                    const dx = Math.abs((r.left + r.right) / 2 - cx);
-                    const dy = Math.abs((r.top + r.bottom) / 2 - cy);
-                    const d = Math.hypot(dx, dy);
-                    if (!best || d < best.d) best = { si, d };
-                    if (dx < window.innerWidth * 0.22 && dy < window.innerHeight * 0.24) {
-                        cand.push(si);
-                        if (sl.page != null || (r.width >= minWin && r.height >= minWin))
-                            qual.push(si);
-                    }
-                });
-                const pool = qual.length ? qual : cand;
-                const pick = pool.length
-                    ? pool[Math.floor(Math.random() * pool.length)]
-                    : best
-                      ? best.si
-                      : 0;
-                setWinner(pick);
-                setHots({ primary: pick, others: [], final: true });
-                // stage one for the NEW page's media
-                setGate("ground");
-                setPhase("final");
-            }, T_WALK);
-            return () => clearTimeout(t);
+        if (phase === "walk" && job && walked && arrived) {
+            // brake everything, pick the window near the centre
+            const cx = window.innerWidth / 2;
+            const cy = window.innerHeight / 2;
+            // A tiny mute frame makes a degenerate window (and can't
+            // carry the destination's name) — a qualifying candidate is
+            // a PAGE box, or a mute at least a fifth of the screen's
+            // short side. The pick stays random among the qualifiers.
+            const minWin = Math.min(window.innerWidth, window.innerHeight) * 0.2;
+            const cand = [];
+            const qual = [];
+            let best = null;
+            SLOTS.forEach((sl, si) => {
+                const el = boxRefs.current[si];
+                if (!el) return;
+                const r = el.getBoundingClientRect();
+                const dx = Math.abs((r.left + r.right) / 2 - cx);
+                const dy = Math.abs((r.top + r.bottom) / 2 - cy);
+                const d = Math.hypot(dx, dy);
+                if (!best || d < best.d) best = { si, d };
+                if (dx < window.innerWidth * 0.22 && dy < window.innerHeight * 0.24) {
+                    cand.push(si);
+                    if (sl.page != null || (r.width >= minWin && r.height >= minWin))
+                        qual.push(si);
+                }
+            });
+            const pool = qual.length ? qual : cand;
+            const pick = pool.length
+                ? pool[Math.floor(Math.random() * pool.length)]
+                : best
+                  ? best.si
+                  : 0;
+            setWinner(pick);
+            setHots({ primary: pick, others: [], final: true });
+            // stage one for the NEW page's media
+            setGate("ground");
+            setPhase("final");
+            return undefined;
         }
         if (phase === "final") {
             const t = setTimeout(() => {
@@ -212,7 +239,21 @@ export default function PageVeil() {
             }, T_FINAL);
             return () => clearTimeout(t);
         }
-    }, [phase, job, winner, router, setGate]);
+    }, [phase, job, winner, walked, arrived, router, setGate]);
+
+    // Délka „walk" — stejná jako dřív, takže na rychlé síti se nic nemění.
+    // Vlastní efekt, který na `arrived` nezávisí: kdyby byl v hodinách výš,
+    // příchod stránky by efekt spustil znovu a časovač by běžel od nuly.
+    // Odchod z fáze (nebo z komponenty) oba časovače zruší.
+    useEffect(() => {
+        if (phase !== "walk" || !job) return undefined;
+        const t = setTimeout(() => setWalked(true), T_WALK);
+        const giveUp = setTimeout(() => window.location.assign(job.href), T_GIVE_UP);
+        return () => {
+            clearTimeout(t);
+            clearTimeout(giveUp);
+        };
+    }, [phase, job]);
 
     // A fresh page starting at its top — under the veil, never seen — used to be
     // handled here, on this component's own routeChangeComplete. It is in _app

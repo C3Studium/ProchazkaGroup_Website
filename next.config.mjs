@@ -92,11 +92,6 @@ const nextConfig = {
         hostname: 'www.prochazkagroup.cz',
         pathname: '/**',
       },
-      {
-        protocol: 'https',
-        hostname: 'pg-website-nbzo0pdil-centrumprojects.vercel.app',
-        pathname: '/**',
-      },
       // A fourth entry stood here for a Supabase project this site no longer
       // uses. Removed rather than kept "just in case": checked against the live
       // database, and neither `people` (13 rows) nor `reviews` (37) holds a URL

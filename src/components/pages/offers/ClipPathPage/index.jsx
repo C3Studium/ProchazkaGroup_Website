@@ -17,7 +17,7 @@ import CornerButton from "@/components/common/ui/CornerButton";
 import Arrow from "@/components/common/ui/Arrow";
 import { projects } from "@/constants/nabidkypage";
 import { trackEvent } from "@/hooks/trackEvent";
-import { editable, editableLink } from "@/cms/edit";
+import { editable, editableLink, isEditMode } from "@/cms/edit";
 
 // the site's own glide — away quickly, then a long approach
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
@@ -207,12 +207,13 @@ export default function Partners({ section = {}, chapters: blocks }) {
         >
             {/* All the chrome there is: what this is, and how far through. */}
             <div className="Partners__mark">
-                <span
+                {/* The page's h1: the one line that says what this page is. */}
+                <h1
                     className="Partners__mark__label"
                     {...editable(chrome.docId, "title", "text")}
                 >
                     {chrome.label}
-                </span>
+                </h1>
                 <span className="Partners__mark__rule" aria-hidden="true" />
                 {/* Pinned, this counts where the ride has got to. Stacked, the
                     mark is a heading at the top of a list that is then scrolled
@@ -405,6 +406,10 @@ function Chapter({ item, index, lead, stacked, calm, dealLabel, dealDocId }) {
                         {item.description}
                     </motion.p>
 
+                    {/* Partner, se kterým se teprve jedná, nemá kam odkazovat:
+                        tlačítko se mu nekreslí. Ve Studiu ano, jinak by odkaz
+                        nebylo kde doplnit. */}
+                    {(item.href || isEditMode()) && (
                     <motion.div
                         className="Partners__panel__act"
                         style={{ opacity: still ?? ctaIn, y: stacked ? 0 : ctaY }}
@@ -428,6 +433,7 @@ function Chapter({ item, index, lead, stacked, calm, dealLabel, dealDocId }) {
                             <span className="cornerButton__arrow"><Arrow direction="upRight" /></span>
                         </CornerButton>
                     </motion.div>
+                    )}
                 </motion.div>
 
                 {/* The number the reader came for, on its own plate and offset,

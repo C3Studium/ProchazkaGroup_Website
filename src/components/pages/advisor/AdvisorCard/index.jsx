@@ -301,11 +301,14 @@ export default function AdvisorCard({ advisor, copy = {}, notices = null }) {
                         <span className="corner corner--br" />
 
                         <h2 {...editable(docId, "title", "text")}>{words.heading}</h2>
-                        {/* Unannotated: "na" is a bare text node beside the
+                        {/* Unannotated: "Pro –" is a bare text node beside the
                             consultant's own name, so the paragraph holds two
-                            things and neither of them alone. */}
+                            things and neither of them alone. A label rather
+                            than a sentence ("na Lukáš Matouš"): the name comes
+                            in the nominative and its gender is unknown, so it
+                            cannot be declined. Same form as the review tags. */}
                         <p className="AdvCard__form__for">
-                            na <em>{advisor.name}</em>
+                            Pro – <em>{advisor.name}</em>
                         </p>
 
                         <label>

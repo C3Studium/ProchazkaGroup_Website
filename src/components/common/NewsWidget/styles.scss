@@ -32,6 +32,18 @@ $edge: clamp(1rem, 1.6vw, 1.75rem);
 
     &.is-middle-right,
     &.is-middle-left { top: calc(50vh - 1.75rem); }
+
+    // Dokud je dole lišta s cookies, dok stojí nad ní. Obě jsou na vrstvě 900
+    // a bublina „Podívejte se na novinky" jinak ležela přes tlačítko
+    // „Nastavení" a brala mu kliknutí. Výšku hlásí lišta sama (CookiesBar),
+    // `bottom` je její vlastní odsazení od okraje plus mezera. Otevřené okno
+    // novinek (`.NewsPanel`) má vlastní `position: fixed` a nehne se.
+    transition: bottom 0.5s $glide;
+
+    :root[data-cookiebar] &.is-bottom-right,
+    :root[data-cookiebar] &.is-bottom-left {
+        bottom: calc(var(--cookiebar-h, 0px) + clamp(0.75rem, 2.5vh, 1.75rem) + 0.75rem);
+    }
 }
 
 /* --------------------------------------------------------- dok u okraje -- */

@@ -31,8 +31,8 @@ const FALLBACK = {
     claim: "Napište nám a ozveme se vám zpátky — obvykle do jednoho pracovního dne.",
     labels: [
         "Jméno",
-        "Email",
-        "Telčíslo",
+        "E-mail",
+        "Tel. číslo",
         "+420 |",
         "Preferovaný čas hovoru",
         "Od",
@@ -441,14 +441,14 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
                                             <span {...editable(copy?.docId, "items.0.label", "text")}>{labelAt(copy, 0)}</span>
                                             <Req />&nbsp;|
                                         </span>
-                                        <input type="text" name="name" value={values.name} onChange={set("name")} data-cursor="frame" />
+                                        <input type="text" name="name" placeholder="Vaše jméno" autoComplete="name" value={values.name} onChange={set("name")} data-cursor="frame" />
                                     </label>
                                     <label>
                                         <span className="label">
                                             <span {...editable(copy?.docId, "items.1.label", "text")}>{labelAt(copy, 1)}</span>
                                             <Req />&nbsp;|
                                         </span>
-                                        <input type="email" name="email" value={values.email} onChange={set("email")} data-cursor="frame" />
+                                        <input type="email" name="email" placeholder="Váš e-mail" autoComplete="email" value={values.email} onChange={set("email")} data-cursor="frame" />
                                     </label>
                                     <label>
                                         <span className="label">
@@ -467,7 +467,7 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
                                                 onChange={set("dial")}
                                                 separator
                                             />
-                                            <input type="tel" name="phone" value={values.phone} onChange={set("phone")} data-cursor="frame" />
+                                            <input type="tel" name="phone" placeholder="Vaše telefonní číslo" autoComplete="tel-national" value={values.phone} onChange={set("phone")} data-cursor="frame" />
                                         </div>
                                     </label>
 
@@ -559,6 +559,7 @@ export default function ContactModal({ open, onClose, assistant, copy, studioRoo
                                         <textarea
                                             name="message"
                                             rows={3}
+                                            placeholder="Vaše zpráva"
                                             value={values.message}
                                             onChange={set("message")}
                                             data-cursor="frame"

@@ -30,40 +30,16 @@ import { ACTIONS_MODERATE, editable, editableDoc } from "@/cms/edit";
 //
 // The tags were hashtags — and stale ones: "#hypoteka" and "#investice" are not
 // values the review schema accepts, so no real review could ever have shown
-// them. They are placeholders now saying what a real one says: who it is for.
-// See constants/reviews.
-const FALLBACK_REVIEWS = [
-    {
-        tag: "Pro – jméno poradce",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce in dui ut metus blandit dapibus ut eget purus. Nunc vel turpis mollis, consequat turpis at, tempus velit.",
-        author: "| Jméno a město - klienta",
-    },
-    {
-        tag: "Pro – jméno poradce",
-        text: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce in dui ut metus blandit dapibus ut eget purus. Nunc vel turpis mollis, consequat turpis at, tempus velit.",
-        author: "| Jméno a město - klienta",
-    },
-    {
-        tag: "Pro – jméno poradce",
-        text: "Praesent commodo cursus magna vel scelerisque nisl consectetur et. Donec ullamcorper nulla non metus auctor fringilla. Vestibulum id ligula porta felis euismod semper.",
-        author: "| Jméno a město - klienta",
-    },
-    {
-        tag: "Pro – jméno poradce",
-        text: "Maecenas faucibus mollis interdum. Cras mattis consectetur purus sit amet fermentum. Aenean lacinia bibendum nulla sed consectetur, nullam quis risus eget urna mollis.",
-        author: "| Jméno a město - klienta",
-    },
-    {
-        tag: "Pro – jméno poradce",
-        text: "Nullam quis risus eget urna mollis ornare vel eu leo. Integer posuere erat a ante venenatis dapibus posuere velit aliquet, sed do eiusmod tempor incididunt.",
-        author: "| Jméno a město - klienta",
-    },
-    {
-        tag: "Pro – jméno poradce",
-        text: "Curabitur blandit tempus porttitor. Etiam porta sem malesuada magna mollis euismod. Duis mollis, est non commodo luctus, nisi erat porttitor ligula eget lacinia odio.",
-        author: "| Jméno a město - klienta",
-    },
-];
+// them. See constants/reviews.
+//
+// The placeholder says nothing a reader could take for a real review — no
+// invented client, no invented words. Six of it, for the even count above.
+const FALLBACK_REVIEW = {
+    tag: "Recenze klientů",
+    text: "Tady brzy najdete zkušenosti našich klientů. Všechny recenze si můžete přečíst na stránce Recenze.",
+    author: "| Procházka Group",
+};
+const FALLBACK_REVIEWS = Array.from({ length: 6 }, () => FALLBACK_REVIEW);
 
 // The section's own copy, from siteCopy "index.reviews". What is NOT here:
 //
@@ -75,7 +51,7 @@ const FALLBACK_REVIEWS = [
 //                 stored strings, so the DOM never holds a settled value for an
 //                 in-place editor to read back.
 const ASIDE = { value: "3000+", label: "Spokojených klientů" };
-const FALLBACK_SCROLL_HINT = "Scroll down";
+const FALLBACK_SCROLL_HINT = "Posuňte dolů";
 
 // The section's heading, in the shape the site layer answers with: one entry per
 // line, each a run of `[text, marked]`. No accent — this section paints none.
