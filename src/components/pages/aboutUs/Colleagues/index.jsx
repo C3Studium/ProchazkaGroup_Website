@@ -605,6 +605,12 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                             anybody is named at all. */}
                         {phone && <span className="Colleagues__who">{person.name}</span>}
                         <p className="Colleagues__moto">{person.moto}</p>
+                        {/* Příběh — jak se k poradenství dostal. Motto je jedna
+                            věta, kterou o sobě říká; tohle je odstavec o tom, kdo
+                            to je. Ze stejného pole, které ukazuje modál poradce
+                            v menu, takže se upravuje na jednom místě (Studio →
+                            Poradce → Příběh). Kdo ho nemá, nemá ani prázdný řádek. */}
+                        {person.story ? <p className="Colleagues__story">{person.story}</p> : null}
                     </motion.div>
 
                     {/* „Líbí se" u fotky, ne v řadě ikon pod ní.

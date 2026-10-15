@@ -607,6 +607,9 @@ const colleague = (person, { draft }) => {
         ...(draft && person.id ? { docId: person.id } : {}),
         name: person.name,
         motto: person.motto,
+        // Příběh pod mottem v panelu kolegů (Colleagues). Prázdný řetězec, ne
+        // `undefined` — getStaticProps `undefined` neserializuje.
+        story: person.story || '',
         phone: person.phone,
         portrait: person.portrait,
         // The second photograph, shown when the pointer rests on the one already

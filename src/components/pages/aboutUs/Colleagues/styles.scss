@@ -447,6 +447,23 @@ $panel: rgba(0, 0, 0, 0.6);
         line-height: 1.5;
     }
 
+    // Příběh pod mottem: o stupeň menší a tlumenější, od motta oddělený
+    // vlasovou linkou, aby se četly jako dvě věci — co říká a kdo to je.
+    // Texty jsou v CMS krátké (do ~140 znaků), na šířku 20vw je to pár řádků.
+    .Colleagues__story {
+        margin: 1.4vh 0 0;
+        padding-top: 1.4vh;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        color: rgba(255, 255, 255, 0.66);
+        font-family: "Switzer-Light";
+        font-size: clamp(0.76rem, 0.82vw, 0.98rem);
+        line-height: 1.55;
+        // Leží přes portrét — přes bílou košili nebo světlé sako by drobné
+        // písmo zmizelo. Měkký tmavý stín ho drží čitelné, na tmavém pozadí
+        // není vidět.
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.5);
+    }
+
     // „Líbí se" nad řadou ikon, na stejné svislici jako ona.
     //
     // Stálo to v té řadě jako druhá položka. Řada je čtyři ODKAZY — zavolat,
@@ -924,6 +941,18 @@ $panel: rgba(0, 0, 0, 0.6);
                 font-size: 0.85rem;
             }
 
+            // Tři řádky a dost, ze stejného důvodu jako motto nad ním: další
+            // řádek je ten, který odsune kontakty z obrazovky.
+            .Colleagues__story {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin-top: 0.6rem;
+                padding-top: 0.6rem;
+                font-size: 0.78rem;
+            }
+
             // Under the record rather than across from it, and at the bottom of
             // the panel at the bottom of the screen — which is the part of a
             // phone a thumb reaches without the hand moving. The faces are for
@@ -1178,6 +1207,12 @@ $panel: rgba(0, 0, 0, 0.6);
             overflow: hidden;
             font-size: 0.72rem;
             line-height: 1.35;
+        }
+
+        // Telefon na šířku: 320 px výšky nemá místo ani na celé motto, natož na
+        // odstavec. Příběh je celý v modálu poradce z menu.
+        .Colleagues__story {
+            display: none;
         }
 
         // Four 44px targets in 212px of usable panel at 568. The gap is what
