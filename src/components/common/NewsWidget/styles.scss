@@ -65,8 +65,29 @@ $edge: clamp(1rem, 1.6vw, 1.75rem);
     .is-tucked.is-right & { transform: translateX(calc(50% + #{$edge})); }
     .is-tucked.is-left & { transform: translateX(calc(-50% - #{$edge})); }
 
-    .is-tucked &:hover,
-    .is-tucked &:focus-within { transform: translateX(0); }
+    // Vysunuto jen tak, aby bylo tlačítko celé vidět a zůstalo u okraje
+    // (0.35rem od něj) — ne až na svou plnou pozici o $edge dál. Dřív jelo
+    // ~53 px doleva a to bylo víc, než je potřeba.
+    .is-tucked.is-right &:hover,
+    .is-tucked.is-right &:focus-within { transform: translateX(calc(#{$edge} - 0.35rem)); }
+    .is-tucked.is-left &:hover,
+    .is-tucked.is-left &:focus-within { transform: translateX(calc(-1 * #{$edge} + 0.35rem)); }
+
+    // Plocha pro myš mezi tlačítkem a okrajem obrazovky. Bez ní tlačítko po
+    // vysunutí ujelo zpod kurzoru stojícího u samého okraje: hover zmizel,
+    // tlačítko zajelo zpátky pod kurzor, hover se vrátil — a dokola. Pruh
+    // jede s tlačítkem a sahá za okraj, takže kurzor kdekoli od tlačítka
+    // k okraji hover drží.
+    .is-tucked & { position: relative; }
+    .is-tucked &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: calc(#{$edge} + 1.5rem);
+    }
+    .is-tucked.is-right &::before { left: 100%; }
+    .is-tucked.is-left &::before { right: 100%; }
 
     @media (prefers-reduced-motion: reduce) { transition-duration: 0.35s; }
 }
