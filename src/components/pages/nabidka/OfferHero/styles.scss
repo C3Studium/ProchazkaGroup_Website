@@ -24,20 +24,6 @@
         overflow: hidden;
     }
 
-    // The shader, as a bitmap — the same capture the statistics section uses,
-    // so the two sit behind each other with nothing between them. See the
-    // cover effect in index.jsx for why the live one is off here.
-    .OfferHero__still {
-        position: absolute;
-        inset: 0;
-        z-index: 0;
-        background-color: #020E15;
-        background-image: url("/assets/backgrounds/tunnel_still.webp");
-        background-size: cover;
-        background-position: center;
-        pointer-events: none;
-    }
-
     // --- aperture -------------------------------------------------------
 
     .OfferHero__aperture,

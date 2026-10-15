@@ -283,26 +283,37 @@ export default function OfferHero({ copy = {} }) {
     gateRef.current = gate;
     const plate = usePlate();
 
-    // The page's ground is a photograph of itself here, not the live shader.
+    // Za oknem běží živý shader stránky — ne jeho fotka.
     //
-    // Measured across this section's own opening — the aperture going from the
-    // plate to full bleed — the live shader was the whole of the cost: p50
-    // 16.7ms and nine frames over 33ms with it, p50 8.3ms and none without.
-    // It is the single worst stretch on the page, and it is the first thing
-    // anyone sees. The still is the same picture from the same shader, so
-    // nothing about the look changes; see ui/pageGround.js.
+    // Dřív tu stála bitmapa `tunnel_still.webp` a shader byl po celou dobu,
+    // kdy je sekce na obrazovce, vypnutý: měřeno přes otevírání okna stál
+    // živý shader p50 16,7 ms proti 8,3 ms. Jenže nehybný snímek za stránkou,
+    // jejíž podklad se všude jinde hýbe, je vidět — StatRail pod tím ho ze
+    // stejného důvodu zahodila už dřív.
+    //
+    // Úspora zůstává, jen ve chvíli, kdy nic nestojí: shader se uspí, až když
+    // je sekce na řadě A okno je otevřené přes celou obrazovku — tedy když
+    // fotografie kryje všechno a podklad není vidět vůbec. Kolem fotky, kde
+    // ho vidět je, běží.
+    const groundRef = useRef({ inView: false, full: false, release: null });
+    const syncGround = () => {
+        const g = groundRef.current;
+        const cover = g.inView && g.full;
+        if (cover && !g.release) g.release = coverGround();
+        else if (!cover && g.release) {
+            g.release();
+            g.release = null;
+        }
+    };
     useEffect(() => {
         const node = sectionRef.current;
         if (!node || typeof IntersectionObserver === "undefined") return undefined;
 
-        let release = null;
+        const g = groundRef.current;
         const watcher = new IntersectionObserver(
             ([entry]) => {
-                if (entry.isIntersecting && !release) release = coverGround();
-                else if (!entry.isIntersecting && release) {
-                    release();
-                    release = null;
-                }
+                g.inView = entry.isIntersecting;
+                syncGround();
             },
             // Střed obrazovky, ne celá obrazovka.
             //
@@ -322,8 +333,10 @@ export default function OfferHero({ copy = {} }) {
 
         return () => {
             watcher.disconnect();
-            release?.();
+            g.inView = false;
+            syncGround();
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
     const entryPlate = useEntryPlate();
 
@@ -403,6 +416,15 @@ export default function OfferHero({ copy = {} }) {
     // frame element reads this one value, so the marks, the rules and the
     // window cannot drift apart.
     const opened = useTransform(progress, (v) => TRAVEL(clamp01(v / OPEN_END)));
+
+    // Druhá polovina podmínky pro uspání shaderu (viz výš): okno přes celou
+    // obrazovku. Pod 0,995 je u okraje ještě kousek podkladu vidět.
+    useMotionValueEvent(opened, "change", (t) => {
+        const full = t >= 0.995;
+        if (full === groundRef.current.full) return;
+        groundRef.current.full = full;
+        syncGround();
+    });
 
     const aperture = useTransform(opened, (t) =>
         inset(plate.top * (1 - t), plate.right * (1 - t), plate.left * (1 - t))
@@ -566,11 +588,6 @@ export default function OfferHero({ copy = {} }) {
                     "--plate-right": `${plate.right}%`,
                 }}
             >
-                {/* The ground, as a bitmap. The live one is switched off for
-                    as long as this section is on screen — see the effect
-                    above — so this is what stands behind the plate. */}
-                <div className="OfferHero__still" aria-hidden="true" />
-
                 {/* Aperture. Two nested clips that intersect: the outer one is
                     the scroll (plate -> full bleed), the inner one is the entry
                     (seam -> full). Nesting them is what lets both own a
