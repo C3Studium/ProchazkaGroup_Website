@@ -1,0 +1,264 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+
+// Modál poradce. Rám, barvy a písmo jsou převzaté z ContactModal, aby dva
+// modály téhož webu nevypadaly jako ze dvou webů. Rozvržení vlastní: portrét
+// vlevo, text vpravo; pod 900 px pod sebou.
+
+.AdvisorModal__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background-color: rgba(2, 14, 21, 0.86);
+}
+
+.AdvisorModal__wrap {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    display: grid;
+    place-items: center;
+    padding: 7vh 5vw;
+    pointer-events: none;
+}
+
+.AdvisorModal {
+    position: relative;
+    display: flex;
+    width: 100%;
+    max-width: 64rem;
+    max-height: 84vh;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: rgba(2, 14, 21, 0.96);
+    color: var(--wText);
+    pointer-events: auto;
+}
+
+.AdvisorModal__scroll {
+    display: grid;
+    grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+    width: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+}
+
+// Portrét se roztáhne na výšku řádku a ořízne do SVÉHO sloupce.
+//
+// Dřív měl `aspect-ratio: 4/5` spolu s `min-height: 100%` — a když byl text
+// vedle vysoký (titul, dvouřádkové jméno, dlouhé motto), dopočítal si podle
+// výšky šířku větší, než měl sloupec, a přelezl přes text: „ORADCE", „MGR.".
+// Teď poměr neurčuje nic; výšku dává řádek mřížky a spodní mez `min-height`,
+// aby krátký text neudělal z fotky pruh.
+.AdvisorModal__photo {
+    position: relative;
+    min-width: 0;
+    min-height: min(34rem, 66vh);
+    overflow: hidden;
+    border-right: 1px solid rgba(255, 255, 255, 0.16);
+    background-color: rgba(2, 14, 21, 0.5);
+
+    // Vnitřní vrstva kvůli animaci: přiblížení běží na ní, oříznutí drží obal.
+    .AdvisorModal__photo__in {
+        position: absolute;
+        inset: 0;
+        will-change: transform;
+    }
+
+    // Jemný přechod do tmavé plochy na pravém okraji — světlá fotka (bílé
+    // studio pozadí) jinak naráží na tmavý sloupec ostrou hranou.
+    &::after {
+        content: "";
+        position: absolute;
+        inset: 0 0 0 auto;
+        width: 18%;
+        background: linear-gradient(to right, rgba(2, 14, 21, 0), rgba(2, 14, 21, 0.35));
+        pointer-events: none;
+    }
+
+    .AdvisorModal__photo__empty {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.01));
+    }
+}
+
+.AdvisorModal__text {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    min-width: 0;
+    padding: 7vh 3.6vw 5.5vh;
+}
+
+.AdvisorModal__eyebrow,
+.AdvisorModal__label {
+    display: block;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.62rem, 0.74vw, 0.86rem);
+    letter-spacing: 0.26em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.AdvisorModal__name {
+    margin: 2.2vh 0 0;
+    // Místo pro křížek v rohu: dlouhé jméno do něj jinak vjede.
+    padding-right: 3rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    text-transform: uppercase;
+    font-size: clamp(1.4rem, 2.3vw, 2.5rem);
+    line-height: 1.05;
+    // Akademický titul a dvě jména se na úzkém sloupci lámou; balance drží
+    // řádky stejně dlouhé místo jednoho slova na posledním.
+    text-wrap: balance;
+}
+
+.AdvisorModal__moto {
+    margin: 2.4vh 0 0;
+    max-width: 42ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.95rem, 1.15vw, 1.3rem);
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.AdvisorModal__rule {
+    display: block;
+    transform-origin: left center;
+    width: 100%;
+    height: 1px;
+    margin: 3.6vh 0 3vh;
+    background-color: rgba(255, 255, 255, 0.16);
+}
+
+.AdvisorModal__story {
+    margin: 1.4vh 0 0;
+    max-width: 52ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.88rem, 1vw, 1.08rem);
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.AdvisorModal__reach {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem 2rem;
+    margin-top: auto;
+    padding-top: 4vh;
+}
+
+.AdvisorModal__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.25rem 0 0.3rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.85rem, 1vw, 1.05rem);
+    color: rgba(255, 255, 255, 0.85);
+    position: relative;
+    text-decoration: none;
+    transition: color 0.35s ease;
+
+    // Podtržení ve dvou vrstvách: tlumená linka stojí, světlá se při najetí
+    // dokreslí zleva. Stejný pohyb jako linka nad příběhem.
+    &::before,
+    &::after {
+        content: "";
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 1px;
+    }
+    &::before { background-color: rgba(255, 255, 255, 0.24); }
+    &::after {
+        background-color: var(--wText);
+        transform: scaleX(0);
+        transform-origin: left center;
+        transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    &:hover,
+    &:focus-visible {
+        color: var(--wText);
+        &::after { transform: scaleX(1); }
+        svg { opacity: 1; transform: translateX(-1px) rotate(-8deg); }
+    }
+
+    svg { flex: none; opacity: 0.7; transition: opacity 0.35s ease, transform 0.35s ease; }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after { transition-duration: 0.35s; }
+        svg { transition: opacity 0.35s ease; }
+        &:hover svg, &:focus-visible svg { transform: none; }
+    }
+}
+
+.AdvisorModal__close {
+    position: absolute;
+    top: 2.4vh;
+    right: 1.6vw;
+    z-index: 3;
+    width: 2.125rem;
+    height: 2.125rem;
+    padding: 0;
+    background-color: rgba(2, 14, 21, 0.55);
+    cursor: inherit;
+
+    span {
+        position: absolute;
+        top: 50%;
+        left: 15%;
+        width: 70%;
+        height: 1px;
+        background-color: rgba(255, 255, 255, 0.7);
+        transition: background-color 0.3s ease;
+
+        &:first-child { transform: rotate(45deg); }
+        &:last-child { transform: rotate(-45deg); }
+    }
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    transition: border-color 0.35s ease, transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &:hover {
+        border-color: rgba(255, 255, 255, 0.5);
+        transform: rotate(90deg);
+        span { background-color: var(--wText); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &:hover { transform: none; }
+    }
+    &:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 3px; }
+}
+
+// Tablet na výšku a úzká okna: pod sebou. Portrét na šířku, aby na první
+// obrazovce bylo i jméno — fotka 4:5 přes celou šířku by ho vytlačila dolů.
+@include below-px(900) {
+    .AdvisorModal__wrap { padding: 6vh 5vw; }
+    .AdvisorModal { max-height: 88vh; max-width: 40rem; }
+    .AdvisorModal__scroll { grid-template-columns: 1fr; }
+    .AdvisorModal__photo {
+        min-height: 0;
+        height: min(38vh, 26rem);
+        border-right: 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    }
+    .AdvisorModal__text { padding: 4vh 7vw 5vh; }
+    .AdvisorModal__photo::after { display: none; }
+    .AdvisorModal__close { top: 1.6vh; right: 3vw; }
+    .AdvisorModal__reach { margin-top: 0; }
+}
+
+// Nízký laptop (1280×720 a níž na výšku): méně vzduchu nahoře i dole, aby se
+// motto a příběh vešly bez posouvání.
+@include lt-h {
+    .AdvisorModal { max-height: 88vh; }
+    .AdvisorModal__text { padding: 4.5vh 3vw 4vh; }
+    .AdvisorModal__rule { margin: 2.6vh 0 2.2vh; }
+    .AdvisorModal__reach { padding-top: 3vh; }
+}

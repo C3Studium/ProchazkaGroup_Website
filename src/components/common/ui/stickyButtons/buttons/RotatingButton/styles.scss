@@ -1,0 +1,97 @@
+@use "../../../../../../styles/system/_shortcuts.scss" as *;
+
+// Safe rotation: CSS keyframe on a self-contained, clipped layer of a size this
+// file decides. No per-frame JS transforms, no backdrop-filter — the whole
+// animation lives on the compositor inside this circle, so it cannot oscillate
+// page height or flicker strips at layer edges.
+//
+// The circle is in rem rather than px — 10.5rem is the 168px it always was at
+// every width up to 1920, and past that it grows with the root (see
+// globals.scss). It has to: this badge is placed in vw/vh by whoever mounts it,
+// so on a 2560 monitor a circle frozen at 168px is the same badge in a frame a
+// third wider again, and it reads as having been left behind. Everything inside
+// is expressed against this box, so one number moves the whole thing.
+.RotatingButton {
+    position: relative;
+    width: 10.5rem;
+    height: 10.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    overflow: hidden;
+    contain: layout paint;
+    cursor: pointer;
+
+    .RotatingButton__ring {
+        position: absolute;
+        inset: 0;
+        margin: 0;
+        animation: RotatingButton-spin 16s linear infinite;
+        will-change: transform;
+
+        span {
+            position: absolute;
+            inset: 0;
+            display: block;
+            text-align: center;
+            font-family: "Switzer-Light";
+            font-weight: 300;
+            font-size: 0.8rem;
+            letter-spacing: 0.06em;
+            line-height: 1;
+            // How far the ring's text sits inside the circle's edge. In rem for
+            // the same reason the circle is: it is a gap between two things that
+            // both grow, and left in px the words would creep towards the rim as
+            // the badge got bigger.
+            padding-top: 0.5rem;
+            color: var(--wText);
+        }
+    }
+
+    .RotatingButton__center {
+        // Just under a third of the circle, and it has to stay that share of it,
+        // so it moves in rem with the ring around it.
+        width: 3.375rem;
+        height: 3.375rem;
+        border-radius: 50%;
+        background-color: var(--wText);
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    // Pointer feedback only where a pointer can hover — after a tap, :hover
+    // sticks, and a badge whose ring froze the first time it was touched reads
+    // as broken.
+    @include fine-pointer {
+        &:hover {
+            .RotatingButton__ring {
+                animation-play-state: paused;
+            }
+
+            .RotatingButton__center {
+                transform: scale(1.2);
+            }
+        }
+    }
+
+    @include below-px(820) {
+        width: 128px;
+        height: 128px;
+
+        .RotatingButton__ring span {
+            font-size: 0.65rem;
+            padding-top: 6px;
+        }
+
+        .RotatingButton__center {
+            width: 40px;
+            height: 40px;
+        }
+    }
+}
+
+@keyframes RotatingButton-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

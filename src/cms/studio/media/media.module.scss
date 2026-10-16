@@ -1,0 +1,605 @@
+@use "../styles/tokens.module" as t;
+
+/* Knihovna médií se vykresluje na dvou místech s velmi různou šířkou: jako
+   celá stránka Studia a uvnitř dialogu, který je nejvýš 1180px široký.
+   
+   `container-type: inline-size` je to, co ten rozdíl umí přečíst. Do 0.1.37
+   se řídila `@media`, tedy OKNEM — takže si v 1180px krabici na širokém
+   monitoru poskládala rozvržení pro celou obrazovku a přebytek zmizel pod
+   `overflow: hidden`. Nedosažitelně: přesně tak, jak vypadala uříznutá
+   spodní lišta s tlačítky.
+   
+   `min-width: 0` k tomu, protože flexový potomek se bez něj nescvrkne pod
+   šířku svého obsahu — a mřížka miniatur je široká vždycky. Sousední
+   `.dropZone` a `.setPane` ho mají odjakživa, tady vypadl.
+   
+   Pozor na jednu věc: `container-type: inline-size` dělá z prvku containing
+   block pro potomky s `position: fixed`. V knihovně žádný takový není
+   (`.dropOverlay` je `absolute`), ale nový sem nepatří — patřil by výš. */
+.library {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  container-type: inline-size;
+}
+
+/* -------------------------------------------------------------- dropzone -- */
+
+.dropZone {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.dropOverlay {
+  position: absolute;
+  inset: var(--st-s2);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--st-text-body);
+  color: var(--st-accent);
+  pointer-events: none;
+  background: rgba(16, 16, 17, 0.92);
+  border: 1px dashed var(--st-accent-line);
+  border-radius: var(--st-radius-lg);
+}
+
+.dropInner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  align-items: center;
+  width: 100%;
+  padding: var(--st-s6);
+  font-family: var(--st-font);
+  cursor: pointer;
+  background: none;
+  border: 1px dashed var(--st-line-strong);
+  border-radius: var(--st-radius);
+  transition: border-color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    border-color: var(--st-ink-3);
+  }
+}
+
+.dropCompact .dropInner {
+  padding: var(--st-s4);
+}
+
+.dropIcon {
+  color: var(--st-ink-4);
+}
+
+.dropTitle {
+  font-size: var(--st-text-body);
+  color: var(--st-ink-2);
+}
+
+.dropHint {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+.queue {
+  position: absolute;
+  right: var(--st-s4);
+  bottom: var(--st-s4);
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s1);
+  padding: 0;
+  margin: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: var(--st-s2);
+    align-items: center;
+    padding: 6px 10px;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-2);
+    background: var(--st-raised);
+    border: 1px solid var(--st-line-strong);
+    border-radius: var(--st-radius);
+  }
+}
+
+.queueName {
+  @include t.truncate;
+
+  max-width: 200px;
+}
+
+.queue_uploading {
+  color: var(--st-ink-3);
+}
+
+.queue_done {
+  color: var(--st-ink);
+}
+
+.queue_failed {
+  color: var(--st-danger);
+}
+
+/* ------------------------------------------------------------------ bar -- */
+
+.libraryBar {
+  /* Zalomí se, místo aby přetekla: v dialogu je pro ni o třetinu míň místa
+     než na celé stránce a hledání, dva filtry a Nahrát se na jeden řádek
+     nevejdou. */
+  flex-wrap: wrap;
+  min-width: 0;
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  height: 46px;
+  padding: 0 var(--st-gutter);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.grow {
+  flex: 1;
+}
+
+.count {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+  white-space: nowrap;
+}
+
+/* Missing alt text is a real defect, so it uses the accent — the one hue in the
+   Studio that means "this wants your attention" — rather than its own yellow. */
+/* A button now, not a label: it filters the grid down to the files it counts.
+   The reset that follows is what stops a <button> inheriting the browser's own
+   font and chrome in the middle of a toolbar of ours. */
+.altWarning {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: var(--st-text-small);
+  color: var(--st-accent);
+  white-space: nowrap;
+  cursor: pointer;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--st-radius);
+
+  &:hover {
+    background: var(--st-accent-soft);
+  }
+
+  &[data-active="true"] {
+    background: var(--st-accent-soft);
+    border-color: var(--st-accent-line);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--st-accent);
+    outline-offset: 1px;
+  }
+}
+
+.libraryBody {
+  @include t.scrollbar;
+
+  /* Knihovna se vykresluje i uvnitř overlaye, tedy na stránce hostitele.
+     Bez tohohle se dojetí na konec mřížky propadne do rolování webu pod ní. */
+  overscroll-behavior: contain;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+/* ----------------------------------------------------------------- grid -- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: var(--st-s5) var(--st-s4);
+  padding: var(--st-s6) var(--st-gutter) var(--st-s10);
+}
+
+/* The tile is the image plus its name — not a bordered card containing them.
+   Only the thumbnail has an edge, because an image genuinely needs one to sit
+   against a dark ground. */
+.tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  font-family: var(--st-font);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: none;
+
+  &:focus-visible {
+    outline: none;
+
+    .thumb {
+      @include t.focus-outline;
+    }
+  }
+
+  &:hover .thumb {
+    border-color: var(--st-line-strong);
+  }
+
+  &:hover .tileName {
+    color: var(--st-ink);
+  }
+}
+
+.tileSelected .thumb {
+  border-color: var(--st-ink);
+  box-shadow: 0 0 0 1px var(--st-ink);
+}
+
+.thumb {
+  display: block;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+
+  /* Checkerboard so a logo on transparency is legible instead of vanishing. */
+  background-color: #0d0d0f;
+  background-image:
+    linear-gradient(45deg, rgba(255, 252, 247, 0.025) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(255, 252, 247, 0.025) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(255, 252, 247, 0.025) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(255, 252, 247, 0.025) 75%);
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+  background-size: 12px 12px;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    border-color var(--st-fast) var(--st-ease),
+    box-shadow var(--st-fast) var(--st-ease);
+
+  // `video` alongside `img`: the library holds the site's .mp4 clips and draws
+  // them with a <video> element, which without this sits at its intrinsic size
+  // and blows the tile open.
+  img,
+  video {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.tileMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding-top: var(--st-s2);
+}
+
+.tileName {
+  @include t.truncate;
+
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  transition: color var(--st-fast) var(--st-ease);
+}
+
+.tileSub {
+  font-size: var(--st-text-tiny);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+}
+
+/* Flagged on the tile rather than only in the detail panel — a library of
+   twenty images should say which ones are unfinished without being opened. */
+.tileFlag {
+  position: absolute;
+  top: var(--st-s2);
+  right: var(--st-s2);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  color: var(--st-accent);
+  background: rgba(10, 10, 11, 0.9);
+  border-radius: 3px;
+}
+
+.pager {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  justify-content: center;
+  padding: var(--st-s5);
+  border-top: 1px solid var(--st-line);
+}
+
+.pagerLabel {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-3);
+}
+
+/* --------------------------------------------------------------- detail -- */
+
+.detail {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  width: 320px;
+  background: var(--st-rail);
+  border-left: 1px solid var(--st-line);
+}
+
+.detailHead {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: space-between;
+  height: 46px;
+  padding: 0 var(--st-s2) 0 var(--st-s5);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.detailTitle {
+  @include t.eyebrow;
+
+  margin: 0;
+  color: var(--st-ink-2);
+}
+
+.detailBody {
+  @include t.scrollbar;
+
+  /* Knihovna se vykresluje i uvnitř overlaye, tedy na stránce hostitele.
+     Bez tohohle se dojetí na konec mřížky propadne do rolování webu pod ní. */
+  overscroll-behavior: contain;
+
+  flex: 1;
+  min-height: 0;
+  padding: var(--st-s5);
+  overflow-y: auto;
+}
+
+.detailPreview {
+  display: grid;
+  place-items: center;
+  margin-bottom: var(--st-s5);
+  overflow: hidden;
+  background: #0d0d0f;
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  img,
+  video {
+    display: block;
+    width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+  }
+}
+
+.detailLabel {
+  display: block;
+  margin-bottom: var(--st-s2);
+  font-size: var(--st-text-tiny);
+  font-weight: var(--st-w-medium);
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--st-ink-2);
+}
+
+.detailInput {
+  @include t.control;
+
+  line-height: 1.55;
+  resize: vertical;
+}
+
+.detailHint {
+  margin: var(--st-s2) 0 0;
+  font-size: var(--st-text-small);
+  line-height: 1.55;
+  color: var(--st-ink-4);
+}
+
+.detailFacts {
+  margin: var(--st-s6) 0 0;
+  border-top: 1px solid var(--st-line);
+
+  div {
+    display: flex;
+    gap: var(--st-s3);
+    justify-content: space-between;
+    padding: var(--st-s2) 0;
+    border-bottom: 1px solid var(--st-line-soft);
+  }
+
+  dt {
+    flex: none;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-4);
+  }
+
+  dd {
+    @include t.truncate;
+
+    margin: 0;
+    font-size: var(--st-text-small);
+    color: var(--st-ink-2);
+  }
+}
+
+/* Tři tlačítka — Vyřadit z knihovny, Oříznout, Uložit — v panelu širokém
+   320px. V písmu, ve kterém se to navrhovalo, je to těsné; v jakémkoli širším
+   to přeteče, a `overflow: hidden` na kořeni to ořízne až na hraně okna.
+   Odtud useknuté „Uložit".
+   
+   Zalomit je levnější než hádat, jak široké písmo hostitel má. */
+.detailFoot {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  min-width: 0;
+  gap: var(--st-s2);
+  align-items: center;
+  padding: var(--st-s3) var(--st-s3) var(--st-s3) var(--st-s5);
+  border-top: 1px solid var(--st-line);
+}
+
+/* Podle KONTEJNERU, ne podle okna. Tenhle blok platí, když je knihovna úzká —
+   ať už proto, že je úzké okno, nebo proto, že je v dialogu na širokém
+   monitoru. To druhé `@media` rozeznat neumí a byl to celý ten problém. */
+@container (max-width: 900px) {
+  .libraryBar,
+  .grid {
+    padding-right: var(--st-s5);
+    padding-left: var(--st-s5);
+  }
+
+  .detail {
+    width: 260px;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Filtry a použití — MediaLibrary.jsx
+ *
+ * Ani jedno není uložená taxonomie: složka je cesta souboru, použití je odpověď
+ * na dotaz nad dokumenty. Viz server/mediaUsage.js.
+ * ------------------------------------------------------------------------- */
+
+.filterSelect {
+  max-width: 190px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+  cursor: pointer;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  &:hover {
+    color: var(--st-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--st-accent);
+    outline-offset: 1px;
+  }
+}
+
+.usage {
+  margin: var(--st-s3) 0 0;
+}
+
+.usageList {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    padding: 4px 8px;
+    font-size: var(--st-text-small);
+    background: var(--st-sunken);
+    border-radius: var(--st-radius);
+  }
+}
+
+.usageWhere {
+  flex: none;
+  color: var(--st-ink-3);
+}
+
+.usageWhat {
+  overflow: hidden;
+  color: var(--st-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ne varování barvou nebezpečí: nepoužitý soubor není chyba, je to informace,
+   podle které se dá rozhodnout o archivaci. */
+.usageNone {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin: var(--st-s3) 0 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* Označeno v režimu výběru.
+ *
+ * Neonová oranžová `#ff6a00` je barva *vybranosti* v celém CMS — definuje ji
+ * edit/overlay/overlay.module.scss jako `--cms-pick` a stojí za ní měření proti
+ * 31 tisícům pixelů podkladů webu. Ten token sem nedosáhne (je nastavený na
+ * kořeni rámu se stránkou), takže je tu ta samá hodnota znovu; komentář je to,
+ * co je drží pohromadě.
+ *
+ * Odlišené od `.tileSelected`, které znamená něco jiného: „tohle je v poli
+ * uložené teď". Označení je „tohle se chystám vzít". */
+.tileMarked .thumb {
+  border-color: #ff6a00;
+  box-shadow: 0 0 0 2px #ff6a00;
+}
+
+.tileMarked .tileName {
+  color: #ff6a00;
+}
+
+/* Mřížka médií se řídí plochou, ne zlomem.
+   
+   `auto-fill` sloupce dopočítá sám; co se musí měnit, je JAK VELKÁ dlaždice
+   dává smysl. Na 13" notebooku je 150px minimum správné — víc dlaždic v řadě
+   znamená míň scrollování v okně, které ho má nejmíň. Na 27" je 150px opačná
+   chyba: šestnáct sloupců miniatur, ve kterých se obrázek nedá poznat. */
+@include t.wide {
+  /* Strop platí i tady. Bez něj je mřížka deset sloupců široká přes celou
+     obrazovku a hlavička nad ní má hledání úplně vlevo a Nahrát úplně vpravo,
+     dva tisíce pixelů od sebe — dvě věci, mezi kterými se chodí, na opačných
+     koncích stolu. */
+  .grid,
+  .libraryBar,
+  .pager {
+    max-width: var(--st-measure);
+  }
+
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  }
+}
+
+@include t.ultra {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+}
+
+/* Nízké okno: detail vpravo měl pevný strop náhledu, který na 640px sebral
+   třetinu panelu dřív, než se dostalo na pole. */
+@include t.short {
+  .detailPreview {
+    max-height: 150px;
+  }
+}

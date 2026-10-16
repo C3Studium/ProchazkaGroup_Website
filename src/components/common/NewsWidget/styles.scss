@@ -1,0 +1,529 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+
+// Okno novinek. Barvy, písmo a hrany převzaté z ContactModal a AdvisorModal,
+// aby to byl tentýž web: tmavý inkoust, vlasové linky, Switzer Light, velká
+// písmena s prostrkáním pro popisky. Akcent je ta tyrkysová tečka ze zdi
+// recenzí.
+
+$ink: rgba(2, 14, 21, 0.94);
+$line: rgba(255, 255, 255, 0.16);
+$accent: #7fd8e0;
+$glide: cubic-bezier(0.22, 1, 0.36, 1);
+$edge: clamp(1rem, 1.6vw, 1.75rem);
+
+.NewsWidget {
+    position: fixed;
+    z-index: 900; // pod modály (1000+), nad obsahem stránky
+    pointer-events: none;
+    font-family: "Switzer-Light", sans-serif;
+    color: var(--wText);
+
+    &.is-right { right: $edge; }
+    &.is-left { left: $edge; }
+
+    &.is-bottom-right,
+    &.is-bottom-left { bottom: $edge; }
+
+    // „Ve dvou třetinách" = střed tlačítka (3.5rem) ve 2/3 výšky okna. Bez
+    // `transform`: okno novinek je `position: fixed` uvnitř a pod
+    // transformovaným rodičem by se počítalo od něj, ne od okna prohlížeče.
+    &.is-lower-right,
+    &.is-lower-left { top: calc(66.6vh - 1.75rem); }
+
+    &.is-middle-right,
+    &.is-middle-left { top: calc(50vh - 1.75rem); }
+
+    // Dokud je dole lišta s cookies, dok stojí nad ní. Obě jsou na vrstvě 900
+    // a bublina „Podívejte se na novinky" jinak ležela přes tlačítko
+    // „Nastavení" a brala mu kliknutí. Výšku hlásí lišta sama (CookiesBar),
+    // `bottom` je její vlastní odsazení od okraje plus mezera. Otevřené okno
+    // novinek (`.NewsPanel`) má vlastní `position: fixed` a nehne se.
+    transition: bottom 0.5s $glide;
+
+    :root[data-cookiebar] &.is-bottom-right,
+    :root[data-cookiebar] &.is-bottom-left {
+        bottom: calc(var(--cookiebar-h, 0px) + clamp(0.75rem, 2.5vh, 1.75rem) + 0.75rem);
+    }
+}
+
+/* --------------------------------------------------------- dok u okraje -- */
+
+.NewsWidget__dock { pointer-events: auto; }
+
+.NewsWidget__slide {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+
+    .is-right & { flex-direction: row; }
+    .is-left & { flex-direction: row-reverse; }
+
+    // Zasunuto: polovina tlačítka za okrajem. Vyjede na najetí i na fokus —
+    // klávesnicí se k němu musí dát dostat stejně jako myší.
+    transition: transform 0.6s $glide;
+
+    .is-tucked.is-right & { transform: translateX(calc(50% + #{$edge})); }
+    .is-tucked.is-left & { transform: translateX(calc(-50% - #{$edge})); }
+
+    // Vysunuto jen tak, aby bylo tlačítko celé vidět a zůstalo u okraje
+    // (0.35rem od něj) — ne až na svou plnou pozici o $edge dál. Dřív jelo
+    // ~53 px doleva a to bylo víc, než je potřeba.
+    .is-tucked.is-right &:hover,
+    .is-tucked.is-right &:focus-within { transform: translateX(calc(#{$edge} - 0.35rem)); }
+    .is-tucked.is-left &:hover,
+    .is-tucked.is-left &:focus-within { transform: translateX(calc(-1 * #{$edge} + 0.35rem)); }
+
+    // Plocha pro myš mezi tlačítkem a okrajem obrazovky. Bez ní tlačítko po
+    // vysunutí ujelo zpod kurzoru stojícího u samého okraje: hover zmizel,
+    // tlačítko zajelo zpátky pod kurzor, hover se vrátil — a dokola. Pruh
+    // jede s tlačítkem a sahá za okraj, takže kurzor kdekoli od tlačítka
+    // k okraji hover drží.
+    .is-tucked & { position: relative; }
+    .is-tucked &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: calc(#{$edge} + 1.5rem);
+    }
+    .is-tucked.is-right &::before { left: 100%; }
+    .is-tucked.is-left &::before { right: 100%; }
+
+    @media (prefers-reduced-motion: reduce) { transition-duration: 0.35s; }
+}
+
+.NewsWidget__launcher {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 3.5rem;
+    height: 3.5rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    border-radius: 50%;
+    background-color: $ink;
+    color: var(--wText);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    cursor: inherit;
+    transition: border-color 0.35s ease, background-color 0.35s ease;
+
+    // Jemný puls kolem tlačítka, jen dokud nikdo nic nezavřel.
+    &::after {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        border-radius: inherit;
+        border: 1px solid $accent;
+        opacity: 0;
+        animation: NewsWidget-pulse 2.8s $glide 2s infinite;
+        pointer-events: none;
+    }
+    .is-tucked &::after { animation: none; }
+
+    &:hover,
+    &:focus-visible {
+        border-color: rgba(255, 255, 255, 0.6);
+        background-color: rgba(8, 30, 40, 0.98);
+    }
+    &:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+        &::after { animation: none; }
+    }
+}
+
+@keyframes NewsWidget-pulse {
+    0% { opacity: 0.55; transform: scale(1); }
+    70%, 100% { opacity: 0; transform: scale(1.45); }
+}
+
+.NewsWidget__count {
+    position: absolute;
+    top: -0.35rem;
+    min-width: 1.6rem;
+    height: 1.25rem;
+    padding: 0 0.4rem;
+    border-radius: 0.625rem;
+    background-color: $accent;
+    color: #02141c;
+    font-family: "Switzer-Regular", "Switzer-Light", sans-serif;
+    font-size: 0.7rem;
+    line-height: 1.25rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+
+    // Na straně od okraje, ať je vidět i u zasunutého tlačítka.
+    .is-right & { left: -0.45rem; }
+    .is-left & { right: -0.45rem; }
+}
+
+.NewsWidget__bubble {
+    position: relative;
+    display: flex;
+    align-items: center;
+    max-width: min(17rem, calc(100vw - 7rem));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background-color: $ink;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+    .is-right & { transform-origin: 100% 50%; }
+    .is-left & { transform-origin: 0% 50%; }
+
+    // Ocásek k tlačítku.
+    &::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        width: 0.6rem;
+        height: 0.6rem;
+        background-color: $ink;
+        border: solid rgba(255, 255, 255, 0.22);
+        transform: translateY(-50%) rotate(45deg);
+    }
+    .is-right &::after { right: -0.32rem; border-width: 1px 1px 0 0; }
+    .is-left &::after { left: -0.32rem; border-width: 0 0 1px 1px; }
+
+    .NewsWidget__bubble__text {
+        padding: 0.8rem 0.4rem 0.8rem 1rem;
+        border: 0;
+        background: none;
+        color: var(--wText);
+        font: inherit;
+        font-size: 0.86rem;
+        line-height: 1.4;
+        text-align: left;
+        cursor: inherit;
+    }
+
+    .NewsWidget__bubble__close {
+        display: grid;
+        place-items: center;
+        flex: none;
+        align-self: flex-start;
+        width: 1.75rem;
+        height: 1.75rem;
+        margin: 0.35rem 0.35rem 0 0;
+        padding: 0;
+        border: 0;
+        background: none;
+        color: rgba(255, 255, 255, 0.55);
+        cursor: inherit;
+        transition: color 0.3s ease, transform 0.4s $glide;
+
+        &:hover,
+        &:focus-visible { color: var(--wText); transform: rotate(90deg); }
+        @media (prefers-reduced-motion: reduce) {
+            &:hover, &:focus-visible { transform: none; }
+        }
+    }
+}
+
+/* --------------------------------------------------------------- okno -- */
+
+// Velikost telefonu všude kromě telefonu — na něm přes celou obrazovku.
+.NewsPanel {
+    position: fixed;
+    display: flex;
+    flex-direction: column;
+    width: min(24rem, calc(100vw - 2 * #{$edge}));
+    height: min(42rem, calc(100dvh - 2 * #{$edge}));
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 1.25rem;
+    // Plně krycí: přes 94% inkoust prosvítaly bílé prvky stránky pod oknem.
+    background-color: #04131b;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    pointer-events: auto;
+
+    .is-right & { right: $edge; }
+    .is-left & { left: $edge; }
+
+    // Svisle: dole stojí dole, ostatní polohy berou okno do středu výšky —
+    // telefon vysoký 42rem se do horní či dolní třetiny stejně nevejde.
+    .is-bottom-right &,
+    .is-bottom-left & { bottom: $edge; }
+    .is-lower-right &,
+    .is-lower-left &,
+    .is-middle-right &,
+    .is-middle-left & { top: 50vh; margin-top: calc(min(42rem, 100dvh - 2 * #{$edge}) / -2); }
+
+    @media (max-width: 600px) {
+        inset: 0 !important;
+        width: 100%;
+        height: 100dvh;
+        margin: 0 !important;
+        border: 0;
+        border-radius: 0;
+    }
+}
+
+
+.NewsPanel__head {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1rem 1rem 0.9rem 1.1rem;
+    border-bottom: 1px solid $line;
+}
+
+.NewsPanel__avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+}
+
+.NewsPanel__who { flex: 1; min-width: 0; }
+
+.NewsPanel__title {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: 1rem;
+    letter-spacing: 0.04em;
+}
+
+.NewsPanel__status {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0.2rem 0 0;
+    font-size: 0.72rem;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.NewsPanel__dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 50%;
+    background-color: $accent;
+}
+
+.NewsPanel__close {
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
+    background: none;
+    color: rgba(255, 255, 255, 0.75);
+    cursor: inherit;
+    transition: border-color 0.3s ease, color 0.3s ease, transform 0.5s $glide;
+
+    &:hover,
+    &:focus-visible { border-color: rgba(255, 255, 255, 0.5); color: var(--wText); transform: rotate(90deg); }
+    &:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+        &:hover, &:focus-visible { transform: none; }
+    }
+}
+
+/* ------------------------------------------------------------- filtr -- */
+
+.NewsPanel__filter {
+    padding: 0.75rem 1rem 0.7rem;
+    border-bottom: 1px solid $line;
+}
+
+.NewsPanel__chips {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    &::-webkit-scrollbar { display: none; }
+}
+
+.NewsPanel__chip {
+    flex: none;
+    padding: 0.38rem 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 999px;
+    background: none;
+    color: rgba(255, 255, 255, 0.7);
+    font: inherit;
+    font-size: 0.74rem;
+    cursor: inherit;
+    transition: border-color 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+
+    &:hover { border-color: rgba(255, 255, 255, 0.45); color: var(--wText); }
+    &:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 2px; }
+    &.is-on { border-color: $accent; background-color: rgba(127, 216, 224, 0.14); color: var(--wText); }
+}
+
+.NewsPanel__range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    overflow: hidden;
+}
+
+.NewsPanel__date {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding-top: 0.6rem;
+    font-size: 0.66rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+
+    input {
+        width: 100%;
+        padding: 0.45rem 0.55rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 0.5rem;
+        background-color: rgba(255, 255, 255, 0.04);
+        color: var(--wText);
+        font: inherit;
+        font-size: 0.8rem;
+        letter-spacing: 0;
+        text-transform: none;
+        color-scheme: dark;
+
+        &:focus-visible { outline: 1px solid $accent; outline-offset: 1px; }
+    }
+}
+
+/* ------------------------------------------------------------- zprávy -- */
+
+.NewsPanel__scroll {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1rem 1rem 1.25rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.NewsPanel__day {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.NewsPanel__sep {
+    align-self: center;
+    margin: 0.4rem 0 0.1rem;
+    padding: 0.2rem 0.65rem;
+    border-radius: 999px;
+    background-color: rgba(255, 255, 255, 0.06);
+    font-size: 0.64rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+// Zpráva od webu: vlevo, jako příchozí v chatu.
+.NewsPanel__msg {
+    align-self: flex-start;
+    max-width: 92%;
+    padding: 0.8rem 0.9rem 0.7rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 0.25rem 1rem 1rem 1rem;
+    background-color: rgba(255, 255, 255, 0.05);
+
+    &.is-intro {
+        background-color: rgba(127, 216, 224, 0.08);
+        border-color: rgba(127, 216, 224, 0.22);
+    }
+}
+
+.NewsPanel__msg__title {
+    margin: 0;
+    font-family: "Switzer-Regular", "Switzer-Light", sans-serif;
+    font-weight: 400;
+    font-size: 0.92rem;
+    line-height: 1.35;
+    text-wrap: balance;
+}
+
+.NewsPanel__msg__summary {
+    margin: 0.3rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: $accent;
+}
+
+.NewsPanel__text {
+    margin: 0.45rem 0 0;
+    font-size: 0.84rem;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.78);
+    white-space: pre-line;
+
+    .is-intro & { margin-top: 0; }
+}
+
+.NewsPanel__msg__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 0.65rem;
+}
+
+.NewsPanel__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.42rem 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    color: var(--wText);
+    font-size: 0.76rem;
+    text-decoration: none;
+    transition: border-color 0.3s ease, background-color 0.3s ease;
+
+    svg { transition: transform 0.35s $glide; }
+
+    &:hover,
+    &:focus-visible {
+        border-color: $accent;
+        background-color: rgba(127, 216, 224, 0.12);
+        svg { transform: translate(2px, -2px); }
+    }
+    &:focus-visible { outline: 1px solid rgba(255, 255, 255, 0.6); outline-offset: 2px; }
+    @media (prefers-reduced-motion: reduce) {
+        &:hover svg, &:focus-visible svg { transform: none; }
+    }
+}
+
+.NewsPanel__time {
+    margin-left: auto;
+    font-size: 0.68rem;
+    color: rgba(255, 255, 255, 0.4);
+    font-variant-numeric: tabular-nums;
+}
+
+.NewsPanel__empty {
+    margin: auto 0;
+    padding: 2rem 1rem;
+    font-size: 0.84rem;
+    line-height: 1.5;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.NewsPanel__foot {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.7rem 1.1rem calc(0.75rem + env(safe-area-inset-bottom, 0px));
+    border-top: 1px solid $line;
+    font-size: 0.66rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45);
+}

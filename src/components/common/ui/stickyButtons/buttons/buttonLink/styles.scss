@@ -1,0 +1,65 @@
+@use "../../../../../../styles/system/_shortcuts.scss" as *;
+
+// The magnetic wrapper is gone from the markup; these two are grid children of
+// the navbar and place themselves there.
+.rotateText {
+    position: relative;
+    justify-self: start;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+    height: fit-content;
+    z-index: 165;
+    cursor: pointer;
+
+    // `:last-child`, not `:nth-of-type(3)`.
+    //
+    // nth-of-type counts by element type, and the bar's three children are a
+    // div, a button and a div — so "the third div" is something that does not
+    // exist and the contact word sat at the inside edge of the right-hand
+    // column, a third of the screen from the corner it belongs in. It matched
+    // while the middle trigger was still a <div>; it stopped the moment that
+    // became the <button> it always should have been.
+    &:last-child {
+        justify-self: end;
+    }
+
+    .rotateText__text {
+        position: relative;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        // Was 0.75rem, which pushed the corner marks most of a centimetre off
+        // the word. They have to sit almost on it.
+        margin: 0.25rem 0.35rem;
+        background-color: transparent;
+        padding: 0;
+        border: 0;
+        box-shadow: none;
+        text-decoration: none;
+        color: inherit;
+        font: inherit;
+
+        // The word is barely twenty pixels tall. On touch the pseudo widens
+        // what a finger can land on to the 44px a tap needs, without moving a
+        // visible pixel.
+        @include touch {
+            &::after {
+                content: "";
+                position: absolute;
+                inset: -12px;
+            }
+        }
+
+        .rotateText__text__content {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: fit-content;
+            height: 1.3rem;
+            overflow: hidden;
+            pointer-events: none;
+        }
+    }
+}

@@ -5,16 +5,20 @@ module.exports = {
   changefreq: 'weekly',
   priority: 0.7,
   sitemapSize: 5000,
-  exclude: ['/private-page', '/admin/*', '/api/*'],
+  // The Studio and its preview frames are the CMS's own surface — they are
+  // for whoever edits this site, never for a search engine, and they were
+  // being published in the sitemap.
+  // /recenze/<poradce> are the forms a client is sent to write a review; they
+  // carry noindex, so listing them here only told Google two opposite things.
+  exclude: ['/private-page', '/admin/*', '/api/*', '/studio', '/studio/*', '/recenze/*'],
   robotsTxtOptions: {
     policies: [
+      // One group: two `User-agent: *` groups are merged by Google but not by
+      // every crawler, and some read only the first one they meet.
       {
         userAgent: '*',
         allow: '/',
-      },
-      {
-        userAgent: '*',
-        disallow: ['/private-page', '/admin', '/api'],
+        disallow: ['/private-page', '/admin', '/api', '/studio'],
       },
     ],
   },
@@ -22,7 +26,8 @@ module.exports = {
     // Custom priority for important pages
     const customPriority = {
       '/': 1.0,
-      '/kontakt': 0.9,
+      // '/kontakt' takes the default: it is the fallback address of the
+      // contact sheet the bar opens, and on arrival it opens that sheet.
       '/recenze': 0.9,
       '/o-nas': 0.8,
       '/benefit-program': 0.8,
@@ -32,13 +37,11 @@ module.exports = {
     // Check for specific priorities first
     let priority = customPriority[path];
 
-    // If not found, check patterns
+    // If not found, use the default. (The '/reviews/*' pattern that used to
+    // live here is gone with the routes: twelve pages that rendered nothing,
+    // now permanently redirected to /recenze — see next.config.mjs.)
     if (!priority) {
-      if (path.startsWith('/reviews/')) {
-        priority = 0.6; // All individual review submission pages
-      } else {
-        priority = config.priority; // Default fallback (0.7)
-      }
+      priority = config.priority;
     }
 
     return {

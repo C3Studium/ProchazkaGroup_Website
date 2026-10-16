@@ -1,0 +1,573 @@
+@use "../../../styles/system/_shortcuts.scss" as *;
+
+// Sticky reveal footer — variation 2 from
+// blog.olivierlarose.com/tutorials/sticky-footer:
+//   outer  : takes --footer-h of flow + clip-path window
+//   scroller: 100vh taller, pulled up by 100vh
+//   inner  : sticky, sticks at (100vh - footer height)
+// Pure CSS, no JS, so every page gets it for free. The height used to be
+// declared in three places by hand; it is one custom property now, so a
+// breakpoint that needs a taller panel changes one number and the reveal
+// stays coherent.
+.SiteFooter {
+    --footer-h: 60vh;
+
+    position: relative;
+    height: var(--footer-h);
+    clip-path: polygon(0% 0, 100% 0%, 100% 100%, 0 100%);
+
+    .SiteFooter__scroller {
+        position: relative;
+        height: calc(100vh + var(--footer-h));
+        top: -100vh;
+    }
+
+    .SiteFooter__inner {
+        position: sticky;
+        top: calc(100vh - var(--footer-h));
+        height: var(--footer-h);
+        display: flex;
+        flex-direction: column;
+        padding: 6vh 3vw 2.5vh;
+        color: var(--wText);
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+
+        // The faint printed grid is gone. The page carries a lattice already —
+        // the one that lights under the pointer — and a static copy of it behind
+        // the footer's text was the same idea said twice, in the one place where
+        // the reader has stopped moving and would look at it longest.
+    }
+
+    h2, h3 {
+        margin: 0;
+        font-weight: 200;
+    }
+
+    // ---- shared bracket button ----
+    .SiteFooter__btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        padding: 0.5rem 1rem;
+        color: var(--wText);
+        text-decoration: none;
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+        font-size: clamp(0.9rem, 1.05vw, 1.2rem);
+        white-space: nowrap;
+
+        // The arms are in rem: they are the drawing round the label and have to
+        // stay the size of it, and the label is set in rem. The 1.5px strokes
+        // below are the house's hairline weight and stay px at every width —
+        // grown they would only go soft. So does the hover travel further down:
+        // that is three pixels of nudge off a resting position, which is motion
+        // and reads the same however many pixels the monitor has.
+        .corner {
+            position: absolute;
+            width: 0.5625rem;
+            height: 0.5625rem;
+            border: 0 solid currentColor;
+            transition: transform 0.3s ease;
+        }
+
+        .corner--tl { top: 0; left: 0; border-top-width: 1.5px; border-left-width: 1.5px; }
+        .corner--tr { top: 0; right: 0; border-top-width: 1.5px; border-right-width: 1.5px; }
+        .corner--bl { bottom: 0; left: 0; border-bottom-width: 1.5px; border-left-width: 1.5px; }
+        .corner--br { bottom: 0; right: 0; border-bottom-width: 1.5px; border-right-width: 1.5px; }
+
+        .arrow {
+            font-size: 0.85em;
+            transition: transform 0.3s ease;
+        }
+
+        &:hover {
+            .corner--tl { transform: translate(-3px, -3px); }
+            .corner--tr { transform: translate(3px, -3px); }
+            .corner--bl { transform: translate(-3px, 3px); }
+            .corner--br { transform: translate(3px, 3px); }
+            .arrow { transform: translate(2px, -2px); }
+        }
+    }
+
+    // On touch there is no hover to forgive a near miss, so everything
+    // tappable grows to the 44px it needs. The bracket buttons grow through
+    // their padding — the corners ride out with it, so the button simply
+    // reads a size up. The tel/email pair are stacked hairline-height text
+    // links whose 44px zones would overlap if they were expanded invisibly,
+    // so they take real height instead and the column opens up with them.
+    @include touch {
+        .SiteFooter__btn {
+            padding: 0.85rem 1.2rem;
+        }
+
+        .SiteFooter__contact .SiteFooter__contact__row .details a {
+            display: flex;
+            align-items: center;
+            min-height: 2.75rem;
+        }
+    }
+
+    // ---- top: claim (left) + contact (right) ----
+    .SiteFooter__top {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 4vw;
+        align-items: start;
+    }
+
+    .SiteFooter__claim {
+        display: flex;
+        flex-direction: column;
+        gap: 2.5vh;
+        max-width: 46vw;
+
+        h2 {
+            text-transform: uppercase;
+            font-size: clamp(1.5rem, 2.3vw, 2.8rem);
+            line-height: 1.25;
+        }
+
+        .SiteFooter__claim__divider {
+            width: 100%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .SiteFooter__claim__cta {
+            display: flex;
+            align-items: center;
+            gap: 3vw;
+
+            .SiteFooter__btn {
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+            }
+
+            p {
+                margin: 0;
+                text-transform: uppercase;
+                font-size: clamp(0.95rem, 1.2vw, 1.35rem);
+                line-height: 1.4;
+            }
+        }
+    }
+
+    .SiteFooter__contact {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 1.4vh;
+        text-align: right;
+
+        a {
+            color: var(--wText);
+            text-decoration: none;
+
+            &:hover {
+                color: var(--hColor);
+            }
+        }
+
+        .SiteFooter__contact__row {
+            display: flex;
+            align-items: center;
+            // 1vw collapsed to 4px on a phone and welded the lead to the
+            // numbers; the clamp keeps the desktop rhythm and holds a floor.
+            gap: clamp(0.75rem, 1vw, 1.4rem);
+
+            .lead {
+                font-size: clamp(1rem, 1.3vw, 1.5rem);
+            }
+
+            .details {
+                display: flex;
+                flex-direction: column;
+                font-size: clamp(0.7rem, 0.85vw, 0.95rem);
+                line-height: 1.5;
+                text-align: left;
+            }
+        }
+
+        .SiteFooter__contact__divider {
+            width: 70%;
+            height: 1px;
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .SiteFooter__contact__where {
+            display: flex;
+            align-items: center;
+            gap: 1.2vw;
+
+            h3 {
+                font-size: clamp(1.2rem, 1.6vw, 1.9rem);
+            }
+
+            .pin {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 3.4rem;
+                height: 3.4rem;
+                border: 1px solid rgba(255, 255, 255, 0.6);
+                border-radius: 50%;
+            }
+        }
+
+        .SiteFooter__contact__address {
+            margin: 0;
+            opacity: 0.85;
+            font-size: clamp(0.8rem, 0.95vw, 1.05rem);
+        }
+
+        .SiteFooter__socials {
+            display: flex;
+            // Floor for the same reason as the contact row's gap — and these
+            // two are adjacent tap targets, which need daylight between them.
+            gap: clamp(0.75rem, 1vw, 1.5rem);
+        }
+    }
+
+    // ---- wordmark ----
+    // The size and the spacing are the component's now — it measures the box
+    // and sets the letters to fill it, which is the only way the spread stays
+    // right when the string or the viewport changes.
+    .SiteFooter__wordmark {
+        margin-top: auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    // ---- legal row ----
+    .SiteFooter__legal {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 2.5vh;
+        font-size: clamp(0.6rem, 0.72vw, 0.8rem);
+        opacity: 0.75;
+    }
+
+    @include below-px(820) {
+        // no reveal on small screens: plain footer in normal flow
+        height: auto;
+        clip-path: none;
+
+        .SiteFooter__scroller {
+            height: auto;
+            top: 0;
+        }
+
+        .SiteFooter__inner {
+            position: static;
+            height: auto;
+            padding: 6vh 6vw 3vh;
+            gap: 4vh;
+        }
+
+        .SiteFooter__top {
+            grid-template-columns: 1fr;
+            gap: 5vh;
+        }
+
+        .SiteFooter__claim {
+            max-width: none;
+
+            .SiteFooter__claim__cta {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 2vh;
+            }
+        }
+
+        .SiteFooter__contact {
+            align-items: flex-start;
+            text-align: left;
+
+            .SiteFooter__contact__divider {
+                width: 100%;
+            }
+        }
+
+        .SiteFooter__wordmark .textPressure__word {
+            white-space: normal;
+        }
+
+        .SiteFooter__legal {
+            flex-direction: column;
+            gap: 1vh;
+        }
+
+        // ---- phone, portrait ----
+        //
+        // Bound at 560 and not at the 820 this sits inside, because what
+        // follows takes copy off the page and 820 is wide enough to be a
+        // tablet stood upright — an iPad Mini is 744 across, and a tablet is
+        // meant to read exactly what a laptop reads. The nearest thing on the
+        // far side is a phone turned landscape at 568, so the number has open
+        // ground on both sides. This stop already existed here, holding the
+        // one rule that unpicked the headline's authored break; the headline
+        // is gone below and that rule went with it.
+        @include below-px(560px) {
+            // One rail through the contact block. The map mark's ring sets it,
+            // and everything the block points at starts where the ring ends —
+            // the street beside it, and the number and the e-mail above. Two
+            // values indented by two different amounts read as two accidents;
+            // indented by the same one they read as a column.
+            --footer-mark: 2.75rem;
+            --footer-mark-gap: 0.9rem;
+
+            // The claim is out. Stacked, it was three lines of 24px uppercase
+            // standing over a patička that on a phone is the five things
+            // underneath it — and the call to action immediately below says
+            // the same sentence in the imperative, with the button to act on
+            // it beside it. Hidden rather than dropped from the markup: both
+            // lines are CMS copy carrying an editable annotation, and the
+            // Studio edits at desk widths, where they are still on the page.
+            //
+            // Its rule goes with it. A hairline between nothing and the call
+            // to action separates nothing; the one below the button stays, and
+            // is now the single break between what the patička says and what
+            // it lists.
+            .SiteFooter__claim h2,
+            .SiteFooter__claim h2 + .SiteFooter__claim__divider {
+                display: none;
+            }
+
+            // "Kde nás najdete" is out and the pin stays: the mark is the whole
+            // of what the heading said. It moves beside the address rather than
+            // standing above it — a circled pin alone on a line is a hole where
+            // a heading used to be, and against a street it is the label for
+            // it. The two are siblings rather than one block, so the column
+            // that pairs them has to come from their parent, which is why the
+            // contact stack is a grid here and a column everywhere else.
+            .SiteFooter__contact__where h3 {
+                display: none;
+            }
+
+            .SiteFooter__contact {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                justify-items: start;
+                row-gap: 1.25rem;
+                column-gap: var(--footer-mark-gap);
+
+                // Everything takes the full width except the pair that share a
+                // line, and the address centres on the mark beside it.
+                > * {
+                    grid-column: 1 / -1;
+                }
+
+                .SiteFooter__contact__where {
+                    grid-column: 1;
+                }
+
+                .SiteFooter__contact__address {
+                    grid-column: 2;
+                    align-self: center;
+                }
+            }
+
+            // The ring was 3.4rem because it stood beside 1.9rem of heading.
+            // What it stands beside now is one line of address, and at the old
+            // size it outweighed the thing it is pointing at.
+            .SiteFooter__contact .SiteFooter__contact__where .pin {
+                width: var(--footer-mark);
+                height: var(--footer-mark);
+            }
+
+            // "Kontakt | 8-16" was centred against a block two links tall and
+            // came to rest exactly in the space between them, so it read as
+            // something wedged between the number and the address rather than
+            // as the heading for both. It goes above the pair.
+            //
+            // The space it fell into is not a spacing mistake and does not go
+            // anywhere: on touch each of those links takes a real 2.75rem so a
+            // finger has 44px to land on, and two of those stacked put 25px
+            // between the two lines of type whatever else is done. Under a
+            // heading that is the inside of a short list; in the middle of one
+            // it was a hole. The links keep the indent they had, on the rail
+            // the address below them uses, so the label and the map mark make
+            // a left column and the things they name make a right one.
+            .SiteFooter__contact .SiteFooter__contact__row {
+                flex-direction: column;
+                align-items: flex-start;
+
+                // The first link's own 44px already opens 16px under the
+                // heading, which is the whole of the space this needs.
+                gap: 0;
+
+                .details {
+                    padding-left: calc(var(--footer-mark) + var(--footer-mark-gap));
+
+                    // Set to the address's size rather than the clamp's floor.
+                    // These two and the street are the three things on the
+                    // rail, and one column of values reads as a column when it
+                    // is one size — and 11px is small for the two entries on
+                    // this patička that are meant to be tapped.
+                    font-size: 0.8rem;
+                }
+            }
+
+            // One measure of air around every hairline in the patička, so the
+            // rules read as one system rather than as two blocks that happen to
+            // both use rules — the claim spaced its at 2.5vh and the contact
+            // spaced its at 1.4vh, which was invisible while a headline stood
+            // between them and is not now.
+            //
+            // In rem from here down. The rest of this stylesheet is in vh,
+            // which is the right unit for a panel measured against the window;
+            // it is the wrong one for the space between two lines of type on a
+            // phone, where the window itself changes height every time the
+            // browser's own bar slides away.
+            .SiteFooter__claim,
+            .SiteFooter__top {
+                gap: 1.25rem;
+            }
+
+            // The three movements — what it says, whose it is, its small print
+            // — keep more than the rules inside them do.
+            .SiteFooter__inner {
+                gap: 2.25rem;
+
+                // 3vh is 17px on the shortest screen we target, and the bottom
+                // of a phone is where the browser's own furniture and the home
+                // indicator sit. The last line of the page should not be in
+                // among them.
+                padding-bottom: 2.25rem;
+            }
+
+            // The two legal lines were the last thing here still sized by a
+            // desktop clamp: 0.72vw is under 3px at these widths, so both of
+            // them landed on the clamp's 0.6rem floor — a floor written to stop
+            // a 2K screen running away with the small print, never a size
+            // anyone picked to be read at arm's length. The 1vh between them is
+            // 5.7px at 568 tall, which at that size is not a gap so much as the
+            // absence of one, and the pair reads as a single smudge in the
+            // corner. Their own size, and a gap that does not depend on how
+            // tall the window happens to be.
+            //
+            // 0.7rem is where the ceiling is, and 320 sets it: the longer of
+            // the two lines measures 267px at that size against the 282px the
+            // narrowest screen leaves between its margins, and at 0.75rem it is
+            // 286px and wraps, which strands "udělena" on a line by itself. It
+            // is also exactly the size the tel and the e-mail are set at here,
+            // so the small print is quiet without being a different system.
+            .SiteFooter__legal {
+                margin-top: 0;
+                gap: 0.4rem;
+                font-size: 0.7rem;
+                line-height: 1.45;
+            }
+        }
+    }
+
+    // ---- tablet, upright ----
+    //
+    // The block above stacks the claim over the contact and turns the call to
+    // action into a column, which is a phone's answer read on a screen 800
+    // across. Upright at 799 that leaves "kdykoliv jste připraveni" and its
+    // button on one line of a page half of which is empty, and the hours block
+    // a whole screen further down.
+    //
+    // Back to the two columns the laptop has — the claim and its offer on the
+    // left, the contact on the right, so the offer and the hours it is offered
+    // in stand beside each other. Narrower, not different: this is the same
+    // decision the rest of the upright-tablet pass makes.
+    @include v(md) {
+        @include below-px(900) {
+            .SiteFooter__top {
+                grid-template-columns: minmax(0, 1fr) auto;
+                gap: 4vw;
+            }
+
+            .SiteFooter__claim .SiteFooter__claim__cta {
+                flex-direction: row;
+                align-items: center;
+                gap: 2.5vw;
+            }
+
+            // The two lines closer together.
+            //
+            // Nothing is spacing them: what stands between them is the tap
+            // target itself. The touch block at the top of this file gives each
+            // link `min-height: 2.75rem` and centres its line in it, which is
+            // 44px a link and therefore 27px of empty box between a number and
+            // an address that are one thought.
+            //
+            // 2.25rem is 36px, and it is a trade rather than a free win — 44 is
+            // the guideline and this is under it. It is taken here and nowhere
+            // else because a tablet is held in two hands rather than thumbed,
+            // and because these two are the only links in this block: there is
+            // nothing next to either of them to hit by mistake. A phone keeps
+            // its 44.
+            .SiteFooter__contact .SiteFooter__contact__row .details a {
+                min-height: 2.25rem;
+            }
+        }
+    }
+
+    // A desktop window that is wide but short (521–700px): the panel's content
+    // does not shrink with the height, so the 60vh window would be outgrown.
+    // The reveal keeps working — it just opens a taller window. Below 820px
+    // width the blocks above have already put the footer in plain flow, and a
+    // var on a static footer moves nothing.
+    @media (min-height: 521px) and (max-height: 700px) {
+        --footer-h: 72vh;
+    }
+
+    // Phone landscape (and any window that short, 800px wide and up): 60vh is
+    // ~230px and the panel cannot fit through it, so no reveal — plain flow,
+    // like the portrait fallback above. Unlike portrait the two columns stay:
+    // width is the one thing this orientation has plenty of, and stacking
+    // would spend the height it does not have.
+    @include phl-h {
+        height: auto;
+        clip-path: none;
+
+        .SiteFooter__scroller {
+            height: auto;
+            top: 0;
+        }
+
+        .SiteFooter__inner {
+            position: static;
+            height: auto;
+            padding: 2.5rem 4vw 2rem;
+            gap: 2rem;
+        }
+
+        .SiteFooter__top {
+            grid-template-columns: 1fr auto;
+            gap: 5vw;
+        }
+
+        .SiteFooter__claim {
+            max-width: 52vw;
+            gap: 1.25rem;
+
+            .SiteFooter__claim__cta {
+                flex-direction: row;
+                align-items: center;
+                gap: 3vw;
+            }
+        }
+
+        .SiteFooter__contact {
+            align-items: flex-end;
+            text-align: right;
+            gap: 0.9rem;
+
+            .SiteFooter__contact__divider {
+                width: 70%;
+            }
+        }
+
+        .SiteFooter__legal {
+            flex-direction: row;
+            gap: 0;
+            margin-top: 0;
+        }
+    }
+}

@@ -1,81 +1,32 @@
-// This is the API route for sending emails using Resend with React Email templates
-import { Resend } from 'resend';
+// /api/resend — ZRUŠENO. Odpovídá 410 a nic neposílá.
+//
+// Tahle trasa brala příjemce z těla požadavku:
+//
+//     const { template, to, data = {} } = req.body
+//     await resend.emails.send({ from: …, to, subject, react: … })
+//
+// Bez session, bez limitu, bez seznamu povolených adres. To znamená, že kdokoli
+// na světě mohl POSTnout požadavek a odeslat e-mail z ověřené domény
+// prochazkagroup.cz komukoli, s libovolným obsahem z deseti připravených
+// šablon. Není to chybějící kontrola, je to otevřená relay — a následek nenese
+// ten, kdo ji použije, ale doména, která skončí na blacklistu.
+//
+// Nahradilo to /api/forms: klient posílá název formuláře a vyplněná data,
+// příjemce zná výhradně server (@/lib/mail/forms). Nic na webu tuhle trasu
+// nevolalo — jediné odkazy na ni byly ukázky v komentářích — takže zrušení
+// nikomu nic nebere.
+//
+// 410 a ne 404: 410 znamená „bylo a není", což je přesně ta informace, kterou
+// potřebuje kdokoli, kdo má tu adresu zapsanou ve vlastním skriptu. A ne tiché
+// 200, protože odpovědět „odesláno" na něco, co se neodeslalo, je to jediné
+// chování, které je horší než původní stav.
+//
+// Soubor se dá smazat. Zůstává proto, že adresa byla veřejná a bylo by lepší,
+// aby řekla, co se stalo, než aby zmizela.
 
-// Import email templates
-import { benefitAdminEmail as BenefitAdminEmail, subject as benefitAdminSubject } from '../../modules/resend/emails/benefit-admin.jsx';
-import { benefitUserEmail as BenefitUserEmail, subject as benefitUserSubject } from '../../modules/resend/emails/benefit-user.jsx';
-import { kontaktAdminEmail as KontaktAdminEmail, subject as kontaktAdminSubject } from '../../modules/resend/emails/kontakt-admin.jsx';
-import { kontaktUserEmail as KontaktUserEmail, subject as kontaktUserSubject } from '../../modules/resend/emails/kontakt-user.jsx';
-import { newsletterAdminEmail as NewsletterAdminEmail, subject as newsletterAdminSubject } from '../../modules/resend/emails/newsletter-admin.jsx';
-import { newsletterUserEmail as NewsletterUserEmail, subject as newsletterUserSubject } from '../../modules/resend/emails/newsletter-user.jsx';
-import { recenzeAdminEmail as RecenzeAdminEmail, subject as recenzeAdminSubject } from '../../modules/resend/emails/recenze-admin.jsx';
-import { recenzeUserEmail as RecenzeUserEmail, subject as recenzeUserSubject } from '../../modules/resend/emails/recenze-user.jsx';
-import { zajemAdminEmail as ZajemAdminEmail, subject as zajemAdminSubject } from '../../modules/resend/emails/zajem-admin.jsx';
-import { zajemUserEmail as ZajemUserEmail, subject as zajemUserSubject } from '../../modules/resend/emails/zajem-user.jsx';
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// Email template mapping
-const emailTemplates = {
-  'benefit-admin': { component: BenefitAdminEmail, subject: benefitAdminSubject },
-  'benefit-user': { component: BenefitUserEmail, subject: benefitUserSubject },
-  'kontakt-admin': { component: KontaktAdminEmail, subject: kontaktAdminSubject },
-  'kontakt-user': { component: KontaktUserEmail, subject: kontaktUserSubject },
-  'newsletter-admin': { component: NewsletterAdminEmail, subject: newsletterAdminSubject },
-  'newsletter-user': { component: NewsletterUserEmail, subject: newsletterUserSubject },
-  'recenze-admin': { component: RecenzeAdminEmail, subject: recenzeAdminSubject },
-  'recenze-user': { component: RecenzeUserEmail, subject: recenzeUserSubject },
-  'zajem-admin': { component: ZajemAdminEmail, subject: zajemAdminSubject },
-  'zajem-user': { component: ZajemUserEmail, subject: zajemUserSubject },
-};
-
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  try {
-    const { template, to, data = {} } = req.body;
-
-    if (!template || !to) {
-      return res.status(400).json({ error: 'Missing required fields: template, to' });
-    }
-
-    const emailConfig = emailTemplates[template];
-    if (!emailConfig) {
-      return res.status(400).json({ error: `Unknown template: ${template}` });
-    }
-
-    const { component: EmailComponent, subject: subjectFunction } = emailConfig;
-
-    // Generate the email React element
-    const emailElement = EmailComponent(data);
-
-    // Generate the subject
-    const subject = subjectFunction(data);
-
-    // Send the email using React component directly
-    const { data: emailData, error } = await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || 'cetrum.servers@gmail.com',
-      to: to, // Use the 'to' parameter from the request
-      subject,
-      react: emailElement,
-    });
-
-    if (error) {
-      console.error('Resend error:', error);
-      return res.status(500).json({ error: 'Failed to send email' });
-    }
-
-    res.status(200).json({
-      success: true,
-      data: emailData,
-      subject,
-      template
-    });
-
-  } catch (error) {
-    console.error('Email sending error:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
+export default function handler(req, res) {
+    res.setHeader('Allow', '')
+    return res.status(410).json({
+        error: 'Tato trasa byla zrušena. Formuláře odesílá POST /api/forms.',
+    })
 }

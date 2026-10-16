@@ -1,0 +1,237 @@
+@use "../../styles/viewport" as *;
+@use "../styles/tokens.module" as t;
+
+/* The dialog is a decision, so it is built the way the rest of the Studio
+   builds regions: hairlines and space, no cards stacked on cards. The one place
+   a filled surface appears is the chosen side, because "which of these two is
+   selected" has to survive a glance. */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s8);
+}
+
+/* ------------------------------------------------------------- summary --- */
+
+.summary {
+  padding-bottom: var(--st-s5);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.summaryList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-ink-2);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
+  }
+}
+
+.summaryAsk {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  color: var(--st-ink);
+
+  svg {
+    flex: none;
+    margin-top: 0.2em;
+    color: var(--st-danger);
+  }
+}
+
+/* ------------------------------------------------------------ one field --- */
+
+.conflict {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s4);
+}
+
+.head {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: baseline;
+}
+
+.fieldTitle {
+  margin: 0;
+  font-size: var(--st-text-lead);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.fieldPath {
+  padding: 0.1em 0.4em;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-micro);
+  color: var(--st-ink-3);
+  background: var(--st-sunken);
+  border-radius: 3px;
+}
+
+.baseBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s2);
+  padding-left: var(--st-s4);
+  border-left: 2px solid var(--st-line);
+}
+
+.boxLabel {
+  margin: 0;
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-ink-3);
+}
+
+/* ------------------------------------------------------------- the two --- */
+
+/* Side by side so the difference is read across rather than remembered down the
+   page; stacked below the width where two columns stop being readable. */
+.sides {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--st-s4);
+
+  @include below-px(760) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.choice {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s3);
+  padding: var(--st-s4);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  background: var(--st-bg);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  cursor: pointer;
+  transition:
+    border-color var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+
+  &:hover {
+    border-color: var(--st-line-strong);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline;
+  }
+}
+
+.chosen {
+  background: var(--st-accent-soft);
+  border-color: var(--st-accent-line);
+}
+
+.choiceHead {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Reserved whether or not it is filled, so choosing does not move the label. */
+.choiceMark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--st-accent);
+  border: 1px solid var(--st-line-strong);
+  border-radius: 50%;
+
+  .chosen & {
+    color: var(--st-on-accent);
+    background: var(--st-accent);
+    border-color: var(--st-accent);
+  }
+}
+
+.choiceLabel {
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.choiceHint {
+  font-size: var(--st-text-micro);
+  color: var(--st-ink-3);
+}
+
+/* Neither of these needs `pointer-events: none`, and it is deliberately absent:
+   the values carry `inert` in the JSX, which takes them out of the hit test and
+   out of the tab order together. One mechanism, stated where it is decided. */
+.choiceValue,
+.value {
+  display: block;
+}
+
+/* Read-only inputs still draw their own control; flattened so three of them in
+   a row read as three values rather than as a form somebody could fill in. */
+.value {
+  :global(input),
+  :global(textarea),
+  :global(select) {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  :global(textarea) {
+    min-height: 0;
+    resize: none;
+  }
+}
+
+.raw {
+  margin: 0;
+  padding: var(--st-s3);
+  overflow-x: auto;
+  font-family: var(--st-mono);
+  font-size: var(--st-text-micro);
+  line-height: 1.5;
+  color: var(--st-ink-2);
+  background: var(--st-sunken);
+  border-radius: var(--st-radius);
+}
+
+.emptyValue {
+  margin: 0;
+  font-size: var(--st-text-small);
+  font-style: italic;
+  color: var(--st-ink-4);
+}
+
+.nothing {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+
+  svg {
+    flex: none;
+    color: var(--st-accent);
+  }
+}

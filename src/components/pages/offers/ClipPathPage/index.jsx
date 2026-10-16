@@ -1,242 +1,473 @@
-import MainText from "@/components/anim/MainText";
-import SubText from "@/components/anim/SubText";
-import Grid from "@/components/common/grid";
-import RoundButton from "@/components/ui/stickyButtons/buttons/RoundButton";
-import CustomImage from "@/components/ui/stickyImage";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
+import {
+    cubicBezier,
+    motion,
+    useMotionValueEvent,
+    useReducedMotion,
+    useScroll,
+    useSpring,
+    useTransform,
+} from "framer-motion";
+import GridDistortion from "@/components/common/ui/GridDistortion";
+import { useGlobalContext } from "@/context/LoadProvider";
+import CornerButton from "@/components/common/ui/CornerButton";
+import Arrow from "@/components/common/ui/Arrow";
 import { projects } from "@/constants/nabidkypage";
-import { usePerformance } from "@/context/PerformanceProvider";
-import { useGlobalContext } from "@/context/LoadProvider"; // Added import
-import { useScroll, useTransform, motion, useInView, useSpring } from "framer-motion"; // Added useInView
-import { useRef } from "react";
-import PixelateText from "../../index/main/neonText";
-import Magnetic from "@/components/anim/Magnetic";
-import Link from "next/link";
 import { trackEvent } from "@/hooks/trackEvent";
+import { editable, editableLink, isEditMode } from "@/cms/edit";
 
-export default function ClipPathPage() {
-    const sectionRef = useRef(null);
-    const { firstLoad } = useGlobalContext(); // Access firstLoad state
-    const headingRef = useRef(null);
-    const isInView = useInView(headingRef, { once: true });
-    
+// the site's own glide — away quickly, then a long approach
+const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
-    const { scrollYProgress } = useScroll({
-        target: sectionRef,
-        offset: ['start start', 'end start'],
-    });
+const clamp01 = (v) => Math.min(1, Math.max(0, v));
 
-    const smoothYProgress = useSpring(scrollYProgress, {
-        stiffness: 100,
-        damping: 30,
-        restDelta: 0.001,
-    });
+// Viewport heights of scroll each chapter is given.
+const RUN = 115;
 
-    const headerY = useTransform(
-        smoothYProgress,
-        [0, 0.15, 0.75, 1],
-        [0, 0, -50, -80]
-    );
-    const textY = useTransform(
-        smoothYProgress,
-        [0, 0.5, 1],
-        [0, 0, -50]
-    );
-    // Animation for cover container
-    const coverAnim = {
-        initial: {
-            y: '-30%',
-            opacity: 0
-        },
-        enter: {
-            y: '0%',
-            opacity: 1,
-            transition: {
-                delay: firstLoad ? 4.25 : 0.25,
-                duration: 1,
-                ease: [0.76, 0, 0.24, 1],
-            }
-        }
-    };
+// And the last chapter is held for this long after it finishes arriving.
+//
+// The sequence used to end inside itself. `lead` ran 0→3 across the whole of
+// the section's scroll, so the fourth chapter's window finished opening at
+// progress 1.0 — at which point the section stopped being sticky. There was a
+// sheet of the page's own ground fading up over the last 7% to cover the seam,
+// and measured at 1440×900 it began while the fourth chapter was 83% open and
+// was solid by 99%: the last of the four was never once on the screen, lit and
+// still. The other three each get a stretch of their own before the next climbs
+// over them.
+//
+// The sheet is gone and this is what replaced it. The chapters now finish at
+// 0.852 of the section, and the 60vh after that is the fourth one standing
+// open, in full, while the reader decides what to do about it. That is a better
+// ending than a fade to black for the one chapter carrying a link.
+const CLOSE_RUN = 60;
 
-    
-    return (
-        <section className="ClipPathPage">
-            <Grid size="20vh" key={"ClipPathPage"}/>
-            <div className="header">
-                <Magnetic sensitivity={0.05}>
-                    <Link href="/">
-                        <h2>ProchazkaGroup</h2>
-                    </Link>
-                </Magnetic>
-            </div>
-            <div className="devider"></div>
-            
-            {/* Apply animation to cover */}
-            <motion.div 
-                className="cover"
-                initial="initial"
-                animate="enter"
-                ref={sectionRef}
-                variants={coverAnim}
-                style={{
-                    transformOrigin: "center top",
-                    willChange: "transform, opacity"
-                }}
-            >
-                <Grid size="20vh" key={"Cover__ClipPathPage"}/>
-                <div className="cover__header" ref={headingRef}>
-                    <motion.p style={{ y: headerY }}>
-                        <span>
-                            <PixelateText 
-                                text="SLEVY A VÝHODNÉ NABÍDKY" 
-                                isInView={isInView}
-                                firstLoad={firstLoad}
-                            />
-                        </span>
+// The one gate this page has, and the exact query styles.scss opens its
+// `stacked` block on — the two have to agree to the pixel, because every value
+// on this page is measured against a section that is 445vh tall in one layout
+// and as tall as its own contents in the other.
+//
+// Nothing held upright is in it — phone, tablet or turned-sideways monitor.
+// They all pin and ride like a laptop; only a phone has the reading placed
+// differently. See the mixin in styles.scss for what the two arms are and what
+// they are what is left of.
+const STACK_QUERY =
+    "(max-width: 900px) and (min-height: 521px) and (orientation: landscape)," +
+    "(max-width: 479px) and (orientation: landscape)";
 
-                        <span className="highlighted">
-                            <PixelateText 
-                                text="EXCLUSIF ET SEULEMENT" 
-                                isInView={isInView}
-                                firstLoad={firstLoad}
-                            />
-                        </span>
-                        <span>
-                            <PixelateText 
-                                text="PRO NAŠE KLIENTY." 
-                                isInView={isInView}
-                                firstLoad={firstLoad}
-                            />
-                        </span>
-                    </motion.p>
-                </div>
-                <motion.div className="cover__desc" style={{ y: textY }}>
-                    <h3>
-                        Σ
-                    </h3>
-                    <p>
-                        <PixelateText
-                            text="Domlouváme exklusivní nabídky pro lepší podmínky" 
-                            isInView={isInView}
-                            firstLoad={firstLoad}
-                        />
-                    </p>
-                </motion.div>
-            </motion.div> 
-            
-            {projects.map((project, index) => {
-                const { number, title, description, href, src, alt, text } = project;
-                return (
-                    <Galery 
-                        number={number} 
-                        title={title} 
-                        description={description} 
-                        href={href}
-                        src={src}
-                        alt={alt}
-                        text={text}
-                        key={index}
-                    />
-                )
-            })}
-        </section>
-    )
+// The two words this section owns outright — everything else on the page is a
+// partner's. They come from the CMS over `nabidky.sekce` (see cms.config.js);
+// what is written here is what the page ships with and what each field falls
+// back to on its own, so an empty CMS, an unreachable database or a block that
+// fills in nothing renders exactly this page.
+//
+// The partners themselves stay in `src/constants/nabidkypage.js`, and how many
+// there are stays a code change: the section's measuring height is
+// `100 + last * RUN` vh and the ride's arithmetic is computed from the count, so
+// a fifth entry arriving from a database would not add a chapter — it would move
+// the seam every value on this page is measured against. Same rule /o-nas's
+// showcase follows, for the same reason.
+const SECTION = {
+    label: "Partneři",
+    dealLabel: "Co z toho máte",
+    // The link out to a partner. Its words and its target both belong to the
+    // chapter rather than here — a target is per-partner and so, in principle,
+    // are the words — so this is only the fallback the four share today.
+    visit: "Navštívit stránky",
+};
+
+/** A CMS string when there is one, the shipped one otherwise. */
+const say = (value, shipped) => (value?.trim() ? value.trim() : shipped);
+
+// False on the server and on the first client paint, so the markup either side
+// of hydration is identical — matchMedia cannot be read while rendering. The
+// stylesheet carries the same layout under !important, so the paint before this
+// resolves is already the stacked one; this only stops the desktop timeline
+// from writing inline values over it.
+function useStacked() {
+    const [stacked, setStacked] = useState(false);
+
+    useEffect(() => {
+        const query = window.matchMedia(STACK_QUERY);
+        const sync = () => setStacked(query.matches);
+        sync();
+        query.addEventListener("change", sync);
+        return () => query.removeEventListener("change", sync);
+    }, []);
+
+    return stacked;
 }
 
-// Existing Galery component remains unchanged
-const Galery = ({ number, title, description, href, src, alt, text }) => {
-    //Performace 
-    const { shouldReduceAnimations } = usePerformance();
+// The partners, as one sequence.
+//
+// Each chapter is a full-screen plate stacked over the last, and it arrives by
+// its own window opening from the floor — so nothing is ever dismissed, it is
+// COVERED. Behind that window the picture travels a third of its own height,
+// which is what makes an opening window read as depth rather than as a wipe.
+// The picture is the shader, not a photograph: it can be pushed about in square
+// cells like every other picture on this site.
+//
+// The reading sits to the right, on two plates. The first is the partner and
+// what they are; the second is the one number the reader came for, kept apart
+// so it cannot be skimmed past. Both are hairline boxes over a blurred, dimmed
+// ground — no radius, no colour, nothing but the rules.
+//
+// The rules are the styling. An upright down the column's edge and two reaches
+// that run out of it clear across the photograph, each carrying the same
+// travelling white the home page's network carries.
+//
+// There is one arrangement. The switch between frames, a grid and a list was
+// three ways of saying the same thing, and the sequence is the one worth having.
+export default function Partners({ section = {}, chapters: blocks }) {
+    const [front, setFront] = useState(0);
+    const { gate } = useGlobalContext();
+    // Below the gate the plates are not fixed and there is no ride to be part
+    // way through, so nothing on this page may be driven by the scroll — see
+    // useStacked above and the `stacked` block in styles.scss.
+    const stacked = useStacked();
+    const calm = useReducedMotion();
+    // The whole section is its photographs, so the root opacity is media and
+    // enters at "ground" — a stage before the preloader's window opens.
+    const ground = gate !== "hold";
+    const sectionRef = useRef(null);
+    const last = projects.length - 1;
 
-    const sectionRef = useRef();
+    // The section's own two words, over the ones above.
+    const chrome = {
+        label: say(section.label, SECTION.label),
+        dealLabel: say(section.dealLabel, SECTION.dealLabel),
+        docId: section.docId,
+    };
+
+    // The four chapters, merged onto the four the page owns BY POSITION — the
+    // key list in cms.config.js is declared in this order. Truncated to them for
+    // the reason the section's length is a code change: a fifth block would not
+    // appear at the end of the ride, it would appear with no screen of scroll
+    // allotted to it.
+    //
+    // `number` is deliberately not the React key: it is a field an editor can
+    // change, and two chapters that came to say "01" would be two children with
+    // one key. The position is the identity here — the list never reorders.
+    const chapters = projects.map((project, index) => {
+        const block = blocks?.[index] || null;
+        return {
+            ...project,
+            number: say(block?.number, project.number),
+            tag: say(block?.tag, project.tag),
+            title: say(block?.title, project.title),
+            description: say(block?.description, project.description),
+            visit: say(block?.visit, SECTION.visit),
+            href: say(block?.href, project.href),
+            // The figure is absent on two of the four and must stay absent: the
+            // component draws no `<em>` for a falsy one, and the shipped value
+            // is `null` rather than an empty string.
+            dealFigure: say(block?.dealFigure, project.dealFigure),
+            deal: say(block?.deal, project.deal),
+            src: block?.photo?.src || project.src,
+            // `alt: 'own'` in the configuration refuses the block's title as a
+            // stand-in alt — a partner's name is not a description of their
+            // photograph — so an unwritten alt arrives empty and the shipped one
+            // stands.
+            alt: say(block?.photo?.alt, project.alt),
+            docId: block?.docId,
+        };
+    });
 
     const { scrollYProgress } = useScroll({
         target: sectionRef,
-        offset: ['start end', 'end start'],
+        offset: ["start start", "end end"],
+    });
+    // Softened, so a chapter keeps arriving for a beat after the wheel stops.
+    const ride = useSpring(scrollYProgress, { stiffness: 110, damping: 30, mass: 0.5 });
+    // Where the chapters are done, as a share of the section's own scroll. The
+    // rest of it is the hold — see CLOSE_RUN.
+    const rideSpan = (last * RUN) / (last * RUN + CLOSE_RUN);
+
+    const lead = useTransform(ride, (p) => clamp01(p / rideSpan) * last);
+
+    useMotionValueEvent(lead, "change", (v) => {
+        const i = Math.min(last, Math.max(0, Math.round(v)));
+        setFront((prev) => (prev === i ? prev : i));
     });
 
-    const x = useTransform(
-        scrollYProgress,
-        [ 0, 0.5, 1 ], 
-        [ 400, -100, -200 ]
+    return (
+        <motion.section
+            className="Partners"
+            ref={sectionRef}
+            // The measuring height belongs to the pinned ride. Stacked, the
+            // section is as tall as the four chapters it actually contains —
+            // the stylesheet says so too, but stating it here keeps a 445vh
+            // inline value off an element that is 3000px tall.
+            style={stacked ? undefined : { height: `${100 + last * RUN + CLOSE_RUN}vh` }}
+            initial={{ opacity: 0 }}
+            animate={ground ? { opacity: 1 } : undefined}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+            {/* All the chrome there is: what this is, and how far through. */}
+            <div className="Partners__mark">
+                {/* The page's h1: the one line that says what this page is. */}
+                <h1
+                    className="Partners__mark__label"
+                    {...editable(chrome.docId, "title", "text")}
+                >
+                    {chrome.label}
+                </h1>
+                <span className="Partners__mark__rule" aria-hidden="true" />
+                {/* Pinned, this counts where the ride has got to. Stacked, the
+                    mark is a heading at the top of a list that is then scrolled
+                    away from, and a "01 / 04" frozen at its first chapter is a
+                    progress report that never reports. It becomes the count. */}
+                <span className="Partners__mark__count">
+                    {stacked ? (
+                        String(projects.length).padStart(2, "0")
+                    ) : (
+                        <>
+                            {String(front + 1).padStart(2, "0")}
+                            <em> / {String(projects.length).padStart(2, "0")}</em>
+                        </>
+                    )}
+                </span>
+            </div>
+
+            <div className="Partners__stage">
+                {chapters.map((item, index) => (
+                    <Chapter
+                        key={index}
+                        item={item}
+                        index={index}
+                        lead={lead}
+                        stacked={stacked}
+                        calm={calm}
+                        dealLabel={chrome.dealLabel}
+                        dealDocId={chrome.docId}
+                    />
+                ))}
+                {/* The full stop used to be here: a sheet of the page's own
+                    ground over the whole stage, fading up to solid as the
+                    section ran out. It is gone. What it was for — not letting
+                    the sequence stop mid-sentence — is the tail of scroll below
+                    (CLOSE_RUN), and that does it by holding the last chapter
+                    rather than by painting it out. The fourth partner is the
+                    one thing on this page a reader might act on; ending on it
+                    means leaving it up. */}
+            </div>
+        </motion.section>
     );
+}
 
-    // Handle partner link click with specific tracking
-    const handlePartnerClick = () => {
-        // Create specific event names for each partner
-        const eventMap = {
-            'Pojistné Hlášení': 'partner_pojistne_hlaseni_clicked',
-            'ElevenCosmetic': 'partner_eleven_cosmetic_clicked', 
-            'ReKvítka': 'partner_rekvitka_clicked',
-            'Project 04': 'partner_project_04_clicked'
-        };
+function Chapter({ item, index, lead, stacked, calm, dealLabel, dealDocId }) {
+    // How far this chapter has come in. 0 while the one before it still holds
+    // the screen, 1 once its window is fully open. The first is simply open.
+    const enter = useTransform(lead, (p) => clamp01(p - (index - 1)));
+    // ...and how far the NEXT one has come over it, which is what dismisses it.
+    const buried = useTransform(lead, (p) => clamp01(p - index));
 
-        const eventName = eventMap[title] || `partner_${title.toLowerCase().replace(/\s+/g, '_')}_clicked`;
-        
-        trackEvent(eventName, {
-            partner_name: title,
-            partner_number: number,
-            partner_index: index,
-            partner_url: href,
-            button_text: "Více informací",
-            timestamp: new Date().toISOString(),
-            page_section: "offers_gallery"
+    // The window, opening from the floor over the chapter beneath.
+    //
+    // Every chapter, the same way. Alternating the edge was tried and taken back
+    // out: sideways, the window travels against the direction the page is being
+    // read in, and what looked like rhythm on paper looked like a different
+    // effect every other screen. One gesture, repeated, is the sequence.
+    const clip = useTransform(enter, (e) =>
+        `inset(${((1 - e) * 100).toFixed(2)}% 0% 0% 0%)`);
+
+    // The long travel behind it.
+    const own = useTransform(lead, (p) => p - index);
+    const rideY = useTransform(own, [-1, 1], ["16%", "-16%"]);
+
+    // Everything below arrives on the ride, so below the gate there is no ride
+    // to arrive on and every one of them reads "already here". One value, held
+    // at rest, rather than a branch per property.
+    const still = stacked ? 1 : null;
+
+    const dim = useTransform(buried, [0, 1], [1, 0.4]);
+
+    // The reading arrives once the window is most of the way open and leaves as
+    // the next plate climbs over it.
+    //
+    // In ORDER, though. Every line used to ride one value and the whole plate
+    // appeared at once, which reads as a slide being swapped rather than a page
+    // being set. Each part now has its own window out of the same arrival, in
+    // the order the eye takes them — the stagger this site uses everywhere else.
+    const copyIn = useTransform(enter, [0.36, 0.9], [0, 1]);
+    const gone = useTransform(buried, (b) => clamp01(1 - b * 1.6));
+
+    // Written out rather than made by a helper: a helper that calls useTransform
+    // is a hook inside a function, and the lint that runs on build refuses it
+    // even though the call order never varies.
+    const plateAlive = useTransform([copyIn, gone], ([c, g]) => clamp01(c / 0.28) * g);
+    const eyebrowIn = useTransform([copyIn, gone], ([c, g]) => clamp01((c - 0.05) / 0.35) * g);
+    const nameIn = useTransform([copyIn, gone], ([c, g]) => clamp01((c - 0.14) / 0.48) * g);
+    const offerIn = useTransform([copyIn, gone], ([c, g]) => clamp01((c - 0.34) / 0.44) * g);
+    const ctaIn = useTransform([copyIn, gone], ([c, g]) => clamp01((c - 0.5) / 0.4) * g);
+    const dealIn = useTransform([copyIn, gone], ([c, g]) => clamp01((c - 0.62) / 0.38) * g);
+
+    const plateY = useTransform(plateAlive, [0, 1], ["3vh", "0vh"]);
+    const dealY = useTransform(dealIn, [0, 1], ["4vh", "0vh"]);
+    const eyebrowY = useTransform(eyebrowIn, [0, 1], ["0.8em", "0em"]);
+    const offerY = useTransform(offerIn, [0, 1], ["0.7em", "0em"]);
+    const ctaY = useTransform(ctaIn, [0, 1], ["1em", "0em"]);
+    const nameClip = useTransform(nameIn, (c) =>
+        `inset(-30% ${((1 - c) * 100).toFixed(2)}% -30% 0%)`);
+
+    // The rules, drawn out of the same arrival: the upright first, then the two
+    // reaches out across the picture.
+    const spineDraw = useTransform(enter, [0.26, 0.62], [0, 1]);
+    const reachTop = useTransform(enter, [0.4, 0.8], [0, 1]);
+    const reachBase = useTransform(enter, [0.52, 0.94], [0, 1]);
+
+    const onVisit = () => {
+        trackEvent(`partner_${item.title.toLowerCase().replace(/\s+/g, "_")}_visited`, {
+            partner_name: item.title,
+            partner_number: item.number,
+            partner_url: item.href,
+            page_section: "partners",
         });
     };
 
     return (
-        <div className="ClipPathPage__Galery" ref={sectionRef}>
-            <motion.div
-                className="ClipPathPage__Galery__Image"
-                style={{
-                    position: 'fixed',
-                    top: '25%',
-                    left: '5%',
-                    width: '40vw',
-                    height: '60vh',
-                    zIndex: 1,
-                    clipPath: useTransform(
-                        scrollYProgress,
-                        [0, 0.3, 0.7, 1],
-                        [
-                            'inset(100% 0 0 0)',
-                            'inset(0 0 0 0)',   
-                            'inset(0 0 0 0)',
-                            'inset(0 0 100% 0)'
-                        ]
-                    )
-                }}
-                transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 40,
-                }}
-            >
-                <CustomImage src={src} altText={alt} />
-            </motion.div>
-
-            <div className="ClipPathPage__Galery__Content">
-                <div className="ClipPathPage__Galery__Content__Header">
-                    <p>
-                        {number}
-                    </p>
-                    <p>
-                        {title}
-                    </p>
-                </div>
-                <div className="ClipPathPage__Galery__Content__devider"/>
-                <MainText text={description} initialColor={'#050A10'} />
-                <SubText initialColor="#050A10" className={'ClipPathPage__Galery__Content__p'} text={text} />
-                <div className="ClipPathPage__Galery__Content__Button">
-                    <motion.div
-                    style={shouldReduceAnimations ? { x: -50 } : { x }}
-                        onClick={handlePartnerClick}  // Track click event
-                    >   
-                        <RoundButton href={href} text="Více informací" />
-                    </motion.div>
-                    <div className="ClipPathPage__Galery__Content__Button__devider"/>
-                </div>
+        <motion.article
+            className="Partners__chapter"
+            style={{ clipPath: stacked ? "none" : clip, zIndex: index + 1 }}
+        >
+            <div className="Partners__chapter__plate" data-cursor="frame">
+                {/* The picture's own travel is the one motion here that answers
+                    to nothing but itself, so it is the one the motion
+                    preference takes away. The window keeps opening: it is tied
+                    to the scroll, and it is how the page is read. */}
+                <motion.div
+                    {...editable(item.docId, "image", "image")}
+                    className="Partners__chapter__ride"
+                    style={{ y: stacked || calm ? 0 : rideY }}
+                >
+                    <GridDistortion imageSrc={item.src} cellSize={46}>
+                        <Image
+                            src={item.src}
+                            alt={item.alt}
+                            fill={true}
+                            quality={80}
+                            sizes="100vw"
+                            style={{ objectFit: "cover", objectPosition: "center top" }}
+                        />
+                    </GridDistortion>
+                </motion.div>
+                {/* The page's half-black — see .photoVeil in globals.scss.
+                    Constant, and under the wash rather than mixed into it: the
+                    wash is this chapter's own STATE (it lifts as the next plate
+                    climbs over), and a photograph's weight is not a state. */}
+                <span className="photoVeil" aria-hidden="true" />
+                <motion.span className="Partners__chapter__wash" aria-hidden="true" style={{ opacity: still ?? dim }} />
             </div>
-        </div>
+
+            {/* The rules run clear across the picture, not just around the
+                reading — that reach is what keeps them from being a border.
+                They reach across a full-screen plate and there is no such plate
+                below the gate, so stacked they are not drawn at all. */}
+            {!stacked && (
+                <>
+                    <motion.span className="Partners__rule Partners__rule--spine" style={{ scaleY: spineDraw, opacity: gone }} aria-hidden="true" />
+                    <motion.span className="Partners__rule Partners__rule--reachT" style={{ scaleX: reachTop, opacity: gone }} aria-hidden="true" />
+                    <motion.span className="Partners__rule Partners__rule--reachB" style={{ scaleX: reachBase, opacity: gone }} aria-hidden="true" />
+                </>
+            )}
+
+            <div className="Partners__column">
+                <motion.div className="Partners__panel" style={{ opacity: still ?? plateAlive, y: stacked ? 0 : plateY }}>
+                    <motion.span
+                        className="Partners__panel__eyebrow"
+                        style={{ opacity: still ?? eyebrowIn, y: stacked ? 0 : eyebrowY }}
+                    >
+                        {/* The ordinal has an element and can carry an
+                            annotation. The tag beside it is a bare text node
+                            sharing this paragraph with two others — annotating
+                            the paragraph would store the `<em>` and the rule as
+                            copy and drop both on the first save — so it is
+                            `items.0.label` and is edited in the Studio's form. */}
+                        <em {...editable(item.docId, "items.0.lead", "text")}>{item.number}</em>
+                        <i />
+                        {item.tag}
+                    </motion.span>
+
+                    <motion.h2
+                        className="Partners__panel__name"
+                        style={{ clipPath: stacked ? "none" : nameClip }}
+                        {...editable(item.docId, "title", "text")}
+                    >
+                        {item.title}
+                    </motion.h2>
+
+                    <motion.p
+                        className="Partners__panel__offer"
+                        style={{ opacity: still ?? offerIn, y: stacked ? 0 : offerY }}
+                        {...editable(item.docId, "body", "text")}
+                    >
+                        {item.description}
+                    </motion.p>
+
+                    {/* Partner, se kterým se teprve jedná, nemá kam odkazovat:
+                        tlačítko se mu nekreslí. Ve Studiu ano, jinak by odkaz
+                        nebylo kde doplnit. */}
+                    {(item.href || isEditMode()) && (
+                    <motion.div
+                        className="Partners__panel__act"
+                        style={{ opacity: still ?? ctaIn, y: stacked ? 0 : ctaY }}
+                    >
+                        {/* Words AND target, both on the chapter's own block:
+                            this link leaves the site for one named partner, so
+                            neither half is the section's. `editableLink` renders
+                            a form rather than editing in place, which is what
+                            lets it sit on a button that draws four corner marks
+                            and an arrow inside itself. */}
+                        <CornerButton
+                            {...editableLink(item.docId, {
+                                text: "items.2.label",
+                                href: "items.0.value",
+                            })}
+                            href={item.href}
+                            className="Partners__panel__cta"
+                            onClick={onVisit}
+                        >
+                            {item.visit}
+                            <span className="cornerButton__arrow"><Arrow direction="upRight" /></span>
+                        </CornerButton>
+                    </motion.div>
+                    )}
+                </motion.div>
+
+                {/* The number the reader came for, on its own plate and offset,
+                    so it is read rather than skimmed past inside a paragraph —
+                    and set as a figure, which is what it is. */}
+                <motion.div className="Partners__deal" style={{ opacity: still ?? dealIn, y: stacked ? 0 : dealY }}>
+                    {/* One field, four elements — the same words stand over all
+                        four plates, so editing one moves all of them. The same
+                        bargain /o-nas's showcase makes for the button its three
+                        cards share. */}
+                    <span
+                        className="Partners__deal__label"
+                        {...editable(dealDocId, "items.0.label", "text")}
+                    >
+                        {dealLabel}
+                    </span>
+                    <span className="Partners__deal__line">
+                        {item.dealFigure && (
+                            <em
+                                className="Partners__deal__figure"
+                                {...editable(item.docId, "items.1.lead", "text")}
+                            >
+                                {item.dealFigure}
+                            </em>
+                        )}
+                        <span
+                            className="Partners__deal__rest"
+                            {...editable(item.docId, "items.1.label", "text")}
+                        >
+                            {item.deal}
+                        </span>
+                    </span>
+                </motion.div>
+            </div>
+        </motion.article>
     );
-};
+}

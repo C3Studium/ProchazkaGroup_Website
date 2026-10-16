@@ -1,0 +1,463 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Section after the horizontal scroll. NO top margin: its down-line at 40vw
+// must continue the line leaving HScroll panel 3 at the shared boundary.
+//
+// 550vh tall against a 100vh sticky stage: 77vh of pure hand-off before
+// anything of its own starts, then one continuous journey that ends by pulling
+// the orbit back and clearing the section into the one below — the finished
+// section holds still long enough to be read before the next one pushes in. They are spent on one object seen from four distances: the logos
+// flying past the camera one at a time, the line they travel curling into a
+// ring, that ring being named, and finally docking around the photo and the
+// copy — over them, not under them, so the logos become the section's setting.
+.Offers {
+    position: relative;
+    width: 100%;
+    height: 550vh;
+
+    .Offers__sticky {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+    }
+
+    // The orbit's stage. Square and centred on the viewport, so at scale 1 it
+    // is already where it ends up horizontally and the whole journey is one
+    // transform: blown up and re-centred at the start, ridden back to identity.
+    // Above everything. While the ring is open its logos pass in front of the
+    // title, which is what gives that moment any depth at all; once it has
+    // folded down it sits clear of the content anyway.
+    //
+    // The tilt lives on its own layer so it composes outside the stage's uneven
+    // scale — inside it, a rotation is a shear.
+    // Behind the section's content: once it has docked the ring is a backdrop
+    // the photo and the copy sit on top of, not a layer crossing over them.
+    .Offers__stageTilt {
+        z-index: 1;
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        will-change: transform;
+    }
+
+    // Jak velké je jedno logo na prstenci — základ, ze kterého OrbitImages
+    // počítá (viz jeho styles.scss a --orbit-fit).
+    //
+    // Byla to dvě čísla v pixelech předaná komponentě propem: 178x68, stejných
+    // na telefonu jako na 2K. Strop je ta stará hodnota, takže od 1440 nahoru
+    // je prstenec na pixel tím, čím byl — pod ní se logo zmenšuje se šířkou
+    // okna místo aby z ní přetékalo.
+    //
+    // Obě míry mají stejné hranice pásma, takže poměr stran 178:68 drží na
+    // každé šířce; logo je wordmark a nahnutý wordmark je chyba, které si
+    // všimne každý.
+    .orbit-container {
+        --orbit-item-w: clamp(6.5rem, 12.36vw, 11.125rem);
+        --orbit-item-h: clamp(2.48rem, 4.72vw, 4.25rem);
+    }
+
+    // Everything the section shows, so it can be parallaxed away as one on the
+    // release. The rules stay outside it: they run to the section's own edges
+    // and have to meet the next section there.
+    .Offers__stack {
+        position: absolute;
+        inset: 0;
+        will-change: transform;
+    }
+
+    .Offers__stage {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 70vw;
+        height: 70vw;
+        margin-left: -35vw;
+        margin-top: -35vw;
+        pointer-events: none;
+        will-change: transform;
+    }
+
+    // The title of act one: centred, behind the ring, opening out of its own
+    // hairline. It is gone before any of the section's real content arrives.
+    .Offers__hero {
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    // Two halves that are thrown in from opposite edges and lock together in
+    // the middle. They start well outside the viewport, so nothing needs to be
+    // masked or faded — what you see is only ever the arrival itself.
+    .Offers__hero__title {
+        margin: 0;
+        color: var(--wText);
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+        text-transform: uppercase;
+        display: flex;
+        font-size: clamp(2rem, 6.4vw, 7rem);
+        line-height: 1;
+        letter-spacing: 0.1em;
+        white-space: nowrap;
+
+        span {
+            display: block;
+            white-space: pre;
+            will-change: transform;
+        }
+    }
+
+    .Offers__hero__rule {
+        // ...and this one is in normal flow, for the same reason.
+        position: relative;
+        margin-top: 3.4vh;
+        width: 30vw;
+        height: 1px;
+        transform-origin: center; // opens from the middle out, both ways at once
+        background-color: rgba(255, 255, 255, 0.25);
+
+        @include lineSweep(x, 0s);
+    }
+
+    .Offers__photo {
+        z-index: 2;
+        position: absolute;
+        top: 30vh;
+        left: 8.5vw;
+        width: 32vw;
+        height: 54vh;
+        overflow: hidden;
+    }
+
+    // Five slats, each holding its own strip of the picture and sliding it up
+    // into place. The frame is empty before the move, not covered — the grid
+    // shows through and the orbit can still pass over this space.
+    .Offers__photo__slat {
+        position: absolute;
+        top: 0;
+        height: 100%;
+        width: 20%;
+        overflow: hidden;
+    }
+
+    .Offers__photo__pane {
+        position: absolute;
+        top: 0;
+        width: 500%; // five slats wide: one full frame
+        height: 100%;
+        will-change: transform;
+
+        img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+    }
+
+    .Offers__info {
+        z-index: 2;
+        position: absolute;
+        top: 38vh;
+        left: 45vw;
+        width: 41vw;
+        display: flex;
+        align-items: flex-start;
+        gap: 0.9rem;
+
+        .Offers__info__icon {
+            flex-shrink: 0;
+            margin-top: 0.3rem;
+            color: var(--wText);
+            opacity: 0.9;
+            // The icon arrives from react-icons with its size as a number, and
+            // a number there is a pixel at every width. Everything it sits
+            // beside — the copy, the gap, the rules framing the block — grows
+            // on a 2560 monitor, so a mark left at 26px stops being the
+            // paragraph's bullet and becomes a speck next to it. 1.625rem is
+            // that same 26px on every screen the section was drawn for.
+            width: 1.625rem;
+            height: 1.625rem;
+        }
+
+        p {
+            margin: 0;
+            color: var(--wText);
+            font-family: "Poppins", sans-serif;
+            font-weight: 200;
+            text-transform: uppercase;
+            font-size: clamp(1.1rem, 1.75vw, 1.9rem);
+            line-height: 1.55;
+            letter-spacing: 0.02em;
+
+            .hl {
+                color: var(--hColor);
+            }
+        }
+    }
+
+    // Each line clips independently, so it needs to be its own block box —
+    // an inline span would let the clip bleed across the whole paragraph.
+    .Offers__copyLine {
+        display: block;
+        overflow: hidden;
+
+        > span {
+            display: inline-block;
+            will-change: transform;
+        }
+    }
+
+    // The wrapper carries the placement, not the button: it is the element
+    // the entry transform sits on, and a transformed ancestor would otherwise
+    // become the containing block and pull an absolute button off its mark.
+    .Offers__ctaWrap {
+        z-index: 2;
+        position: absolute;
+        top: 68vh;
+        left: 45vw;
+    }
+
+    .Offers__line {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.25);
+        pointer-events: none;
+    }
+
+    // continues the down-line from HScroll panel 3 (40vw) and runs to the
+    // bottom edge, where ReviewsPreview's v1 picks it up
+    .Offers__line--down {
+        left: 40vw;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        transform-origin: center top; // carries on downwards from HScroll panel 3
+
+        @include lineSweep(y, -0.8s);
+    }
+
+    // caps the photo and the copy, growing out of the down-line back over the
+    // photo: 8.5vw→40vw, so the origin is its right end
+    .Offers__line--hTop {
+        left: 8.5vw;
+        top: 30vh;
+        width: 31.5vw;
+        height: 1px;
+        transform-origin: 100% center;
+
+        @include lineSweep(x, -1.6s);
+    }
+
+    // under the copy block, crossing the down-line
+    // spans 24vw→86vw, so 40vw sits at 25.8%
+    .Offers__line--hMid {
+        left: 24vw;
+        top: 84vh;
+        width: 62vw;
+        height: 1px;
+        transform-origin: 25.8% center;
+
+        @include lineSweep(x, -2.4s);
+    }
+
+    // closes the copy block on its right, dropping from the top rule to the
+    // middle one
+    .Offers__line--vRight {
+        left: 86vw;
+        top: 30vh;
+        height: 54vh;
+        width: 1px;
+        transform-origin: center top;
+
+        @include lineSweep(y, -3.2s);
+    }
+
+    // the base the orbit settles onto — the widest rule on the page
+    // spans 8.5vw→91.5vw, so the down-line at 40vw crosses it at 38%
+    .Offers__line--hBase {
+        left: 8.5vw;
+        top: 92vh;
+        width: 83vw;
+        height: 1px;
+        transform-origin: 38% center;
+
+        @include lineSweep(x, -4s);
+    }
+
+    // Phone in landscape keeps the pinned journey — the fly-by and the ring
+    // read fine at 390px tall — but the docked composition has no room left:
+    // at these heights the copy block ran down into the CTA. The copy starts
+    // higher and sets smaller, and the CTA sits below the copy's worst case
+    // instead of inside it. The frame's rules stay where they are: the photo
+    // and the lines still agree, and it is only the type that had outgrown
+    // the space between them.
+    @include phl-h {
+        .Offers__info {
+            top: 32vh;
+            width: 44vw;
+
+            p {
+                font-size: 0.95rem;
+                line-height: 1.45;
+            }
+        }
+
+        .Offers__ctaWrap {
+            top: 70vh;
+        }
+    }
+
+    // ---- tablet, upright ----
+    //
+    // The desktop layout, with one change made three times across this page: the
+    // picture is half as tall and the reading sits ON it rather than beside it.
+    //
+    // Beside it is what a landscape screen affords. Upright, the photograph's
+    // 32vw is 262px and the copy's 41vw is 335 — two columns that are each too
+    // narrow for what is in them, on a screen that has height to spare and none
+    // to waste. One plate the width of the section, with the reading over it,
+    // uses the width once instead of splitting it.
+    //
+    // Everything else is the desktop's, deliberately: the rules are a network
+    // that runs from the section above into the one below, and the stats they
+    // pass through are laid out to meet them. Moving a block here would break a
+    // line three sections long.
+    @include v(md) {
+        @include below-px(900) {
+            // Reading, then the picture under it — the same column the third
+            // panel of the horizontal scroll settled on, and for the same
+            // reason: this section's copy is four lines and a button, which is
+            // more than a half-height plate can carry.
+            .Offers__info {
+                top: 26vh;
+                left: 8.5vw;
+                width: 74vw;
+            }
+
+            .Offers__ctaWrap {
+                top: 42vh;
+                left: 8.5vw;
+            }
+
+            .Offers__photo {
+                // Half of 54vh, and a share of the width rather than all of it:
+                // under the reading it is this section's illustration, not its
+                // ground.
+                top: 52vh;
+                left: 8.5vw;
+                width: 46vw;
+                height: 27vh;
+            }
+
+            // The half-black rides WITH the picture, on the pane that carries
+            // it — not on the frame around it.
+            //
+            // On the frame it was a black rectangle sitting in the section from
+            // the moment the section existed: the frame is deliberately empty
+            // before the move — the five slats each hold their own slice and
+            // slide it up into place, and the grid and the orbit show through
+            // the gap until they do. A veil on the frame darkens that emptiness,
+            // so what the reader met was a black plate that a photograph later
+            // assembled inside.
+            //
+            // The pane is the element that slides. Its box is five slats wide
+            // and each slat clips its own share of it, so one veil here comes
+            // out as a veil on every slice, arriving exactly when the slice
+            // does.
+            .Offers__photo__pane::after {
+                content: "";
+                position: absolute;
+                inset: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                pointer-events: none;
+            }
+        }
+    }
+
+    // Stacked, and an upright tablet is NOT in that set: from 600 to 900 across
+    // it takes the desktop layout exactly, which is what this stop is for.
+    //
+    //   under 600           every phone upright, and any window that narrow
+    //   ≤820 and landscape  a phone on its side, and a small landscape window
+    //
+    // Raw rather than `below-px(820)`, because the stop stopped being a width.
+    @media (max-width: 599.98px),
+           (max-width: 820px) and (orientation: landscape) {
+        height: auto;
+
+        .Offers__sticky {
+            position: static;
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 4vh;
+            padding: 6vh 6vw;
+        }
+
+        .Offers__stack {
+            position: static;
+        }
+
+        .Offers__stage,
+        .Offers__hero {
+            display: none;
+        }
+
+        // relative, not static: the slats inside are absolute and would
+        // otherwise position themselves against the section. The base rule's
+        // top/left have to be zeroed with it — on a relative box they stop
+        // being placement and become an offset, shoving the frame 30vh down
+        // onto the copy.
+        .Offers__photo {
+            position: relative;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 44vh;
+        }
+
+        .Offers__info {
+            position: static;
+            width: auto;
+            // The sticky's flex gap runs between its own children, and these
+            // three are all inside the one stack — so the stack spaces them
+            // itself.
+            margin-top: 3.5vh;
+            // The column is as wide as the tablet: unclamped, a line of this
+            // copy runs to seventy-odd characters. Capped to a measure instead
+            // of a fraction, so it is the same reading width on every stop the
+            // stack serves.
+            max-width: 38rem;
+        }
+
+        .Offers__ctaWrap {
+            position: static;
+            align-self: flex-start;
+            margin-top: 4vh;
+        }
+
+        .Offers__line {
+            display: none;
+        }
+    }
+
+    // The CTA is the section's one interactive element. CornerButton's resting
+    // box is ~32px tall — fine under a pointer, under the 44px a fingertip
+    // needs. More padding rather than a min-height: the corner marks trace the
+    // padding box, so this grows the frame and the target together.
+    @include touch {
+        .Offers__cta {
+            padding: 0.75rem 1.3rem;
+            min-height: 44px;
+        }
+    }
+}

@@ -1,0 +1,555 @@
+@use "../../styles/viewport" as *;
+// Studio design system.
+//
+// Named `.module.scss` on purpose. `scripts/sync-styles.js` globs every stylesheet
+// under `src/` and concatenates the non-module ones into the site's public global
+// sheet; a partial called `_tokens.scss` would therefore ship the admin's CSS to
+// every visitor. The `.module` suffix puts it on the CSS-Modules side of the
+// check at sync-styles.js:62. It emits no CSS by itself — only Sass variables and
+// mixins. The custom properties they feed are declared once, in Studio.module.scss.
+//
+// ---------------------------------------------------------------------------
+// The three rules this system runs on
+//
+// 1. ONE ACCENT. Brass, and it means "attention" — nothing else. Approve is not
+//    green, reject is not red, published is not green. Those meanings are carried
+//    by weight, position and restraint, because a screen where every control is
+//    filled with a signal colour has no signal left. The one exception is error:
+//    a failure has to be unmistakable, so it gets the second hue and it appears
+//    only on failure or on destructive intent, never at rest.
+//
+// 2. STRUCTURE FROM RULES AND SPACE. There are no cards. Regions are separated by
+//    hairlines and by whitespace, and they run to the edge of the canvas.
+//
+// 3. A REAL SCALE. Sizes accelerate — tight at the bottom where the UI is dense,
+//    wide at the top where the eye needs a landmark. Nothing is "about 14px".
+// ---------------------------------------------------------------------------
+
+// -------------------------------------------------------------- surfaces --
+// Warm-neutral graphite rather than the blue-black every dark admin ships with.
+// There is one content ground; elevation exists only for things that genuinely
+// float above it (modal, toast, the bulk bar).
+$bg: #101011;
+$rail: #0a0a0b;
+$sunken: #08080a;
+$raised: #1a1a1d;
+$overlay: rgba(6, 6, 7, 0.74);
+
+// Hairlines carry the whole structure. Warm white so they sit in the same family
+// as the ink instead of reading blue against it.
+$line: rgba(255, 252, 247, 0.09);
+$line-soft: rgba(255, 252, 247, 0.055);
+$line-strong: rgba(255, 252, 247, 0.17);
+
+// Ink. Deliberately brighter than the previous palette across the board — this
+// is a tool someone reads in for hours, not a hero section. ink-2 is the body
+// colour and clears 10:1 on the ground; ink-4 is decorative only and is never
+// the sole carrier of meaning.
+$ink: #f4f2ef;
+$ink-2: #c6c3bd;
+$ink-3: #918d87;
+$ink-4: #66625d;
+
+// The solid, achromatic primary. The most important action on a screen is the
+// brightest thing on it, which needs no hue at all.
+$solid: #f4f2ef;
+$solid-hover: #ffffff;
+$on-solid: #101011;
+
+// Brass. Attention: the queue count, the focused row, focus rings, links, and
+// the states that used to be a separate "warning" yellow.
+$accent: #d8a657;
+$accent-soft: rgba(216, 166, 87, 0.13);
+$accent-line: rgba(216, 166, 87, 0.44);
+$on-accent: #171104;
+
+// Brick. Errors and destructive intent only — it is never a resting fill.
+$danger: #de7466;
+$danger-soft: rgba(222, 116, 102, 0.12);
+$danger-line: rgba(222, 116, 102, 0.42);
+
+// ------------------------------------------------------------------ type --
+// Písmo si Studio veze samo — viz ./font.js, který ho registruje do
+// dokumentu. Jméno rodiny je vlastní schválně: kdyby se jmenovalo "Inter",
+// převzal by ho hostitel, který má vlastní Inter jiné verze.
+//
+// Záložní řetězec pořád stojí za to. Než se soubor načte, kreslí se
+// systémovým, a `font-display: swap` znamená, že se to na okamžik uvidí.
+$font: "ValeCMS Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+$mono: ui-monospace, "SF Mono", Menlo, monospace;
+
+// Fixed density: an admin is read at one distance and should not fluidly scale.
+// The jumps widen as they climb — 1.12 between the UI sizes, 1.4 and 1.57 at the
+// top — which is what puts an editorial hierarchy on a screen of small text.
+$text-micro: 10px; // eyebrow, small caps only
+$text-tiny: 11px;
+$text-small: 12.5px;
+$text-body: 14px; // every control, every list row
+$text-lead: 16px; // prose meant to be read — the review queue lives here
+$text-section: 20px;
+$text-title: 28px;
+$text-display: 48px;
+
+$w-light: 300;
+$w-book: 400;
+$w-medium: 500;
+$w-strong: 600;
+
+// Optical tracking. Large text needs negative tracking to stop looking loose;
+// small caps need a lot of positive. Skipping this is the clearest tell that a
+// type scale was picked from a list rather than set.
+$track-display: -0.028em;
+$track-title: -0.021em;
+$track-section: -0.014em;
+$track-body: 0;
+$track-caps: 0.13em;
+
+// ----------------------------------------------------------------- space --
+// One 4px scale. Every padding, gap and margin in the Studio is a step on it.
+$s1: 4px;
+$s2: 8px;
+$s3: 12px;
+$s4: 16px;
+$s5: 20px;
+$s6: 24px;
+$s8: 32px;
+$s10: 40px;
+$s12: 48px;
+$s16: 64px;
+
+// The page gutter is a token because every screen has to share one left edge —
+// header, toolbar, rows and empty states all line up on it.
+$gutter: 32px;
+$gutter-sm: 20px;
+// A phone held upright. The queue's three tab counts are 337px of text at this
+// size; 16px a side is what leaves them all on screen at 375 without the strip
+// having to be scrolled to read the number the editor came for.
+$gutter-ph: 16px;
+
+// --------------------------------------------------------------- metrics --
+$radius: 3px;
+$radius-lg: 6px;
+$sidebar: 240px;
+$row: 52px;
+
+// Motion. Quiet and quick: this is a tool, not a showreel. Nothing animates
+// position except things that genuinely arrive (bulk bar, toast, modal).
+$fast: 110ms;
+$mid: 170ms;
+$ease: cubic-bezier(0.22, 0.7, 0.3, 1);
+
+// ------------------------------------------------------------- the bands --
+//
+// Two stops for the whole admin, and both are named rather than typed.
+//
+// There used to be one number — `max-width: 900px` — written by hand in twelve
+// stylesheets, and it was wrong twice over. It was wrong for a phone in
+// landscape, which is 932px across and therefore got the *desktop* layout: a
+// 240px navigation rail out of 932px on a screen 430px tall. And it was the only
+// stop there was, so a 390px phone got the tablet layout and every toolbar on it
+// ran off the side of a workspace that clips.
+//
+// `below-with-phone()` and the `ph` stop are the library's own — see
+// ../../styles/_viewport.scss for why width alone cannot answer this.
+
+/// Tablet, phone, and the phone in landscape. The navigation is a rail of icons
+/// and the gutter halves; a screen still lays its content out in rows.
+///
+/// The landscape half is `phs` out of the system's own table, which is what
+/// brings 932×430 in here instead of leaving it with the desktop.
+@mixin compact {
+  @include below-with-phone(sm) {
+    @content;
+  }
+}
+
+/// A phone held upright — 390×844, 375×667, and nothing wider than 560px.
+///
+/// The band where rows of controls stop fitting side by side at any gutter, so
+/// they wrap or stack instead. Deliberately narrower than `compact`: at 768px
+/// and at 932px a toolbar still fits on one line, and stacking it there would
+/// spend vertical space — which on a landscape phone is the scarce one — to fix
+/// a problem that screen does not have.
+///
+/// Every rule under this must come after the `compact` rule it refines; they
+/// carry the same specificity and both are true here.
+@mixin stacked {
+  @include below(ph) {
+    @content;
+  }
+}
+
+/// Malý notebook: 11" a 13", tedy 1280×800 a 1366×768.
+///
+/// Šířka není ten problém — 1280 je pořád desktop. Problém je VÝŠKA. 800px
+/// mínus lišta prohlížeče, panely a stavový řádek je kolem 640px, a Studio je
+/// navržené na 900+. Projeví se to tím, čeho je najednou málo: hlavička
+/// pohledu bere 96px, řádek 52px, a dialog s knihovnou médií se opře o obě
+/// hrany okna.
+///
+/// Vede se to podle výšky, ne podle šířky, protože 1920×1080 na 13" externím
+/// monitoru tenhle problém nemá a 1280×720 na 27" ho má. `min-width` odděluje
+/// notebook od telefonu na šířku, který má vlastní pásmo.
+@mixin short {
+  @media (min-width: 900px) and (max-height: 860px) {
+    @content;
+  }
+}
+
+/// Šířka notebooku: nad tabletem, pod stolním monitorem.
+///
+/// Rail 240px a dvakrát 32px okraje ubere z 1280px téměř třetinu, než se
+/// začne kreslit obsah.
+///
+/// Horní hranice je 1680, ne 1440. MacBook Air 13" hlásí 1440×900 a MacBook
+/// Pro 14" 1512; Windows notebook se škálováním 150 % hlásí 1536. Kdyby to
+/// končilo na 1440, minulo by pásmo přesně ty stroje, kvůli kterým vzniklo —
+/// 1440 je notebook, ne monitor.
+@mixin laptop {
+  @media (min-width: 900px) and (max-width: 1679.98px) {
+    @content;
+  }
+}
+
+/// Velký monitor — 27" na 2560px, nebo maximalizované okno na 1440p.
+///
+/// Tady se nic nezmenšuje, naopak. Riziko velké obrazovky není nedostatek
+/// místa, ale míra: seznam roztažený přes 2500px je řádek, který se čte
+/// otáčením hlavy, a oko ztratí sloupec dřív, než dojede na konec. Obsah
+/// dostane strop a okraje se rozšíří, aby ten strop nevypadal jako
+/// nedodělaná stránka přilepená vlevo.
+@mixin wide {
+  @media (min-width: 1800px) {
+    @content;
+  }
+}
+
+/// 4K a ultrawide. Totéž, o stupeň dál.
+@mixin ultra {
+  @media (min-width: 2400px) {
+    @content;
+  }
+}
+
+/// The queue's own stop, and the only one in the Studio the site's table has no
+/// name for: the width at which four columns of review row stop being four
+/// columns. It is not a device — it is where 18px + 210px of identity + a
+/// readable measure + a pair of buttons stops fitting — so it is named here,
+/// once, rather than written as a number into ModerationView.
+///
+/// `below(md)` rather than the 1180 that used to be typed there. The site's `md`
+/// stop is 1200px, twenty pixels away, and a second number that close to a named
+/// one is a number that will be read as the same stop and edited as if it were.
+@mixin queue-narrow {
+  @include below(md) {
+    @content;
+  }
+}
+
+// ---------------------------------------------------------------- mixins --
+
+/// A column header, a field label above a control, a section eyebrow. Small caps
+/// carry hierarchy at this density better than another size step would.
+@mixin eyebrow {
+  font-size: var(--st-text-micro);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-caps);
+  text-transform: uppercase;
+  color: var(--st-ink-3);
+}
+
+@mixin display {
+  font-size: var(--st-text-display);
+  font-weight: var(--st-w-light);
+  line-height: 1.04;
+  letter-spacing: var(--st-track-display);
+  color: var(--st-ink);
+}
+
+@mixin title {
+  font-size: var(--st-text-title);
+  font-weight: var(--st-w-book);
+  line-height: 1.15;
+  letter-spacing: var(--st-track-title);
+  color: var(--st-ink);
+}
+
+@mixin section-title {
+  font-size: var(--st-text-section);
+  font-weight: var(--st-w-book);
+  line-height: 1.25;
+  letter-spacing: var(--st-track-section);
+  color: var(--st-ink);
+}
+
+/// Focus for anything that draws its own border — fields, search, selects. The
+/// ring lands inside the control's own edge.
+@mixin focus-ring {
+  outline: none;
+  border-color: var(--st-accent-line);
+  box-shadow: 0 0 0 3px var(--st-accent-soft);
+}
+
+/// Focus for anything that does not — buttons, tiles, rows, links. Offset so it
+/// reads on a hairline background, and never inherits the element's radius
+/// badly because `outline` follows the border box.
+@mixin focus-outline($offset: 2px) {
+  outline: 2px solid var(--st-accent);
+  outline-offset: $offset;
+}
+
+/// Every text-entry control in the Studio, so a text field, a number field and a
+/// select cannot drift apart visually. All six states are decided here once.
+@mixin control {
+  width: 100%;
+  padding: 9px 12px;
+  font-family: var(--st-font);
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  line-height: 1.5;
+  color: var(--st-ink);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+  transition:
+    border-color var(--st-fast) var(--st-ease),
+    box-shadow var(--st-fast) var(--st-ease),
+    background var(--st-fast) var(--st-ease);
+  appearance: none;
+
+  &::placeholder {
+    color: var(--st-ink-4);
+  }
+
+  &:hover:not(:disabled):not(:focus) {
+    border-color: var(--st-line-strong);
+  }
+
+  &:focus {
+    @include focus-ring;
+  }
+
+  &:disabled {
+    color: var(--st-ink-3);
+    cursor: not-allowed;
+    background: transparent;
+    border-color: var(--st-line-soft);
+  }
+}
+
+/// Posuvník uvnitř Studia.
+///
+/// `scrollbar-gutter: stable` je tu kvůli Windows. Na macOS je posuvník
+/// překryvný — objeví se nad obsahem a zase zmizí, takže nic neposune. Na
+/// Windows je klasický a bere si 15px ŠÍŘKY: obsah se při jeho příchodu
+/// přeskládá, mřížka médií přepočítá sloupce a poslední sloupec se schová pod
+/// něj. `stable` to místo drží pořád, takže se nic nehýbe a nic se
+/// nepodsouvá.
+///
+/// `scrollbar-width` a `::-webkit-scrollbar` vedle sebe: od Chromium 121 platí
+/// ten první a druhý se ignoruje. Nechává se pro starší prohlížeče, ale barvu
+/// musí říct oba, jinak by se na nich rozešly.
+/// Ostrov: dědičné vlastnosti, které si Studio nastavuje samo, ať mu je
+/// hostitel nepodstrčí.
+///
+/// Studio žije v dokumentu cizího webu, takže na něj dosáhne každé pravidlo
+/// se selektorem `*`, `body *` nebo `:where(...)`. Kořeny si odjakživa
+/// nastavovaly písmo a barvu — to jsou ale jen dvě z dědičných vlastností.
+/// Zbytek se dědil z hostitele: `body * { letter-spacing: .02em }` rozjede
+/// tabulky, `* { white-space: nowrap }` rozbije zalomení popisků, Tailwind
+/// preflight sáhne na tlačítka.
+///
+/// Není to izolace — tou by byl shadow DOM. Je to seznam vlastností, které
+/// se prokazatelně dědí a které Studio používá, prohlášený na jednom místě
+/// místo aby se na ně čekalo po jedné.
+@mixin island {
+  letter-spacing: normal;
+  word-spacing: normal;
+  text-transform: none;
+  text-indent: 0;
+  text-align: start;
+  white-space: normal;
+  font-variant: normal;
+  font-style: normal;
+  list-style: none;
+  cursor: auto;
+  visibility: visible;
+  text-shadow: none;
+  // Prohlížeč tím vybírá výchozí barvy formulářových prvků a posuvníků.
+  // Světlý hostitel by uvnitř tmavého Studia nakreslil bílý select.
+  color-scheme: dark;
+}
+
+@mixin scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 252, 247, 0.14) transparent;
+  scrollbar-gutter: stable;
+
+  &::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 252, 247, 0.13);
+    background-clip: content-box;
+    border: 3px solid transparent;
+    border-radius: 6px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 252, 247, 0.24);
+    background-clip: content-box;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin clamp-lines($count) {
+  display: -webkit-box;
+  -webkit-line-clamp: $count;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/// Emitted once, on the Studio root. Every other stylesheet reads `var(--st-*)`,
+/// so the Sass variables above stay the single source and the two cannot drift.
+@mixin declare {
+  --st-font: #{$font};
+  --st-mono: #{$mono};
+
+  --st-bg: #{$bg};
+  --st-rail: #{$rail};
+  --st-sunken: #{$sunken};
+  --st-raised: #{$raised};
+  --st-overlay: #{$overlay};
+
+  --st-line: #{$line};
+  --st-line-soft: #{$line-soft};
+  --st-line-strong: #{$line-strong};
+
+  --st-ink: #{$ink};
+  --st-ink-2: #{$ink-2};
+  --st-ink-3: #{$ink-3};
+  --st-ink-4: #{$ink-4};
+
+  --st-solid: #{$solid};
+  --st-solid-hover: #{$solid-hover};
+  --st-on-solid: #{$on-solid};
+
+  --st-accent: #{$accent};
+  --st-accent-soft: #{$accent-soft};
+  --st-accent-line: #{$accent-line};
+  --st-on-accent: #{$on-accent};
+
+  --st-danger: #{$danger};
+  --st-danger-soft: #{$danger-soft};
+  --st-danger-line: #{$danger-line};
+
+  --st-text-micro: #{$text-micro};
+  --st-text-tiny: #{$text-tiny};
+  --st-text-small: #{$text-small};
+  --st-text-body: #{$text-body};
+  --st-text-lead: #{$text-lead};
+  --st-text-section: #{$text-section};
+  --st-text-title: #{$text-title};
+  --st-text-display: #{$text-display};
+
+  --st-w-light: #{$w-light};
+  --st-w-book: #{$w-book};
+  --st-w-medium: #{$w-medium};
+  --st-w-strong: #{$w-strong};
+
+  --st-track-display: #{$track-display};
+  --st-track-title: #{$track-title};
+  --st-track-section: #{$track-section};
+  --st-track-caps: #{$track-caps};
+
+  --st-s1: #{$s1};
+  --st-s2: #{$s2};
+  --st-s3: #{$s3};
+  --st-s4: #{$s4};
+  --st-s5: #{$s5};
+  --st-s6: #{$s6};
+  --st-s8: #{$s8};
+  --st-s10: #{$s10};
+  --st-s12: #{$s12};
+  --st-s16: #{$s16};
+  --st-gutter: #{$gutter};
+
+  --st-radius: #{$radius};
+  --st-radius-lg: #{$radius-lg};
+  --st-sidebar: #{$sidebar};
+  --st-row: #{$row};
+
+  /* Strop čtecí šířky. `none` do 1800px, protože do té doby je obsah užší než
+     okno stejně; nad ním je to jediné, co drží seznamy čitelné. Čte ho
+     `.padded` a tabulky ve ViewLayout — na jednom místě, ne v každém pohledu. */
+  --st-measure: none;
+
+  --st-fast: #{$fast};
+  --st-mid: #{$mid};
+  --st-ease: #{$ease};
+}
+
+/// Responzivní část tokenů. Odděleně od `declare` schválně.
+///
+/// `declare` končilo `@media` bloky, takže cokoli, co v kořeni následovalo —
+/// a v obou kořenech následuje — byla DEKLARACE ZA VNOŘENÝM PRAVIDLEM. Sass
+/// na to v některých verzích upozorňuje při každém překladu, protože se to
+/// chová jinak, než jak to vypadá.
+///
+/// Rozdělením se to nedá napsat špatně: kořen zahrne `declare` nahoře, pak
+/// své vlastní deklarace, a tenhle mixin jako poslední řádek.
+@mixin declare-responsive {
+  /* The one edge every screen shares, so it folds in one place rather than in
+     each of the eleven stylesheets that used to restate `var(--st-s5)` under
+     their own copy of the 900px query. */
+  @include compact {
+    --st-gutter: #{$gutter-sm};
+  }
+
+  /* After `compact`, never before: both are one declaration on the same
+     element and both are true on a phone held upright. */
+  @include stacked {
+    --st-gutter: #{$gutter-ph};
+  }
+
+  /* Notebook. Rail i okraj o krok níž, ať zbyde na obsah — nic se nepřeskládá,
+     jen se přestane plýtvat vlevo. */
+  @include laptop {
+    --st-gutter: 24px;
+    --st-sidebar: 208px;
+  }
+
+  /* Nízké okno. Řádek a odsazení se stáhnou, aby se na obrazovku vešly
+     o dva řádky seznamu víc — což je na 640px viditelné výšky rozdíl mezi
+     "vidím data" a "vidím hlavičku". Písmo se NEZMENŠUJE: přečíst se to musí
+     pořád stejně, a zmenšené písmo na malém notebooku je únava, ne úspora. */
+  @include short {
+    --st-row: 44px;
+    --st-s8: 24px;
+    --st-s10: 32px;
+    --st-s16: 40px;
+  }
+
+  /* Velký monitor. Okraje se rozšíří a obsah dostane strop. */
+  @include wide {
+    --st-gutter: 48px;
+    --st-sidebar: 264px;
+    --st-measure: 1520px;
+  }
+
+  @include ultra {
+    --st-gutter: 64px;
+    --st-measure: 1760px;
+  }
+}

@@ -1,290 +1,382 @@
-.navbar__container{
-    .magnetic{
-        z-index: 105; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
-        .navbar__menu{
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+.navbar__container {
+    cursor: pointer;
+    position: fixed;
+    top: 0;
+    right: 0;
+    // Was 5px, which put the logo hard against the window edge. The side value
+    // is the same 3vw the sections below start their content at, so the bar
+    // lines up with the page rather than floating over it.
+    padding: 1.5rem 3vw;
+    width: 100%;
+    // As tall as the three words, said the plain way.
+    //
+    // This was `fit-content`, and on iOS that is what put the bar in the middle
+    // of the screen. WebKit does not resolve an intrinsic height the way Blink
+    // does on a fixed-position box, and the bar came out the full height of the
+    // viewport — at which point the two rules below finish the job: a grid's
+    // default `align-content` is `stretch`, so the single row grew to fill it,
+    // and `align-items: center` then put the words in the middle of that row.
+    // The ::before scrim is sized off this box too, so the same fault laid a
+    // 92%-black gradient over the top half of every page. Reproduced exactly by
+    // forcing `height: 100vh` here in a desktop browser.
+    //
+    // `auto` is the same content height everywhere it already worked —
+    // measured identical at 390, 844, 768, 1280, 1440 and 2552 across, down to
+    // the position of each word — and it is the value with no intrinsic-sizing
+    // edge cases in it.
+    height: auto;
+    z-index: 160;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    align-items: center;
+    // The belt to that brace. Whatever this box's height turns out to be, the
+    // row it holds sits at the top of it rather than being stretched down the
+    // middle — so the bar cannot drift again if anything else ever grows it.
+    align-content: start;
+
+    // A ground for the bar where the page has none to give it. On the wide
+    // compositions every section is designed with clearance under the bar, so
+    // the three words always land on quiet pixels. On the stacked ones content
+    // simply flows beneath them — a photo or a headline slides under
+    // "PROCHÁZKA GROUP" mid-scroll and takes the word with it. This is the
+    // faintest thing that fixes it: a scrim that is the site's own ground at
+    // the very top and nothing at all by the bar's foot, painted behind the
+    // words (the strip itself stays click-through; see the pointer-events
+    // rules below). Same gate the stacked layouts use, width OR height, so a
+    // phone gets it in both orientations and no desktop ever does.
+    @media (max-width: 820px), (max-height: 520px) {
+        &::before {
+            content: "";
+            position: absolute;
+            inset: -1px 0 auto 0;
+            height: calc(100% + 1.2rem);
+            background: linear-gradient(
+                to bottom,
+                rgba(2, 14, 21, 0.92) 0%,
+                rgba(2, 14, 21, 0.72) 55%,
+                rgba(2, 14, 21, 0) 100%
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+    }
+
+    // The bar is a full-width strip over the top of every page, but only its
+    // three words are anything. Without this the strip itself swallowed every
+    // tap and hover across the top of the screen.
+    pointer-events: none;
+
+    > * { pointer-events: auto; }
+
+    // Two words instead of three. The bar's three at their own tracking are
+    // wider than any phone — SPOJIT SE goes, because the panel this bar opens
+    // carries KONTAKT as a first-class box of its own, and a wordmark shrunk
+    // until all three fit reads as a mistake rather than a bar.
+    @include below(xs) {
+        grid-template-columns: auto auto;
+        justify-content: space-between;
+
+        > .rotateText:last-child { display: none; }
+
+        .navbar__menu { justify-self: end; }
+    }
+
+    // All three are grid children in their own right now — the magnetic wrapper
+    // that used to place the middle one is gone, and with it the centring it
+    // did, which is why this is stated here.
+
+    .navbar__menu {
+        position: relative;
+        justify-self: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        width: fit-content;
+        height: fit-content;
+        z-index: 165;
+
+        // It is a <button> now; these are the defaults a button brings with it
+        // that the bar has never wanted.
+        padding: 0;
+        border: 0;
+        background: none;
+        color: var(--wText);
+        font: inherit;
+        cursor: pointer;
+
+        &:focus-visible {
+            outline: 1px solid var(--bgPrimary, #BBB788);
+            outline-offset: 4px;
+        }
+
+        // The word is a line of caps under twenty pixels tall. The pseudo
+        // widens what a finger can land on to the 44px a tap needs without
+        // moving a single visible pixel.
+        @include touch {
+            &::after {
+                content: "";
+                position: absolute;
+                inset: -12px;
+            }
+        }
+
+        // Two hairlines that CROSS. Closed they lie parallel; open they meet
+        // in the middle and turn into the X — one continuous morph on the
+        // panel's own curve, each line arriving a breath after the other so
+        // the cross is drawn rather than switched. Hovering the closed button
+        // draws them toward each other: the first millimetre of the same
+        // journey, which is how the wall's boxes promise their growth too.
+        // The box the two lines live in, given in rem so the mark grows with
+        // the word beside it. Above 1920 the root ramps and the type in the bar
+        // comes up a third; a mark left at a literal 20px would sit next to it
+        // as the one thing in the bar that did not, which is exactly how a
+        // control reads as an afterthought.
+        .navbar__cut {
+            position: relative;
+            flex-shrink: 0;
+            width: 1.25rem;
+            height: 0.6875rem;
+
+            // Centre-anchored (left 50% + the -50% in every transform) so the
+            // width change below grows the line out of its own middle, and
+            // rotate(0deg) stated at rest so the cross is a per-function
+            // interpolation, not a matrix jump.
+            span {
+                position: absolute;
+                left: 50%;
+                top: 50%;
+                width: 100%;
+                height: 1px;
+                margin-top: -0.5px;
+                background-color: currentColor;
+                transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1),
+                    width 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+            }
+
+            // In rem for the same reason the box is: this is how far apart the
+            // two lines lie, which is part of the drawing rather than a nudge,
+            // and a mark that widened while its two lines stayed six pixels
+            // apart would simply flatten as the screen grew.
+            span:first-child { transform: translate(-50%, -0.1875rem) rotate(0deg); }
+            span:last-child {
+                transform: translate(-50%, 0.1875rem) rotate(0deg);
+                transition-delay: 0.05s;
+            }
+        }
+
+        &:hover:not([aria-expanded="true"]) .navbar__cut span:first-child { transform: translate(-50%, -0.09375rem) rotate(0deg); }
+        &:hover:not([aria-expanded="true"]) .navbar__cut span:last-child { transform: translate(-50%, 0.09375rem) rotate(0deg); }
+
+        // Crossed, the lines also LENGTHEN — the same expand the word does:
+        // a rotated 20px line only spans 14, so the growth keeps the X at the
+        // lines' own optical size and the size change travels, never snaps.
+        &[aria-expanded="true"] .navbar__cut span:first-child { transform: translate(-50%, 0) rotate(45deg); width: 130%; }
+        &[aria-expanded="true"] .navbar__cut span:last-child { transform: translate(-50%, 0) rotate(-45deg); width: 130%; }
+
+        // Reduced motion still gets the morph, just calmer: this is pointer
+        // feedback, and an instant snap reads as broken, not as considerate.
+        // Same policy as the tiles' CALM_HOVER — one shorter curtain, no
+        // stagger.
+        @media (prefers-reduced-motion: reduce) {
+            .navbar__cut span {
+                transition-duration: 0.4s;
+                transition-delay: 0s;
+            }
+        }
+
+        .navbar__text {
             position: relative;
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: var(--bgColor2);
-            border-radius: 50%;
-            width: 100px;
-            height: 100px;
-            border: var(--hColor2) 2.5px solid;
-            margin: 25px;
-            z-index: 100;
-            mix-blend-mode: difference;
-            cursor: pointer;
-            .navbar__bounds{
-                position: absolute;
-                top: 0;
-                left: 0;
+            width: fit-content;
+            // Was 0.75rem all round, which stood the corner marks most of a
+            // centimetre off the word. They belong almost on it.
+            margin: 0.25rem 0.35rem;
+
+            .navbar__text__content {
+                position: relative;
                 display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: center;
-                align-content: center;
-                z-index: 4;
-                border-radius: 50%;
-                // I need to expand the border only when I hover over it
-                &:hover{
-                    scale: 3;
-                }
+                align-items: center;
+                width: fit-content;
+                @include font(SCTA);
+                overflow: hidden;
             }
-            p{
-                color: var(--wText);
-                font-size: 1.3rem;
-                font-family: "Satoshi-Variable";
-                font-weight: 300;
-                cursor: pointer;
+        }
+
+        // ── the narrowest phones ──
+        //
+        // The word beside the mark goes, and it is the word rather than the
+        // wordmark, because the mark already says it: two hairlines that cross
+        // are what MENU and CLOSE mean, in twenty pixels instead of a hundred.
+        //
+        // Measured, not guessed. The wordmark is 229px at its own tracking and
+        // the button with CLOSE in it another 105; against the 3vw margins the
+        // page sets, the two stop fitting at about 365 across and are already
+        // touching at 375. 380 is the site's own v(sm) stop and the first round
+        // number clear of that. It is why "CLO…" runs off the right edge of a
+        // 320 screen today, and why 390 and 430 keep the word.
+        //
+        // Taken out of FLOW rather than out of the document, and the difference
+        // is only half a reason now. The button carries its own aria-label —
+        // it has to, because ScrollToText's letter columns put the whole
+        // alphabet in the accessibility tree and the name was never the word
+        // (see index.jsx) — so the name survives either way. What clipping
+        // keeps that display:none would not is the WORD itself, still there,
+        // still spinning between MENU and CLOSE on the same clock as the mark:
+        // one element that stops being drawn rather than a second element that
+        // only exists on small screens.
+        //
+        // Last in the block on purpose. Everything it overrides — the word's
+        // own box, and the pseudo the touch stop sizes — is declared above it
+        // at exactly this specificity, so source order is the whole of what
+        // makes it win.
+        @include below-px(380) {
+            .navbar__text {
+                position: absolute;
+                width: 1px;
+                height: 1px;
                 margin: 0;
-                padding: 0;
-                z-index: 4;
-                pointer-events: none;
-                &:nth-of-type(2){
-                    position: absolute;
-                    opacity: 0;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    
-                }
+                overflow: hidden;
+                white-space: nowrap;
+                clip-path: inset(50%);
+            }
+
+            // With no word to widen it the button is the mark alone, 20 by 11,
+            // so the 44px a finger needs now has to come entirely from the
+            // pseudo — and it needs more of it down than the -12px a wider
+            // screen gets, because that value was sized against a button with a
+            // line of caps standing in it.
+            &::after {
+                content: "";
+                position: absolute;
+                inset: -16.5px -12px;
             }
         }
     }
 }
 
-@media (min-aspect-ratio: 1/1 ){
-    @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .navbar__container{
-            .magnetic{
-                z-index: 105; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
-                .navbar__menu{
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background-color: var(--bgColor2);
-                    border-radius: 50%;
-                    width: 90px;
-                    height: 90px;
-                    border: var(--hColor2) 2.5px solid;
-                    margin: 25px;
-                    z-index: 100;
-                    mix-blend-mode: difference;
-                    cursor: pointer;
-                    .navbar__bounds{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        display: flex;
-                        width: 100%;
-                        height: 100%;
-                        justify-content: center;
-                        align-content: center;
-                        z-index: 4;
-                        border-radius: 50%;
-                        // I need to expand the border only when I hover over it
-                        &:hover{
-                            scale: 3;
-                        }
-                    }
-                    p{
-                        color: var(--wText);
-                        font-size: 1.2rem;
-                        font-weight: 300;
-                        cursor: pointer;
-                        margin: 0;
-                        padding: 0;
-                        z-index: 4;
-                        pointer-events: none;
-                        font-family: "Satoshi-Variable";
-                        &:nth-of-type(2){
-                            position: absolute;
-                            opacity: 0;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            
-                        }
-                    }
-                }
-            }
+
+// The mark, set in from the right by what the logo is set in from the left.
+//
+// The bar's 3vw gutter puts the BUTTON at the same inset as the wordmark, which
+// looks like symmetry until you measure what actually paints: the corner marks
+// are drawn ten pixels outside the button's own box, so on a 320 screen the
+// wordmark stood ten pixels off the left edge and the marks sat hard against the
+// right one. The two ends of the bar were not the same distance in, and the mark
+// read as having slid off the screen rather than as sitting in the corner.
+//
+// So the button gives back exactly that overhang. What lands on the gutter is
+// then the outermost thing the eye can see on each side — the wordmark's first
+// letter and the mark's outer corner — which is the symmetry that was meant.
+//
+// Ten pixels flat rather than a share of the width: it is the corner marks'
+// own offset, and that does not change with the screen.
+@include v(xs) {
+    @include below-px(600) {
+        // Three equal thirds are for the bar that has three words in it. On a
+        // phone the third slot — "Spojit se" — is not rendered, so the middle
+        // column ended in the middle of the screen with an empty third beside
+        // it, and the menu sat wherever the leftover happened to put it. Worse,
+        // `1fr` is `minmax(auto, 1fr)` and that auto floor is content-sized, so
+        // the track was also being pushed about by its own contents: "Close" is
+        // wider than "Menu", and at 390 that slid the mark ten pixels sideways
+        // on opening the panel.
+        //
+        // The wordmark takes what is left, the menu takes exactly its own width,
+        // and the empty third takes nothing — so the boundary the menu is pinned
+        // to is the bar's own right edge, at every width and in both states.
+        .navbar__container {
+            grid-template-columns: minmax(0, 1fr) auto auto;
         }
-    }
-    @media only screen and (min-width: 800px ) and (max-width: 950px) and (min-height: 390px) and (max-height: 500px) {
-        .navbar__container{
-            .magnetic{
-                z-index: 105; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
-                .navbar__menu{
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background-color: var(--bgColor2);
-                    border-radius: 50%;
-                    width: 80px;
-                    height: 80px;
-                    border: var(--hColor2) 2.5px solid;
-                    margin: 25px;
-                    z-index: 100;
-                    mix-blend-mode: difference;
-                    cursor: pointer;
-                    .navbar__bounds{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        display: flex;
-                        width: 100%;
-                        height: 100%;
-                        justify-content: center;
-                        align-content: center;
-                        z-index: 4;
-                        border-radius: 50%;
-                        // I need to expand the border only when I hover over it
-                        &:hover{
-                            scale: 3;
-                        }
-                    }
-                    p{
-                        color: var(--wText);
-                        font-size: 1rem;
-                        font-weight: 300;
-                        cursor: pointer;
-                        margin: 0;
-                        padding: 0;
-                        z-index: 4;
-                        pointer-events: none;
-                        font-family: "Satoshi-Variable";
-                        &:nth-of-type(2){
-                            position: absolute;
-                            opacity: 0;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            
-                        }
-                    }
-                }
-            }
-        } 
-    }
-    @media only screen and (min-width: 500px ) and (max-width: 795px) and (min-height: 200px) and (max-height: 389px) {
-        .navbar__container{
-            .magnetic{
-                z-index: 105; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
-                .navbar__menu{
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background-color: var(--bgColor2);
-                    border-radius: 50%;
-                    width: 80px;
-                    height: 80px;
-                    border: var(--hColor2) 2.5px solid;
-                    margin: 25px;
-                    z-index: 100;
-                    mix-blend-mode: difference;
-                    cursor: pointer;
-                    .navbar__bounds{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        display: flex;
-                        width: 100%;
-                        height: 100%;
-                        justify-content: center;
-                        align-content: center;
-                        z-index: 4;
-                        border-radius: 50%;
-                        // I need to expand the border only when I hover over it
-                        &:hover{
-                            scale: 3;
-                        }
-                    }
-                    p{
-                        color: var(--wText);
-                        font-size: 1rem;
-                        font-weight: 300;
-                        cursor: pointer;
-                        margin: 0;
-                        padding: 0;
-                        z-index: 4;
-                        pointer-events: none;
-                        font-family: "Satoshi-Variable";
-                        &:nth-of-type(2){
-                            position: absolute;
-                            opacity: 0;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            
-                        }
-                    }
-                }
-            }
-        } 
+
+        // At the originals' depth, like everything else in this block: the rule
+        // upstairs sets `padding: 0` from inside `.navbar__container`, so a
+        // padding written out here would lose to it in silence.
+        .navbar__container .navbar__menu {
+            // Room round the mark. The corner marks are drawn off the button's
+            // own box, so until now they closed on the mark itself with nothing
+            // between — this is what puts a frame round it rather than a border
+            // on it.
+            padding: 0.625rem;
+            // Pinned to the end of its column rather than centred in it.
+            //
+            // Centred, the button's right edge is a function of how wide the
+            // button happens to be — so it moved when the padding was added, and
+            // it moved again between "Menu" and "Close", which are not the same
+            // width. The mark drifted 14px sideways on opening the panel. Pinned,
+            // the right edge is fixed and the word grows to the left of it, which
+            // is what a mark in the corner of a bar is supposed to do.
+            justify-self: end;
+            // What is left over: the corner marks are drawn ten pixels outside
+            // the button, so ten of margin puts THEM on the same gutter the
+            // wordmark's first letter sits on at the other end of the bar.
+            margin-right: 0.625rem;
+        }
+
+        // And taller. Eleven pixels of mark is what a bar reads at arm's length
+        // beside a word; with the word gone on a narrow phone the mark is the
+        // whole control, and eleven pixels of it in a forty-four pixel target is
+        // a hit area with almost nothing drawn in it.
+        //
+        // Height only — the box keeps its width, because the width is what the
+        // corner marks are positioned against and those are now set to the same
+        // inset as the wordmark on the other end of the bar. Growing it sideways
+        // would spend that.
+        //
+        // The three numbers move together or the drawing comes apart: the box,
+        // how far apart the two lines lie at rest, and how far they close on
+        // hover. Each is the same multiple of what it was.
+        //
+        // Written at the depth the originals are written at. They live inside
+        // `.navbar__container .navbar__menu`, and a rule out here that restates
+        // one of their declarations loses on specificity without saying so —
+        // which is exactly what happened on the first attempt: the margin above
+        // applied, because nothing else sets it, and every height and transform
+        // silently did not.
+        .navbar__container .navbar__menu .navbar__cut {
+            height: 1rem;
+
+            span:first-child { transform: translate(-50%, -0.28125rem) rotate(0deg); }
+            span:last-child { transform: translate(-50%, 0.28125rem) rotate(0deg); }
+        }
+
+        .navbar__container .navbar__menu:hover:not([aria-expanded="true"]) .navbar__cut {
+            span:first-child { transform: translate(-50%, -0.14rem) rotate(0deg); }
+            span:last-child { transform: translate(-50%, 0.14rem) rotate(0deg); }
+        }
+
+        // The cross grows with it. A line at 45° spans only 0.707 of its own
+        // length, so the cross is drawn by lengthening the lines rather than by
+        // any height — 150% of a 20px line crosses at 21px against the 18 it
+        // did. They overflow the box by a pixel either side, which is what they
+        // already did at 130%, and they are absolutely positioned, so nothing
+        // in the bar moves.
+        .navbar__container .navbar__menu[aria-expanded="true"] .navbar__cut {
+            span:first-child { width: 150%; }
+            span:last-child { width: 150%; }
+        }
     }
 }
 
-@media ( max-aspect-ratio: 1/1){
-    @media only screen and (max-width: 600px ) {
-        .navbar__container{
-            .magnetic{
-                z-index: 105; // the menu is in the magnetic element -- needs to have z-index of 3 because the body has 2
-                .navbar__menu{
-                    position: relative;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    background-color: var(--bgColor2);
-                    border-radius: 50%;
-                    width: 80px;
-                    height: 80px;
-                    border: var(--hColor2) 2.5px solid;
-                    margin: 25px;
-                    z-index: 100;
-                    mix-blend-mode: difference;
-                    cursor: pointer;
-                    .navbar__bounds{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        display: flex;
-                        width: 100%;
-                        height: 100%;
-                        justify-content: center;
-                        align-content: center;
-                        z-index: 4;
-                        border-radius: 50%;
-                        // I need to expand the border only when I hover over it
-                        &:hover{
-                            scale: 3;
-                        }
-                    }
-                    p{
-                        color: var(--wText);
-                        font-size: 1.2rem;
-                        font-weight: 300;
-                        cursor: pointer;
-                        margin: 0;
-                        padding: 0;
-                        z-index: 4;
-                        pointer-events: none;
-                        font-family: "Satoshi-Variable";
-                        &:nth-of-type(2){
-                            position: absolute;
-                            opacity: 0;
-                            top: 50%;
-                            left: 50%;
-                            transform: translate(-50%, -50%);
-                            
-                        }
-                    }
-                }
-            }
+// The tap target, restated because everything it was derived from moved.
+//
+// 44px is the floor and this pseudo is the whole of it. It used to be a bare
+// 20×11 mark plus 16.5 above and 12 either side, which came to exactly 44 square.
+// The mark is 16 tall now and the button carries 10 of padding all round, so the
+// box under the pseudo is 40×36 — and the old insets would have quietly made the
+// target 64, half again over the floor and taller than the row it sits in.
+//
+// Written as what is left to find rather than as two numbers: 4 above and below
+// and 2 either side is 44 in both directions, and if the padding changes again
+// this comment is where to look.
+@include v(xs) {
+    @include below-px(380) {
+        .navbar__container .navbar__menu::after {
+            inset: -4px -2px;
         }
-        
-    }   
+    }
 }

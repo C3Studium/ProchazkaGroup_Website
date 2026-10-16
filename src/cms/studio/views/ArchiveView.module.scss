@@ -1,0 +1,573 @@
+@use "../../styles/viewport" as *;
+@use "../styles/tokens.module" as t;
+
+/* Archiv.
+   `.module.scss`, like every stylesheet under the Studio: scripts/sync-styles.js
+   globs every NON-module sheet under src/ into the public site's stylesheet, so a
+   plain .scss here would ship the admin's CSS to every visitor of the marketing
+   site. See styles/_tokens.module.scss for the check this suffix passes.
+
+   Three lists share one row grammar — a fixed left rail, a column that takes the
+   room, and the state on the right — so scanning down any of them lands the eye
+   in the same places. What differs is only which columns each list needs. */
+
+.search {
+  width: 280px;
+}
+
+.filter {
+  width: 200px;
+}
+
+/* --------------------------------------------------------------- strips --- */
+
+.strips {
+  flex: none;
+}
+
+/* Same shape as the editor's strip, because it is the same kind of statement:
+   one line, always on screen, saying what the surface below can and cannot be
+   held to. */
+.strip {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  padding: var(--st-s2) var(--st-gutter);
+  margin: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.45;
+  color: var(--st-ink-3);
+  background: var(--st-rail);
+  border-bottom: 1px solid var(--st-line);
+
+  strong {
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink-2);
+  }
+}
+
+.stripIcon {
+  flex: none;
+  margin-top: 2px;
+  color: var(--st-ink-4);
+}
+
+/* Brass, not brick: "this is a reconstruction, not a record" is the thing on
+   this screen that most needs to be read, and it is not a failure. */
+.stripWarn {
+  color: var(--st-accent);
+
+  strong {
+    color: var(--st-accent);
+  }
+
+  .stripIcon {
+    color: var(--st-accent);
+  }
+}
+
+/* ------------------------------------------------------------------ rows --- */
+
+.rows {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.rowItem {
+  position: relative;
+  display: grid;
+  grid-template-columns: 30px 1fr auto;
+  align-items: center;
+  border-bottom: 1px solid var(--st-line-soft);
+
+  &:hover .rowActions,
+  &:focus-within .rowActions {
+    opacity: 1;
+  }
+}
+
+.rowSelected {
+  background: var(--st-accent-soft);
+}
+
+.select {
+  display: flex;
+  justify-content: center;
+  padding-left: var(--st-s3);
+}
+
+/* Every row is operable from the keyboard. The list carries no hover-only path:
+   the actions on the right appear on `:focus-within` as well as on hover, which
+   is the arrangement DocumentListView already uses. */
+.row {
+  display: grid;
+  grid-template-columns: 190px 1fr auto 16px;
+  gap: var(--st-s4);
+  align-items: center;
+  min-height: 60px;
+  padding: var(--st-s3) var(--st-s3) var(--st-s3) var(--st-s3);
+  cursor: pointer;
+  background: none;
+  border: 0;
+
+  &:hover {
+    background: rgba(255, 252, 247, 0.02);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(-2px);
+  }
+}
+
+.textRow {
+  grid-template-columns: 230px 1fr 170px 16px;
+  align-items: start;
+}
+
+.mediaRow {
+  grid-template-columns: 44px minmax(160px, 1fr) 250px minmax(140px, 1fr) auto;
+  cursor: default;
+
+  &:hover {
+    background: none;
+  }
+}
+
+.when {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.whenStamp {
+  font-size: var(--st-text-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink);
+}
+
+.whenWho {
+  @include t.truncate;
+
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-3);
+}
+
+.what,
+.where,
+.file {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.title {
+  @include t.truncate;
+
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink);
+}
+
+.meta {
+  @include t.truncate;
+
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-3);
+}
+
+/* The field path, in mono. It is a machine's name for a place and reads as one —
+   which is the point: it is what an editor searches for when they need to find
+   the same field in the editor. */
+.field {
+  @include t.truncate;
+
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-4);
+}
+
+/* The whole text, at reading size. Truncating it would answer a different
+   question than the one this sub-page exists for. */
+.said {
+  min-width: 0;
+  font-size: var(--st-text-small);
+  line-height: 1.5;
+  color: var(--st-ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.window {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-items: flex-start;
+  font-size: var(--st-text-tiny);
+  font-variant-numeric: tabular-nums;
+}
+
+.windowFrom {
+  color: var(--st-ink-2);
+}
+
+.windowTo {
+  color: var(--st-ink-3);
+}
+
+.flags {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+}
+
+.chevron {
+  color: var(--st-ink-4);
+}
+
+.rowActions {
+  display: flex;
+  gap: var(--st-s1);
+  align-items: center;
+  padding-right: var(--st-s3);
+  opacity: 0;
+  transition: opacity var(--st-fast) var(--st-ease);
+}
+
+/* ----------------------------------------------------------------- média --- */
+
+.thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  color: var(--st-ink-4);
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line);
+  border-radius: var(--st-radius);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+/* Two dates side by side, each with its own label, because the whole point is
+   that they are two different answers. A single "datum" column would quietly
+   pick one of them and the screen would stop being able to answer the question
+   people actually ask. */
+.dates {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--st-s3);
+}
+
+.date {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.dateLabel {
+  @include t.eyebrow;
+}
+
+.dateValue {
+  font-size: var(--st-text-tiny);
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-2);
+}
+
+.dateNever {
+  color: var(--st-ink-4);
+}
+
+/* A tilde, not a footnote marker: the date beside it is an estimate rather than
+   a record, and it must never be read as one. */
+.derivedMark {
+  margin-left: 4px;
+  font-weight: var(--st-w-strong);
+  color: var(--st-accent);
+  cursor: help;
+}
+
+.usage {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.usedList {
+  @include t.truncate;
+
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-2);
+}
+
+.usedNone {
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-4);
+}
+
+.usedCount {
+  font-size: var(--st-text-micro);
+  color: var(--st-ink-4);
+}
+
+/* ---------------------------------------------------------------- pager --- */
+
+.pager {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  justify-content: center;
+  padding: var(--st-s6) 0 var(--st-s12);
+}
+
+.pagerText {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* -------------------------------------------------------------- selection -- */
+
+.bulkDock {
+  position: absolute;
+  right: var(--st-gutter);
+  bottom: var(--st-s6);
+  left: var(--st-gutter);
+  z-index: 20;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.bulkBar {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  max-width: 100%;
+  padding: var(--st-s2) var(--st-s2) var(--st-s2) var(--st-s4);
+  pointer-events: auto;
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-lg);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.55);
+}
+
+.bulkCount {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-2);
+}
+
+/* ---------------------------------------------------------------- destroy -- */
+
+.destroyLoading {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* The four numbers, as a definition list rather than a sentence: a person about
+   to destroy something reads them, they do not skim them. */
+.destroyFacts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--st-s3) var(--st-s6);
+  margin: 0 0 var(--st-s4);
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  dt {
+    @include t.eyebrow;
+  }
+
+  dd {
+    margin: 0;
+    font-size: var(--st-text-body);
+    color: var(--st-ink);
+  }
+}
+
+.exact {
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-4);
+}
+
+.destroyList {
+  display: grid;
+  gap: 2px;
+  max-height: 180px;
+  padding: var(--st-s2) var(--st-s3);
+  margin: 0 0 var(--st-s4);
+  overflow-y: auto;
+  list-style: none;
+  background: var(--st-sunken);
+  border: 1px solid var(--st-line-soft);
+  border-radius: var(--st-radius);
+
+  @include t.scrollbar;
+
+  li {
+    display: flex;
+    gap: var(--st-s3);
+    align-items: baseline;
+    justify-content: space-between;
+    font-size: var(--st-text-tiny);
+  }
+}
+
+.destroyName {
+  @include t.truncate;
+
+  font-family: var(--st-mono);
+  color: var(--st-ink-2);
+}
+
+.destroyBytes {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--st-ink-4);
+}
+
+/* Brick, because this one IS a refusal. The button above it is disabled as a
+   courtesy; the server is what makes the refusal true. */
+.blocked {
+  padding: var(--st-s3);
+  margin: 0 0 var(--st-s4);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-2);
+  background: var(--st-danger-soft);
+  border: 1px solid var(--st-danger-line);
+  border-radius: var(--st-radius);
+
+  ul {
+    display: grid;
+    gap: var(--st-s1);
+    padding: 0 0 0 var(--st-s4);
+    margin: var(--st-s2) 0;
+  }
+
+  code {
+    font-family: var(--st-mono);
+    color: var(--st-danger);
+  }
+}
+
+.blockedHead {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: center;
+  margin: 0;
+  font-weight: var(--st-w-medium);
+  color: var(--st-danger);
+}
+
+.blockedFoot {
+  margin: 0;
+  color: var(--st-ink-3);
+}
+
+/* The sentence, verbatim and last — the thing read with the numbers still in
+   view. It is the largest text in the dialog on purpose. */
+.destroyConfirm {
+  margin: 0 0 var(--st-s3);
+  font-size: var(--st-text-lead);
+  line-height: 1.4;
+  color: var(--st-ink);
+}
+
+.destroyWho {
+  margin: 0;
+  font-size: var(--st-text-tiny);
+  line-height: 1.5;
+  color: var(--st-ink-3);
+}
+
+/* ---------------------------------------------------------------- as of T -- */
+
+.frameView {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.frameHead {
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  padding: var(--st-s3) var(--st-gutter);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.frameTitle {
+  font-size: var(--st-text-body);
+  color: var(--st-ink-3);
+
+  strong {
+    font-variant-numeric: tabular-nums;
+    font-weight: var(--st-w-medium);
+    color: var(--st-ink);
+  }
+}
+
+.frameStage {
+  flex: 1;
+  min-height: 0;
+}
+
+.build {
+  font-family: var(--st-mono);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-2);
+}
+
+.booting {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  margin: auto;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* ------------------------------------------------------------------- a11y -- */
+
+/* Names for the row checkboxes. A checkbox whose only context is the row beside
+   it has no accessible name at all, and this list is exactly where "which one
+   did I just tick" matters most. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@include below-px(1200) {
+  .mediaRow {
+    grid-template-columns: 44px minmax(140px, 1fr) 220px auto;
+  }
+
+  .usage {
+    display: none;
+  }
+}

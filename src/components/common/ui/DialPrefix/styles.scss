@@ -1,0 +1,46 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// Viz index.jsx. Seznam kreslí @/components/common/ui/Dropdown — tady zbývá jen
+// to, čím se předvolba od ostatních výběrů liší: je úzká.
+//
+// Zavřený ovladač je široký jako předvolba v něm a ani o píď víc. Na řádku za
+// ním se píše telefonní číslo a to je ta delší polovina; kdyby si tenhle vzal
+// celé pole, zbylo by na číslo pár znaků.
+.DialPrefix {
+    width: auto;
+
+    .Dropdown__button {
+        width: auto;
+        gap: 0.15rem;
+    }
+
+    // Seznam je dvousloupcový (kód a země), takže je širší než ovladač nad ním.
+    // Bez tohohle by se z něj stal sloupec o šířce „+420".
+    .Dropdown__list {
+        min-width: 11rem;
+    }
+}
+
+.DialPrefix__rule {
+    margin-left: 0.15rem;
+}
+
+// Ovladač je řádek textu uvnitř řádku textu, takže se cíl pro prst zvětšuje ven
+// z něj a ne posunutím čehokoli — inline-flex s min-height by odsunul účtování
+// číslice od linky, na které pole stojí.
+@include touch {
+    .DialPrefix .Dropdown__button {
+        padding: 0.6rem 0;
+        margin: -0.6rem 0;
+    }
+}
+
+@include below-px(560) {
+    .DialPrefix .Dropdown__list { min-width: 10rem; }
+}
+
+@include v(md) {
+    @include below-px(900) {
+        .DialPrefix .Dropdown__list { min-width: 12rem; }
+    }
+}

@@ -1,0 +1,1250 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// The heading's rules and the selected row's number were a saturated royal blue,
+// #2f7fd6. It appeared nowhere else on the site — not in the palette, not in any
+// other section — and against a page of navy and turquoise it read as a stray
+// rather than as an accent. They are white now, like every other line here; the
+// heading's rule is simply the most present of them, which is what makes it the
+// heading's.
+$rule: rgba(255, 255, 255, 0.55);
+
+// The same ground the showcase's cards carry — black at 0.6, so whatever is
+// behind it is knocked back by the same amount and the two sections read as one
+// material. Nothing here is opaque: what removes the showcase is its own clip
+// closing on this seam, not this panel covering it.
+$panel: rgba(0, 0, 0, 0.6);
+
+// "Naši kolegové": the roster on one half, the person on the other.
+//
+// Two boxes, and the split matters. `.Colleagues` is 260vh and never leaves the
+// normal flow — it is what the scroll is measured against, and a sticky element
+// cannot be that. `.Colleagues__stage` is the screen, pinned for the whole of
+// it: the first 37.5% is the two halves closing, the rest is the detail being
+// drawn in.
+//
+// Must match COLLEAGUES_BOX_VH and COLLEAGUES_OVERLAP_VH in ../aboutStack.js —
+// Sass cannot read that file, so these are the second copies and it says so.
+// The pull-back puts this pin exactly where the showcase's squeeze begins.
+.Colleagues {
+    position: relative;
+    z-index: 3;
+    width: 100%;
+    height: 260vh;
+    margin-top: -150vh;
+
+    @include below-px(820) {
+        height: auto;
+        margin-top: 0;
+    }
+
+    // A phone on its side is 800-and-some pixels wide, so the width test above
+    // reads it as a desktop and hands it the pinned two-column stage — which at
+    // 390px of height put the heading through the navbar and ten rows in a
+    // space that gives each of them two finger-widths less than a tap needs.
+    // The height is what identifies it (phs: max-height 520px). The box is the
+    // same answer the portrait phone gets — no pin, no pull-back, one screen —
+    // but what stands in it is not: see the landscape block at the foot of the
+    // stage below.
+    @include phs-h {
+        height: auto;
+        margin-top: 0;
+    }
+}
+
+// The stacked flow, named once and reached from two directions: narrow
+// viewports (portrait phones, portrait tablets) and short ones (phones on
+// their side). The two queries cannot be one expression, so the rules live
+// here rather than being written twice.
+@mixin colleagues-stacked {
+    position: static;
+    flex-direction: column;
+    height: auto;
+    overflow: visible;
+
+    // The section's choreography is desktop's: the halves close over a pinned
+    // stage, the detail is drawn in over the rest of the pin, and standing
+    // aside for the history fades the stage where it stands. None of those
+    // gestures exist in a stacked flow — there is no pin to measure them
+    // against, so the heading sat at opacity 0 at the top of the section and
+    // the dismissal blanked two screens of in-flow page. The inline styles are
+    // framer's, so overriding them takes the one thing that beats an inline
+    // declaration.
+    opacity: 1 !important;
+    pointer-events: auto !important;
+
+    // The halves are inline transforms set from JS, and there is nothing to
+    // close on here — the two simply stack.
+    .Colleagues__list,
+    .Colleagues__panel {
+        flex: none;
+        transform: none !important;
+    }
+
+    .Colleagues__list {
+        padding: 8vh 6vw 4vh;
+    }
+
+    // The scroll-drawn detail, finished rather than absent — same reasoning
+    // as the stage above.
+    .Colleagues__heading {
+        opacity: 1 !important;
+
+        .Colleagues__heading__line i {
+            transform: none !important;
+        }
+    }
+
+    .Colleagues__meta,
+    .Colleagues__links {
+        opacity: 1 !important;
+    }
+
+    .Colleagues__row {
+        flex: none;
+    }
+
+    .Colleagues__name {
+        padding: 1.6vh 0 1.6vh 0;
+        grid-template-columns: 7vw 1fr;
+
+        // A shorter step than the desktop one, and it has to override the
+        // transform rather than add a padding of its own: the two would
+        // otherwise stack and the row would move twice as far.
+        &:hover,
+        &.is-active {
+            .Colleagues__name__index,
+            .Colleagues__name__who {
+                transform: translateX(1.5vw);
+            }
+        }
+    }
+
+    .Colleagues__panel {
+        height: 70vh;
+    }
+
+    .Colleagues__meta {
+        left: 6vw;
+        bottom: 12vh;
+        max-width: 60vw;
+    }
+
+    .Colleagues__links {
+        right: 6vw;
+        bottom: 4vh;
+    }
+
+    .Colleagues__frame,
+    .Colleagues__line--seam,
+    .Colleagues__line--rail,
+    .Colleagues__line--overHeading {
+        display: none;
+    }
+}
+
+.Colleagues__stage {
+    position: sticky;
+    top: 0;
+    display: flex;
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+
+    // ---- the left half: the roster ----
+    .Colleagues__list {
+        position: relative;
+        flex: 0 0 47vw;
+        display: flex;
+        flex-direction: column;
+        // The top is deeper than the rule above the heading (10vh) so that the
+        // heading sits under that rule rather than on it. The left stays level
+        // with it: the rule down the margin and the dividers under the names
+        // both start here, and the text is inset from them by the heading's and
+        // the rows' own padding.
+        padding: 13vh 4vw 4vh 3.5vw;
+        background-color: $panel;
+    }
+
+    .Colleagues__heading {
+        margin: 0;
+        // Off the margin rule, and into the same column the row numbers start
+        // in — the heading was set flush against it, so the corner the two rules
+        // make had the word wedged into it.
+        padding-left: 2.5vw;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        // Room for the rule that hangs below each line, so the second word is
+        // not sitting on the first one's mark.
+        gap: 0.28em;
+        color: var(--wText);
+        font-family: "Switzer-Light";
+        font-weight: 300;
+        text-transform: uppercase;
+        font-size: clamp(1.8rem, 3.2vw, 3.8rem);
+        line-height: 1.15;
+        letter-spacing: 0.01em;
+
+        // Each line carries its own rule, and the rule runs past the word: an
+        // underline that ends exactly where the text does reads as a mistake in
+        // the kerning, not as a mark.
+        .Colleagues__heading__line {
+            position: relative;
+            padding-right: 2.5vw;
+
+            i {
+                position: absolute;
+                left: 0;
+                right: 0;
+                // Below the line box rather than inside it. At `0.08em` the rule
+                // sat about a sixth of an em under the baseline, which on a 48px
+                // heading is close enough to read as part of the letters instead
+                // of as a mark under them.
+                bottom: -0.1em;
+                height: 2px;
+                background-color: $rule;
+                transform-origin: left center;
+            }
+        }
+    }
+
+    // The whole roster, in one screen, without scrolling inside itself.
+    //
+    // It takes the room left over from the heading and the rows divide it up —
+    // so the list is sized by how many people there are rather than the number
+    // of people being chosen to suit a row height. Ten of them at present; add
+    // to src/constants/people.js and the rows simply get shorter.
+    .Colleagues__names {
+        flex: 1;
+        margin: 4vh 0 0;
+        padding: 0;
+        min-height: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+        // Between one row and the next. Kept a little wider than the gap inside
+        // a row (below), because that difference is the whole reason a divider
+        // reads as belonging to the name above it rather than floating between
+        // two of them.
+        gap: 1vh;
+    }
+
+    .Colleagues__row {
+        flex: 1 1 0;
+        min-height: 0;
+    }
+
+    .Colleagues__row {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        // The divider was flush under its name — measured, nought pixels, and
+        // still only ten after a first pass at it. The room for this came out of
+        // the list's bottom padding and the gap between rows rather than out of
+        // the row height, because ten people have to fit on one screen.
+        gap: 1.8vh;
+    }
+
+    // A button, not a link: it selects which person the panel is showing, and
+    // it does not navigate anywhere.
+    .Colleagues__name {
+        appearance: none;
+        border: 0;
+        background: none;
+        padding: 0 0 0 2.5vw;
+        display: grid;
+        grid-template-columns: 3.5vw 1fr;
+        align-items: baseline;
+        gap: 1vw;
+        text-align: left;
+        color: rgba(255, 255, 255, 0.72);
+        font-family: "Switzer-Light";
+        font-weight: 300;
+        // The site runs its own cursor; a row that switched to a hand would be
+        // the only element on the page that does.
+        cursor: inherit;
+        transition: color 0.45s ease;
+
+        // The step to the right on hover is a transform on the two cells, not
+        // padding on the grid around them.
+        //
+        // It was `padding-left: 2.5vw → 3.4vw`, eased over 0.45s. Padding is a
+        // layout property: easing it re-laid this grid — and the 1fr column, and
+        // the text in it — on every frame, on two rows at once, for every hover.
+        // Measured over a sweep of forty hovers it was 292 extra layouts and
+        // 791ms of extra scripting; the p90 frame went from 25ms to 92ms.
+        // Translating the cells lands in the same place and never leaves the
+        // compositor.
+        //
+        // It has to be the cells rather than the button, because the button
+        // already carries a transform: the row's own arrival animates `x` on it,
+        // and an inline style is not something a stylesheet can add to.
+        .Colleagues__name__index,
+        .Colleagues__name__who {
+            transition: transform 0.45s ease, color 0.45s ease;
+        }
+
+        .Colleagues__name__index {
+            font-size: clamp(0.65rem, 0.8vw, 0.95rem);
+            letter-spacing: 0.14em;
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .Colleagues__name__who {
+            font-size: clamp(0.85rem, 1.15vw, 1.4rem);
+            letter-spacing: 0.01em;
+        }
+
+        &:hover,
+        &.is-active {
+            color: var(--wText);
+
+            .Colleagues__name__index,
+            .Colleagues__name__who {
+                transform: translateX(0.9vw);
+            }
+
+            // Brightens with the name rather than departing from it.
+            .Colleagues__name__index { color: var(--wText); }
+        }
+    }
+
+    // ---- the right half: the person ----
+    .Colleagues__panel {
+        position: relative;
+        flex: 1;
+        background-color: $panel;
+        overflow: hidden;
+    }
+
+    // What the portraits are multiplied into, and it has to be OPAQUE.
+    //
+    // `multiply` blends with the backdrop of its stacking context, and against
+    // a translucent one there is nothing to multiply by: the source comes
+    // through unchanged. The panel's ground is black at 0.6, so the first
+    // version of this left every portrait's white studio backdrop showing and
+    // turned the whole half grey — the exact opposite of asking for a dark
+    // panel. That is not a tuning problem, it is what the blend mode does.
+    //
+    // So the plate is solid, and it is painted the colour the translucent panel
+    // resolves to over the shader behind it. Nothing visible is given up except
+    // the shader's drift under this one half; what is gained is a ground the
+    // cutouts can actually be dropped into.
+    //
+    // Bright over the figure, dark everywhere else — the falloff is the whole
+    // trick. Where the plate is light the person survives the multiply and the
+    // white around them goes to the plate's colour; where it is dark, both go
+    // dark together and the panel is simply the panel.
+    .Colleagues__pool {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        // Smaller and gentler than it was. The old one held near-white out to
+        // 38% of the radius and then fell from 188 to 74 by 62% — a hundred and
+        // fourteen levels across a quarter of the radius, which is a visible
+        // ring, and it read as a lamp switched on behind the person rather than
+        // as light falling off. The peak is down from 210 to 198, the ellipse is
+        // in from 40/60 to 32/48, and the fall is spread over eight stops with
+        // no step steeper than about three levels per percent against the old
+        // four and three quarters.
+        //
+        // The ellipse had to come in twice. Spreading the fall alone made the
+        // light BIGGER, not smaller: the half-brightness point moved from 57%
+        // of the old radius out to 67% of the new one, which at 36/54 put it
+        // further from the centre in absolute terms than it started. Measured
+        // against the box, half-light now sits at 21.3% of the width where it
+        // was at 22.8%, and the dark closes at 29.8% where it was at 32%.
+        //
+        // The outermost stop is not free to change: this plate covers the whole
+        // half, so its edge colour IS the panel's, and it has to keep matching
+        // the list beside it.
+        background:
+            radial-gradient(
+                32% 48% at 50% 50%,
+                #c6ccd1 0%,
+                #bcc2c8 25%,
+                #a5acb3 42%,
+                #858d95 56%,
+                #626a72 68%,
+                #444c54 78%,
+                #2c343c 86%,
+                #181f26 93%,
+                #070f15 100%
+            ),
+            #070f15;
+    }
+
+    // One portrait now, not ten stacked. What changes it is the grid inside —
+    // see ui/PixelReveal — so there is nothing here to fade.
+    .Colleagues__portrait {
+        position: absolute;
+        inset: 0;
+        // Multiplying drops the cutout's white into whatever is under it
+        // exactly — masking it out would leave a halo on every strand of hair.
+        mix-blend-mode: multiply;
+    }
+
+    // ---- detail ----
+    // The frame's inset, named once: the marks draw on it and the counter, the
+    // motto and the links all sit inside it. They used to be placed against the
+    // panel's own edges instead, which put them outside the very frame that is
+    // there to say where to look.
+    --frame-top: 9vh;
+    --frame-x: 6vw;
+    --frame-bottom: 7vh;
+
+    .Colleagues__frame {
+        position: absolute;
+        inset: var(--frame-top) var(--frame-x) var(--frame-bottom);
+        pointer-events: none;
+
+        .Colleagues__frame__corner {
+            position: absolute;
+            // The frame is inset in vw and vh, so it opens up with the screen;
+            // these marks are the only part of it that was written as a length.
+            // In rem they open up with it, and a corner stays the same fraction
+            // of the frame it was drawn as. The border stays a hairline — that
+            // is what it is, at any size.
+            width: 1.625rem;
+            height: 1.625rem;
+            border: 0 solid rgba(255, 255, 255, 0.45);
+        }
+
+        .Colleagues__frame__corner--tl { top: 0; left: 0; border-top-width: 1px; border-left-width: 1px; }
+        .Colleagues__frame__corner--tr { top: 0; right: 0; border-top-width: 1px; border-right-width: 1px; }
+        .Colleagues__frame__corner--bl { bottom: 0; left: 0; border-bottom-width: 1px; border-left-width: 1px; }
+        .Colleagues__frame__corner--br { bottom: 0; right: 0; border-bottom-width: 1px; border-right-width: 1px; }
+    }
+
+    .Colleagues__meta {
+        position: absolute;
+        z-index: 1;
+        left: calc(var(--frame-x) + 1.8vw);
+        bottom: calc(var(--frame-bottom) + 3vh);
+        max-width: 20vw;
+    }
+
+    .Colleagues__counter {
+        display: block;
+        margin-bottom: 1.2vh;
+        font-family: "Switzer-Light";
+        font-size: clamp(0.68rem, 0.8vw, 0.95rem);
+        letter-spacing: 0.16em;
+        color: rgba(255, 255, 255, 0.42);
+
+        em {
+            font-style: normal;
+            color: var(--wText);
+        }
+    }
+
+    .Colleagues__moto {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.6);
+        font-family: "Switzer-Light";
+        font-size: clamp(0.85rem, 1vw, 1.15rem);
+        line-height: 1.5;
+    }
+
+    // Příběh pod mottem: o stupeň menší a tlumenější, od motta oddělený
+    // vlasovou linkou, aby se četly jako dvě věci — co říká a kdo to je.
+    // Texty jsou v CMS krátké (do ~140 znaků), na šířku 20vw je to pár řádků.
+    .Colleagues__story {
+        margin: 1.4vh 0 0;
+        padding-top: 1.4vh;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        color: rgba(255, 255, 255, 0.66);
+        font-family: "Switzer-Light";
+        font-size: clamp(0.76rem, 0.82vw, 0.98rem);
+        line-height: 1.55;
+        // Leží přes portrét — přes bílou košili nebo světlé sako by drobné
+        // písmo zmizelo. Měkký tmavý stín ho drží čitelné, na tmavém pozadí
+        // není vidět.
+        text-shadow: 0 1px 10px rgba(0, 0, 0, 0.7), 0 0 2px rgba(0, 0, 0, 0.5);
+    }
+
+    // „Líbí se" nad řadou ikon, na stejné svislici jako ona.
+    //
+    // Stálo to v té řadě jako druhá položka. Řada je čtyři ODKAZY — zavolat,
+    // napsat, Facebook, Instagram; tohle nikam nevede a je to jediné tlačítko
+    // na panelu, které něco udělá s tím, na koho se člověk dívá. Vedle nich
+    // vypadalo jako pátý odkaz a počet vedle něj jako jejich popisek.
+    //
+    // Odsazení zdola je řada ikon plus mezera: 2.5rem je jejich výška a zbytek
+    // je odstup. Váže se na stejné --frame-* jako ona, takže se s rámem
+    // portrétu hýbe obojí najednou.
+    .Colleagues__like {
+        position: absolute;
+        z-index: 1;
+        right: calc(var(--frame-x) + 1.8vw);
+        bottom: calc(var(--frame-bottom) + 3vh + 3.4rem);
+        display: flex;
+        justify-content: flex-end;
+        // Bez tohohle je počet ČERNÝ. LikeBtn barvu nenastavuje schválně —
+        // stojí i na světlých sekcích a dědí ji po tom, v čem je — jenže tady
+        // nad ním není nic, co by ji řeklo, takže spadl na černou a na tmavé
+        // fotce z něj byla šmouha. Odkazy pod ním si ji nastavují každý sám;
+        // tohle je totéž jedním řádkem pro kroužek i pro číslo vedle.
+        color: rgba(255, 255, 255, 0.7);
+
+        // Kroužek napravo, počet nalevo od něj — aby kroužek stál přesně nad
+        // ikonami a ne o šířku čísla vedle.
+        .LikeBtn { flex-direction: row-reverse; }
+
+        // A stejný kroužek, jaký mají ikony pod ním.
+        //
+        // LikeBtn si nese vlastní hodnoty, protože stojí i na světlých
+        // sekcích: 2.4rem a 72% krytí dědící barvu. Tady je ale přímo nad
+        // čtyřmi stejnými kroužky a čte se s nimi jako jedna skupina, takže
+        // slabší obrys vedle nich vypadá jako nedokreslený, ne jako jiná věc.
+        .LikeBtn__hit {
+            width: 2.5rem;
+            height: 2.5rem;
+            opacity: 1;
+            border-color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+        }
+    }
+
+    .Colleagues__links {
+        position: absolute;
+        z-index: 1;
+        right: calc(var(--frame-x) + 1.8vw);
+        bottom: calc(var(--frame-bottom) + 3vh);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        gap: 0.7rem;
+
+        a {
+            display: grid;
+            place-items: center;
+            // Four small squares standing against a portrait that fills half the
+            // screen. In px they came out the same size beside a 2K panel as
+            // beside a 1920 one, which does not read as four buttons holding
+            // their size — it reads as the panel having grown away from them.
+            // In rem they keep their place in the composition, and below 1921
+            // they are the 40px they have always been.
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+            transition: border-color 0.35s ease, color 0.35s ease;
+
+            // react-icons writes its `size` prop as width and height ATTRIBUTES
+            // on the svg (`size={20}` in index.jsx), which is a px length no
+            // ramp can reach — the box would grow and leave a 20px glyph adrift
+            // in the middle of it. A CSS length beats the attribute, so the icon
+            // is restated at the size the prop asks for and grows with its box.
+            svg {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
+
+            &:hover {
+                border-color: rgba(255, 255, 255, 0.75);
+                color: var(--wText);
+            }
+        }
+    }
+
+    // ---- rules ----
+    .Colleagues__line {
+        position: absolute;
+        background-color: rgba(255, 255, 255, 0.22);
+        pointer-events: none;
+    }
+
+    // down the page margin, tying the rows together
+    .Colleagues__line--rail {
+        left: 3.5vw;
+        top: 10vh;
+        width: 1px;
+        height: 78vh;
+        transform-origin: center top;
+
+        @include lineSweep(y, -0.4s);
+    }
+
+    // above the heading, running out to the seam
+    .Colleagues__line--overHeading {
+        left: 3.5vw;
+        top: 10vh;
+        width: 43.5vw;
+        height: 1px;
+        transform-origin: left center;
+
+        @include lineSweep(x, -1.2s);
+    }
+
+    // one under each name
+    .Colleagues__line--row {
+        position: relative;
+        height: 1px;
+        transform-origin: left center;
+        background-color: rgba(255, 255, 255, 0.16);
+
+        @include lineSweep(x, -2s);
+    }
+
+    // The seam, drawn from the middle outwards — it is the mark of where the
+    // two halves met, not a border either of them brought with it.
+    .Colleagues__line--seam {
+        left: 47vw;
+        top: 0;
+        width: 1px;
+        height: 100%;
+        transform-origin: center center;
+        z-index: 2;
+
+        @include lineSweep(y, -2.8s);
+    }
+
+    @include below-px(820) {
+        @include colleagues-stacked;
+    }
+
+    // ── the phone, held upright: the list becomes the roster ──
+    //
+    // The stacked flow above is still a list, and a list is what does not fit
+    // here. Measured at 390×844 before this block: the ten names ran 4049→4727
+    // and the panel they select began at 4761, so tapping a name and seeing who
+    // it was were a screen of scrolling apart — the section was a table of
+    // contents with its contents somewhere else.
+    //
+    // So it takes the shape the navigation's advisor roster now has — see
+    // src/components/common/navbar/body/advisors/styles.scss, which is where it
+    // was worked out and which is the reference for everything below: ten 3:4
+    // miniatures, five across, desaturated until one is chosen, and the chosen
+    // one filling a panel underneath with the record on it. Same ten people,
+    // same gesture; they should not meet two designs for them on one site.
+    //
+    // What is deliberately NOT carried over, and why:
+    //
+    //   The portrait. The roster crops a `background-size: cover` out of the
+    //   file; this section multiplies its cut-outs into a pool of light and has
+    //   done on every screen since it was built (see .Colleagues__pool). That is
+    //   this section's material, not a detail of its desktop layout, and a phone
+    //   is not a reason to swap it for another one.
+    //
+    //   The roster's short-phone card, where the enlargement shrinks to a
+    //   thumbnail beside the name below 700px of viewport. That branch exists
+    //   because the roster lives in a modal, which is given its height and
+    //   cannot ask for more. This is a section of a page: at 320×568 it simply
+    //   runs to 610 and the record keeps its full-bleed portrait.
+    //
+    //   The roster's telephone button. It offers a number and nothing else,
+    //   so it draws one target; this panel has had four — call, write,
+    //   Facebook, Instagram — since it was built, and they are already 44px
+    //   under `touch` below. A fifth way to ring the same person, sixty pixels
+    //   from the first, is the thing the roster's own notes warn against.
+    //
+    // Portrait, up to 900. `phs-h` below owns the same phone on its SIDE and
+    // would collide with every rule in here, so the orientation bound is meant;
+    // the width bound moved from 600 to 900 because a tablet upright takes this
+    // same view, only bigger — a sheet of faces and the chosen one under them is
+    // what a narrow screen wants at either size, and 818px of width does not
+    // turn it into the pinned two-half arrangement a laptop gets.
+    //
+    // The twin of PHONE_OR_TABLET_UPRIGHT in @/helpers/usePhone, which the
+    // roster's matchMedia reads: the stylesheet lays the tiles out, the hook
+    // decides what a tile IS, and the two cannot disagree about it.
+    @include v(xs) {
+        @include below-px(900) {
+            // One screen, near enough. The sheet takes what it needs and the
+            // record takes the rest, which is the whole repair: the faces, the
+            // person chosen out of them and the ways to reach that person are
+            // one view rather than three screens of scrolling. 844 exactly at
+            // 390×844 and at 430×932; 611 at 320×568, where the floor on the
+            // record below wins.
+            //
+            // Stated twice, and the first one is not dead: `svh` is load-bearing
+            // here — it and the floor on the panel are the only things giving
+            // the record a height at all, and an engine that does not know the
+            // unit drops the whole declaration. It would then be left with a
+            // panel sized by the two lines of text in it and a portrait, which
+            // is absolutely positioned inside it, with nothing to fill. `vh`
+            // first is the answer that degrades to the old behaviour instead of
+            // to a broken one.
+            min-height: 100vh;
+            min-height: 100svh;
+
+            .Colleagues__list {
+                // No bottom padding. The sheet's own last hairline is where the
+                // list stops and the record begins, and a gap under it would
+                // read as the rule having come loose from what it divides.
+                padding: 8vh 6vw 0;
+            }
+
+            // The heading was inset off the rail down the page margin, and the
+            // stacked flow does not draw that rail. Flush, so the heading, the
+            // sheet under it and the record's own text share one left edge.
+            .Colleagues__heading {
+                padding-left: 0;
+            }
+
+            // ── the sheet ──
+            //
+            // Five across, and the count is the geometry. Ten people, so five is
+            // the only count in a usable range that leaves no half-empty last
+            // row — four ends on a row of two, three on a row of one — and it
+            // holds at every width rather than reflowing between them. A tile
+            // comes out 56×75 at 320, 69×92 at 390 and 76×101 at 430, so the
+            // smallest of them is still a quarter clear of the 44px a finger
+            // needs, and the whole roster is two rows.
+            .Colleagues__names {
+                display: grid;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                // It is what it is, and the record below takes the remainder.
+                flex: none;
+                margin-top: 4vh;
+                // The rows carry their own hairlines; a gap would put a channel
+                // of panel between two faces instead of a line where they meet.
+                gap: 0;
+            }
+
+            .Colleagues__row {
+                position: relative;
+                display: block;
+                // 3:4 because a portrait is, and because a row of them has to
+                // read as a sheet of faces rather than as a strip of them. The
+                // height comes from the width now and from nothing else.
+                aspect-ratio: 3 / 4;
+                gap: 0;
+
+                // Where two tiles meet. Drawn on the tile rather than between
+                // them, so there is never a gap to close or a line drawn twice.
+                &::before,
+                &::after {
+                    content: "";
+                    position: absolute;
+                    z-index: 2;
+                    background-color: rgba(255, 255, 255, 0.16);
+                    pointer-events: none;
+                }
+
+                &::after { top: 0; bottom: 0; right: 0; width: 1px; }
+                &::before { left: 0; right: 0; bottom: 0; height: 1px; }
+
+                // The fifth column's right-hand rule would be the sheet's outer
+                // edge, and this lattice has no outer edge — only the lines
+                // where two tiles meet. The last row keeps its bottom one: that
+                // is the line between the sheet and the record, and it is the
+                // only rule this section still draws on a phone.
+                &:nth-child(5n)::after { display: none; }
+            }
+
+            // The rule the list drew under each name. There are no names in the
+            // sheet to underline, and it would be a second hairline in the pixel
+            // the tile already draws one in. It also carries `lineSweep`, whose
+            // travelling light is a compliment to a rule down a page margin and
+            // a flicker under a photograph.
+            .Colleagues__line--row {
+                display: none;
+            }
+
+            .Colleagues__name {
+                position: absolute;
+                inset: 0;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                // Most of a 56px tile at 320, and it only has two digits in it.
+                padding: 0.3rem 0.35rem;
+                overflow: hidden;
+
+                // The scrim, so the two digits are legible. These portraits are
+                // shot against white and the number lies on the bottom of one:
+                // the same gradient the roster's tiles use, at the same
+                // strength, confined to the bottom of the picture where the
+                // number is rather than laid over the face. Absolutely
+                // positioned, which is what keeps a pseudo-element from
+                // becoming a member of the flex line this button now is.
+                &::before {
+                    content: "";
+                    position: absolute;
+                    inset: 0;
+                    z-index: 1;
+                    pointer-events: none;
+                    background-image: linear-gradient(
+                        to top,
+                        rgba(3, 13, 19, 0.9) 0%,
+                        rgba(3, 13, 19, 0.34) 46%,
+                        rgba(3, 13, 19, 0) 78%
+                    );
+                }
+
+                // The step to the right belongs to a row in a list. A tile is a
+                // square in a grid and has nowhere to step to — and it would
+                // slide the number out from under its own scrim.
+                &:hover,
+                &.is-active {
+                    .Colleagues__name__index,
+                    .Colleagues__name__who {
+                        transform: none;
+                    }
+                }
+            }
+
+            // The miniature. Held back and desaturated at rest so the sheet
+            // reads as one material rather than as ten photographs at ten
+            // exposures, and the chosen one comes to full colour — which is the
+            // whole of how a tile says it is the one showing below. The roster's
+            // argument, and its numbers.
+            .Colleagues__face {
+                position: absolute;
+                inset: 0;
+                z-index: 0;
+                background-position: center 20%;
+                background-size: cover;
+                opacity: 0.68;
+                filter: grayscale(1) contrast(0.95);
+                transition: opacity 0.45s ease, filter 0.45s ease;
+            }
+
+            .Colleagues__name.is-active .Colleagues__face {
+                opacity: 1;
+                filter: none;
+            }
+
+            // Two digits along the bottom edge, where the scrim is, and nothing
+            // else on the face. Above the scrim it lies on; the picture is under
+            // both.
+            .Colleagues__name__index {
+                position: relative;
+                z-index: 2;
+                font-size: 0.62rem;
+                letter-spacing: 0.1em;
+                color: rgba(255, 255, 255, 0.62);
+            }
+
+            .Colleagues__name.is-active .Colleagues__name__index {
+                color: var(--wText);
+            }
+
+            // The name is downstairs. Left in the tile it would be set in a
+            // column 56px wide, and hiding it here rather than dropping it from
+            // the markup is not the arrangement: index.jsx does not render it on
+            // a phone at all — this is the belt for the frame in which the
+            // matchMedia read and the media query can still disagree.
+            .Colleagues__name__who {
+                display: none;
+            }
+
+            // ── the one that is chosen ──
+            .Colleagues__panel {
+                // Everything the sheet did not take.
+                flex: 1 1 auto;
+                height: auto;
+                // ...and never less than this, for the phone with nothing left
+                // over: at 320×568 the heading and the sheet take 292 of the
+                // 568 and what remains is not a portrait. The same floor the
+                // roster's own sheet sits on, and here it is what lets the
+                // section run to 611 rather than crop — which the roster, being
+                // a modal that is given its height, could not do. `vh` under it
+                // for the same reason as the box above.
+                min-height: 56vh;
+                min-height: 56svh;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-end;
+                align-items: flex-start;
+                padding: 0 6vw 4vh;
+
+                // The record lies on a photograph. The pool the portrait is
+                // multiplied into is already near-black at its edges, but the
+                // name is large and lands wherever the person's own dark
+                // clothing happens not to — so the roster's scrim goes under it
+                // here as well. Absolutely positioned so it stays out of the
+                // flex line, and at z-index 0 so it falls between the portrait
+                // (auto, earlier in the tree) and the record (1).
+                &::after {
+                    content: "";
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    height: 62%;
+                    z-index: 0;
+                    pointer-events: none;
+                    background-image: linear-gradient(
+                        to top,
+                        rgba(3, 13, 19, 0.92) 0%,
+                        rgba(3, 13, 19, 0.72) 26%,
+                        rgba(3, 13, 19, 0.24) 58%,
+                        rgba(3, 13, 19, 0) 100%
+                    );
+                }
+            }
+
+            // Out of the two corners they were pinned into and into the flow at
+            // the foot of the picture, so they read as one record top to bottom:
+            // which of the ten, who, what they say, how to reach them. Pinned,
+            // the motto sat at 12vh and the icons at 4vh and the room between
+            // them was a hole rather than a gap — and on a panel whose height is
+            // now whatever the sheet left, two numbers measured off the viewport
+            // are measuring the wrong box.
+            .Colleagues__meta,
+            .Colleagues__like,
+            .Colleagues__links {
+                position: static;
+            }
+
+            // Ve sloupci už kroužek nad ničím nestojí, takže počet zpátky
+            // napravo, jak ho LikeBtn kreslí všude jinde.
+            .Colleagues__like {
+                justify-content: flex-start;
+                margin-top: 0.9rem;
+                .LikeBtn { flex-direction: row; }
+            }
+
+            .Colleagues__meta {
+                // Where a line of this size stops being one line the eye can
+                // take in — the roster's number for the same block.
+                max-width: 34ch;
+            }
+
+            .Colleagues__counter {
+                // The name follows immediately; the old 1.2vh was the gap before
+                // a motto.
+                margin-bottom: 0.15rem;
+            }
+
+            // The name, at the size of the thing being looked at. It is the one
+            // fact the sheet upstairs no longer states, and it is set the way
+            // the roster sets it — Poppins at 200, which is also the voice the
+            // showcase two sections above puts its speakers in.
+            .Colleagues__who {
+                display: block;
+                margin-bottom: 0.35rem;
+                font-family: "Poppins", "Helvetica", system-ui, sans-serif;
+                font-weight: 200;
+                letter-spacing: 0.02em;
+                line-height: 1.12;
+                // Held down at 320, where a name that takes a second line is the
+                // difference between a record that fits and one that pushes the
+                // targets under the fold.
+                font-size: clamp(1.35rem, 6vw, 1.9rem);
+                color: var(--wText);
+            }
+
+            // Two lines and then it stops. These come from the CMS, where nobody
+            // is counting characters, and the third line is the one that would
+            // push the targets off a 568px screen.
+            .Colleagues__moto {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                font-size: 0.85rem;
+            }
+
+            // Tři řádky a dost, ze stejného důvodu jako motto nad ním: další
+            // řádek je ten, který odsune kontakty z obrazovky.
+            .Colleagues__story {
+                display: -webkit-box;
+                -webkit-line-clamp: 3;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+                margin-top: 0.6rem;
+                padding-top: 0.6rem;
+                font-size: 0.78rem;
+            }
+
+            // Under the record rather than across from it, and at the bottom of
+            // the panel at the bottom of the screen — which is the part of a
+            // phone a thumb reaches without the hand moving. The faces are for
+            // the eyes and go where reading starts; these are for the thumb.
+            .Colleagues__links {
+                margin-top: 0.9rem;
+                gap: 0.6rem;
+            }
+        }
+    }
+
+    // ── the phone, held sideways ──
+    //
+    // The stacked flow is the wrong shape here, and it is the same wrong shape
+    // the upright block above was written to answer, arriving from the other
+    // side. Measured before this: 1037px of section at 568×320, 1129 at 844×390
+    // and 1188 at 949×432 — three screens of page for one section — with the
+    // ten names running the full width and the face they choose beginning below
+    // the last of them. A name and the person it names were never once on the
+    // screen together.
+    //
+    // A phone on its side already has the shape this section was drawn for,
+    // wide and short. What it does not have is the height: ten rows at the 44px
+    // a finger needs is 520px of roster against 320 of screen, and no
+    // arrangement of ten names is both tappable and entirely in view. So the
+    // two halves come back — the roster on the left, the person on the right —
+    // and the one thing that is new is that the ROSTER SCROLLS INSIDE ITSELF.
+    // That is what lets the section be exactly one screen tall while every row
+    // keeps its target: the reader moves the list, not the page.
+    //
+    // Carried over from the navigation's roster, which had its landscape
+    // layout worked out first (src/components/common/navbar/body/advisors):
+    // the row instead of the column; the chosen person on the RIGHT, which is
+    // where the thumb of the hand holding the phone already is; a fixed clamp
+    // for that half rather than a share of the row, so the composition does not
+    // shift under a thumb that is choosing somebody; hairlines at 0.16 white
+    // where two blocks meet; and dropping what does not fit at 568 rather than
+    // shrinking everything until it does.
+    //
+    // Deliberately NOT carried over: that roster is one row and nothing
+    // scrolls, because it draws FACES and ten faces fit across a landscape
+    // phone at a size a finger can hit. This half draws NAMES — the words are
+    // the roster here, as they are on every other screen this section has — and
+    // a name is read along a line, so ten of them are a column. A column of ten
+    // does not fit down 320px. Where the roster gave every tile a share of a
+    // box, this gives the box an overflow. Same ten people, same gesture, and
+    // the difference between the two is the difference between the things being
+    // listed.
+    @include phs-h {
+        // The choreography, called off, and the ground the two halves stand on
+        // — see the mixin. Six of its declarations belong to the stacked column
+        // rather than to the unpinning and are taken back below: the stage's
+        // direction, height and overflow, the two halves' `flex`, and the
+        // panel's height. Its `transform: none !important` is not one of them
+        // and is doing real work — the halves' closing is an inline style from
+        // framer measured against a pin that does not exist here.
+        @include colleagues-stacked;
+
+        // Bare, because this whole block is already inside `.Colleagues__stage`
+        // — writing the class again here would compile to
+        // `.Colleagues__stage .Colleagues__stage` and match nothing. Measured
+        // the hard way: the panel took its new height and the stage stayed a
+        // column.
+        flex-direction: row;
+        // One screen and not a pixel more. `vh` first for an engine that does
+        // not know `svh`, exactly as the upright block states its own box, and
+        // for the same reason: everything inside is a share of this, so a
+        // dropped declaration is a section with no height.
+        height: 100vh;
+        height: 100svh;
+        // The roster's overflow is the roster's own. Nothing else here has any
+        // business leaving the stage.
+        overflow: hidden;
+
+        // ---- the left half: the roster ----
+        .Colleagues__list {
+            flex: 1 1 auto;
+            min-width: 0;
+            // A column allowed to be shorter than what is in it, which is the
+            // whole of what makes the list inside it scrollable. Without this
+            // the flex item takes its content's height and the overflow below
+            // has nothing to overflow.
+            min-height: 0;
+            // 72 at the top rather than the 56 this block had. The navbar is
+            // fixed and sits over this: its box runs to 78px at 568 and 844 and
+            // to 80 at 949, and while it steals no taps — the container is
+            // `pointer-events: none` and only its children take them back — 56
+            // left nine pixels between the wordmark and the heading, which is
+            // not air, it is a near miss. The other three sides are small
+            // because the room here is horizontal, and every vertical pixel
+            // spent on margin is a row the reader has to scroll for.
+            padding: 72px 5vw 12px;
+            // Where the two halves meet. The seam this section draws elsewhere
+            // is a scroll-drawn line and there is no scroll pass here to draw
+            // it, so the mark is a hairline on the block instead — the roster's
+            // own answer to the same problem, and its weight.
+            border-right: 1px solid rgba(255, 255, 255, 0.16);
+        }
+
+        // Both words on one line. Stacked they are 54px of a 320px screen spent
+        // on a heading, and this screen is short and wide: what there is room
+        // for is across. Each line keeps its own rule, so the mark is unchanged
+        // — two underscored words side by side rather than one above the other.
+        // It wraps if the CMS is ever given a longer heading, and then it costs
+        // what it costs.
+        .Colleagues__heading {
+            flex-direction: row;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.45em;
+            font-size: clamp(1.25rem, 2.6vw, 1.6rem);
+        }
+
+        // ── the roster, scrolling inside itself ──
+        //
+        // The <ul> and not a wrapper around it: it holds the ten rows and
+        // nothing else, so it already IS the box the overflow belongs on.
+        //
+        // `data-lenis-prevent` is set on this element from index.jsx and is not
+        // decoration. The page runs Lenis, which takes a wheel or a drag,
+        // calls preventDefault on it and scrolls the document — so without the
+        // attribute a drag inside this list moves the page behind it and the
+        // list never moves at all. ContactModal__scroll and the review sheet
+        // carry it for exactly this.
+        .Colleagues__names {
+            flex: 1 1 auto;
+            min-height: 0;
+            margin-top: 12px;
+            // Sideways is clipped rather than scrollable: the hover step is a
+            // transform on the two cells of a row, and a transform counts
+            // towards scrollable overflow — left as `auto` it put a horizontal
+            // bar under the list the first time a name was taken.
+            overflow-x: hidden;
+            overflow-y: auto;
+            // A flick that runs out of roster stays in the roster instead of
+            // rubber-banding the page behind it.
+            overscroll-behavior: contain;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+            // The rows carry their own rule; this is the air around it.
+            gap: 4px;
+            // Both ends softened, because a scroller's edge is a cut and this
+            // one is 12px under the heading's own rule: at rest the first name
+            // was sliced across the middle by nothing the reader could see, and
+            // read as a rendering fault rather than as a list with more in it.
+            // Fourteen pixels — less than half a line, so no row is ever
+            // unreadable, and enough that the cut is a fade. Prefixed as well,
+            // the pair this codebase already writes.
+            $fade: linear-gradient(
+                to bottom,
+                transparent 0,
+                #000 14px,
+                #000 calc(100% - 14px),
+                transparent 100%
+            );
+            -webkit-mask-image: $fade;
+            mask-image: $fade;
+        }
+
+        .Colleagues__name {
+            // 14px each side of a ~17px line box is what actually lands the
+            // row at the 44px a tap needs — 12px measured out at 41.
+            padding: 14px 0;
+            // 3.5rem was a desktop's column for two digits, standing in one
+            // 264px wide at 568. The room it gives back goes to the name.
+            grid-template-columns: 2.2rem 1fr;
+            gap: 0.4rem;
+        }
+
+        // ---- the right half: the person ----
+        .Colleagues__panel {
+            // A fixed clamp rather than a share of the row, which is the
+            // roster's decision and its reason: what is on this side must not
+            // move under a thumb that is choosing somebody on the other.
+            //
+            // The floor is what four 44px targets need standing in a line with
+            // the padding around them. The cap is about the picture: what fills
+            // this box is a `cover` crop of a standing figure, and a box much
+            // wider than 4:5 takes that crop out of the head. It comes out
+            // 236×320, 304×390 and 340×432 — every one of them within a hair of
+            // 3:4, which is the shape a portrait already is.
+            flex: 0 0 clamp(236px, 36%, 340px);
+            // Stretched by the row it is in, not measured off the viewport. The
+            // mixin's 70vh is a letterbox on a screen this short and the 100vh
+            // that used to be here was the stacked column's answer to that.
+            height: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: flex-start;
+            padding: 0 0.85rem 0.85rem;
+
+            // The record lies on a photograph, so it takes the scrim the
+            // upright block puts under it for the same reason — see the note
+            // there. Shorter, because what sits on it here is a line of numbers,
+            // a motto and the targets, and not a name at 6vw as well.
+            &::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 55%;
+                z-index: 0;
+                pointer-events: none;
+                background-image: linear-gradient(
+                    to top,
+                    rgba(3, 13, 19, 0.92) 0%,
+                    rgba(3, 13, 19, 0.72) 26%,
+                    rgba(3, 13, 19, 0.24) 58%,
+                    rgba(3, 13, 19, 0) 100%
+                );
+            }
+        }
+
+        // Into the flow at the foot of the picture, exactly as upright does it
+        // and for its argument: pinned, these two are measured off `--frame-x`
+        // and `--frame-bottom`, which are a wide screen's insets — 6vw and 7vh
+        // of a 236px panel puts the motto and the targets in the same corner.
+        .Colleagues__meta,
+        .Colleagues__like,
+        .Colleagues__links {
+            position: static;
+        }
+
+        .Colleagues__like {
+            justify-content: flex-start;
+            margin-top: 0.7rem;
+            .LikeBtn { flex-direction: row; }
+        }
+
+        .Colleagues__meta {
+            // 20vw is 114px here, which is a measure of the viewport and not of
+            // the box this now stands in.
+            max-width: 100%;
+        }
+
+        .Colleagues__counter {
+            margin-bottom: 0.2rem;
+            font-size: 0.62rem;
+        }
+
+        // Two lines and then it stops, the same bound the upright record puts
+        // on it. These come from the CMS where nobody is counting characters,
+        // and here the third line is the one that pushes the targets off the
+        // bottom of a 320px screen.
+        .Colleagues__moto {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            font-size: 0.72rem;
+            line-height: 1.35;
+        }
+
+        // Telefon na šířku: 320 px výšky nemá místo ani na celé motto, natož na
+        // odstavec. Příběh je celý v modálu poradce z menu.
+        .Colleagues__story {
+            display: none;
+        }
+
+        // Four 44px targets in 212px of usable panel at 568. The gap is what
+        // gives, not the targets: 0.7rem between them is 210 against 212 and no
+        // room for a rounding error, 0.35rem is 193 and nineteen pixels of it.
+        // Wrapping is the belt — a fifth target, or a browser that rounds the
+        // wrong way, becomes two rows rather than one row running off the edge.
+        .Colleagues__links {
+            flex-wrap: wrap;
+            margin-top: 0.7rem;
+            gap: 0.35rem;
+        }
+    }
+
+    // A tap has nothing to gain from a 40px box missing at 44 — same hairline,
+    // four more pixels of target.
+    @include touch {
+        .Colleagues__links a {
+            width: 44px;
+            height: 44px;
+        }
+    }
+
+    // The sweeps are the one motion here that runs unasked and forever; the
+    // rest of the section moves only as far as the reader scrolls it. Calm the
+    // rules down to the plain hairlines they decorate — the same answer
+    // WhoWeAre and ChooseAdvisor give.
+    @include reduced-motion {
+        .Colleagues__line::after {
+            animation: none;
+            background-image: none;
+            filter: none;
+        }
+    }
+}

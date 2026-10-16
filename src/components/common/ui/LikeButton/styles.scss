@@ -1,0 +1,65 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// „Líbí se" — sourozenec telefonního kroužku na /o-nás.
+//
+// Barvy jsou proměnné webu, ne vlastní: tlačítko stojí na tmavých i světlých
+// sekcích a musí se řídit tím, co kolem něj zrovna je.
+
+.LikeBtn {
+    display: inline-flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.LikeBtn__hit {
+    display: grid;
+    place-items: center;
+    width: 2.4rem;
+    height: 2.4rem;
+    padding: 0;
+    color: inherit;
+    cursor: pointer;
+    background: transparent;
+    border: 1px solid currentColor;
+    border-radius: 50%;
+    opacity: 0.72;
+    transition: opacity 0.25s ease, transform 0.25s ease, color 0.25s ease;
+
+    &:hover:not(:disabled) {
+        opacity: 1;
+        transform: translateY(-1px);
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.4;
+    }
+
+    // Klávesnice musí vidět, kde je — kroužek sám o sobě fokus neukazuje.
+    &:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+        opacity: 1;
+    }
+}
+
+// Odhlasováno: plná ikona a plná sytost. Barva je záměrně ta samá jako všude
+// jinde — červené srdce by na tomhle webu bylo jediné místo s cizí barvou.
+.LikeBtn[data-liked="true"] .LikeBtn__hit {
+    opacity: 1;
+}
+
+.LikeBtn__count {
+    font-size: 0.85rem;
+    font-variant-numeric: tabular-nums;
+    opacity: 0.7;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .LikeBtn__hit {
+        transition: none;
+
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
+}

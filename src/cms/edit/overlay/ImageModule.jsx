@@ -1,0 +1,226 @@
+import { useState } from "react"
+
+import { usePort } from "../../studio/context/StudioProvider.jsx"
+import { isCroppableImage, resolveCropTarget } from "../../studio/media/cropTarget.js"
+import { useAsync } from "../../studio/hooks/useAsync.js"
+import { Button } from "../../studio/ui/controls.jsx"
+import { ErrorState, Spinner } from "../../studio/ui/feedback.jsx"
+
+import { bodyOfDoc, valueAt } from "./assets.js"
+import CropEditor from "./CropEditor.jsx"
+import MediaModule from "./MediaModule.jsx"
+import styles from "./sheet.js"
+
+/**
+ * One picture — the popup Contract D asks for, and the discrepancy it closes.
+ *
+ * ---------------------------------------------------------------------------
+ * What was here before
+ *
+ * The control itself carried *Nahradit* / *Popis* / *Odebrat*, and only the
+ * first of the three opened anything. So an image had three affordances where
+ * every other kind has one, the alt text was typed into a box floating beside
+ * the picture, and *Odebrat* deleted the field on a single click with no view of
+ * what was being deleted. Contract D says taking *Upravit* on an image opens a
+ * popup carrying pick / upload / alt / remove; this is that popup, and the
+ * control is back to one button.
+ *
+ * ---------------------------------------------------------------------------
+ * Why the value is loaded rather than read off the page
+ *
+ * The same reason `SetModule` loads its array. What the page shows is a
+ * rendering: `next/image` rewrites `src` into `/_next/image?url=…`, and a
+ * component that falls back to its own artwork shows a picture the field does
+ * not contain. The alt attribute has the same problem in reverse — a component
+ * may supply a default the field never stored. So the stored value is what is
+ * shown, what "changed" is measured against, and what the remove button is
+ * offered for.
+ *
+ * ---------------------------------------------------------------------------
+ * Every action commits and closes
+ *
+ * Picking, uploading, saving the description and removing all hand one write to
+ * the overlay and close. That is not a shortcut: the overlay's `save()` is the
+ * one path that serialises writes per field, tracks them for *Náhled*, and
+ * reports the server's own sentence on the control — including a refusal. A
+ * second reporting surface inside the popup would either duplicate it or
+ * disagree with it, and "Uloženo" drawn locally before the request lands is the
+ * exact lie this whole build is written against.
+ *
+ * Uploading is `MediaLibrary`'s own affordance and stays there: its bar has the
+ * button, its drop zone takes a file, and in `pick` mode a single uploaded file
+ * is handed straight back as the pick. The store behind it is real now —
+ * `POST /api/cms/media`, bytes on disk under `.cms-dev/media/`, type and
+ * dimensions read from the bytes rather than from what the client claimed.
+ */
+export default function ImageModule({ docId, field, onPick, onAlt, onRemove, onClose }) {
+  const port = usePort()
+  const [alt, setAlt] = useState(null)
+  const [confirming, setConfirming] = useState(false)
+
+  // The crop editor works on the LIBRARY row, not on the value stored in the
+  // document. The stored value was written when the picture was picked and
+  // knows nothing about a crop applied since; opening on it would treat a crop
+  // as an original and quietly crop the crop.
+  const [cropping, setCropping] = useState(null)
+  const [cropBusy, setCropBusy] = useState(false)
+  const [cropError, setCropError] = useState(null)
+
+  const openCrop = async (value) => {
+    setCropError(null)
+    try {
+      // The stored value may be a bare path or a legacy object with no id —
+      // 156 of 208 values in this store are one of those two. See
+      // studio/media/cropTarget.js.
+      const target = await resolveCropTarget(port, value)
+      if (!target) throw new Error("Tenhle soubor není v knihovně médií, takže ho nejde oříznout.")
+      setCropping(await port.media.get(target.id))
+    } catch (problem) {
+      setCropError(problem)
+    }
+  }
+
+  /**
+   * Apply, then hand the new asset to the field.
+   *
+   * Two writes, and they are not the same write. `media.crop` re-frames the
+   * library row — one row, same id, no second entry. `onPick` is the overlay's
+   * ordinary save path, and it is what makes THIS field show the new framing;
+   * without it the row would change and the page would go on rendering the URL
+   * it was saved with. Other places using the picture keep their framing until
+   * someone re-picks there, which is the same rule that keeps an old revision
+   * resolving to the picture it was published with.
+   */
+  const commitCrop = async (rect) => {
+    setCropBusy(true)
+    setCropError(null)
+    try {
+      const updated = await port.media.crop(cropping.id, rect)
+      setCropping(null)
+      onPick(updated)
+    } catch (problem) {
+      setCropError(problem)
+    } finally {
+      setCropBusy(false)
+    }
+  }
+
+  const { data, error, loading, reload } = useAsync(async () => {
+    const doc = await port.get({ id: docId })
+    const value = valueAt(bodyOfDoc(doc), field)
+    setAlt(typeof value?.alt === "string" ? value.alt : "")
+    return value && typeof value === "object" ? value : null
+  }, [port, docId, field])
+
+  if (loading && alt == null) {
+    return (
+      <div className={styles.setLoading}>
+        <Spinner size={20} />
+      </div>
+    )
+  }
+  if (error) return <ErrorState error={error} onRetry={reload} />
+
+  const current = data
+  const altDirty = current ? alt !== (current.alt || "") : false
+
+  if (cropping) {
+    return (
+      <>
+        {cropError ? <ErrorState error={cropError} onRetry={() => setCropError(null)} /> : null}
+        <CropEditor
+          asset={cropping}
+          busy={cropBusy}
+          onCancel={() => setCropping(null)}
+          onApply={commitCrop}
+          onReset={() => commitCrop(null)}
+        />
+      </>
+    )
+  }
+
+  return (
+    <div className={styles.setPane}>
+      <div className={styles.imageHead}>
+        <figure className={styles.imageNow}>
+          {current?.url ? (
+            /* Plain <img>: this is chrome pointed at a library URL, and
+               next/image would need every storage host configured for it. */
+            <img src={current.url} alt={current.alt || ""} />
+          ) : (
+            <span className={styles.imageNone}>Pole je prázdné</span>
+          )}
+        </figure>
+
+        <div className={styles.imageMeta}>
+          <p className={styles.imageName}>{current?.filename || current?.url || "Zatím žádný obrázek"}</p>
+          {current?.width && current?.height ? (
+            <p className={styles.setCount}>
+              {current.width} × {current.height} px
+            </p>
+          ) : null}
+
+          <label className={styles.imageLabel} htmlFor="cms-image-alt">
+            Popis pro čtečky a vyhledávače
+          </label>
+          <input
+            id="cms-image-alt"
+            className={styles.input}
+            value={alt ?? ""}
+            disabled={!current}
+            placeholder="Co je na obrázku vidět?"
+            onChange={(event) => setAlt(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" && altDirty) onAlt(alt)
+            }}
+          />
+
+          <div className={styles.imageActions}>
+            <Button variant="ghost" size="sm" disabled={!altDirty} onClick={() => onAlt(alt)}>
+              Uložit popis
+            </Button>
+            {/* Only for a raster the server can decode. A PDF in an image field
+                is not something to offer a crop handle on. */}
+            {isCroppableImage(current) ? (
+              <Button variant="ghost" size="sm" onClick={() => openCrop(current)}>
+                {current.crop ? "Upravit ořez" : "Oříznout"}
+              </Button>
+            ) : null}
+            <span className={styles.grow} />
+            {/* Two steps, because this one empties the field and the picture is
+                the only thing on screen saying which field that is. */}
+            {confirming ? (
+              <>
+                <span className={styles.setCount}>Opravdu odebrat?</span>
+                <Button variant="ghost" size="sm" onClick={() => setConfirming(false)}>
+                  Ne
+                </Button>
+                <Button variant="danger" size="sm" onClick={onRemove}>
+                  Odebrat
+                </Button>
+              </>
+            ) : (
+              <Button variant="ghost" size="sm" disabled={!current} onClick={() => setConfirming(true)}>
+                Odebrat obrázek
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <p className={styles.setHint}>Vyberte obrázek z knihovny, nebo nahrajte nový — použije se hned.</p>
+
+      <div className={styles.setLibrary}>
+        <MediaModule onPick={onPick} selectedId={current?.id} />
+      </div>
+
+      <div className={styles.setFoot}>
+        <span className={styles.setCount}>Ukládá se jako koncept — na web to nepustí.</span>
+        <span className={styles.grow} />
+        <Button variant="ghost" size="sm" onClick={onClose}>
+          Zavřít
+        </Button>
+      </div>
+    </div>
+  )
+}

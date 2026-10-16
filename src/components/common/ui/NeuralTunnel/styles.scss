@@ -1,0 +1,27 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+.neural-tunnel {
+    position: relative;
+    overflow: hidden;
+}
+
+.neural-tunnel-canvas {
+    position: absolute;
+    inset: 0;
+}
+
+.neural-tunnel-content {
+    position: relative;
+    z-index: 10;
+    height: 100%;
+    width: 100%;
+}
+
+// The page-wide instance: pinned to the viewport behind everything, and inert
+// to the pointer so it never steals hover or the custom cursor.
+.neural-tunnel--page {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}

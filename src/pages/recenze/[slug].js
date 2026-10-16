@@ -1,0 +1,104 @@
+import Seo from "@/components/common/Seo"
+
+import AdvisorCard from "@/components/pages/advisor/AdvisorCard"
+import { getConsultants, getAssistant, getContactContent, getNavbarContent, getFooterContent, getPageContent, readerFor, viewOf } from "@/lib/site"
+import { rosterFromCms } from "@/constants/roster"
+
+// One page per published consultant, and it exists to collect a review for that
+// one person — this is the address behind the QR code on their business card,
+// so the visitor already knows whose page they are on and never picks a name
+// from a list.
+//
+// Generated from the CMS rather than kept as twelve copies of the same file.
+// Adding somebody is an edit in the Studio; all this route needs is a slug.
+//
+// Under /recenze rather than /poradci because that is what the page does. It
+// sits beside the wall at /recenze, which is where these end up once approved.
+const REVALIDATE_SECONDS = 600
+
+export async function getStaticPaths() {
+    const consultants = await getConsultants({ kind: 'consultant' })
+    return {
+        paths: consultants
+            .filter((c) => c.slug)
+            .map((c) => ({ params: { slug: c.slug } })),
+        // A consultant added after the last build still gets a page: the first
+        // request renders it and it is cached from then on. Without this the
+        // Studio could publish somebody who 404s until the next deploy, which is
+        // the whole thing this route exists to stop.
+        fallback: 'blocking',
+    }
+}
+
+export async function getStaticProps({ params, ...context }) {
+    // Same switch every other route's reader takes, and it was missing here for
+    // the same reason it was missing on /recenze: this page writes its own
+    // getStaticProps instead of taking `footerStaticProps`. Without it the
+    // patička and the contact sheet carry no document id inside the Studio's
+    // editing frame, so nothing on either can be clicked.
+    // Published, draft or a moment in the archive — one call decides. See
+    // @/cms/server/site/archive.js.
+    const view = viewOf(context)
+    const read = readerFor(view)
+
+    const [content, consultants, footer, contact, navbar, assistant] = await Promise.all([
+        // The card's framing — the ask over the form, the office's city, the
+        // words on the send button. ONE block behind every consultant's page,
+        // declared under `page: 'recenze'` in cms.config.js: editing it once
+        // moves all ten, and `server/revalidate.js` regenerates all ten.
+        getPageContent("/recenze/[slug]", view),
+        // `read` here too: the card IS the consultant, so a page framed at a
+        // moment must find the person as they were described then. Without it
+        // this route is the one page in the Archive showing today's content.
+        getConsultants({ kind: 'consultant', read }),
+        getFooterContent(view),
+        getContactContent(view),
+        getNavbarContent(view),
+        getAssistant({ read }),
+    ])
+
+    const advisor = consultants.find((c) => c.slug === params.slug) || null
+    // Archived or renamed rather than merely missing: a slug that no longer
+    // belongs to anybody has to 404, not render an empty card.
+    if (!advisor) return { notFound: true, revalidate: REVALIDATE_SECONDS }
+
+    // `roster` je pro lištu a jede na propech každé stránky — tady se
+    // odvodí z poradců, kteří už jsou načtení, místo druhého čtení.
+    return { props: { advisor, content, footer, contact, navbar, assistant, roster: rosterFromCms(consultants) }, revalidate: REVALIDATE_SECONDS }
+}
+
+export default function AdvisorPage({ advisor, content }) {
+    const title = `Recenze — ${advisor.name} | Procházka Group`
+    // Bez skloňování: jméno přichází z CMS v 1. pádě a rod z něj nepoznáme.
+    const description = `${advisor.name}, Procházka Group — ohodnoťte spolupráci a napište recenzi.`
+    const url = `https://prochazkagroup.cz/recenze/${advisor.slug}`
+
+    return (
+        <>
+            <Seo
+                title={title}
+                description={description}
+                path={`/recenze/${advisor.slug}`}
+                type="profile"
+                noindex
+                image={advisor.portrait?.src ? { src: advisor.portrait.src, alt: advisor.name } : undefined}
+                jsonLd={{
+                    "@context": "https://schema.org",
+                    "@type": "Person",
+                    name: advisor.name,
+                    jobTitle: "Finanční poradce",
+                    url,
+                    worksFor: {
+                        "@type": "Organization",
+                        name: "Procházka Group",
+                        url: "https://prochazkagroup.cz",
+                    },
+                    ...(advisor.phone ? { telephone: advisor.phone } : {}),
+                }}
+            />
+            <main lang="cs" key={`advisor-${advisor.slug}`}>
+                <AdvisorCard advisor={advisor} copy={content?.card} notices={content?.notices} />
+            </main>
+        </>
+    )
+}

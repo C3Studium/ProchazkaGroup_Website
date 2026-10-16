@@ -1,0 +1,283 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// One viewport of scroll per panel, plus one for the first to settle in.
+.History {
+    position: relative;
+    width: 100%;
+    height: 400vh;
+    color: var(--wText);
+}
+
+// Mounted, but not yet asked for. Taken out of the flow so the page keeps the
+// height it had, and pinned over the viewport rather than parked off-screen —
+// the first photograph is lazily loaded, and a browser only fetches those for
+// images it believes are on screen. So this is the whole trick: the panel the
+// reader will see first is, as far as the loader is concerned, already in front
+// of them, while as far as the reader is concerned nothing has happened.
+//
+// The remaining three sit off to the right beyond 100vw and load on the ride,
+// the same as they always did.
+.History.is-waiting {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: -1;
+    height: 100vh;
+    pointer-events: none;
+}
+
+.History__sticky {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow: hidden;
+}
+
+// The numeral. Behind everything, and moved by the section rather than by any
+// one panel — `left` and `top` are motion values, and the translate here takes
+// its own centre to that point.
+.History__track {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    width: 400vw;
+    height: 100%;
+    will-change: transform;
+}
+
+.History__panel {
+    position: relative;
+    flex: 0 0 100vw;
+    height: 100%;
+    // Not hidden: a photo is allowed to hang past its own panel, which is what
+    // leaves the tail of one milestone on screen beside the head of the next.
+    // The sticky viewport still clips the section as a whole.
+    overflow: visible;
+}
+
+// The rules the composition is built on. Behind the picture and the words, and
+// drawn in with the panel rather than switched on.
+// The page's number. A solid at very low opacity rather than an outline — a
+// ring reads as another rule in a composition already made of them, and this is
+// meant to be a ground the panel sits on. Poppins for the geometry: its zero is
+// a true circle, which is what the numerals in the design are built from.
+//
+// Big enough that the panel's edge takes a piece off it. That cut is what makes
+// four panels read as pages of one thing rather than four slides.
+.History__numeral {
+    position: absolute;
+    z-index: 0;
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-size: 95vh;
+    line-height: 0.8;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+    color: rgba(255, 255, 255, 0.08);
+    pointer-events: none;
+    user-select: none;
+}
+
+.History__rule {
+    position: absolute;
+    z-index: 0;
+    background-color: rgba(255, 255, 255, 0.22);
+    pointer-events: none;
+
+    // A few of them are the highlight instead — the ones that lead the eye into
+    // the next panel rather than framing this one. `--hColor` is the site's one
+    // accent; `--hColor2` is a leftover from the old palette and appears nowhere
+    // in the redesign, which is exactly why it read as a stray.
+    &.is-accent {
+        background-color: var(--hColor);
+        opacity: 0.7;
+    }
+}
+
+.History__photo {
+    position: absolute;
+    z-index: 1;
+    outline: 1px solid rgba(255, 255, 255, 0.18);
+    overflow: hidden;
+
+    // The picture scales inside the clip rather than with it, so the frame the
+    // clip is opening stays put while the image settles into it.
+    .History__photo__inner {
+        position: absolute;
+        inset: 0;
+    }
+}
+
+.History__copy {
+    position: absolute;
+    z-index: 1;
+
+    p {
+        margin: 1.4vh 0 0;
+        font-family: "Poppins", sans-serif;
+        font-weight: 200;
+        font-size: clamp(0.95rem, 1.15vw, 1.3rem);
+        line-height: 1.6;
+    }
+}
+
+.History__date {
+    display: block;
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-size: clamp(0.7rem, 0.8vw, 0.9rem);
+    letter-spacing: 0.06em;
+    opacity: 0.7;
+}
+
+// A phone on its side still gets the ride — width is what the ride needs and a
+// landscape phone has it — but not the desktop composition: those coordinates
+// are drawn for a screen three times this tall, so photos run off the bottom
+// and copy sits under the fixed navigation. One calm composition for all four
+// panels instead: photo in the upper middle, its words beneath it, the numeral
+// still behind. Raw query rather than the phl stop because the stacked column
+// below owns everything at 820px and under, and this must begin where that
+// ends.
+@media (min-width: 820.02px) and (max-height: 520px) {
+    .History__photo {
+        left: 32vw !important;
+        top: 16vh !important;
+        width: 34vw !important;
+        aspect-ratio: 16 / 9 !important;
+    }
+
+    .History__copy {
+        left: 32vw !important;
+        top: 62vh !important;
+        width: 42vw !important;
+        text-align: left !important;
+
+        p {
+            margin-top: 0.6vh;
+            font-size: 0.85rem;
+            line-height: 1.45;
+        }
+    }
+
+    // The rules are drawn for the composition this block just replaced — kept,
+    // they would strike through the words at random. The numeral stays: it is
+    // behind everything and scales with the height it no longer has much of.
+    .History__rule {
+        display: none;
+    }
+}
+
+// Stacked — and an upright tablet is NOT in this set any more: it rides, like
+// a laptop. The first arm is every phone upright and any window that narrow;
+// the second is a phone on its side and a small landscape window, which have
+// the width but not the height.
+@media (max-width: 599.98px),
+       (max-width: 820px) and (orientation: landscape) {
+    .History {
+        height: auto;
+    }
+
+    .History__sticky {
+        position: relative;
+        height: auto;
+        overflow: visible;
+    }
+
+    // Sideways is a pointer gesture; on a narrow screen the milestones simply
+    // stack, and the numeral stops walking because there is nothing to walk to.
+    // The ride's own translate is cancelled with it: the scroll progress that
+    // drives it still runs while the column is scrolled, and left alone it
+    // would carry the whole column up to 300vw off the left of the screen.
+    .History__track {
+        width: 100%;
+        flex-direction: column;
+        transform: none !important;
+    }
+
+    // Stacked, and the per-panel placement is dropped: those coordinates are a
+    // composition for a wide screen and mean nothing in a column.
+    .History__panel {
+        flex: 0 0 auto;
+        padding: 6vh 8vw;
+    }
+
+    .History__rule,
+    .History__numeral {
+        display: none;
+    }
+
+    .History__photo,
+    .History__copy {
+        position: static !important;
+        left: auto !important;
+        top: auto !important;
+        width: 100% !important;
+        text-align: left !important;
+    }
+
+    .History__photo {
+        aspect-ratio: 16 / 10 !important;
+        margin-bottom: 3vh;
+
+        // A narrow phone on its side stacks too, but a full-width photo there
+        // is taller than the whole screen. Held to most of the height instead,
+        // and the width follows from the ratio.
+        @media (max-height: 520px) {
+            width: auto !important;
+            max-height: 62vh;
+        }
+    }
+
+    .History__copy {
+        max-width: none;
+    }
+
+}
+
+// ---- tablet, upright: the ride, twice as wide ----
+//
+// Same composition a laptop gets, on a panel of 200vw instead of 100. Every
+// coordinate inside a panel is a percentage OF THE PANEL — the photograph at
+// 44%, the copy at 38% — so doubling the panel doubles both against the screen
+// and nothing inside has to be told about it.
+//
+// The cost is real and was accepted: a panel twice the screen is a panel the
+// reader travels through rather than sees at once, and the section is twice as
+// long in scroll. That is the trade for keeping the arrangement instead of
+// folding it into a column.
+//
+// The track's travel is the other half of this and is in index.jsx — it is a
+// motion value, so a stylesheet cannot reach it. The two are one number.
+@include v(md) {
+    @include below-px(900) {
+        .History {
+            height: 800vh;
+        }
+
+        .History__track {
+            width: 800vw;
+        }
+
+        .History__panel {
+            flex: 0 0 200vw;
+        }
+
+        // The type, against the panel rather than against the screen.
+        //
+        // Nothing inside a panel scales with it on its own — every coordinate
+        // is written in vw, and vw is the SCREEN. The photograph, the copy
+        // column, the rules and the numeral are multiplied in index.jsx (see
+        // `k` on Panel); the type is here, and 1.15vw is
+        // 9px here, so both of these were sitting on their rem floors, 15px of
+        // body copy in a column 76vw wide. Doubling the panel had made the
+        // measure twice as wide and left the words the size they were.
+        .History__copy p {
+            font-size: clamp(1.4rem, 2.3vw, 2rem);
+            line-height: 1.55;
+        }
+
+        .History__date {
+            font-size: clamp(1rem, 1.6vw, 1.3rem);
+        }
+    }
+}

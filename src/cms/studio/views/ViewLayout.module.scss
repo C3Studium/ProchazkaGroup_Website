@@ -1,0 +1,231 @@
+@use "../styles/tokens.module" as t;
+
+/* Every screen is header / toolbar / scrolling body, and all three share one
+   left edge — `--st-gutter`. That single alignment does more for the sense of a
+   designed product than any amount of decoration, so nothing is allowed to opt
+   out of it. */
+
+.header {
+  display: flex;
+  flex: none;
+  gap: var(--st-s6);
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: var(--st-s8) var(--st-gutter) var(--st-s5);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.headerMain {
+  min-width: 0;
+}
+
+.breadcrumb {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  margin-bottom: var(--st-s2);
+}
+
+.crumb {
+  display: inline-flex;
+  gap: 2px;
+  align-items: center;
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-book);
+}
+
+.crumbChevron {
+  margin: 0 var(--st-s1);
+  color: var(--st-ink-4);
+}
+
+.crumbLink {
+  color: var(--st-ink-3);
+  text-decoration: none;
+  transition: color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+  }
+}
+
+.crumbCurrent {
+  color: var(--st-ink-3);
+}
+
+.titleRow {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: baseline;
+  min-width: 0;
+}
+
+.title {
+  @include t.title;
+  @include t.truncate;
+
+  margin: 0;
+}
+
+.subtitle {
+  max-width: 68ch;
+  margin: var(--st-s2) 0 0;
+  font-size: var(--st-text-body);
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-3);
+}
+
+.actions {
+  display: flex;
+  flex: none;
+  gap: var(--st-s2);
+  align-items: center;
+}
+
+/* The toolbar's bottom hairline doubles as the rail the segmented tabs sit on —
+   see `.segmented` in controls, which pulls itself down onto this line. */
+.toolbar {
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  height: 46px;
+  padding: 0 var(--st-gutter);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.resultCount {
+  font-size: var(--st-text-small);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--st-w-book);
+  color: var(--st-ink-3);
+  white-space: nowrap;
+}
+
+.body {
+  @include t.scrollbar;
+
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Strop čtecí šířky a okraje kolem něj.
+   
+   `--st-measure` je `none` až do 1800px, takže do té doby se tady nic neděje.
+   Nad ním se obsah přestane roztahovat: řádek seznamu přes 2500px je řádek,
+   u kterého oko na cestě zprava doleva ztratí, ve kterém sloupci bylo.
+   
+   `margin-inline` a ne `margin: auto` na užší kontejner — hlavička a toolbar
+   sdílejí `--st-gutter` jako levou hranu a musí se s tělem potkat na téže
+   svislici. */
+.padded {
+  max-width: var(--st-measure);
+  padding: var(--st-s8) var(--st-gutter) var(--st-s16);
+}
+
+@include t.compact {
+  .header {
+    padding: var(--st-s5) var(--st-gutter) var(--st-s4);
+  }
+
+  .title {
+    font-size: var(--st-text-section);
+    letter-spacing: var(--st-track-section);
+  }
+}
+
+/* A phone held upright.
+
+   The header was one row — title on the left, actions on the right, `flex: none`
+   on both — and at 390 that row was 442px wide inside a workspace that clips, so
+   Publikovat změny was simply not on the screen and nothing scrolled to it. The
+   two halves stack, and the actions wrap among themselves, because five controls
+   do not fit on one 358px line either.
+
+   `align-items` has to be restated: `flex-end` aligned the two halves along the
+   baseline of a row that no longer exists, and would leave the action row the
+   width of its content, centred nowhere in particular. */
+@include t.stacked {
+  .header {
+    flex-direction: column;
+    gap: var(--st-s3);
+    align-items: stretch;
+    padding-top: var(--st-s4);
+  }
+
+  .actions {
+    flex-wrap: wrap;
+  }
+
+  /* The way back out of a document, and 18px tall — the height of its own text.
+     Padding rather than a height, so the link keeps sitting on the text baseline
+     it shares with the chevrons; the margin below it gives back what the padding
+     takes so the title does not move. */
+  .crumbLink,
+  .crumbCurrent {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+  }
+
+  .breadcrumb {
+    margin-bottom: 0;
+  }
+
+  /* 535px of controls on a 358px line. It wraps rather than scrolling: a scroll
+     container would clip the segments' focus ring, which is drawn 5px outside a
+     control stretched to the full height of the bar, and a filter row nobody can
+     see the focus in is a worse trade than a second line.
+
+     The three queue counts are 337px at this gutter, so they take the first line
+     whole and everything after the spacer lands on the second. `height` has to
+     become `min-height` for that to be possible at all — the 46px was a fixed
+     height, and a wrapped row inside it would have overflowed the bar instead of
+     growing it. The segmented's own stretch and its rule are corrected in
+     controls.module.scss, which is where they are declared. */
+  .toolbar {
+    flex-wrap: wrap;
+    height: auto;
+    min-height: 46px;
+    row-gap: var(--st-s2);
+    padding-bottom: var(--st-s2);
+  }
+
+  .padded {
+    padding-top: var(--st-s5);
+  }
+}
+
+/* Velký monitor: hlavička a toolbar drží stejný strop jako tělo, jinak by
+   titulek zůstal vlevo a obsah pod ním se odsunul doprostřed. */
+@include t.wide {
+  .header,
+  .toolbar {
+    max-width: var(--st-measure);
+  }
+}
+
+/* Nízké okno — 13" notebook. Hlavička brala 96px na výšku a je jedna ze tří
+   věcí, které jsou na obrazovce vždycky. Titulek se zmenší o stupeň a padding
+   se stáhne; dohromady je to necelých 40px, tedy skoro celý další řádek
+   seznamu. */
+@include t.short {
+  .header {
+    padding: var(--st-s5) var(--st-gutter) var(--st-s4);
+  }
+
+  .title {
+    font-size: var(--st-text-section);
+    letter-spacing: var(--st-track-section);
+  }
+
+  .toolbar {
+    height: 40px;
+  }
+}

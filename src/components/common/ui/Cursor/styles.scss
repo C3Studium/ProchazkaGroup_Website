@@ -1,0 +1,201 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.cursor {
+    position: fixed;
+    inset: 0;
+    // Above everything. This is the pointer: there is no layer on the site it is
+    // correct to be underneath, because whatever is on top is exactly what is
+    // being pointed at.
+    //
+    // It was 1002, which was chosen to clear the contact sheet (1001) — and then
+    // the advisors sheet arrived at 1002 as well. Equal z-index is decided by
+    // document order, and that sheet is a portal appended to <body> after this
+    // is, so it won every time and the marks asked into a layer nobody could
+    // see. The number is now clear of the whole ladder rather than one step
+    // above whatever the tallest thing happened to be that week: the preloader
+    // is 1009, the page transition 1003, the sheets 1001 and 1002.
+    z-index: 1100;
+    pointer-events: none;
+}
+
+// A fixed 28px box carried at the pointer. Nothing inside it ever resizes; the
+// corners only travel the few pixels between where they wait and where they
+// close, which is the whole interaction.
+//
+// Every length that draws the mark stays in px, and this is the one place on
+// the site where that is the right answer rather than an oversight. The ramp in
+// globals.scss grows the root above 1920 so the page keeps its proportion to a
+// wider screen — but this thing's proportion is not to the screen. It is drawn
+// around the system pointer, and the system pointer is a fixed physical object:
+// the OS hands out the same arrow on a 2560 monitor as on a 1920 one, because
+// the two are about the same number of pixels per inch and only one of them is
+// wider. A 28px frame grown to 37 would no longer sit on the arrow it is
+// framing, and a 6px dot grown to 8 would be visibly larger than the pointer it
+// stands in for. The corner marks that frame a *word* do grow, and should — see
+// ui/CornerMarks — because a word is part of the page and this is not.
+.cursor__mark {
+    position: absolute;
+    width: 28px;
+    height: 28px;
+    translate: -50% -50%;
+    will-change: left, top;
+    transition: opacity 0.2s ease;
+}
+
+.cursor__dot {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    border-radius: 50%;
+    background-color: var(--hColor);
+}
+
+// The same shape the buttons are framed with, at the same weight as the page's
+// rules. They wait a little outside the box and unseen; over something usable
+// they come in to its corners.
+.cursor__corner {
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border: 0 solid var(--hColor);
+    opacity: 0;
+    transition:
+        transform 0.34s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.22s ease;
+}
+
+.cursor__corner--tl {
+    top: 0;
+    left: 0;
+    border-top-width: 1px;
+    border-left-width: 1px;
+    transform: translate(-6px, -6px);
+}
+
+.cursor__corner--tr {
+    top: 0;
+    right: 0;
+    border-top-width: 1px;
+    border-right-width: 1px;
+    transform: translate(6px, -6px);
+    transition-delay: 0.03s;
+}
+
+.cursor__corner--bl {
+    bottom: 0;
+    left: 0;
+    border-bottom-width: 1px;
+    border-left-width: 1px;
+    transform: translate(-6px, 6px);
+    transition-delay: 0.06s;
+}
+
+.cursor__corner--br {
+    bottom: 0;
+    right: 0;
+    border-bottom-width: 1px;
+    border-right-width: 1px;
+    transform: translate(6px, 6px);
+    transition-delay: 0.09s;
+}
+
+// Closed in. The stagger above means they arrive one after another rather than
+// all at once, which is what keeps it from reading as a state flipping.
+.cursor__mark.is-active .cursor__corner {
+    opacity: 1;
+    transform: translate(0, 0);
+}
+
+// Words beside the marks, and only when the target asks for them by name. Set
+// outside the 28px box so the marks keep their size — the label is a note the
+// cursor is carrying, not part of it.
+//
+// Which is also why this one size is left in rem while everything above it is
+// pinned in px: being a note rather than part of the apparatus, it is type on
+// the page and grows with the page's type above 1920. Ten pixels of letter on a
+// 2560 monitor is a word you lean in for. Nothing moves to accommodate it — the
+// 26px below only has to clear the mark box, which is not going anywhere, and
+// the gap after it is in em and follows the word.
+.cursor__label {
+    position: absolute;
+    top: 50%;
+    left: 26px;
+    transform: translateY(-50%);
+    padding-left: 0.6em;
+    white-space: nowrap;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--wText);
+    opacity: 0;
+    // Held behind its own left edge until there is something to say.
+    clip-path: inset(-40% 100% -40% 0%);
+    transition:
+        opacity 0.28s ease,
+        clip-path 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+
+    &.is-on {
+        opacity: 1;
+        clip-path: inset(-40% 0% -40% 0%);
+    }
+}
+
+// Not on a screen this shape, whatever is pointing at it.
+//
+// On a real phone this rule never fires, and that is worth saying rather than
+// leaving to be discovered: index.jsx reads `(hover: none)` and returns null, so
+// on a handset there is no `.cursor` in the document at all — measured, at
+// 953×437, 844×390 and 568×320, zero nodes and zero bytes of it in the server's
+// HTML.
+//
+// Where it does fire is a desktop browser pulled down to a phone's landscape
+// shape, which is how the layout gets checked and is the one place a pointer and
+// these dimensions coexist. A ring and a dot chasing the mouse across a 437px
+// band is a desktop flourish in a window with no room for it, so it goes, and
+// the system's own arrow — which the site never hides — does the pointing.
+// Not on a touchscreen, whatever shape it is.
+//
+// index.jsx already answers this and answers it harder — it reads `(hover:
+// none)` and returns null, so on a handset or a tablet there is no `.cursor` in
+// the document at all. This is the belt to that brace: the flag is read in an
+// effect, so for the frame between hydration and that effect the markup exists,
+// and this is what keeps it off the screen for it. It is also the one rule that
+// survives if the component is ever mounted from somewhere that does not run
+// the check.
+@include touch {
+    .cursor {
+        display: none;
+    }
+}
+
+// And not on a screen this shape either, whatever is pointing at it.
+//
+// Where the rule above cannot fire is a DESKTOP browser pulled down to a
+// handset's or a tablet's dimensions, which is how the layout gets checked and
+// is the one place a pointer and these shapes coexist. A ring and a dot chasing
+// the mouse across a 437px band, or down an 818px column, is a desktop flourish
+// in a window with no room for it — so it goes, and the system's own arrow,
+// which the site never hides, does the pointing.
+//
+// Portrait is bounded at 900 and landscape is not extended past a phone on
+// purpose: no laptop is ever upright, so 600–900 upright is a tablet and
+// nothing else, but 1024×768 in landscape is both a tablet and a real small
+// monitor. Taking the cursor off that one would cost a desktop its pointer to
+// catch a tablet that has already lost it in index.jsx.
+@include phs-h {
+    .cursor {
+        display: none;
+    }
+}
+
+@include v(md) {
+    @include below-px(900) {
+        .cursor {
+            display: none;
+        }
+    }
+}

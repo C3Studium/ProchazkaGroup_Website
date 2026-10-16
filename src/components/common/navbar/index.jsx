@@ -1,54 +1,99 @@
 'use client'
 import NavbarBody from './body';
-import { useState, useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import Menu from './menu';
+import ContactModal from '@/components/common/ContactModal';
+import { onContactRequest } from '@/components/common/ContactModal/open';
 import { AnimatePresence } from 'framer-motion';
-import { usePathname, useRouter } from 'next/navigation';
+import { surfaceRoot, useStudioSurface } from '@/cms/edit';
 
-export default function Navbar () {
+export default function Navbar({ assistant, contactCopy, roster, navCopy }) {
     const [menu, setMenu] = useState(false);
+    const [contact, setContact] = useState(false);
     const pathname = usePathname();
-    const router = useRouter();
 
-    // Handle scroll to section when URL changes
-    useEffect(() => {
-        if (pathname === '/o-nas') {
-            // Wait for page transition animations to complete (1.5s) then check for hash
-            setTimeout(() => {
-                if (window.location.hash === '#poradci') {
-                    const element = document.querySelector('#poradci');
-                    if (element && window.lenis) {
-                        window.lenis.scrollTo(element, {
-                            offset: window.innerHeight * 0.35,
-                            easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-                        });
-                    }
-                }
-            }, 1500);
-        }
-    }, [pathname]);
+    // Dva povrchy, jeden panel. Ve Studiu se panel otevře, jakmile si editor
+    // vybere jeden z nich; `navbar.advisors` ho navíc rovnou přepne na stěnu
+    // poradců, protože ta je druhý POHLED téhož panelu a jinak se k ní editor
+    // musí proklikat. Na webu vrací obojí `false`, viz cms/edit/surface.js.
+    const studioMenu = useStudioSurface('navbar');
+    const studioAdvisors = useStudioSurface('navbar.advisors');
+    const studioOpen = studioMenu || studioAdvisors;
 
-    // Also handle direct navigation to URLs with hash (e.g., page reload)
-    useEffect(() => {
-        if (pathname === '/o-nas' && window.location.hash === '#poradci') {
-            // Shorter delay for direct hash navigation (page reload scenarios)
-            setTimeout(() => {
-                const element = document.querySelector('#poradci');
-                if (element && window.lenis) {
-                    window.lenis.scrollTo(element, {
-                        offset: window.innerHeight * 0.35,
-                        easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t))
-                    });
-                }
-            }, 500);
-        }
+    // Opening one closes the other. Two full-screen things over the page at
+    // once is two ways out and no way to tell which the Escape key meant.
+    const openContact = useCallback(() => {
+        setMenu(false);
+        setContact(true);
     }, []);
-  return (
-    <section className='navbar'>
-        <Menu menu={menu} setMenu={setMenu} />
-        <AnimatePresence mode='sync'>
-            {menu && <NavbarBody setMenu={setMenu}/>}
-        </AnimatePresence>
-    </section>
-  ) 
+
+    // The menu's boxes that open something instead of going somewhere. Only the
+    // contact sheet is a sheet now — the roster stays inside the panel and never
+    // reaches this. One handler rather than a prop each, because the panel
+    // already carries the name in its own data.
+    const openSheet = useCallback((which) => {
+        if (which !== 'contact') return;
+        setMenu(false);
+        setContact(true);
+    }, []);
+
+    // The bar is where the sheet lives, and the page is where most of the
+    // buttons that want it are — the CTAs that used to navigate to /kontakt.
+    // `_app` renders this bar beside the page rather than around it, so the
+    // registration below is the seam between the two. See ContactModal/open.
+    useEffect(() => onContactRequest(openContact), [openContact]);
+
+    // A link in the panel closes it on the way out, but that is not the only
+    // way a route changes underneath it: the back button, a link somewhere
+    // else on the page, a redirect. The panel is fixed and would still be
+    // hanging over whatever arrived.
+    useEffect(() => { setMenu(false); }, [pathname]);
+
+    // Escape closes it, and the page underneath stops scrolling while it is
+    // open — the same two things ContactModal does, because from the reader's
+    // side they are the same kind of thing over the page.
+    //
+    // No focus trap, and that is the difference between the two: the sheet is
+    // a dialog and traps Tab because leaving it silently is a bug, while this
+    // is a menu on a bar. Tab leaving the last link and landing on the page
+    // behind is where a menu is supposed to go.
+    useEffect(() => {
+        if (!menu) return;
+        window.lenis?.stop();
+        const onKey = (e) => { if (e.key === 'Escape') setMenu(false); };
+        window.addEventListener('keydown', onKey);
+        return () => {
+            window.lenis?.start();
+            window.removeEventListener('keydown', onKey);
+        };
+    }, [menu]);
+
+    return (
+        <>
+            <Menu menu={menu} setMenu={setMenu} onContact={openContact} />
+            <ContactModal open={contact} onClose={() => setContact(false)} assistant={assistant} copy={contactCopy} />
+            <AnimatePresence mode='wait'>
+                {(menu || studioOpen) && (
+                    <NavbarBody
+                        key='navPanel'
+                        setMenu={setMenu}
+                        onSheet={openSheet}
+                        roster={roster}
+                        copy={navCopy}
+                        studioView={studioAdvisors ? 'advisors' : null}
+                        // Hranice výběru. Panel leží NAD stránkou, ale stránka
+                        // pod ním zůstává — patičku kreslí `_app` dál — a bez
+                        // tohohle ji překryv najde a označí, protože hledá
+                        // geometricky přes celý dokument. Editor pak vidí
+                        // rámeček kolem textu, na který se vůbec nedívá.
+                        //
+                        // Který z obou povrchů se zrovna edituje, se pozná samo:
+                        // `surfaceRoot` se porovnává se jménem na `<html>`.
+                        studioRoot={studioAdvisors ? 'navbar.advisors' : 'navbar'}
+                    />
+                )}
+            </AnimatePresence>
+        </>
+    )
 }

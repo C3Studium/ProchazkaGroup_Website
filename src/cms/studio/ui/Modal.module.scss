@@ -1,0 +1,163 @@
+@use "../styles/tokens.module" as t;
+
+.scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  /* DEFINITE tracks. With `auto` the grid area is sized by the panel, so the
+     panel's own `max-height: 100%` resolves against a box the panel defines —
+     circular, so it caps nothing. Measured on the crop dialog at 1280×660: the
+     panel came out 720px tall in a 660px window and its footer sat off-screen.
+     `minmax(0, 1fr)` fills the scrim, which the viewport defines, so the cap
+     finally has something real to resolve against. Applies to every dialog. */
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  place-items: center;
+  padding: var(--st-s8);
+  background: var(--st-overlay);
+  backdrop-filter: blur(3px);
+  animation: fade var(--st-fast) var(--st-ease);
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The one place elevation is real: a dialog genuinely floats above the surface,
+   so it is allowed the border and the shadow that the rest of the Studio does
+   without. */
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 100%;
+  background: var(--st-raised);
+  border: 1px solid var(--st-line-strong);
+  border-radius: var(--st-radius-lg);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.62);
+  animation: lift var(--st-mid) var(--st-ease);
+}
+
+@keyframes lift {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+}
+
+.sm {
+  max-width: 420px;
+}
+
+.md {
+  max-width: 620px;
+}
+
+.lg {
+  max-width: 940px;
+}
+
+/* Velký dialog — knihovna médií, ořez.
+   
+   `height` jako `min()` a ne pevných 720px: `max-height: 100%` sice pracuje
+   (scrim má definitivní stopy, viz výš), ale panel se pak opře přesně o okraj
+   okna a scrim kolem něj zůstane jen jako 32px rám, do kterého se nedá kliknout
+   ven. Na 13" notebooku s okny Windows je viditelná výška kolem 640px, takže
+   se panel dotýká obou hran a dialog vypadá jako celá obrazovka.
+   
+   Odsazení scrimu je to, co ten kus nechá — `max-height: 100%` se počítá proti
+   jeho VNITŘKU, takže panel nikdy nedosáhne na hranu okna. `100vh` by tu byla
+   chyba: na mobilu se do něj počítá i adresní řádek, který zrovna zajel, takže
+   by dialog byl vyšší než to, co je vidět. Scrim je uvnitř kořene Studia,
+   který je `position: fixed; inset: 0`, tedy sám výřez. */
+.xl {
+  width: 1100px;
+  max-width: 100%;
+  height: 720px;
+  max-height: 100%;
+}
+
+.head {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: var(--st-s5) var(--st-s3) var(--st-s4) var(--st-s6);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.headText {
+  min-width: 0;
+}
+
+.title {
+  @include t.section-title;
+
+  margin: 0;
+}
+
+.description {
+  margin: var(--st-s1) 0 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+/* `display: flex` a ne block, a není to kosmetika.
+   
+   Obsah dialogu, který si sám dělá rozvržení na výšku — knihovna médií je
+   hlavička s filtry, mřížka a lišta dole — má kořen `flex: 1; min-height: 0`.
+   Uvnitř bloku ale `flex: 1` neznamená nic: rodič není flex kontejner, takže
+   se ten kořen roztáhne na výšku obsahu, jeho vlastní scroll oblast nemá co
+   přetéct a roluje se místo ní tenhle `.body` — i s hlavičkou a lištou, které
+   měly zůstat stát.
+   
+   Blokový obsah (potvrzovací text, formulář) se ve sloupcovém flexu chová
+   stejně jako dřív, takže to nic jiného nemění. */
+.body {
+  @include t.scrollbar;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--st-s6);
+  overflow-y: auto;
+}
+
+.footer {
+  display: flex;
+  gap: var(--st-s2);
+  justify-content: flex-end;
+  padding: var(--st-s4) var(--st-s6);
+  border-top: 1px solid var(--st-line);
+}
+
+.confirmText {
+  margin: 0;
+  font-size: var(--st-text-body);
+  line-height: 1.65;
+  color: var(--st-ink-2);
+}
+
+/* Nízké okno. 32px scrimu nahoře i dole je na 640px viditelné výšky deset
+   procent okna spotřebovaných na rám; 16px pořád stačí na to, aby bylo vidět,
+   že je pod dialogem něco dalšího. */
+@include t.short {
+  .scrim {
+    padding: var(--st-s4);
+  }
+
+  .head {
+    padding: var(--st-s4) var(--st-s3) var(--st-s3) var(--st-s5);
+  }
+
+  .body {
+    padding: var(--st-s5);
+  }
+
+  .footer {
+    padding: var(--st-s3) var(--st-s5);
+  }
+}

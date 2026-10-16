@@ -1,0 +1,32 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx. One shape; direction is a rotation, so the stroke weight and
+// the join geometry stay identical whichever way it points — which is the whole
+// reason for not using the glyphs.
+.arrowIcon {
+    width: 1em;
+    height: 1em;
+    flex: none;
+    // sits on the text baseline the way the glyph it replaces did
+    vertical-align: -0.12em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.arrowIcon--down {
+    transform: rotate(90deg);
+}
+
+.arrowIcon--left {
+    transform: rotate(180deg);
+}
+
+.arrowIcon--up {
+    transform: rotate(-90deg);
+}
+
+.arrowIcon--upRight {
+    transform: rotate(-45deg);
+}

@@ -4,31 +4,25 @@ import React, { createContext, useContext, useMemo, useState, useEffect } from '
 const LoadContext = createContext();
 
 export function LoadProvider({ children }) {
-    const [firstLoad, setFirstLoad] = useState(true);
-    const minRunTime = 4;
-    const maxRunTime = 4;
+    const [firstLoad, setFirstLoad] = useState(false);
 
-    // Calculate runTime once and memoize it
-    const runTime = useMemo(() => {
-        const generatedTime = Math.random() * (maxRunTime - minRunTime) + minRunTime;
-        return Math.max(generatedTime, 0.1);
-    }, [])
+    // The preloader gate. "hold" while the first-load curtain owns the screen,
+    // "go" from the moment its mask starts opening — hero sections read this
+    // as the cue for their entrance. Initialized synchronously from the
+    // attribute the _document inline script stamps before first paint, so a
+    // hero never starts its entrance under the curtain. Safe against
+    // hydration: the flag only ever drives `animate` props, never markup.
+    const [gate, setGate] = useState(() =>
+        typeof document !== "undefined" &&
+        document.documentElement.hasAttribute("data-preload")
+            ? "hold"
+            : "go",
+    );
 
-
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setFirstLoad(false);
-            document.body.style.overflow = '';
-        }, runTime * 1000);
-
-        document.body.style.overflow = 'hidden';
-        return () => clearTimeout(timer);
-    }, [firstLoad]);
-
-    // Memoize context value to prevent unnecessary re-renders
-    // change this when the preloader will be ready to run normally
-    const value = useMemo(() => ({ firstLoad, setFirstLoad, runTime }), [firstLoad, runTime]);
+    const value = useMemo(
+        () => ({ firstLoad, setFirstLoad, gate, setGate }),
+        [firstLoad, gate],
+    );
 
     return (
         <LoadContext.Provider value={value}>
@@ -42,6 +36,6 @@ export function useGlobalContext() {
     if (context === undefined) {
         throw new Error('useGlobalContext must be used within a LoadProvider');
     }
-    const { firstLoad, setFirstLoad, runTime } = context;
-    return { firstLoad, setFirstLoad, runTime };
+    const { firstLoad, setFirstLoad, gate, setGate, runTime } = context;
+    return { firstLoad, setFirstLoad, gate, setGate, runTime };
 }

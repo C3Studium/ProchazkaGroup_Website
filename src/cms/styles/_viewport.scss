@@ -1,0 +1,82 @@
+// The library's own viewport stops.
+//
+// Why this file exists at all: every stylesheet under src/cms used to `@use`
+// the host's `src/styles/system/_shortcuts.scss`, which is the one thing that
+// stopped this directory from being liftable into another project. The
+// dependency looked large — 27 files imported it — and measured small: five
+// files called a mixin from it, seven call sites in total, all of them width
+// stops. So the library ships its own table instead of borrowing one.
+//
+// The values below are DELIBERATELY the same numbers the host system uses, so
+// moving the Studio onto this file changes no pixel of the current site. They
+// are the library's defaults, though, not a mirror kept in sync: a host is free
+// to disagree, and when one does, it disagrees by overriding `$stops` here
+// rather than by the Studio reaching into its stylesheets.
+//
+// One deliberate difference from the host's `below-px`: this one asserts a
+// unit. `#{$w}` on a unitless number emits `(max-width: 760)`, which is not
+// valid media-query syntax — the current site survives it only because the CSS
+// pipeline normalises the number back to px on its way out. That is a bundler
+// behaviour, not a guarantee, and a library carried into a project with a
+// different pipeline would lose every one of those rules silently.
+
+@use "sass:map";
+@use "sass:math";
+
+/// Named width stops. `ph` is the phone as a form factor rather than as a width
+/// a layout grows from — above the widest phone (430px) and below the narrowest
+/// tablet in portrait (600px).
+$stops: (
+    xxs: 400px,
+    xs: 750px,
+    ph: 560px,
+    sm: 900px,
+    md: 1200px,
+    lg: 1400px,
+    xl: 1500px,
+) !default;
+
+/// The landscape phone that no max-width can separate from a tablet: 480px wide
+/// at most 520px tall. 520 clears the tallest phone in landscape (430px) with
+/// room for browser chrome and stays well under the shortest tablet (768px).
+$phone-landscape: "(min-width: 480px) and (max-height: 520px) and (orientation: landscape)" !default;
+
+@function width-of($key) {
+    $w: map.get($stops, $key);
+
+    @if $w == null {
+        @error "Neznámý zlom pro below(): #{$key}. Známé: #{map.keys($stops)}.";
+    }
+
+    @return $w;
+}
+
+/// Narrower than a named stop. Exclusive, so `below(md)` and a `md`-and-up rule
+/// never both apply at 1200px.
+@mixin below($key) {
+    @media (max-width: #{width-of($key) - 0.02px}) {
+        @content;
+    }
+}
+
+/// Narrower than an explicit width. INCLUSIVE of `$w`, because it exists to
+/// carry an existing `@media (max-width: N)` across unchanged. A unitless
+/// number is read as px rather than emitted as one — see the note at the top.
+@mixin below-px($w) {
+    $width: $w;
+
+    @if math.is-unitless($w) {
+        $width: $w * 1px;
+    }
+
+    @media (max-width: #{$width}) {
+        @content;
+    }
+}
+
+/// `below()`, plus the landscape phone that is too wide for it.
+@mixin below-with-phone($key) {
+    @media (max-width: #{width-of($key) - 0.02px}), #{$phone-landscape} {
+        @content;
+    }
+}

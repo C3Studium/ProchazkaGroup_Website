@@ -1,0 +1,47 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.gridDistortion {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    // Inherited so this can sit inside a round frame — the wheels — without
+    // squaring it off.
+    border-radius: inherit;
+}
+
+// The ordinary <Image>, underneath. It is what is served, what is measured and
+// what is read; the canvas is only ever laid over the top of it.
+.gridDistortion__fallback {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+}
+
+.gridDistortion__canvas {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+
+    canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+    // Only once the texture is up, so the swap from the fallback to the canvas
+    // is never a flash of nothing.
+    &.is-ready {
+        opacity: 1;
+    }
+}

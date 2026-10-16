@@ -1,0 +1,230 @@
+import { useState } from "react"
+import Link from "next/link"
+import { useStudioRouter } from "../../runtime/navigation.jsx"
+import { useAuth, usePort, useRevision, useStudio, useTypes } from "../context/StudioProvider.jsx"
+import { useAsync } from "../hooks/useAsync.js"
+import { hrefs, isActive, parseRoute, previewFrom } from "../lib/routes.js"
+import { PENDING, REVIEW_TYPE, queueQuery, reviewsManaged } from "../lib/moderation.js"
+import { initials } from "../lib/format.js"
+import Icon from "../ui/Icon.jsx"
+import { IconButton } from "../ui/controls.jsx"
+import PasswordDialog from "./PasswordDialog.jsx"
+import { usePersistedFlag } from "./persist.js"
+import styles from "./Sidebar.module.scss"
+
+const COLLAPSED_KEY = "cms.studio.sidebar.collapsed"
+
+/**
+ * Navigation. The content section is generated from `listTypes()` — adding a
+ * schema puts it in the sidebar with no change here, which is the whole point of
+ * config-driven types.
+ *
+ * Moderation sits above the content list rather than inside it because it is not
+ * a content type to the client, it is the job they open this tool to do.
+ *
+ * Collapsing keeps every row and only drops the words. An admin's navigation is
+ * learned by position within a week, and once it is, the labels are costing 180px
+ * of the screen the person is actually working on — but a rail that hid its items
+ * would make the editor open it to find out where they are, which is worse than
+ * never collapsing at all. Below 900px the same rail is forced by the stylesheet,
+ * because at that width the choice is not really available.
+ */
+export default function Sidebar() {
+  const router = useStudioRouter()
+  const types = useTypes()
+  const port = usePort()
+  const { config } = useStudio()
+  const { revision } = useRevision()
+  const { user, isOwner, signOut } = useAuth()
+  const [changingPassword, setChangingPassword] = useState(false)
+  const [collapsed, setCollapsed] = usePersistedFlag(COLLAPSED_KEY, false)
+
+  // The queue badge is the one number the client wants without navigating.
+  //
+  // Vypnuté recenze znamenají, že se na ně ani NEPTÁ. Projekt, který je má
+  // v jiném nástroji, by na ten dotaz odpověděl chybou nebo prázdnem — a ptát
+  // se na číslo, které se nemá kam vypsat, je zbytečné volání při každém
+  // překreslení bočního menu.
+  const showReviews = reviewsManaged()
+  const { data: pending } = useAsync(
+    () => (showReviews ? port.list({ type: REVIEW_TYPE, perPage: 1, ...queueQuery(PENDING) }) : Promise.resolve(null)),
+    [port, revision, showReviews],
+  )
+
+  const pendingCount = pending?.total || 0
+
+  // Opening the preview from an editor should come back to that editor, so the
+  // route the shell is already parsing is the source of "which document" — the
+  // views stay unaware that a preview exists.
+  const route = parseRoute(router.query.path)
+  const from = route.view === "editor" ? previewFrom(route.type, route.id) : null
+
+  return (
+    <nav
+      className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}
+      aria-label="Hlavní navigace"
+      data-collapsed={collapsed ? "true" : "false"}
+    >
+      <div className={styles.head}>
+        <Link href={hrefs.overview()} className={styles.brand} title={config.title}>
+          <span className={styles.mark}>
+            <Icon name="layers" size={15} />
+          </span>
+          <span className={styles.brandText}>{config.title}</span>
+        </Link>
+        {/* A real button in the document's tab order, not a hover affordance on
+            the rail's edge: the collapsed state has to be reachable and
+            reversible from the keyboard, and `aria-expanded` is what says which
+            way it will go. */}
+        <button
+          type="button"
+          className={styles.collapseToggle}
+          onClick={() => setCollapsed((current) => !current)}
+          aria-expanded={!collapsed}
+          aria-label={collapsed ? "Rozbalit navigaci" : "Sbalit navigaci"}
+          title={collapsed ? "Rozbalit navigaci" : "Sbalit navigaci"}
+        >
+          <Icon name={collapsed ? "chevronRight" : "chevronLeft"} size={14} />
+        </button>
+      </div>
+
+      <div className={styles.scroll}>
+        <ul className={styles.group}>
+          <NavItem href={hrefs.overview()} icon="grid" label="Přehled" path={router.path} />
+          {/* Recenze jsou modul. Web, který je nemá — nebo je má v backendu,
+              jako e-shop na Meduse — dostane navigaci bez nich; druhá fronta ve
+              druhém nástroji znamená dvě místa, kde se schvaluje, a jedno z nich
+              se přehlédne. Zapíná se v konfiguraci: `reviews: false`. */}
+          {showReviews ? (
+            <NavItem
+              href={hrefs.moderation()}
+              icon="inbox"
+              label="Schvalování recenzí"
+              path={router.path}
+              count={pendingCount}
+              emphasis={pendingCount > 0}
+            />
+          ) : null}
+          {/* Directly under moderation and above "Obsah", by the same argument
+              moderation already won: this is not a content type, it is a job the
+              client opens the tool to do. `monitor` rather than `eye` — the eye
+              is looking at the site (Náhled webu, under Nástroje) and this is
+              working on it. */}
+          <NavItem
+            href={hrefs.edit()}
+            icon="monitor"
+            label="Upravit kontent"
+            path={router.path}
+          />
+        </ul>
+
+        <div className={styles.groupLabel}>Obsah</div>
+        <ul className={styles.group}>
+          {types.map((type) => (
+            <NavItem
+              key={type.name}
+              href={hrefs.list(type.name)}
+              icon={type.icon || "document"}
+              label={type.title || type.name}
+              path={router.path}
+            />
+          ))}
+          {types.length === 0 ? <li className={styles.hint}>Žádné typy obsahu</li> : null}
+        </ul>
+
+        <div className={styles.groupLabel}>Nástroje</div>
+        <ul className={styles.group}>
+          {/* An <a>, not a <Link>: the target is an API route that sets the
+              draft cookie and redirects, and a client-side transition would
+              never reach it. `external` rather than `eye` as the icon because it
+              genuinely leaves the workspace. */}
+          <li>
+            <a
+              className={styles.item}
+              href={hrefs.preview({ mode: "draft", from })}
+              title="Náhled úvodní stránky"
+              aria-label="Náhled úvodní stránky"
+            >
+              <Icon name="eye" size={15} className={styles.itemIcon} />
+              <span className={styles.itemLabel}>Náhled webu</span>
+            </a>
+          </li>
+          <NavItem href={hrefs.media()} icon="image" label="Knihovna médií" path={router.path} />
+          <NavItem href={hrefs.stats()} icon="chart" label="Statistiky" path={router.path} />
+          {/* In Nástroje, first of the owner-only three, and the position is the
+              argument moderation already won: the archive is a job somebody
+              opens the tool to do, not a content type — so it does not belong in
+              Obsah, whose rows are generated from the schema list. It sits at
+              the top of the owner-only cluster because it is about content, the
+              way everything above it in Nástroje is, while Uživatelé and
+              Nastavení are about people and configuration.
+
+              `clock` rather than `archive`: the archive icon already means
+              something else in this admin — "Do archivu" on a document row,
+              which takes it off the site and leaves it in the database. Two
+              different archives sharing one glyph is exactly the confusion this
+              screen exists to remove. */}
+          {isOwner ? <NavItem href={hrefs.archive()} icon="clock" label="Archiv" path={router.path} /> : null}
+          {/* Owners only, both of them. Hiding them is a courtesy — each route
+              renders an explanation for an editor who types the URL, and the
+              server refuses the calls behind them either way.
+
+              Uživatelé keeps its own row rather than being folded into
+              Nastavení: it is the screen the client already knows where to
+              find, and it is opened far more often than the rest of the portal.
+              Nastavení links to it, so the two are one click apart in the
+              direction that is actually travelled. */}
+          {isOwner ? <NavItem href={hrefs.users()} icon="users" label="Uživatelé" path={router.path} /> : null}
+          {isOwner ? (
+            <NavItem href={hrefs.settings()} icon="settings" label="Nastavení" path={router.path} />
+          ) : null}
+        </ul>
+      </div>
+
+      <div className={styles.footer}>
+        <div className={styles.user}>
+          <span className={styles.avatar}>{initials(user?.name || user?.email)}</span>
+          <span className={styles.userText}>
+            <span className={styles.userName}>{user?.name || "Redaktor"}</span>
+            <span className={styles.userMail}>{user?.email}</span>
+          </span>
+          <IconButton icon="lock" label="Změnit heslo" onClick={() => setChangingPassword(true)} />
+          <IconButton icon="logout" label="Odhlásit se" onClick={signOut} />
+        </div>
+        <a className={styles.siteLink} href="/" target="_blank" rel="noreferrer">
+          <Icon name="external" size={12} />
+          Zobrazit web
+        </a>
+      </div>
+
+      <PasswordDialog open={changingPassword} onClose={() => setChangingPassword(false)} />
+    </nav>
+  )
+}
+
+/**
+ * `title` and `aria-label` are unconditional rather than applied only while
+ * collapsed. The rail also collapses from a media query, which JavaScript here
+ * cannot see, and a row whose only accessible name is a `display: none` span is
+ * a row with no accessible name at all. Both values repeat the visible text, so
+ * they cost nothing in the expanded state.
+ */
+function NavItem({ href, icon, label, path, count, emphasis }) {
+  const active = isActive(href, path)
+
+  return (
+    <li>
+      <Link
+        href={href}
+        className={`${styles.item} ${active ? styles.active : ""}`}
+        aria-current={active ? "page" : undefined}
+        aria-label={label}
+        title={label}
+      >
+        <Icon name={icon} size={15} className={styles.itemIcon} />
+        <span className={styles.itemLabel}>{label}</span>
+        {count ? <span className={`${styles.count} ${emphasis ? styles.countHot : ""}`}>{count}</span> : null}
+      </Link>
+    </li>
+  )
+}

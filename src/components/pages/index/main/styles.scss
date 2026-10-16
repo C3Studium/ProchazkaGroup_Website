@@ -1,1980 +1,285 @@
-@media (min-aspect-ratio: 1/1) {
-    @media only screen and ( min-width: 1730px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 10%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 4.5rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 4.5rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: -1.5;
-                    left: 0;
-                    width: 100%;
-                    height: 102%;
-                    overflow: hidden;
+@use "../../../../styles/system/_shortcuts.scss" as *;
 
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 300px;
-                            height: 60px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            .a{  
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-            
-        }
-    }
-    @media only screen and (min-width: 1598px) and (max-width: 1729px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 10%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 80%;
-                        color: var(--wText);
-                        font-size: 4.5rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 4.5rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: -1.5;
-                    left: 0;
-                    width: 100%;
-                    height: 102%;
-                    overflow: hidden;
-
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 300px;
-                            height: 60px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
-    @media only screen and (min-width: 1420px) and (max-width: 1596px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 10%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 3.5rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 3.5rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: -1.5;
-                    left: 0;
-                    width: 100%;
-                    height: 102%;
-                    overflow: hidden;
-
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 300px;
-                            height: 60px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.3rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
-    @media only screen and (min-width: 1260px) and (max-width: 1420px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 10%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 3rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 3rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
-
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 250px;
-                            height: 50px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 160px;
-                            height: 160px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
-    @media only screen and (min-width: 960px) and (max-width: 1240px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 20%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 2.5rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 2.5rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 102%;
-                    overflow: hidden;
-
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 250px;
-                            height: 50px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                 .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 160px;
-                            height: 160px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
-    @media only screen and (min-width: 701px ) and (max-width: 950px) and (min-height: 280px) and (max-height: 600px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 15%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 2rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 2rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 102%;
-                    overflow: hidden;
-
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 2.5%;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 200px;
-                            height: 40px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 140px;
-                            height: 140px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 0.9rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
-    @media only screen and (min-width: 500px ) and (max-width: 700px) and (min-height: 200px) and (max-height: 380px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 15%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 2rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 2rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 102%;
-                    overflow: hidden;
-
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
-
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 2.5%;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 200px;
-                            height: 40px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 140px;
-                            height: 140px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 0.9rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
-        }
-    }
+// Shared wrapper for the hero and WhoWeAre: it gives the sticky hero its
+// travel (= WhoWeAre's height) and is the non-sticky element the hero's
+// scroll progress is measured against.
+.HeroStack {
+    position: relative;
 }
 
-@media (max-aspect-ratio: 1/1) {
-    @media only screen and (min-width: 1000px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 10%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 3rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 3rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
+.MainIntro {
+    width: 100%;
+    height: 100vh;
+    // Pinned while WhoWeAre scrolls over it. Also the containing block for the
+    // absolute children (title, image, video background). Must stay
+    // transparent: an opaque background here would paint over the z:-1 video.
+    position: sticky;
+    top: 0;
 
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
+    .MainIntro__Title {
+        position: absolute;
+        top: 14vh;
+        left: 7vw;
+        z-index: 2;
+        margin: 0;
+        font-family: "Switzer-Light";
+        font-weight: 300;
+        color: var(--wText);
+        text-transform: uppercase;
+        font-size: clamp(2.2rem, 3.2vw, 4.1rem);
+        line-height: 1.3;
+        letter-spacing: 0.05em;
 
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 250px;
-                            height: 50px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 160px;
-                            height: 160px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
+        .highlighted {
+            color: var(--hColor);
         }
     }
-    @media only screen and (min-width: 600px) and (max-width: 990px) and (min-height: 800px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 15%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 70%;
-                        color: var(--wText);
-                        font-size: 2.5rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 2.5rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
 
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
+    // Entrance-only wrappers: layout-neutral shells the preloader-gated
+    // entrance animates, so the scroll-driven outer boxes keep their exact
+    // geometry. enterStack/enterRow replicate their parent's flex so the
+    // children never notice the extra element.
+    .MainIntro__enterBlock {
+        display: block;
+    }
 
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
+    .MainIntro__enterPhoto {
+        position: absolute;
+        inset: 0;
+        will-change: clip-path, transform;
+    }
 
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 250px;
-                            height: 50px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
+    .MainIntro__enterStack {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: inherit;
+    }
 
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
+    .MainIntro__enterRow {
+        display: flex;
+        align-items: flex-end;
+        gap: 1.25rem;
+    }
 
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 140px;
-                            height: 140px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
+    .MainIntro__Image {
+        position: absolute;
+        top: 26vh;
+        left: 18.5vw;
+        width: 63vw;
+        height: 62vh;
+        z-index: 1;
+
+        // Sits over the photo to knock the exposure down, and that is all it
+        // does — so it must not take the pointer. It is a sibling of the
+        // distortion canvas rather than a child of it, so anything it swallows
+        // never reaches the picture underneath: the hero was the one image on
+        // the page that could not be pushed around, and this was why.
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+            z-index: 1;
         }
     }
-    @media only screen and (min-width: 400px) and (max-width: 600px) and (min-height: 700px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 15%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 90%;
-                        color: var(--wText);
-                        font-size: 2rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 2rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
 
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
+    .MainIntro__Background {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: -1;
 
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
+        .MainIntro__Background__video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
 
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 220px;
-                            height: 50px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 140px;
-                            height: 140px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(25px);
         }
     }
-    @media only screen and (min-width: 380px) and (max-width: 399px) and (min-height: 600px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
-            }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 15%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 90%;
-                        color: var(--wText);
-                        font-size: 2rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 2rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
 
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
+    .MainIntro__Badge {
+        position: absolute;
+        left: 4.5vw;
+        top: 44vh;
+        z-index: 2;
 
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
-            }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 220px;
-                            height: 50px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
-
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 140px;
-                            height: 140px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            
+        a {
+            display: block;
+            text-decoration: none;
         }
     }
-    @media only screen and (min-width: 320px) and (max-width: 379px) and (min-height: 450px) {
-        .MainIntro{
-            position: relative;
-            display: flex;
-            width: 100vw;
-            min-height: 100vh;
-            height: auto;
-            justify-content: center;
-            align-items: center;
-            background-color: transparent;
-            overflow: hidden;
-            .header{
-                position: fixed;
-                top: 2.5vh;
-                left: 2.5vw;
-                display: flex;
-                justify-content: flex-start;
-                align-items: center;
-                z-index: 100;
-                width: 2.5vw;
-                height: 2.5vw;
-                mix-blend-mode: difference;
-                
-                a{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    text-decoration: none;
-                    
-                    h2{
-                        font-size: 1.5rem;
-                        margin: 0;
-                        color: var(--wText);
-                        font-family: "Switzer-Light"
-                    }
-                }
+
+    .MainIntro__Scroll {
+        position: absolute;
+        bottom: 3vh;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--wText);
+        font-family: "Switzer-Light";
+        font-size: 1rem;
+
+        .MainIntro__Scroll__arrow {
+            font-size: 1.4rem;
+        }
+    }
+
+    .MainIntro__reviews {
+        position: absolute;
+        right: 1.5vw;
+        bottom: 2.5vh;
+        z-index: 2;
+        display: flex;
+        align-items: flex-end;
+        gap: 1.25rem;
+
+        p {
+            margin: 0;
+            color: var(--wText);
+            font-family: "Switzer-Light";
+            font-weight: 300;
+            font-size: 1.05rem;
+            line-height: 1.35;
+        }
+    }
+
+    @include below(sm) {
+        .MainIntro__Title {
+            top: 11vh;
+            left: 6vw;
+            font-size: clamp(1.6rem, 7vw, 2.2rem);
+        }
+
+        .MainIntro__Image {
+            top: 30vh;
+            left: 5vw;
+            width: 90vw;
+            height: 46vh;
+        }
+
+        .MainIntro__Badge {
+            left: auto;
+            right: 4vw;
+            top: auto;
+            bottom: 14vh;
+        }
+
+        .MainIntro__reviews {
+            right: 4vw;
+            bottom: 8vh;
+        }
+    }
+
+    // Phone landscape (480+ wide, ≤520 tall). A 100vh hero on a ~390px-tall
+    // screen: the portrait stack cannot fit, so the hero goes side-by-side —
+    // words top-left, photo right — with every offset re-derived from the
+    // short axis. Written after the below(sm) block on purpose: an 844×390
+    // phone matches neither width stop the same way, and source order is what
+    // lets this one win where they overlap.
+    @include phs-h {
+        .MainIntro__Title {
+            // Down off the bar and into the middle of the column it stands in.
+            // At 16vh it started level with the photograph's top edge and read
+            // as a caption pinned under the navigation; the left half of a
+            // landscape phone is otherwise empty from the bar to the badge, and
+            // the headline is the only thing in it.
+            //
+            // `top` rather than a transform, and that is not a preference: the
+            // element carries an inline `transform` from framer-motion — the
+            // parallax `y` the hero scrolls the headline with — so a translate
+            // written here would be overwritten on the first frame.
+            //
+            // The 84px floor is for the 320-tall screen, where 26vh is 83 and
+            // the bar is 74: without it the two touch.
+            top: max(84px, 26vh);
+            left: 5vw;
+            // Bigger, because it is now the only thing in its half of the
+            // screen and it was set at the size of a caption. The ceiling is
+            // what keeps the longest line — FINANČNÍ PORADENSTVÍ — clear of the
+            // photograph's left edge at 47vw.
+            font-size: clamp(1.05rem, 3.1vw, 1.8rem);
+            line-height: 1.35;
+        }
+
+        .MainIntro__Image {
+            // The px floor keeps the photo's top edge off the navbar on the
+            // shortest screens (320px tall), where 16vh alone runs into it.
+            top: max(56px, 16vh);
+            left: 47vw;
+            width: 48vw;
+            height: 62vh;
+        }
+
+        .MainIntro__Badge {
+            // Cleared past the fixed chat bubble pinned in the corner below.
+            left: max(70px, 8vw);
+            right: auto;
+            top: auto;
+            bottom: 6vh;
+
+            // The ring is a fixed-size circle owned by RotatingButton; on a
+            // short screen it is scaled down here rather than resized there,
+            // so its internal geometry stays untouched. The link's hit target
+            // keeps the full box — larger than the visual, never smaller.
+            a {
+                transform: scale(0.62);
+                transform-origin: bottom left;
             }
-        
-            .MainIntro__Wrapper{
-                position: absolute;
-                display: flex;
-                width: 100%;
-                height: 100%;
-                justify-content: flex-end;
-                align-items: center;
-                will-change: transform, opacity;
-        
-                .Heading{
-                    z-index: 3;
-                    position: absolute;
-                    bottom: 10%;
-                    right: 2.5%;
-                    transform: translateY(-50%);
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    h1{
-                        text-align: right;
-                        width: 90%;
-                        color: var(--wText);
-                        font-size: 1.8rem;
-                        font-family: "Switzer-Regular";
-                        .highlighted{
-                            color: var(--hColor);
-                            font-size: 1.8rem;
-                        }
-                    }
-                }
-                .background__container{
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
+        }
 
-                    .cover{
-                        position: absolute;
-                        top: 0;
-                        left: 0;
-                        width: 100%;
-                        height: 100%;
-                        background-color: var(--bgColor2);
-                        opacity: 0.45;
-                        z-index: 1;
-                    }
+        .MainIntro__Scroll {
+            bottom: 2.5vh;
+            // Off dead center: at 568px wide the centered hint runs into the
+            // reviews block anchored bottom-right. A third of the way across
+            // sits in the clear lane between the badge and the reviews at
+            // every landscape-phone width.
+            left: 34vw;
+            gap: 0.35rem;
+            font-size: 0.85rem;
 
-                    img{
-                        width: 100%;
-                        height: 100%;
-                        object-fit: cover;
-                    }
-                }
-
-        
+            .MainIntro__Scroll__arrow {
+                font-size: 1.1rem;
             }
-            .rect__container{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                width: 25%;
-                height: 10vh;
-                display: flex;
-                justify-content: center;
-                align-items: flex-end;
-                z-index: 57;
-            
-                .rect__bottom{
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    text-decoration: none;
-                    justify-content: flex-start;
-                    align-items: center;
-                    position: relative;
-                    color:  var(--wText);
-                    padding: 0 0 0 2.5vw;
-                    .magnetic{
-                        .Small__button_container{
-                            width: 220px;
-                            height: 40px;
-                            .Small__button_Text{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
+        }
 
-                }
-            }
-            .button__container{
-                position: absolute;
-                bottom: 2.5%;
-                right: 2.5%;
-                z-index: 56;
+        .MainIntro__reviews {
+            right: 3vw;
+            bottom: 2.5vh;
+            gap: 1rem;
 
-                .button__bottom{
-                    text-decoration: none;
-                    width: 100%;
-                    height: 100%;
-                    display: flex;
-                    justify-content: center;        
-                    align-items: center;
-                    position: relative;
-                    .magnetic{
-                        .Rotating__button_container{
-                            width: 140px;
-                            height: 140px;
-                            .a{
-                                p{
-                                    font-family: "Satoshi-Variable";
-                                    font-size: 1.1rem;
-                                }
-                            }
-                        }
-                    }
-                }
+            p {
+                font-size: 0.85rem;
             }
-            
+        }
+    }
+
+    // Short laptops (1200+ wide, ≤800 tall): the desktop offsets hold, but
+    // the full-size headline sinks three lines deep into the photo. Start it
+    // higher and cap it lower so the overlap stays at the ~1.5 lines the
+    // tall-viewport composition shows.
+    @include lt-h {
+        .MainIntro__Title {
+            top: 12vh;
+            font-size: clamp(1.9rem, 2.6vw, 3rem);
         }
     }
 }

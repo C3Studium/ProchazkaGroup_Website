@@ -1,26 +1,144 @@
 import "@/styles/globals.scss";
 import { useEffect } from "react";
+import { useRouter } from "next/router";
+import Head from "next/head";
+import dynamic from "next/dynamic";
 import Lenis from "lenis";
 import { LoadProvider } from "@/context/LoadProvider";
 import { CursorRefProvider } from "@/context/CursorRefProvider";
-import { Toaster } from "@/components/ui/toaster";
 import { PerformanceProvider } from "@/context/PerformanceProvider";
 import { CookiesProvider } from "@/context/CookiesProvider";
-import Transition from "@/components/common/Transition";
-import CookiesBar from "@/components/modems/Cookies";
+import { useTunnelPreset } from "@/components/common/ui/NeuralTunnel/presets";
+// The seam. `@/cms` answers which shell a route wants and supplies the admin's;
+// the decision is a static property of the page component, so it reads the same
+// on the server pass and the first client pass. See @/cms/shell for why it is
+// not a path prefix — `/studio/preview/home` is a page of *this* site.
+import { StudioShell, usesStudioChrome } from "@/cms";
+// Visual editing, and the only line of it that is on a public route. It arms
+// `editable()` when this document is framed by the Studio's preview host and
+// does nothing at all otherwise — the overlay itself is mounted from the host's
+// bundle and is never downloaded here. See @/cms/edit/arm.
+import { useEditArming } from "@/cms/edit/arm";
+// The editor's way back into the Studio, so the client never types /studio into
+// an address bar. Mounted on every public route and worth almost nothing there:
+// it is a cookie check in an effect and a `dynamic()` that is never requested
+// unless the check passes. See @/cms/manage — and @/cms/manage/hint for why the
+// cookie it reads is a convenience and can never be a control.
+import ManageBadge from "@/cms/manage";
+// import Transition from "@/components/common/Transition";
+import CookiesBar from "@/components/modems/CookiesBar";
+// GTM, GA a Clarity — vykreslí se až po souhlasu s analytickými cookies.
+import ConsentScripts from "@/components/common/ConsentScripts";
 import { Analytics } from "@vercel/analytics/react";
+// The shader ground for every page. Loaded client-side only: react-three-fiber
+// builds a WebGL context on mount and has nothing to render on the server.
+const NeuralTunnel = dynamic(
+    () => import("@/components/common/ui/NeuralTunnel"),
+    { ssr: false },
+);
+// The lattice that lights under the cursor. Client-side only for the same
+// reason as the shader: it is a canvas and there is nothing to draw on the
+// server.
+const CursorGrid = dynamic(
+    () => import("@/components/common/ui/CursorGrid"),
+    { ssr: false },
+);
+import Navbar from "@/components/common/navbar";
+import Preloader from "@/components/common/PreLoader";
+import PageVeil from "@/components/common/PageVeil";
+// The custom cursor. Client-side only, and for the same reason the shader and
+// the lattice above are: there is nothing for the server to draw. It also has
+// to answer "is there a pointer here at all" before its first paint — rendered
+// on the server it shipped a ring and a dot into the HTML of every phone, which
+// were then taken away again on hydration. See its own note.
+const Cursor = dynamic(() => import("@/components/common/ui/Cursor"), {
+    ssr: false,
+});
+// Pravítko u pravého okraje: kde na stránce jsme, a dá se na něj kliknout.
+// Klientsky ze stejného důvodu jako kurzor — než se vykreslí, musí vědět, jestli
+// je tu vůbec ukazovátko, a na to se serveru zeptat nedá.
+// Okno novinek — jen v prohlížeči a až po načtení: data si bere samo
+// z /api/news a do serverového HTML nemá co přispět.
+const NewsWidget = dynamic(() => import("@/components/common/NewsWidget"), { ssr: false });
+const ScrollRail = dynamic(() => import("@/components/common/ui/ScrollRail"), {
+    ssr: false,
+});
+import { Toaster } from "sonner";
+// import Footer from "@/components/common/footer";
+import SiteFooter from "@/components/common/SiteFooter";
 
-export default function App({ Component, pageProps }) {
+/**
+ * One decision, and nothing else.
+ *
+ * The two shells are sibling components rather than branches inside one, so the
+ * site's hooks — Lenis, the edit arming — are never called on an admin route,
+ * and switching between the two unmounts one shell wholesale rather than
+ * leaving half of it mounted behind an opaque layer.
+ */
+export default function App({ Component, pageProps, router }) {
+  // Jednou pro web i Studio. Dřív ho psala každá stránka a k tomu _document,
+  // takže v hlavičce byl dvakrát; next/head duplicitu odstraní jen ve svém
+  // vlastním <Head>, ne napříč s _document.
+  const viewport = (
+    <Head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+    </Head>
+  );
+
+  if (usesStudioChrome(Component, router.pathname)) {
+    return (
+      <StudioShell>
+        {viewport}
+        <Component {...pageProps} />
+      </StudioShell>
+    );
+  }
+
+  return (
+    <>
+      {viewport}
+      <SiteShell Component={Component} pageProps={pageProps} />
+    </>
+  );
+}
+
+/** The managed site: everything a visitor gets, on every route that is one. */
+function SiteShell({ Component, pageProps }) {
+  // Vrácená hodnota je důležitá: anotace se počítají při renderu a po zapnutí
+  // musí každá anotovaná komponenta projít renderem ZNOVU. Změna stavu tady
+  // k nim nemusí doletět — `React.memo` po cestě nebo React Compiler, který
+  // `<Component key={armed ? 'valecms-armed' : 'valecms-site'} {...pageProps} />` memoizuje sám, ji zastaví (změřeno na
+  // Sabině s `reactCompiler: true`: nula anotací). Proto níž `key`: jiný klíč
+  // stránku přemountuje a to nejde obejít ničím. Jednou, jen v rámu Studia.
+  const armed = useEditArming();
+  // Které hodnoty shaderu platí pro tuhle obrazovku — svisle na dotyku jedna
+  // sada, všude jinde druhá. Sledování orientace i obě sady jsou v
+  // NeuralTunnel/presets; tady se jen dosadí.
+  const tunnel = useTunnelPreset();
+  const router = useRouter();
+  const { pathname } = router;
+
+  // Which surface this is, for the one rule that has to tell them apart.
+  //
+  // globals.scss grows the root font size on screens past 1920 so the whole
+  // public site scales to a 2K monitor. rem is root-relative and there is only
+  // one root, so that would take the Studio with it — a dense admin laid out in
+  // px, and explicitly outside this pass. This is what holds it back.
+  useEffect(() => {
+    const studio = pathname.startsWith("/studio");
+    document.documentElement.toggleAttribute("data-studio", studio);
+  }, [pathname]);
+
   useEffect(() => {
     // Initialize Lenis for smooth scrolling
     window.lenis = new Lenis({
-      duration: 1.2,           
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), 
-      lerp: 0.8,               
-      smoothWheel: true,       
-      wheelMultiplier: 1,      
-      touchMultiplier: 1,      
-      autoRaf: false,          
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      lerp: 0.8,
+      smoothWheel: true,
+      wheelMultiplier: 1.2,
+      touchMultiplier: 1.2,
+      autoRaf: false,
     });
 
     function raf(time) {
@@ -35,17 +153,139 @@ export default function App({ Component, pageProps }) {
     }
   }, [])
 
+  // Every page opens at its own top, by whichever of the three doors the
+  // visitor came through.
+  //
+  // The browser gets two of them wrong for this site. A reload restores the
+  // offset it was left at, and so does a back or forward step — both put the
+  // reader down in the middle of a page whose entrances are all keyed to
+  // arriving at its start. On /o-nas that is worse than untidy: the hero and
+  // the showcase are one pinned mechanism measured from the top of the
+  // document, and landing inside it means landing inside an animation that was
+  // never played.
+  //
+  // `manual` turns the browser's own restoration off. Everything after it is
+  // done here rather than in PageVeil so that it covers navigations the veil
+  // does not drive — a back button, a router.push from anywhere — and not only
+  // the ones it does.
+  //
+  // Placed after the effect above on purpose: effects run in the order they are
+  // written, so by the time this one does there is a Lenis to talk to.
+  useEffect(() => {
+    if ("scrollRestoration" in window.history) {
+      window.history.scrollRestoration = "manual";
+    }
+
+    const toTop = () => {
+      // The Studio keeps its own place. It is a dense admin that scrolls in its
+      // own panels and is outside every pass this rule belongs to; sending it
+      // home on each of its internal route changes would be a regression, not a
+      // fix.
+      if (window.location.pathname.startsWith("/studio")) return;
+      window.scrollTo(0, 0);
+      // Lenis holds a scroll position of its own and would glide the page back
+      // to it on the next frame. `immediate` makes this a jump rather than a
+      // visible ride; `force` is because the veil stops Lenis for the length of
+      // a transition, and a stopped instance ignores a plain scrollTo.
+      if (window.lenis) window.lenis.scrollTo(0, { immediate: true, force: true });
+    };
+
+    toTop();
+    router.events.on("routeChangeComplete", toTop);
+
+    // The third door: a step back into the bfcache. No mount, no route change,
+    // and the browser restores the offset itself — so neither of the two above
+    // ever hears about it.
+    const onShow = (e) => {
+      if (e.persisted) toTop();
+    };
+    window.addEventListener("pageshow", onShow);
+
+    return () => {
+      router.events.off("routeChangeComplete", toTop);
+      window.removeEventListener("pageshow", onShow);
+    };
+  }, [router.events])
+
   return (
     <CookiesProvider>
       <PerformanceProvider>
         <LoadProvider>
           <CursorRefProvider>
-             <Transition> 
-                  <CookiesBar />
-                  <Component {...pageProps} />
-                  <Analytics />
-                  <Toaster />
-              </Transition>
+            {/* Předvolby telefonu tady bývaly, jako provider krmený propem
+                z každé stránky. Nejsou obsah tohohle webu, ale funkce Studia:
+                pole si je bere z @/cms/dialPrefixes, knihovna si je stáhne sama
+                jedním dotazem za záložku a devět `getStaticProps` je nemusí
+                vozit. Viz src/cms/DIAL-PREFIXES.md. */}
+            {/* Hodnoty už nestojí tady, ale v NeuralTunnel/presets — jsou dvě
+                sady a která platí, rozhoduje orientace a to, jestli je to
+                dotykové zařízení. Rozepsané na tomhle místě by se daly změnit
+                jen pro obojí najednou. */}
+            <NeuralTunnel className="neural-tunnel--page" {...tunnel} />
+            {/* Sits over the shader and under everything that is read. Values
+                are the ones settled on in the generator: a 150px lattice at 10%
+                white and a half-pixel stroke, which is the same hairline weight
+                as the section rules, so it reads as those rules briefly
+                extending rather than as a second system arriving. */}
+            <CursorGrid
+              className="cursorGrid--page"
+              cellSize={150}
+              color="#ffffff"
+              radius={100}
+              falloff="smooth"
+              holdTime={250}
+              fadeDuration={350}
+              lineWidth={0.5}
+              maxOpacity={0.25}
+              fillOpacity={0}
+              gridOpacity={0}
+              cellRadius={0}
+              clickPulse
+              pulseSpeed={2000}
+            />
+            {/* The contact sheet the navigation opens reads both its copy and
+                the person it is addressed to from here: the bar is mounted once,
+                outside any page, so they travel on every page's props beside the
+                patička. See @/lib/site/footer. */}
+            <Preloader />
+            <PageVeil />
+            <Navbar
+                assistant={pageProps.assistant || null}
+                contactCopy={pageProps.contact || null}
+                // Texty panelu menu. Každá routa je čte ve svém getStaticProps
+                // (viz getNavbarContent) — `_app` vlastní načítání nemá, a tohle
+                // je jediný kanál, kterým se k navigaci dostanou.
+                navCopy={pageProps.navbar || null}
+                /* Poradci pro seznam, který lišta otevírá. Stejná cesta jako u
+                   asistentky a patičky, a ze stejného důvodu: lišta je
+                   namountovaná tady vedle stránky, ne uvnitř ní, takže si sama
+                   načíst nemůže nic. Každá stránka to veze na propech —
+                   `getRoster` v @/lib/site. Bez toho seznam kreslil natvrdo
+                   zapsaná jména z @/constants/roster, která nemají id, a bez id
+                   nejde u nikoho zmáčknout „líbí se". */
+                roster={pageProps.roster || null}
+            />
+            <Cursor />
+            <ScrollRail />
+            <CookiesBar />
+            <ConsentScripts />
+            {/* <BackgroundGradient /> */}
+            <Component {...pageProps} />
+            {/* The patička belongs to no page, so it travels on every page's
+                props. `_app` cannot fetch for itself without
+                `App.getInitialProps`, which opts the whole site out of static
+                generation; a page with no getStaticProps hands down nothing and
+                the footer renders the copy it ships with. See
+                @/lib/site/footer. */}
+            <SiteFooter {...(pageProps.footer || {})} />
+            <Analytics />
+            {/* Last, so a fixed badge in a corner is painted over the page
+                rather than under it, and outside <Component> so switching pages
+                does not remount it. */}
+            <ManageBadge />
+            <NewsWidget />
+            <Toaster containerAriaLabel="Oznámení" position="top-center" richColors closeButton={false} toastOptions={{ duration: 3000 }} />
+
           </CursorRefProvider>
         </LoadProvider>
       </PerformanceProvider>

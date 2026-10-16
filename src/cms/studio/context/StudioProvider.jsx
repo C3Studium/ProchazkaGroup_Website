@@ -1,0 +1,174 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react"
+import { normalizeCore } from "../lib/core.js"
+import { REVIEW_TYPE, reviewsManaged } from "../lib/moderation.js"
+import { RESERVED } from "../lib/routes.js"
+import { ToastProvider } from "./ToastProvider.jsx"
+
+/**
+ * The Studio's only two dependencies — the schema core (Contract 1) and the data
+ * port (Contract 2) — arrive here as props and are read everywhere else through
+ * hooks. Nothing under `studio/` imports a database client, a Supabase client or
+ * the core module directly, which is what lets the dev stub and the real server
+ * port be swapped at the page without touching a single component.
+ */
+
+const StudioContext = createContext(null)
+
+export function StudioProvider({ core, port, config, children }) {
+  // A monotonic signal every mutation bumps. Views that must not go stale — the
+  // sidebar's pending-review count, an open list behind an editor — depend on it
+  // and re-fetch. Cheaper than a cache layer and there is no correctness cliff:
+  // the worst case is one redundant request.
+  const [revision, setRevision] = useState(0)
+  const bump = useCallback(() => setRevision((current) => current + 1), [])
+
+  const value = useMemo(() => {
+    const normalized = normalizeCore(core)
+
+    // Seznam typů, které Studio nabízí — a jediné místo, kde se z něj ubírá.
+    //
+    // `reviews: false` znamená, že recenze spravuje něco jiného. Pak nestačí
+    // schovat moderační frontu: dokud typ zůstane v tomhle seznamu, je „Recenze"
+    // pořád v obsahu v bočním menu, pořád mezi rychlými akcemi a pořád ve
+    // filtrech archivu. Ubrat ho tady je ubere ve všech třech najednou, protože
+    // všechny tři čtou tenhle seznam.
+    //
+    // Typ se z registru schémat nemaže — server ho pořád zná a veřejný web
+    // pořád čte schválené recenze. Mění se jen to, co Studio nabízí.
+    const types = normalized.listTypes().filter((type) => reviewsManaged() || type.name !== REVIEW_TYPE)
+
+    // A type whose name collides with a shell route would be unreachable. Fail
+    // loudly in development rather than 404 for the client months later.
+    const shadowed = types.filter((type) => RESERVED.includes(type.name))
+    if (shadowed.length && process.env.NODE_ENV !== "production") {
+      console.warn(
+        `[studio] Content type(s) ${shadowed.map((type) => `"${type.name}"`).join(", ")} shadow a reserved Studio route ` +
+          `(${RESERVED.join(", ")}) and cannot be opened. Rename the type.`,
+      )
+    }
+
+    return { core: normalized, port, types, revision, bump, config: { title: "Studio", ...config } }
+  }, [core, port, config, revision, bump])
+
+  return (
+    <StudioContext.Provider value={value}>
+      <ToastProvider>{children}</ToastProvider>
+    </StudioContext.Provider>
+  )
+}
+
+export function useStudio() {
+  const context = useContext(StudioContext)
+  if (!context) throw new Error("useStudio must be used inside <StudioProvider>")
+  return context
+}
+
+export const usePort = () => useStudio().port
+export const useCore = () => useStudio().core
+export const useTypes = () => useStudio().types
+export const useType = (name) => useCore().getType(name)
+
+/** `revision` belongs in a fetch's dependency list; `bump` is called after writes. */
+export function useRevision() {
+  const { revision, bump } = useStudio()
+  return { revision, bump }
+}
+
+/* ------------------------------------------------------------------ auth -- */
+
+const AuthContext = createContext(null)
+
+/**
+ * Session state for the sign-in gate. `status` is explicit rather than derived
+ * from `user == null` so the gate can hold its ground during the first check
+ * instead of flashing the sign-in form at an already-authenticated editor.
+ *
+ * `user.role` decides what the Studio offers, never what it permits: the server
+ * re-checks every owner-only call and answers 403 regardless of what this
+ * object says. Hiding a control the server would refuse is a courtesy to the
+ * person, not a boundary.
+ */
+export function AuthProvider({ children }) {
+  // Už jeden nad sebou máme? Pak jen pustit dál.
+  //
+  // Překryv v rámu si zakládá vlastní React root (edit/overlay/mount.jsx) a musí
+  // si proto session obstarat sám — jenže tentýž Popup Studio renderuje i uvnitř
+  // sebe, kde `AuthProvider` z Studio.jsx dávno je. Bez tohohle by tam vznikl
+  // druhý a s ním druhé volání /auth/user na každé otevření popupu.
+  //
+  // Nakrátko, ne podmíněně: hooky pod tímhle řádkem se musí zavolat vždycky
+  // a ve stejném pořadí, takže se vrací až na konci souboru. Viz `nested`.
+  const inherited = useContext(AuthContext)
+  const port = usePort()
+  const [state, setState] = useState({ status: "checking", user: null })
+
+  const refresh = useCallback(async () => {
+    try {
+      const user = await port.auth.user()
+      setState({ status: user ? "authenticated" : "anonymous", user })
+      return user
+    } catch {
+      setState({ status: "anonymous", user: null })
+      return null
+    }
+  }, [port])
+
+  useEffect(() => {
+    // Zděděný kontext znamená, že se někdo nad námi ptá za nás. Hook zavolat
+    // musíme (pořadí hooků je pořád stejné), ale dotaz posílat ne — jinak by
+    // každé otevření popupu uvnitř Studia znamenalo druhé kolo na /auth/user
+    // a odpověď, kterou stejně zahodíme.
+    if (inherited) return
+    refresh()
+  }, [inherited, refresh])
+
+  const value = useMemo(
+    () => ({
+      ...state,
+      // The developer's account. `owner` is a client's title, not a permission —
+      // see server/auth.js effectiveRole() — so everything gated on "may
+      // administer this CMS" asks for admin.
+      isAdmin: state.user?.role === "admin",
+      // Majitel nebo správce: provozní obrazovky (archiv, uživatelé, provozní
+      // část nastavení). Stejné pravidlo jako isOwnerRole v server/auth.js —
+      // tady jen kvůli tomu, co se ukáže; povoluje server.
+      isOwner: state.user?.role === "admin" || state.user?.role === "owner",
+      // The role itself, for the field-level rules — a field says which roles
+      // may write it (core/defineField.js editRoles) and the renderer has to be
+      // able to answer that, not just "am I the admin".
+      role: state.user?.role || null,
+      refresh,
+      // The server answers a successful sign-in with the user, so the gate can
+      // hand over immediately rather than making a second round trip to find
+      // out what it already knows.
+      signIn: async (email, password) => {
+        const user = await port.auth.signIn(email, password)
+        if (user) setState({ status: "authenticated", user })
+        else await refresh()
+      },
+      signOut: async () => {
+        await port.auth.signOut()
+        setState({ status: "anonymous", user: null })
+      },
+      // A password change re-issues the session cookie server-side; refreshing
+      // keeps this object honest about who the new session belongs to.
+      changePassword: async (patch) => {
+        await port.auth.changePassword(patch)
+        await refresh()
+      },
+    }),
+    [state, port, refresh],
+  )
+
+  // Teprve tady, po všech hoocích. Vrátit `children` hned nahoře by znamenalo
+  // pokaždé jiný počet zavolaných hooků, což React zakazuje.
+  if (inherited) return children
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext)
+  if (!context) throw new Error("useAuth must be used inside <AuthProvider>")
+  return context
+}

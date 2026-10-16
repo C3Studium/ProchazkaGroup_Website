@@ -1,0 +1,26 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.cursorGrid {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.cursorGrid__canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+// The page-wide instance: pinned to the viewport, above the shader ground and
+// below everything that is read, and inert to the pointer. Inert matters — this
+// layer covers the entire page, and a canvas that accepted the pointer would
+// take every hover on the site with it, which is also why the component listens
+// on the window instead of on itself.
+.cursorGrid--page {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+}

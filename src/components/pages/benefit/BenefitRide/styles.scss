@@ -1,0 +1,779 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+
+// See index.jsx. The rewards as one horizontal bento journey: a pinned stage,
+// a track of boxes ridden right-to-left, and the navbar wall's grow-and-push
+// on every box. The vocabulary is the page's own — the WebGL shader is the
+// ground and the boxes are separated by it, light uppercase headings,
+// letterspaced caps, hairlines, and the one accent rationed to the money that
+// deserves it.
+
+$rule: rgba(255, 255, 255, 0.14);
+$curtain: cubic-bezier(0.22, 1, 0.36, 1);
+$ground: rgba(3, 13, 19, 1);
+
+// THE STACKING GATE — twin of the matchMedia in index.jsx, which carries the
+// long version of the reasoning. One decision written twice because one half
+// of it is markup and the other is geometry: JS swaps the pinned ride for the
+// swipe strip, this swaps the pin, the stage and the track that go with it.
+// Change one and you must change the other in the same edit.
+//
+// The height arm keeps a 932×430 phone in landscape off the desktop
+// composition — on width alone it clears `sm` and takes a 340vh pin and a
+// 64vh track inside 430px of screen. 520px is `phs`/`phl`'s own figure.
+@mixin stacked { @media (max-width: 900px), (max-height: 520px) { @content; } }
+@mixin ridden  { @media (min-width: 901px) and (min-height: 521px) { @content; } }
+
+// ── the section and its stage ───────────────────────────────────────────
+
+.BenefitRide {
+    position: relative;
+    z-index: 2;
+    // The ride's length: 100vh of stage plus 200vh of travel.
+    // Longer to keep the pace: the track grew when the blocks did, and the
+    // same scroll over more road is a faster ride.
+    height: 340vh;
+    color: var(--wText);
+
+    @include stacked {
+        height: auto;
+        // A floor under the vh, because the navbar is a fixed height and 10vh
+        // of a phone held sideways is 39px — the eyebrow was landing behind
+        // the logo. The cap keeps the same rhythm from running away on a
+        // tablet held upright.
+        padding: clamp(4.5rem, 10vh, 9rem) 0 clamp(3.5rem, 12vh, 10rem);
+    }
+}
+
+.BenefitRide__stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    // The stage clips its own track — the page must never grow a horizontal
+    // scrollbar off the 150vw waiting to the right.
+    overflow: hidden;
+    // Room for the whole header: eyebrow + the big title + the lead end
+    // around 25vh at the widths this was measured on, and the track begins
+    // under them, not through them.
+    padding-top: 26vh;
+
+    // A short laptop has the same header in a third less height, and 26vh of
+    // 720px leaves the lead's second line sitting on the track's top edge.
+    // The head is tightened to match a few rules down; the stage gives it the
+    // room, and the track gives the stage back what the base still needs.
+    @include lt-h {
+        padding-top: 28vh;
+    }
+
+    @include stacked {
+        position: static;
+        height: auto;
+        padding-top: 0;
+
+        // Vertically open (the strip's own pieces stand out of this box), but
+        // horizontally still CLIPPED — and that difference is load-bearing.
+        //
+        // The stacking gate is twinned between this sheet and the component,
+        // but the twins do not fire at the same MOMENT: this rule paints with
+        // the first frame, while the JS flag starts false for hydration's sake
+        // and only flips in an effect. So on a phone there is a real window in
+        // which the DESKTOP ride is mounted — a track three screens wide —
+        // inside a stage that has already stopped clipping. It escaped the
+        // document, and a phone answered by widening its layout viewport to
+        // ~1143px for half a second. Anything measuring `window.innerWidth` on
+        // mount in that window (TextPressure sizes its face from it, two
+        // sections down) latched onto a viewport three times the phone's and
+        // stayed there.
+        //
+        // `clip` rather than `hidden`: hidden would make this a scroll
+        // container and force `overflow-y` to auto, which is the vertical
+        // freedom this block exists to grant.
+        overflow-x: clip;
+        overflow-y: visible;
+    }
+}
+
+// ── the head — overlaid at the stage's top-left, still while the ride moves ─
+
+.BenefitRide__head {
+    position: absolute;
+    // Below the fixed navbar — the eyebrow was landing under the logo at 5vh.
+    top: 8vh;
+    left: 8vw;
+    right: 8vw;
+    z-index: 3;
+    pointer-events: none;
+
+    // The short-laptop tightening, the head's half of it: the same three lines
+    // in less height, so they still clear the track that begins at 28vh.
+    @include lt-h {
+        top: 7vh;
+
+        .BenefitRide__eyebrow { margin-bottom: 0.7rem; }
+        .BenefitRide__lead { margin-top: 1vh; }
+    }
+
+    @include stacked {
+        position: static;
+        padding: 0 6vw;
+        margin-bottom: 5vh;
+        pointer-events: auto;
+    }
+}
+
+.BenefitRide__eyebrow {
+    margin: 0 0 1.2rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--hColor);
+}
+
+.BenefitRide__title {
+    margin: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.9rem, 3vw, 3.4rem);
+    line-height: 1.06;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.BenefitRide__lead {
+    margin: 1.6vh 0 0;
+    max-width: 44ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.92rem, 1.05vw, 1.2rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.62);
+}
+
+// ── the track ───────────────────────────────────────────────────────────
+//
+// The thread down from the section above: one hairline at the left content
+// edge (the same x the three steps' rules end on), from the section's very
+// top to the eyebrow it lands on. It lives on the section, not the sticky
+// stage — it belongs to the boundary and scrolls away with it.
+.BenefitRide__thread {
+    position: absolute;
+    top: 0;
+    left: 8vw;
+    width: 1px;
+    height: 17vh;
+    transform-origin: center top;
+    background-color: rgba(255, 255, 255, 0.18);
+
+    @include stacked {
+        display: none;
+    }
+}
+
+// One flex line of the journey's segments, width set inline in vw, x driven
+// by the scroll and nothing else. Gaps in vw too, so the track's stated width
+// and its real one are the same arithmetic.
+
+.BenefitRide__track {
+    display: flex;
+    // The same figure GAP_VW states in index.jsx — the travel is computed from
+    // it, and a stylesheet that disagreed would land the destination short.
+    gap: 0.7vw;
+    height: 64vh;
+    will-change: transform;
+
+    // The stage took 2vh for the header on a short laptop; the track gives it
+    // back, so the baseline underneath still stands clear of the fold.
+    @include lt-h { height: 60vh; }
+}
+
+// A level's cluster: a fixed-width seat on the track with the wall's physics
+// running INSIDE it. The seat never changes size — that is what keeps a hover
+// from asking three screens of track to re-lay themselves out — and the two
+// rows inside share its height the way the navbar's rows share the panel's.
+.BenefitRide__seat {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+}
+
+// A level's group and the panels' trio: fixed-width seats with the trade
+// running inside. Gaps match the track's, so the seams read as one grid.
+.BenefitRide__group,
+.BenefitRide__trio {
+    display: flex;
+    gap: 0.7vw;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.BenefitRide__cluster {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55vw;
+    min-width: 0;
+    min-height: 0;
+}
+
+.BenefitRide__row {
+    display: flex;
+    gap: 0.55vw;
+    min-width: 0;
+    min-height: 0;
+}
+
+// ── one card ────────────────────────────────────────────────────────────
+
+.BenefitRide__cell {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    // Every card is a button now (see reachProps in index.jsx) — one that
+    // opens itself rather than going anywhere. What comes with that:
+    // no grey flash under the finger on iOS, and no browser focus ring, which
+    // is replaced below by one drawn in the section's own hairline.
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+
+    // The smallest card on the smallest phone in the strip is 66vw × 78vw, and
+    // in the ride the tightest cluster cell is ~10vw × 26vh; both clear 44px by
+    // a wide margin, so no minimum is stated — this is the note that it was
+    // checked rather than forgotten.
+
+    &:focus-visible {
+        outline: 1px solid var(--hColor);
+        outline-offset: -1px;
+    }
+}
+
+// Keyboard reach opens the card exactly as a pointer or a tap does — the
+// brands line is the only place the voucher says what it is for, and it may
+// not be behind an input some readers do not have.
+.BenefitRide__cell:focus-visible {
+    .BenefitRide__face img { filter: saturate(1) brightness(1); }
+    .BenefitRide__scrim { opacity: 0.6; }
+
+    .BenefitRide__more {
+        grid-template-rows: 1fr;
+        opacity: 1;
+
+        > span { clip-path: inset(0 0 0 0); }
+    }
+}
+
+.BenefitRide__face {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: clamp(0.7rem, 1vw, 1.1rem) clamp(0.8rem, 1.1vw, 1.2rem);
+
+    // The photograph, dimmed under the scrim at rest — the wall reads as one
+    // dark material with money written on it, and colour is what hovering
+    // earns.
+    img {
+        z-index: 0;
+        filter: saturate(0.15) brightness(0.6);
+        transition: filter 0.6s $curtain;
+    }
+}
+
+.BenefitRide__cell.is-open .BenefitRide__face img {
+    filter: saturate(1) brightness(1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .BenefitRide__cell:hover .BenefitRide__face img {
+        filter: saturate(1) brightness(1);
+    }
+
+    .BenefitRide__cell:hover .BenefitRide__scrim {
+        opacity: 0.6;
+    }
+
+    .BenefitRide__cell:hover .BenefitRide__more {
+        grid-template-rows: 1fr;
+        opacity: 1;
+
+        > span { clip-path: inset(0 0 0 0); }
+    }
+}
+
+.BenefitRide__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background-image: linear-gradient(
+        to top,
+        rgba(3, 13, 19, 0.92) 0%,
+        rgba(3, 13, 19, 0.55) 38%,
+        rgba(3, 13, 19, 0.18) 72%,
+        rgba(3, 13, 19, 0.08) 100%
+    );
+    opacity: 0.85;
+    transition: opacity 0.5s $curtain;
+
+    .is-open & { opacity: 0.6; }
+}
+
+.BenefitRide__ord,
+.BenefitRide__foot {
+    position: relative;
+    z-index: 2;
+}
+
+.BenefitRide__ord {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin-bottom: auto;
+    font-family: "Switzer-Light", sans-serif;
+}
+
+.BenefitRide__ord__n {
+    font-size: clamp(0.9rem, 1vw, 1.1rem);
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.BenefitRide__ord__cap {
+    font-size: 0.62rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.BenefitRide__amount {
+    display: block;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(1.05rem, 1.35vw, 1.6rem);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.92);
+}
+
+// The accent is rationed: of the twelve cards only the two big rewards carry
+// it — colour agrees with size about what matters.
+.BenefitRide__amount--big {
+    font-size: clamp(1.5rem, 2.1vw, 2.4rem);
+    color: var(--hColor);
+}
+
+// The detail line — given room the way the roster's motto is: a grid row from
+// nothing plus a clip, so the words are uncovered rather than dropped in.
+.BenefitRide__more {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+        grid-template-rows 0.5s $curtain,
+        opacity 0.35s ease;
+
+    > span {
+        overflow: hidden;
+        clip-path: inset(0 0 100% 0);
+        transition: clip-path 0.5s $curtain;
+    }
+
+    .is-open & {
+        grid-template-rows: 1fr;
+        opacity: 1;
+
+        > span { clip-path: inset(0 0 0 0); }
+    }
+}
+
+.BenefitRide__brands {
+    display: block;
+    padding-top: 0.45rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.72rem, 0.85vw, 0.9rem);
+    line-height: 1.45;
+    color: rgba(255, 255, 255, 0.68);
+}
+
+// The editorial pieces — covers and the two cinematic panels. The ordinal is
+// their headline: numerals at the journey's own scale, a heavier cinematic
+// scrim, the amount a statement rather than a caption.
+.BenefitRide__cell--big {
+    .BenefitRide__face {
+        padding: clamp(1.2rem, 1.8vw, 2rem) clamp(1.2rem, 1.8vw, 2rem);
+    }
+
+    .BenefitRide__ord {
+        align-items: baseline;
+        gap: 0.7rem;
+    }
+
+    .BenefitRide__ord__n {
+        font-size: clamp(2.2rem, 3.6vw, 4.4rem);
+        line-height: 0.95;
+        color: rgba(255, 255, 255, 0.92);
+    }
+
+    .BenefitRide__ord__cap {
+        font-size: 0.7rem;
+        letter-spacing: 0.28em;
+    }
+
+    .BenefitRide__scrim {
+        background-image: linear-gradient(
+            to top,
+            rgba(3, 13, 19, 0.96) 0%,
+            rgba(3, 13, 19, 0.6) 34%,
+            rgba(3, 13, 19, 0.16) 66%,
+            rgba(3, 13, 19, 0.3) 100%
+        );
+    }
+
+    .BenefitRide__amount {
+        font-size: clamp(1.5rem, 2.1vw, 2.4rem);
+    }
+}
+
+// A cover opens its level: quiet colour even at rest, so the chapter starts
+// awake and the cluster behind it reads as its contents.
+.BenefitRide__cell--cover .BenefitRide__face img {
+    filter: saturate(0.5) brightness(0.78);
+}
+
+// ── the level markers ───────────────────────────────────────────────────
+//
+// Narrow, quiet, no photo: the journey's chapter headings. Their caps run
+// down the cell — a marker is an edge, not a box with a headline.
+
+.BenefitRide__markCell {
+    position: relative;
+    // The same figure MARK_VW states in index.jsx. Inside the trio the width
+    // is a traded share instead — the inline flex from the component wins.
+    flex: 0 0 4.5vw;
+    min-width: 0;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 1.1rem 0;
+    border-left: 1px solid $rule;
+}
+
+.BenefitRide__markCell--inTrio {
+    flex: 0 1 auto;
+}
+
+.BenefitRide__markCell__label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    white-space: nowrap;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.68rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.32);
+    transition: color 0.5s $curtain;
+
+    .is-lit & { color: rgba(255, 255, 255, 0.7); }
+}
+
+// ── the destination ─────────────────────────────────────────────────────
+
+.BenefitRide__dest {
+    position: relative;
+    min-width: 0;
+    display: flex;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background-color: rgba(255, 255, 255, 0.03);
+}
+
+.BenefitRide__dest__in {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    padding: clamp(1.4rem, 2.2vw, 2.6rem);
+}
+
+.BenefitRide__dest__label {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.BenefitRide__dest__value {
+    margin-top: 1rem;
+    font-family: "Switzer-Light", sans-serif;
+    font-weight: 300;
+    font-size: clamp(2rem, 2.8vw, 3.2rem);
+    letter-spacing: 0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--hColor);
+}
+
+.BenefitRide__dest__note {
+    margin-top: 1.4rem;
+    max-width: 30ch;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: clamp(0.78rem, 0.9vw, 0.95rem);
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+// ── the baseline ────────────────────────────────────────────────────────
+//
+// The journey's one instrument: a hairline, four ticks that light as the ride
+// passes their level, and where the road leads. Fixed to the stage — the map
+// stands still while the territory moves.
+
+.BenefitRide__base {
+    position: relative;
+    margin: 3.2vh 8vw 0;
+    height: 2.6rem;
+
+    &::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: $rule;
+    }
+
+    @include stacked { display: none; }
+}
+
+// The strip's own instrument. The same hairline and the same accent fill, read
+// off the strip's scrollLeft rather than the page's scroll — a horizontal
+// scroller inside a vertical page is the one place on this site where nothing
+// tells you the road continues, and the destination is fifteen cards to the
+// right of the first screen.
+.BenefitRide__base--strip {
+    display: none;
+    margin: 2.6vh 6vw 0;
+    height: 1.4rem;
+
+    @include stacked { display: block; }
+}
+
+// The accent progress along the baseline — origin left, scaled by the ride.
+.BenefitRide__base__fill {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    transform-origin: left center;
+    background-color: var(--hColor);
+    opacity: 0.55;
+}
+
+// One ruler tick per referral. Fixed height, scaled from its FOOT — the foot
+// stands on the baseline (the translate property composes with the transform
+// framer writes, so the anchor survives the scaling) and the tick rises out of
+// the line as the ride reaches it.
+.BenefitRide__ruler {
+    position: absolute;
+    top: 0;
+    width: 1px;
+    height: 1.7rem;
+    translate: 0 -100%;
+    transform-origin: center bottom;
+    background-color: rgba(255, 255, 255, 1);
+    will-change: transform, opacity;
+}
+
+.BenefitRide__tick {
+    position: absolute;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.BenefitRide__tick__line {
+    display: block;
+    width: 1px;
+    height: 0.55rem;
+    background-color: rgba(255, 255, 255, 0.3);
+    transition: background-color 0.5s $curtain;
+
+    .is-lit & { background-color: var(--hColor); }
+}
+
+.BenefitRide__tick__n {
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.25em;
+    font-variant-numeric: tabular-nums;
+    color: rgba(255, 255, 255, 0.3);
+    transition: color 0.5s $curtain;
+
+    .is-lit & { color: rgba(255, 255, 255, 0.78); }
+}
+
+.BenefitRide__base__cap {
+    position: absolute;
+    top: 0.85rem;
+    right: 0;
+    font-family: "Switzer-Light", sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.38);
+}
+
+// ── the phone: a native swipe strip, no pin, no hover ───────────────────
+//
+// One stop's height, stated once. `min(78vw, 52vh)` alone is what a phone in
+// LANDSCAPE breaks on: 78vw is 658px there and 52vh is 203, so the cards came
+// out 557×203 letterboxes with the photograph blown up inside them. The floor
+// is what stops that; the extra cap keeps a tablet from turning each card into
+// a full screen.
+$stop-h: clamp(11rem, min(78vw, 52vh), 26rem);
+
+.BenefitRide__strip {
+    display: flex;
+    // The stops keep their own height; only the destination may exceed it, and
+    // top alignment lets it without dragging the cards taller with it.
+    align-items: flex-start;
+    gap: 2.5vw;
+    overflow-x: auto;
+    // A swipe that runs off the end of the strip must not become the browser's
+    // back gesture.
+    overscroll-behavior-x: contain;
+    // Horizontal scrubbing only — the thumb must always be able to carry the
+    // page vertically THROUGH this strip. `touch-action: none` here is what
+    // made a section on /nabidka a scroll trap.
+    touch-action: pan-x pan-y;
+    padding: 0 6vw 2vh;
+    scroll-snap-type: x mandatory;
+    scroll-padding-left: 6vw;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+
+    .BenefitRide__cell {
+        flex: 0 0 66vw;
+        height: $stop-h;
+        scroll-snap-align: start;
+    }
+
+    .BenefitRide__cell--big { flex-basis: 76vw; }
+
+    // The detail line stands open on EVERY card here, big or small. In the
+    // ride it is what a pointer or a tap earns; in the strip there is no
+    // second state to spend — a card is either on screen or it is not — and
+    // the brands line is the only place a voucher says what it is for. It is
+    // not information to make the reader go looking for.
+    .BenefitRide__more {
+        grid-template-rows: 1fr;
+        opacity: 1;
+
+        > span { clip-path: inset(0 0 0 0); }
+    }
+
+    .BenefitRide__markCell {
+        flex: 0 0 auto;
+        width: 2.6rem;
+        height: $stop-h;
+        padding: 0.9rem 0;
+    }
+
+    // A tablet held upright: 66vw is a 540px card, which reads as a slideshow
+    // rather than a strip. Narrower stops put two on screen and the road is
+    // visibly a road.
+    @include from-px(620) {
+        .BenefitRide__cell { flex-basis: 40vw; }
+        .BenefitRide__cell--big { flex-basis: 48vw; }
+    }
+
+    // A phone held sideways. It is wider than 620 too, so this must come after
+    // the tablet arm — same specificity, source order decides, and a 844×390
+    // screen has to end up here rather than on the tablet's widths.
+    @include phs-h {
+        .BenefitRide__cell { flex-basis: 34vw; }
+        .BenefitRide__cell--big { flex-basis: 42vw; }
+        .BenefitRide__markCell { width: 2.2rem; }
+
+        // Height, not width, is the scarce dimension here, so the stop is
+        // stated in it: what is left of the screen once the head has had its
+        // share, which is what makes a whole card — amount and brands
+        // included — stand above the fold instead of the top third of one.
+        .BenefitRide__cell,
+        .BenefitRide__markCell { height: 60vh; }
+        .BenefitRide__dest { min-height: 60vh; }
+    }
+
+    .BenefitRide__dest {
+        // !important against the inline flex-basis: 0 the share arithmetic
+        // writes — the strip is not a flex line to be shared, it is a road
+        // of fixed stops (the navbar wall does the same below 900).
+        flex: 0 0 82vw !important;
+        // The one stop that may be taller than the others: it carries the sum
+        // and the payout sentence, and on a phone held sideways those do not
+        // fit in a 203px stop. A floor, not a height — and the strip aligns to
+        // its top so the cards do not stretch to follow it.
+        min-height: $stop-h;
+        scroll-snap-align: start;
+    }
+
+    // Same order rule as the stops above: tablet first, landscape phone last.
+    @include from-px(620) {
+        .BenefitRide__dest { flex-basis: 52vw !important; }
+    }
+
+    @include phs-h {
+        .BenefitRide__dest { flex-basis: 56vw !important; }
+    }
+}
+
+// ── the phone held sideways ─────────────────────────────────────────────
+//
+// 390 to 430px of screen with a fixed navbar in the top sixty of it, and the
+// section's own head is five vertical rhythms written in vh that were measured
+// upright. The head keeps all three of its lines — they ARE the section — but
+// at the tightest rhythm they still read at, which is what buys the strip a
+// whole card above the fold. Placed last so it wins the source-order ties
+// against the `stacked` blocks it narrows.
+
+@include phs-h {
+    .BenefitRide { padding-top: 3.5rem; }
+    .BenefitRide__head { margin-bottom: 2.5vh; }
+    .BenefitRide__eyebrow { margin-bottom: 0.5rem; }
+    .BenefitRide__title { font-size: 1.6rem; }
+    .BenefitRide__lead { margin-top: 0.35rem; font-size: 0.85rem; }
+    .BenefitRide__base--strip { margin-top: 1.8vh; }
+}
+
+// ── reduced motion ──────────────────────────────────────────────────────
+//
+// The ride itself stays: it is scroll-mapped 1:1, never autonomous. What goes
+// is the easing around the hover — reveals and colour land instantly, and the
+// growth's springs are already stilled in index.jsx.
+
+@include reduced-motion {
+    // Shorter, not gone. The reveal and the colour answer the reader's own
+    // pointer; a zero-length answer reads as a glitch, which is how it was
+    // reported. What is fully stilled is anything that moves on its own — the
+    // ride's spring already falls back to the 1:1 mapping in index.jsx.
+    .BenefitRide__face img,
+    .BenefitRide__scrim,
+    .BenefitRide__more,
+    .BenefitRide__more > span {
+        transition-duration: 0.3s;
+    }
+
+    .BenefitRide__markCell__label,
+    .BenefitRide__tick__line,
+    .BenefitRide__tick__n {
+        transition: none;
+    }
+}

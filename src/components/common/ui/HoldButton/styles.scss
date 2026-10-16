@@ -1,0 +1,61 @@
+@use "../../../../styles/system/_shortcuts.scss" as *;
+// See index.jsx.
+.holdButton {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: clamp(9rem, 11vw, 13rem);
+    aspect-ratio: 1;
+    padding: 0;
+    background: none;
+    border: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    color: var(--wText);
+    cursor: pointer;
+    // The label is the only thing that should ever be dragged out of shape by a
+    // press, and a text selection under the thumb would fight it.
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.holdButton__ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    // From the top, clockwise — a progress ring that starts at three o'clock
+    // reads as having begun somewhere arbitrary.
+    transform: rotate(-90deg);
+    overflow: visible;
+    fill: none;
+    // One pixel in the viewBox's own units, scaled with it, so it lands at the
+    // same weight as the rules elsewhere on the page.
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.holdButton__ring__rest {
+    stroke: rgba(255, 255, 255, 0.35);
+}
+
+// Accent, and rounded at the head so the stroke reads as something being drawn
+// rather than a shape being revealed.
+.holdButton__ring__run {
+    stroke: var(--hColor);
+    stroke-linecap: round;
+}
+
+.holdButton__label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15em;
+    font-family: "Poppins", sans-serif;
+    font-weight: 200;
+    font-size: clamp(0.8rem, 0.95vw, 1.05rem);
+    line-height: 1.15;
+    text-align: center;
+    pointer-events: none;
+}

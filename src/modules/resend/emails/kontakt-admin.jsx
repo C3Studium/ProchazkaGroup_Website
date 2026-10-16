@@ -1,189 +1,85 @@
-import {
-  Text,
-  Column,
-  Container,
-  Heading,
-  Html,
-  Img,
-  Row,
-  Section,
-  Tailwind,
-  Head,
-  Preview,
-  Body,
-  Link
-} from "@react-email/components"
+import EmailShell, { BrandButton, BrandText, DataRow, DataTable } from "./_shell.jsx"
+import { BRAND } from "./_brand.js"
 
+/**
+ * Nová zpráva z kontaktního formuláře — pro kancelář.
+ *
+ * Vzhled je obálka `_shell.jsx`: barvy a typografie změřené na živém webu,
+ * v hlavičce snímek jeho shaderu. Dřív měl tenhle e-mail fialovo-azurový
+ * přechod a modré pozadí, které web nikde nemá.
+ *
+ * Interní e-mail, takže žádné vítání a žádné sliby o lhůtách — jen kdo psal,
+ * co, a jedno tlačítko, kterým se dá odpovědět.
+ */
 function KontaktAdminEmailComponent({ name, email, message, phone_number, consultant_name }) {
-  const formatDate = (date) => {
-    if (!date) return new Date().toLocaleDateString('cs-CZ')
-    return new Date(date).toLocaleDateString('cs-CZ')
-  }
+    const when = new Date().toLocaleString("cs-CZ", { dateStyle: "long", timeStyle: "short" })
 
-  return (
-    <Tailwind>
-      <Html className="font-sans" style={{ fontFamily: 'Satoshi, sans-serif' }}>
-        <Head>
-          <link rel="stylesheet" href="https://prochazka.group/css/satoshi.css" />
-          <link rel="stylesheet" href="https://prochazka.group/css/switzer.css" />
-        </Head>
-        <Preview>Nová kontaktní zpráva - {name}</Preview>
-        <Body className="mx-auto w-full max-w-2xl tablet:max-w-4xl" style={{ backgroundColor: '#063F66' }}>
-          {/* Header */}
-          <Section className="text-white px-6 py-4 tablet:px-12 tablet:py-8" style={{ backgroundColor: '#9151e0' }}>
-            <Heading className="font-bold m-0 text-2xl tablet:text-4xl" style={{ fontFamily: 'Switzer, sans-serif' }}>
-              Procházka Group - Nová kontaktní zpráva
-            </Heading>
-          </Section>
+    return (
+        <EmailShell
+            preview={`Nová zpráva od ${name || "návštěvníka"}`}
+            eyebrow="Kontaktní formulář"
+            title="Nová zpráva z webu"
+            footNote="Odesláno automaticky z kontaktního formuláře na webu."
+        >
+            <BrandText style={{ margin: 0 }}>Přišla zpráva z kontaktního formuláře.</BrandText>
 
-          {/* Main Content */}
-          <Container className="p-6 tablet:p-8" style={{ backgroundColor: '#050A10' }}>
-            <Heading className="font-light text-center mb-6 text-2xl tablet:text-4xl" style={{ color: '#fff', fontSize: '34px', fontFamily: 'Switzer, sans-serif' }}>
-              Nová zpráva od: <br/>
-              <span className="text-[#4bdadc]">{name}</span>
-            </Heading>
+            <div style={{ paddingTop: "18px" }}>
+                <DataTable>
+                    <DataRow label="Jméno" value={name} />
+                    <DataRow label="E-mail" value={email} />
+                    <DataRow label="Telefon" value={phone_number} />
+                    <DataRow label="Vybraný poradce" value={consultant_name} />
+                    <DataRow label="Odesláno" value={when} last />
+                </DataTable>
+            </div>
 
-            <Section className="border rounded-lg p-6 mb-6 tablet:p-8 tablet:mb-8 shadow-sm hover:shadow-lg transition-all duration-200" style={{ backgroundColor: 'rgba(75, 218, 220, 0.1)', borderColor: '#4bdadc' }}>
-              <Heading className="font-semibold mb-2 text-lg tablet:text-xl" style={{ color: '#4bdadc', fontSize: '21px', fontFamily: 'Switzer, sans-serif' }}>
-                💬 Nová kontaktní zpráva
-              </Heading>
-              <Text className="m-0 text-md tablet:text-base leading-relaxed" style={{ color: '#fff', }}>
-                Zákazník {name} vás kontaktoval přes kontaktní formulář. Zkontrolujte detaily a odpovězte co nejdříve.
-              </Text>
-            </Section>
-
-            {/* Contact Details */}
-            <Section className="rounded-lg p-6 mb-6 tablet:p-8 tablet:mb-8 shadow-sm hover:shadow-lg transition-all duration-200" style={{ backgroundColor: 'rgba(117, 171, 192, 0.1)' }}>
-              <Heading className="font-semibold mb-4 text-lg tablet:text-xl" style={{ color: '#fff', fontSize: '21px', fontFamily: 'Switzer, sans-serif' }}>
-                Kontaktní údaje
-              </Heading>
-              <Row className="mb-3">
-                <Column className="w-full tablet:w-1/3 mb-2 tablet:mb-0">
-                  <Text className="font-semibold m-0 text-sm tablet:text-base" style={{ color: '#4bdadc', fontSize: '13px' }}>Jméno:</Text>
-                </Column>
-                <Column className="w-full tablet:w-2/3">
-                  <Text className="m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#fff', fontSize: '13px' }}>{name}</Text>
-                </Column>
-              </Row>
-              <Row className="mb-3">
-                <Column className="w-full tablet:w-1/3 mb-2 tablet:mb-0">
-                  <Text className="font-semibold m-0 text-sm tablet:text-base" style={{ color: '#4bdadc', fontSize: '13px' }}>Email:</Text>
-                </Column>
-                <Column className="w-full tablet:w-2/3">
-                  <Text className="m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#fff', fontSize: '13px' }}>{email}</Text>
-                </Column>
-              </Row>
-              {phone_number && (
-                <Row className="mb-3">
-                  <Column className="w-full tablet:w-1/3 mb-2 tablet:mb-0">
-                    <Text className="font-semibold m-0 text-sm tablet:text-base" style={{ color: '#4bdadc', fontSize: '13px' }}>Telefon:</Text>
-                  </Column>
-                  <Column className="w-full tablet:w-2/3">
-                    <Text className="m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#fff', fontSize: '13px' }}>{phone_number}</Text>
-                  </Column>
-                </Row>
-              )}
-              {consultant_name && (
-                <Row className="mb-3">
-                  <Column className="w-full tablet:w-1/3 mb-2 tablet:mb-0">
-                    <Text className="font-semibold m-0 text-sm tablet:text-base" style={{ color: '#4bdadc', fontSize: '13px' }}>Poradce:</Text>
-                  </Column>
-                  <Column className="w-full tablet:w-2/3">
-                    <Text className="m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#fff', fontSize: '13px' }}>{consultant_name}</Text>
-                  </Column>
-                </Row>
-              )}
-              <Row>
-                <Column className="w-full tablet:w-1/3 mb-2 tablet:mb-0">
-                  <Text className="font-semibold m-0 text-sm tablet:text-base" style={{ color: '#4bdadc', fontSize: '13px' }}>Datum:</Text>
-                </Column>
-                <Column className="w-full tablet:w-2/3">
-                  <Text className="m-0 text-sm tablet:text-base whitespace-nowrap" style={{ color: '#fff', fontSize: '13px' }}>{formatDate()}</Text>
-                </Column>
-              </Row>
-            </Section>
-
-            {/* Message */}
-            {message && (
-              <Section className="border rounded-lg p-6 mb-6 tablet:p-8 tablet:mb-8 shadow-sm hover:shadow-lg transition-all duration-200" style={{ backgroundColor: '#063F66', borderColor: '#5E758D' }}>
-                <Heading className="font-semibold mb-4 text-lg tablet:text-xl" style={{ color: '#fff', fontSize: '21px', fontFamily: 'Switzer, sans-serif' }}>
-                  Zpráva
-                </Heading>
-                <Text className="m-0 whitespace-pre-wrap text-sm tablet:text-base leading-relaxed" style={{ color: '#fff', fontSize: '13px' }}>
-                  {message}
-                </Text>
-              </Section>
-            )}
-
-            {/* Action Buttons */}
-            <Section className="text-center mb-6 tablet:mb-8">
-              <Row className="mb-2">
-                <Column className="w-full tablet:w-1/2 mb-4 tablet:mb-0 tablet:pr-2">
-                  <Link
-                    href={`mailto:${email}?subject=Nová kontaktní zpráva - ${name}`}
-                    className="px-4 py-3 tablet:px-6 tablet:py-4 rounded-lg font-semibold inline-block transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 text-sm tablet:text-base min-w-[150px] max-w-[200px]"
-                    style={{ backgroundColor: '#9151e0', color: '#fff', fontSize: '13px', textDecoration: 'none', cursor: "pointer" }}
-                  >
-                    Odpovědět emailem
-                  </Link>
-                </Column>
-              </Row>
-              <Row>
-                <Column className="w-full tablet:w-1/2 tablet:pl-2">
-                  {phone_number && (
-                    <Link
-                      href={`tel:${phone_number}`}
-                      className="px-4 py-3 tablet:px-6 tablet:py-4 rounded-lg font-semibold inline-block transition-all duration-200 hover:shadow-lg hover:-translate-y-0.5 text-sm tablet:text-base min-w-[150px] max-w-[200px]"
-                      style={{ backgroundColor: '#4bdadc', color: '#050A10', fontSize: '13px', textDecoration: 'none', cursor: "pointer" }}
+            {message ? (
+                <div style={{ paddingTop: "18px" }}>
+                    <BrandText muted style={{ margin: "0 0 8px" }}>
+                        Zpráva
+                    </BrandText>
+                    <div
+                        style={{
+                            padding: "16px",
+                            backgroundColor: BRAND.raised,
+                            border: `1px solid ${BRAND.line}`,
+                            fontSize: "15px",
+                            lineHeight: "24px",
+                            color: BRAND.ink,
+                            whiteSpace: "pre-wrap",
+                        }}
                     >
-                      Zavolat
-                    </Link>
-                  )}
-                </Column>
-              </Row>
-            </Section>
+                        {message}
+                    </div>
+                </div>
+            ) : null}
 
-            {/* Response Time Notice */}
-            <Section className="border rounded-lg p-6 mb-6 tablet:p-8 tablet:mb-8 shadow-sm hover:shadow-lg transition-all duration-200" style={{ backgroundColor: 'rgba(145, 81, 224, 0.1)', borderColor: '#9151e0' }}>
-              <Heading className="font-semibold mb-2 text-lg tablet:text-xl" style={{ color: '#9151e0', fontSize: '21px', fontFamily: 'Switzer, sans-serif' }}>
-                ⏰ Doporučená doba odpovědi
-              </Heading>
-              <Text className="m-0 text-sm tablet:text-base leading-relaxed" style={{ color: '#fff', fontSize: '13px' }}>
-                Ideální doba pro odpověď je do 24 hodin. Zákazníci oceňují rychlou komunikaci.
-              </Text>
-            </Section>
-          </Container>
-
-          {/* Footer */}
-          <Section className="p-6 tablet:p-8" style={{ backgroundColor: 'rgba(117, 171, 192, 0.1)' }}>
-            <Text className="text-center mb-4 text-sm tablet:text-base" style={{ color: '#fff', fontSize: '13px' }}>
-              Tento email byl odeslán z kontaktního formuláře na webu Procházka Group.
-            </Text>
-            <Text className="text-center text-sm tablet:text-base" style={{ color: '#fff', fontSize: '13px' }}>
-              © {new Date().getFullYear()} Procházka Group. Všechna práva vyhrazena.
-            </Text>
-          </Section>
-        </Body>
-      </Html>
-    </Tailwind>
-  )
+            <div style={{ padding: "24px 0 4px" }}>
+                <BrandButton href={`mailto:${email}?subject=${encodeURIComponent(`Re: vaše zpráva — Procházka Group`)}`}>
+                    Odpovědět
+                </BrandButton>
+            </div>
+        </EmailShell>
+    )
 }
 
-export const kontaktAdminEmail = (props) => {
-  return <KontaktAdminEmailComponent {...props} />
+export default KontaktAdminEmailComponent
+
+// Dvě jména pro jednu komponentu, protože ji volají dva soubory a každý
+// jinak: src/pages/api/resend.js bere pojmenovaný export, resend-enhanced.js
+// výchozí. Sjednotit je by znamenalo sáhnout na obojí; tohle je jeden řádek.
+export const kontaktAdminEmail = KontaktAdminEmailComponent
+
+export const subject = ({ name }) => `Nová kontaktní zpráva — ${name || "web"}`
+
+// Ukázková data pro `pnpm run dev:email`. Bez nich se náhled kreslí prázdný a
+// nejde na něm posoudit, co e-mail dělá s dlouhou zprávou nebo chybějícím
+// telefonem.
+KontaktAdminEmailComponent.PreviewProps = {
+    name: "Karel Šrámek",
+    email: "karel.sramek@example.cz",
+    phone_number: "+420 777 123 456",
+    consultant_name: "Mgr. Václav Procházka",
+    message:
+        "Dobrý den,\nrádi bychom probrali hypotéku na první bydlení a přepojištění auta.\nKdy by se vám to hodilo?",
 }
-
-// Export subject for use in API
-export const subject = ({ name }) => `Nová kontaktní zpráva - ${name}`;
-
-// Mock data for development
-const mockKontaktAdmin = {
-  name: "Petr Dvořák",
-  email: "petr.dvorak@email.cz",
-  phone_number: "+420 602 123 456",
-  consultant_name: "Ondřej Efenberk",
-  message: "Dobrý den,\n\nrád bych se informoval o vašich finančních službách. Máte volný termín na konzultaci?\n\nDěkuji,\nPetr Dvořák"
-}
-
-// @ts-ignore
-export default () => <KontaktAdminEmailComponent {...mockKontaktAdmin} />

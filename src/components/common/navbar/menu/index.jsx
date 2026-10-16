@@ -1,126 +1,71 @@
-import Magnetic from "@/components/anim/Magnetic";
-import { useCursorRef } from "@/context/CursorRefProvider";
-import { usePerformance } from "@/context/PerformanceProvider";
-import { useMotionValue, motion, animate, transform } from "framer-motion";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { ScrollToText } from "../../TextAnim/scrollToText";
+import CornerMarks from "@/components/common/ui/CornerMarks";
+import ButtonLink from "../../ui/stickyButtons/buttons/buttonLink";
+import { usePathname } from "next/navigation";
 
+// The bar: three words, and four corner marks that close around whichever one
+// you have reached for.
+//
+// It used to carry a great deal more — a magnetic wrapper pulling the middle
+// button towards the pointer, a rotate-and-squash transform leaning it at the
+// pointer's angle, and four violet rules drawing a box round the word. All of
+// it went, and the corners do the work now. They are the same mark the buttons
+// in the page use, so the bar and the page say "this can be used" the same way.
+//
+// The middle one is now a real <button>. It was a <div> with an onClick, which
+// no keyboard can reach and no screen reader announces as anything — on the
+// only control that opens the site's navigation. It also says what it does to
+// what, so a reader is told the panel is open without having to find it.
+//
+// The mark beside the word is one hairline that splits into two as the panel
+// opens. It is the same gesture the panel is made of — a cut opening — at the
+// size of a button, so the thing you press and the thing it does are one idea.
+export default function Menu({ menu, setMenu, onContact }) {
+    const pathname = usePathname();
 
-export default function Menu({menu, setMenu}) {
-    const { registerRef, unregisterRef } = useCursorRef();
-    const menuBoundsRef = useRef(null);
-    const menuRef = useRef(null);
-    const textRef = useRef(null);
-    const [boundsHovered, setBoundsHovered] = useState(false); 
+    // The word on the button and the name it answers to, stated once so the two
+    // cannot drift. The name has to be stated at all because ScrollToText draws
+    // the word out of one column per letter and every column carries the whole
+    // forty-three-letter alphabet behind an overflow — visible to the eye as
+    // four letters, and to the accessibility tree as "A Á B C Č D Ď E…". Left to
+    // its contents this button announces itself as the alphabet at every width;
+    // measured. Below 380 across there is no visible word at all (see
+    // styles.scss) and this is the only name it has.
+    const word = menu ? "Zavřít" : "Menu";
 
-    // Performance
-    const { shouldReduceAnimations } = usePerformance();
-
-    
-    const textChange = {
-        initial: {
-            opacity: 0
-        },
-        open: {
-            opacity: 1,
-            transition: {duration: 0.5}
-        },
-        closed: {
-            opacity: 0,
-            transition: {duration: 0.5}
-        }
-    }
-
-    const scale = {
-        x: useMotionValue(1),
-        y: useMotionValue(1)
-    }
-    const rotate = (distance) => {
-        const angle = Math.atan2(distance.y, distance.x)
-        animate(menuRef.current, {rotate: `${angle}rad`}, {duration: 0});
-        animate(textRef.current, {rotate: `${-angle}rad`}, {duration: 0});
-    }
-
-    const manageMouseMove = useCallback((e) => {
-        if (shouldReduceAnimations) return;
-
-        const { clientX, clientY } = e;
-        const { top: topBounds, left: leftBounds, width: widthBounds, height: heightBounds } = menuRef.current.getBoundingClientRect();
-
-        const center = { x: leftBounds + widthBounds / 2, y: topBounds + heightBounds / 2 };
-
-        const distance = { x: clientX - center.x, y: clientY - center.y };
-
-        if (boundsHovered) {
-            rotate(distance);
-            const absDistance = { x: Math.abs(distance.x), y: Math.abs(distance.y) };
-            const newScaleX = transform(absDistance.x, [0, widthBounds / 2], [1, 1.15], { clamp: true }); // clamps => value will not exceed the range - true
-            const newScaleY = transform(absDistance.y, [0, heightBounds / 2], [1, 0.9], { clamp: true });
-            scale.x.set(newScaleX);
-            scale.y.set(newScaleY);
-        } else {return null}
-    }, [boundsHovered, scale.x, scale.y, menuRef]);
-
-    const manageBoundsHover = () => {
-        if (!shouldReduceAnimations) {
-            setBoundsHovered(true);
-        }
-    };
-
-    const manageBoundsLeave = () => {
-        setBoundsHovered(false);
-        animate(menuRef.current, {scaleX: 1, scaleY: 1,}, {duration: 0.5}, {type: 'spring', damping: 5, stiffness: 350, mass: 0.5});
-    };
-
-    useEffect(() => {
-        window.addEventListener('mousemove', manageMouseMove);
-
-        return () => {
-            window.removeEventListener('mousemove', manageMouseMove);
-        };
-    }, [manageMouseMove]);
-
-    useEffect(() => {
-        const current = menuBoundsRef.current;
-        if (current) {
-            current.addEventListener('mouseenter', manageBoundsHover);
-            current.addEventListener('mouseleave', manageBoundsLeave);
-
-            return () => {
-                if(current) {
-                    current.removeEventListener('mouseenter', manageBoundsHover);
-                    current.removeEventListener('mouseleave', manageBoundsLeave);
-                }
-            };
-        }
-    }, [menuBoundsRef, manageBoundsHover, manageBoundsLeave]);
-
-    useEffect(() => {
-        if (menuBoundsRef.current) {
-            registerRef(menuBoundsRef.current);
-        }
-
-        return () => {
-            if (menuBoundsRef.current) {
-                unregisterRef(menuBoundsRef.current);
-            }
-        }
-    }, [menuBoundsRef.current, registerRef, unregisterRef]);
-
-    const template = ({rotate, scaleX, scaleY}) => {
-        return `rotate(${rotate}) scaleX(${scaleX}) scaleY(${scaleY})` 
-    }
     return (
         <div className="navbar__container">
-            <Magnetic sensitivity='0.15'>
-                <motion.div transformTemplate={template} ref={menuRef} style={{scaleX: scale.x, scaleY: scale.y}} className='navbar__menu' onClick={() => setMenu(!menu)}
-                    >
-                    <div ref={menuBoundsRef} className='navbar__bounds'></div>
-                    <div ref={textRef}>
-                        <motion.p variants={textChange} animate={!menu ? "open" : "closed"}>Menu</motion.p>
-                        <motion.p variants={textChange} animate={menu ? "open" : "closed"}>Close</motion.p>
+            <ButtonLink textRotate="Procházka Group" href="/" />
+
+            <button
+                type="button"
+                className="navbar__menu"
+                data-cursor="frame"
+                data-marks
+                aria-expanded={menu}
+                aria-controls="navPanel"
+                aria-label={word}
+                onClick={() => setMenu(!menu)}
+            >
+                <CornerMarks />
+
+                <span className="navbar__cut" aria-hidden="true">
+                    <span />
+                    <span />
+                </span>
+
+                <div className="navbar__text">
+                    <div className="navbar__text__content">
+                        <ScrollToText text={word} duration={0.5} />
                     </div>
-                </motion.div>
-            </Magnetic>
+                </div>
+            </button>
+
+            <ButtonLink
+                textRotate={pathname === "/o-nas" ? "Navázat Spolupráci" : "Spojit se"}
+                kontakt={true}
+                onClick={onContact}
+            />
         </div>
-    )
+    );
 }
