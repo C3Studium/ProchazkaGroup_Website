@@ -30,7 +30,7 @@ https://search.google.com/local/writereview?placeid=<PLACE_ID>
    (nebo adresu `Smetanova 78/1, Písek`).
 3. Kliknout na správnou špendlíkovou značku — v bublině se ukáže název
    a pod ním **Place ID**.
-4. Zkopírovat.
+4. Zkopírovat. 
 
 Kontrola, že je správné: vložit ho do odkazu výše a otevřít v prohlížeči.
 Musí naskočit formulář Googlu s názvem *Procházka Group*. Když naskočí jiná
