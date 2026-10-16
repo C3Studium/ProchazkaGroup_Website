@@ -18,6 +18,7 @@ import { editable, editableLink } from "@/cms/edit";
 import Arrow from "@/components/common/ui/Arrow";
 import { coverGround } from "@/components/common/ui/pageGround";
 import CornerButton from "@/components/common/ui/CornerButton";
+import { CONTACT_TRIGGER } from "@/components/common/ContactModal/open";
 import GridDistortion from "@/components/common/ui/GridDistortion";
 import Lines, { hasLines } from "@/components/common/ui/lines";
 import { useGlobalContext } from "@/context/LoadProvider";
@@ -829,9 +830,13 @@ export default function OfferHero({ copy = {} }) {
                                 which is the site's own routing rather than
                                 content — see `editableLink`'s three shapes and
                                 the same call on /o-nas's cards. */}
+                            {/* Opens the contact sheet; /kontakt itself is
+                                only a redirect for a middle click or no
+                                JavaScript. */}
                             <CornerButton
                                 {...editableLink(docId, { text: "items.0.label" })}
                                 href="/kontakt"
+                                {...CONTACT_TRIGGER}
                             >
                                 {cta}
                                 <span className="cornerButton__arrow">

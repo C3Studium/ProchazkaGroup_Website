@@ -26,8 +26,8 @@ module.exports = {
     // Custom priority for important pages
     const customPriority = {
       '/': 1.0,
-      // '/kontakt' takes the default: it is the fallback address of the
-      // contact sheet the bar opens, and on arrival it opens that sheet.
+      // No '/kontakt': it is not a page, only a redirect to '/' for the
+      // contact buttons' href (see next.config.mjs).
       '/recenze': 0.9,
       '/o-nas': 0.8,
       '/benefit-program': 0.8,

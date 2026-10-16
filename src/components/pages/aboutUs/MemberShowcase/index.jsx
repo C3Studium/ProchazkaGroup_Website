@@ -5,6 +5,7 @@ import { cubicBezier, motion, useMotionValue, useScroll, useSpring, useTransform
 
 const clamp01 = (v) => Math.min(1, Math.max(0, v));
 import CornerButton from "@/components/common/ui/CornerButton";
+import { CONTACT_TRIGGER } from "@/components/common/ContactModal/open";
 import Arrow from "@/components/common/ui/Arrow";
 import SplitText from "@/components/common/ui/SplitText";
 import Circles from "@/components/pages/aboutUs/MemberShowcase/Circles";
@@ -198,9 +199,12 @@ const MemberCard = ({ member, progress: ride, copyProgress: copyRide, from, span
                     three shapes. `items.0.label` is SHOWCASE_VALUES.cta in
                     @/lib/site/aboutUs; all three cards carry the same
                     field, so editing one moves all of them. */}
+                {/* Opens the contact sheet; /kontakt itself is only a
+                    redirect for a middle click or no JavaScript. */}
                 <CornerButton
                     {...editableLink(extrasDocId, { text: "items.0.label" })}
                     href="/kontakt"
+                    {...CONTACT_TRIGGER}
                 >
                     {cta}
                     <span className="cornerButton__arrow"><Arrow direction="upRight" /></span>

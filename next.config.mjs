@@ -178,6 +178,16 @@ const nextConfig = {
         destination: '/recenze/:slug',
         permanent: true,
       },
+      // /kontakt is no longer a page — contact is the sheet every "Spojit se"
+      // button opens. Those buttons still carry href="/kontakt" so a middle
+      // click, a crawler or a browser without JavaScript gets somewhere; this
+      // is where: the homepage, which has the contact form and the footer
+      // with every number on it. Permanent, so the old indexed URL drops out.
+      {
+        source: '/kontakt',
+        destination: '/',
+        permanent: true,
+      },
       // The twelve /reviews/* routes are gone. There was a page per adviser
       // and every one of them rendered nothing at all — an empty <main> under
       // the bar, its only component commented out. But they were real routes,
