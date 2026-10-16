@@ -98,7 +98,7 @@ export default function Home({ content }) {
           "description": "Profesionální finanční poradenství, řešení pojištění a investic pro jednotlivce i firmy.",
           "url": "https://www.prochazkagroup.cz",
           "logo": "https://www.prochazkagroup.cz/favicon.ico",
-          "image": "https://www.prochazkagroup.cz/assets/seo/og/logo.jpg",
+          "image": "https://www.prochazkagroup.cz/assets/seo/og/prochazka-group.jpg",
           "telephone": "+420 705 500 200",
           "email": "asistentka.prochazka@ovbone.cz",
           "foundingDate": "2013",

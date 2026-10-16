@@ -16,14 +16,15 @@ import Head from "next/head";
 export const SITE_URL = "https://www.prochazkagroup.cz";
 export const SITE_NAME = "Procházka Group";
 
-// Logo, ne snímek webu. Screenshoty stránek v náhledu odkazu působily jako
-// rozmazaná fotka obrazovky; monogram na barvě podkladu je čitelný v každé
-// velikosti, kterou mu síť dá. Vyrobený ze /assets/svg/logo.svg.
+// Logo, ne snímek webu — totéž, které je ve faviconu: nápis „PROCHÁZKA
+// GROUP / FINANCE A VZDĚLÁVÁNÍ", bíle na barvě podkladu webu. Vyrobené
+// z 256px verze ve favicon.ico. Nápis je široký 600 px, aby se vešel celý
+// i do čtvercového výřezu ze středu, který dělá WhatsApp.
 const DEFAULT_IMAGE = {
-    src: "/assets/seo/og/logo.jpg",
+    src: "/assets/seo/og/prochazka-group.jpg",
     width: 1200,
     height: 630,
-    alt: "Logo Procházka Group",
+    alt: "Procházka Group – finance a vzdělávání",
 };
 
 const absolute = (src) => (/^https?:\/\//.test(src) ? src : `${SITE_URL}${src}`);
