@@ -94,7 +94,6 @@ export default function BenefitProgramPage({
                 title="Benefit program – doporučte nás | Procházka Group"
                 description="Doporučte nás někomu, komu pomůžeme s financemi. Když se stane naším klientem, dostanete poukaz – v programu až 47 500 Kč v odměnách."
                 path="/benefit-program"
-                image={{ src: "/assets/seo/og/benefitprogram.jpg", width: 1200, height: 630, alt: "Benefit program Procházka Group – odměny za doporučení" }}
                 keywords="benefit program, doporučení, odměna za doporučení, poukazy, Procházka Group, finanční poradenství Písek"
                 // A WebPage, not a Product: the programme is not sold and has no
                 // price, and a Product without one is a rich-result error.
@@ -103,17 +102,17 @@ export default function BenefitProgramPage({
                     "@type": "WebPage",
                     "name": "Benefit program – doporučte nás",
                     "description": "Program pro klienty Procházka Group: za doporučení, ze kterého se stane nový klient, dostanete poukaz. V programu je celkem až 47 500 Kč v odměnách.",
-                    "url": "https://prochazkagroup.cz/benefit-program",
+                    "url": "https://www.prochazkagroup.cz/benefit-program",
                     "inLanguage": "cs",
                     "isPartOf": {
                         "@type": "WebSite",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz"
+                        "url": "https://www.prochazkagroup.cz"
                     },
                     "publisher": {
                         "@type": "Organization",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz"
+                        "url": "https://www.prochazkagroup.cz"
                     }
                 }}
             />

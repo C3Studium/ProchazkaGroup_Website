@@ -120,7 +120,6 @@ export default function AboutPage({ content }) {
         title="O nás – tým finančních poradců | Procházka Group"
         description="Poznejte tým finančních poradců Procházka Group z Písku – lidi, hodnoty a příběh firmy, která už přes dekádu pomáhá klientům s financemi."
         path="/o-nas"
-        image={{ src: "/assets/seo/og/about.jpg", width: 1200, height: 630, alt: "Tým Procházka Group" }}
         keywords="Procházka Group tým, finanční poradci, historie společnosti, finanční experti, hodnoty společnosti, OVB Allfinanz"
         jsonLd={{
           "@context": "https://schema.org",
@@ -129,7 +128,7 @@ export default function AboutPage({ content }) {
             "@type": "Organization",
             "name": "Procházka Group",
             "description": "Profesionální finanční poradenství s více než desetiletou tradicí, součást OVB Allfinanz",
-            "url": "https://prochazkagroup.cz",
+            "url": "https://www.prochazkagroup.cz",
             "foundingDate": "2013",
             "parentOrganization": {
               "@type": "Organization",

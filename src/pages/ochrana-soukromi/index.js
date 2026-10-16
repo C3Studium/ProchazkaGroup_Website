@@ -50,18 +50,17 @@ export default function PrivacyPolicyPage({ content }) {
                 title="Ochrana osobních údajů | Procházka Group"
                 description="Jak Procházka Group zpracovává a chrání vaše osobní údaje, na jakém právním základě a jaká máte práva podle GDPR."
                 path="/ochrana-soukromi"
-                image={{ src: "/assets/seo/og/gdpr.jpg", width: 1200, height: 630, alt: "Ochrana osobních údajů – Procházka Group" }}
                 keywords="ochrana soukromí, GDPR, zpracování dat, osobní údaje, Procházka Group, OVB Allfinanz"
                 jsonLd={{
                     "@context": "https://schema.org",
                     "@type": "WebPage",
                     "name": "Ochrana soukromí",
                     "description": "Zásady ochrany osobních údajů Procházka Group",
-                    "url": "https://prochazkagroup.cz/ochrana-soukromi",
+                    "url": "https://www.prochazkagroup.cz/ochrana-soukromi",
                     "publisher": {
                         "@type": "Organization",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz",
+                        "url": "https://www.prochazkagroup.cz",
                         "parentOrganization": {
                             "@type": "Organization",
                             "name": "OVB Allfinanz",
@@ -90,7 +89,7 @@ export default function PrivacyPolicyPage({ content }) {
                     "isPartOf": {
                         "@type": "WebSite",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz"
+                        "url": "https://www.prochazkagroup.cz"
                     }
                 }}
             />

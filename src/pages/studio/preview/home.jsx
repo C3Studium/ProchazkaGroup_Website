@@ -95,7 +95,7 @@ function PreviewHome({ content }) {
       <Head>
         <title>Náhled — Studio</title>
         <meta key="robots" name="robots" content="noindex, nofollow" />
-        <link key="canonical" rel="canonical" href="https://prochazkagroup.cz" />
+        <link key="canonical" rel="canonical" href="https://www.prochazkagroup.cz" />
       </Head>
     </>
   )

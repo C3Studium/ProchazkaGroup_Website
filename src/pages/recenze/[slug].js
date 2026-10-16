@@ -71,7 +71,7 @@ export default function AdvisorPage({ advisor, content }) {
     const title = `Recenze — ${advisor.name} | Procházka Group`
     // Bez skloňování: jméno přichází z CMS v 1. pádě a rod z něj nepoznáme.
     const description = `${advisor.name}, Procházka Group — ohodnoťte spolupráci a napište recenzi.`
-    const url = `https://prochazkagroup.cz/recenze/${advisor.slug}`
+    const url = `https://www.prochazkagroup.cz/recenze/${advisor.slug}`
 
     return (
         <>
@@ -81,7 +81,6 @@ export default function AdvisorPage({ advisor, content }) {
                 path={`/recenze/${advisor.slug}`}
                 type="profile"
                 noindex
-                image={advisor.portrait?.src ? { src: advisor.portrait.src, alt: advisor.name } : undefined}
                 jsonLd={{
                     "@context": "https://schema.org",
                     "@type": "Person",
@@ -91,7 +90,7 @@ export default function AdvisorPage({ advisor, content }) {
                     worksFor: {
                         "@type": "Organization",
                         name: "Procházka Group",
-                        url: "https://prochazkagroup.cz",
+                        url: "https://www.prochazkagroup.cz",
                     },
                     ...(advisor.phone ? { telephone: advisor.phone } : {}),
                 }}

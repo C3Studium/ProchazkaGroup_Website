@@ -75,13 +75,12 @@ export default function ReviewsPage({ reviews = [], consultants = [], content })
                 title="Recenze klientů | Procházka Group"
                 description="Přečtěte si, jak hodnotí spolupráci s našimi finančními poradci klienti z Písku a okolí. Skutečné recenze klientů Procházka Group."
                 path="/recenze"
-                image={{ src: "/assets/seo/og/mainpage.jpg", width: 1200, height: 630, alt: "Procházka Group – recenze klientů" }}
                 keywords="recenze Procházka Group, hodnocení finančního poradenství, zkušenosti klientů, finanční poradci reference, OVB Allfinanz"
                 jsonLd={{
                     "@context": "https://schema.org",
                     "@type": "LocalBusiness",
                     "name": "Procházka Group",
-                    "url": "https://prochazkagroup.cz",
+                    "url": "https://www.prochazkagroup.cz",
                     "parentOrganization": {
                         "@type": "Organization",
                         "name": "OVB Allfinanz",

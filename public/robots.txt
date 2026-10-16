@@ -7,7 +7,7 @@ Disallow: /api
 Disallow: /studio
 
 # Host
-Host: https://prochazkagroup.cz
+Host: https://www.prochazkagroup.cz
 
 # Sitemaps
-Sitemap: https://prochazkagroup.cz/sitemap.xml
+Sitemap: https://www.prochazkagroup.cz/sitemap.xml

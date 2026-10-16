@@ -6,9 +6,9 @@ language: cs
 author: Procházka Group
 
 # Website Resources
-website: https://prochazkagroup.cz
-sitemap: https://prochazkagroup.cz/sitemap.xml
-robots: https://prochazkagroup.cz/robots.txt
+website: https://www.prochazkagroup.cz
+sitemap: https://www.prochazkagroup.cz/sitemap.xml
+robots: https://www.prochazkagroup.cz/robots.txt
 
 # Company Overview
 overview: Procházka Group je česká poradenská společnost s více než 10 lety zkušeností. Poskytujeme nezávislé finanční poradenství jednotlivcům, rodinám i firmám.

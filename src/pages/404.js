@@ -25,7 +25,7 @@ export default function Page404({ content }) {
                     "@context": "https://schema.org",
                     "@type": "Organization",
                     "name": "Procházka Group",
-                    "url": "https://prochazkagroup.cz",
+                    "url": "https://www.prochazkagroup.cz",
                     "parentOrganization": {
                         "@type": "Organization",
                         "name": "OVB Allfinanz",

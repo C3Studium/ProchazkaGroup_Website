@@ -63,7 +63,7 @@ export default function CmsInviteEmail({
     name = "",
     email = "",
     role = "member",
-    studioUrl = "https://prochazkagroup.cz/studio",
+    studioUrl = "https://www.prochazkagroup.cz/studio",
     invitedBy = "",
 }) {
     const roleTitle = ROLE_TITLES[role] || role

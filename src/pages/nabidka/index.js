@@ -101,7 +101,6 @@ export default function NabidkaPage({
                 title="Naše nabídka – finanční plán na míru | Procházka Group"
                 description="Osm z deseti domácností v ČR je v dluzích. Podívejte se, jak s poradcem získáte plán, rezervy a klid. První schůzka i finanční plán jsou zdarma."
                 path="/nabidka"
-                image={{ src: "/assets/seo/og/mainpage.jpg", width: 1200, height: 630, alt: "Procházka Group – nabídka finančního poradenství" }}
             />
 
             <main lang="cs" key="nabidka">

@@ -13,14 +13,17 @@ import Head from "next/head";
 // o složku výš): WebP neumí LinkedIn ani starší klienti a 1,91 : 1 je poměr,
 // na který ořezávají všichni.
 
-export const SITE_URL = "https://prochazkagroup.cz";
+export const SITE_URL = "https://www.prochazkagroup.cz";
 export const SITE_NAME = "Procházka Group";
 
+// Logo, ne snímek webu. Screenshoty stránek v náhledu odkazu působily jako
+// rozmazaná fotka obrazovky; monogram na barvě podkladu je čitelný v každé
+// velikosti, kterou mu síť dá. Vyrobený ze /assets/svg/logo.svg.
 const DEFAULT_IMAGE = {
-    src: "/assets/seo/og/mainpage.jpg",
+    src: "/assets/seo/og/logo.jpg",
     width: 1200,
     height: 630,
-    alt: "Procházka Group – finanční poradenství v Písku. Budujeme pro lidi stabilní a kvalitní finanční poradenství už přes jednu dekádu.",
+    alt: "Logo Procházka Group",
 };
 
 const absolute = (src) => (/^https?:\/\//.test(src) ? src : `${SITE_URL}${src}`);

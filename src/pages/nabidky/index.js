@@ -49,18 +49,17 @@ export default function PrilezitostiPage({ content }) {
                 title="Partneři a slevy pro klienty | Procházka Group"
                 description="Slevy u partnerů jen pro klienty Procházka Group: 50 % na předplatné Pojistné hlášení, 10 % v Eleven Cosmetic a další výhody u lokálních firem."
                 path="/nabidky"
-                image={{ src: "/assets/seo/og/partners.jpg", width: 1200, height: 630, alt: "Partneři Procházka Group a slevy pro klienty" }}
                 keywords="slevy pro klienty, partneři, Pojistné hlášení, Eleven Cosmetic, re-kvítka, Procházka Group výhody, Písek"
                 jsonLd={{
                     "@context": "https://schema.org",
                     "@type": "OfferCatalog",
                     "name": "Procházka Group – slevy u partnerů pro klienty",
                     "description": "Slevy a výhody u partnerů Procházka Group, určené jen pro naše klienty.",
-                    "url": "https://prochazkagroup.cz/nabidky",
+                    "url": "https://www.prochazkagroup.cz/nabidky",
                     "provider": {
                         "@type": "Organization",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz",
+                        "url": "https://www.prochazkagroup.cz",
                         "parentOrganization": {
                             "@type": "Organization",
                             "name": "OVB Allfinanz",

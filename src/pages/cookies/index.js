@@ -54,18 +54,17 @@ export default function CookiesPage({ content, cookiesModal }) {
                 title="Zásady používání cookies | Procházka Group"
                 description="Jaké cookies web Procházka Group používá, k čemu slouží a jak si jejich nastavení můžete kdykoli změnit."
                 path="/cookies"
-                image={{ src: "/assets/seo/og/cookies.jpg", width: 1200, height: 630, alt: "Zásady používání cookies – Procházka Group" }}
                 keywords="cookies, zásady cookies, ochrana soukromí, GDPR, Procházka Group cookies, OVB Allfinanz"
                 jsonLd={{
                     "@context": "https://schema.org",
                     "@type": "WebPage",
                     "name": "Zásady používání cookies",
                     "description": "Informace o používání cookies na webu Procházka Group",
-                    "url": "https://prochazkagroup.cz/cookies",
+                    "url": "https://www.prochazkagroup.cz/cookies",
                     "publisher": {
                         "@type": "Organization",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz",
+                        "url": "https://www.prochazkagroup.cz",
                         "parentOrganization": {
                             "@type": "Organization",
                             "name": "OVB Allfinanz",
@@ -94,7 +93,7 @@ export default function CookiesPage({ content, cookiesModal }) {
                     "isPartOf": {
                         "@type": "WebSite",
                         "name": "Procházka Group",
-                        "url": "https://prochazkagroup.cz"
+                        "url": "https://www.prochazkagroup.cz"
                     }
                 }}
             />

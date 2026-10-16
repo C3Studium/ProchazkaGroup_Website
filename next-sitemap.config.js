@@ -1,6 +1,6 @@
 /** @type {import('next-sitemap').IConfig} */
 module.exports = {
-  siteUrl: 'https://prochazkagroup.cz',
+  siteUrl: 'https://www.prochazkagroup.cz',
   generateRobotsTxt: true,
   changefreq: 'weekly',
   priority: 0.7,

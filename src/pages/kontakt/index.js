@@ -8,18 +8,17 @@ export default function ContactPage() {
         title="Kontakt | Procházka Group"
         description="Napište nám nebo zavolejte – ozveme se obvykle do jednoho pracovního dne. Kancelář Procházka Group najdete na Smetanově 78/1 v Písku."
         path="/kontakt"
-        image={{ src: "/assets/seo/og/kontakt.jpg", width: 1200, height: 630, alt: "Kontakt – kancelář Procházka Group v Písku" }}
         keywords="kontakt Procházka Group, finanční poradce kontakt, pobočka Písek, konzultace, finanční poradenství, OVB Allfinanz"
         jsonLd={{
           "@context": "https://schema.org",
           "@type": "ContactPage",
           "name": "Procházka Group - Kontakt",
           "description": "Kontaktní stránka pro finanční poradenství",
-          "url": "https://prochazkagroup.cz/kontakt",
+          "url": "https://www.prochazkagroup.cz/kontakt",
           "mainEntity": {
             "@type": "Organization",
             "name": "Procházka Group",
-            "url": "https://prochazkagroup.cz",
+            "url": "https://www.prochazkagroup.cz",
             "parentOrganization": {
               "@type": "Organization",
               "name": "OVB Allfinanz",
