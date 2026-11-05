@@ -113,6 +113,19 @@ const coverRect = (img, w, h) => {
 // cache, but not free, and never at a predictable moment. Two in flight at once
 // could also land out of order and leave the later request showing the earlier
 // picture.
+// Fotka z public/ jde přes optimalizátor Next (jako každý <Image>), ne jako
+// originál: portrét na /o-nas byl 962 kB, zmenšený má zlomek. 1080 px pokryje
+// rámeček i na hustém displeji; 80 je v images.qualities (next.config.mjs).
+// Adresy, které už optimalizátorem prošly (lišta), a SVG zůstávají, jak jsou.
+const sized = (src) =>
+    typeof src === "string" &&
+    src.startsWith("/") &&
+    !src.startsWith("//") &&
+    !src.startsWith("/_next/") &&
+    !/\.svg($|\?)/i.test(src)
+        ? `/_next/image?url=${encodeURIComponent(src)}&w=1080&q=80`
+        : src;
+
 const decoded = new Map();
 const load = (src) => {
     const held = decoded.get(src);
@@ -122,7 +135,7 @@ const load = (src) => {
         img.decoding = "async";
         img.onload = () => resolve(img);
         img.onerror = () => { decoded.delete(src); resolve(null); };
-        img.src = src;
+        img.src = sized(src);
     });
     decoded.set(src, pending);
     return pending;

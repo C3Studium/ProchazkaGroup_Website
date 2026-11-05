@@ -11,7 +11,7 @@
 // visits every page once. Bottom-left the wordmark (small line over the
 // oversized name, written character by character), a 10px loading bar along
 // the bottom and a 0-100% counter on the right, both advancing with random
-// stalls on a ~6s clock. At 100% the middle square becomes the page's
+// stalls on a ~6s clock (~2.75s on phones, see PHONE_RUN_MS). At 100% the middle square becomes the page's
 // clip-path window and opens over 2.5s — the gate flips as it starts, so the
 // hero runs its entrance inside the growing window.
 import { animate, motion, motionValue, useAnimationFrame, useMotionValue, useTransform } from "framer-motion";
@@ -339,10 +339,20 @@ export function MaskReveal({ rect, onGo, onDone }) {
     );
 }
 
-// The stall-broken loading schedule: ~6s of advancing runs and pauses.
-function buildSchedule() {
+// Délka odpočtu (pak ještě 1,25 s otevírání okna). Na telefonu je opona
+// kratší — celkem ~4 s místo ~7,3 s: na mobilu se na ni čeká hůř a Lighthouse
+// měří první návštěvu, kdy stránka pod oponou čeká. Telefon = stejný dotaz jako
+// v navigaci (navbar/body): úzké okno na výšku nebo nízké naležato.
+const RUN_MS = 6000;
+const PHONE_RUN_MS = 2750;
+const PHONE_QUERY = "(max-width: 820px), (max-height: 520px)";
+// Kolik stránek opona na telefonu „navštíví" (+ ta, na které člověk je), aby
+// při kratším odpočtu každá dostala aspoň ~350 ms a boxy nepřeskakovaly.
+const PHONE_VISITS = 2;
+
+// The stall-broken loading schedule: advancing runs and pauses over `total`.
+function buildSchedule(total = RUN_MS) {
     const rand = (a, b) => a + Math.random() * (b - a);
-    const total = 6000;
     const segs = [];
     let t = 0;
     while (t < total) {
@@ -444,7 +454,14 @@ export default function Preloader() {
         try {
             setHereName(nameForPath(window.location.pathname));
         } catch (e) {}
-        setPlan(buildSchedule());
+        let phone = false;
+        try {
+            phone = window.matchMedia(PHONE_QUERY).matches;
+        } catch (e) {}
+        setPlan({
+            ...buildSchedule(phone ? PHONE_RUN_MS : RUN_MS),
+            visits: phone ? PHONE_VISITS : null,
+        });
         setVp({ w: window.innerWidth, h: window.innerHeight });
         window.scrollTo(0, 0);
         let tries = 0;
@@ -560,7 +577,7 @@ export default function Preloader() {
             const j = Math.floor(Math.random() * (i + 1));
             [pool[i], pool[j]] = [pool[j], pool[i]];
         }
-        const pages = pool.slice(0, 4 + Math.floor(Math.random() * 2));
+        const pages = pool.slice(0, plan.visits ?? 4 + Math.floor(Math.random() * 2));
         if (here != null) pages.push(here);
         const lead = 600;
         const per = (plan.total - lead - 1100) / pages.length;

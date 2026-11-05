@@ -246,7 +246,9 @@ export default function OrbitImages({
         .filter(Boolean)
         .map(({ src, attrs }, index) => (
             // eslint-disable-next-line @next/next/no-img-element
-            <img key={src} {...attrs} src={src} alt={`${altPrefix} ${index + 1}`} draggable={false} className="orbit-image" />
+            // Loga jsou hluboko na stránce: líné načítání je stáhne až těsně
+            // před tím, než k nim návštěvník dojede (14 × ~35 kB na startu).
+            <img key={src} {...attrs} src={src} alt={`${altPrefix} ${index + 1}`} draggable={false} loading="lazy" decoding="async" className="orbit-image" />
         ));
 
     return (

@@ -1,5 +1,5 @@
 import "@/styles/globals.scss";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Head from "next/head";
 import dynamic from "next/dynamic";
@@ -118,6 +118,22 @@ function SiteShell({ Component, pageProps }) {
   const router = useRouter();
   const { pathname } = router;
 
+  // Shader až po startu stránky. three.js je ~180 kB (gzip) a jeho spuštění
+  // na telefonu soupeří s hydratací — a ta odkrývá úvodní fotky. Do té doby je
+  // pod stránkou stejná barva, jakou má shader (body #020E15), a podklad pak
+  // jemně naběhne (NeuralTunnel/styles.scss). Při první návštěvě se to celé
+  // odehraje pod úvodní oponou.
+  const [groundReady, setGroundReady] = useState(false);
+  useEffect(() => {
+    const go = () => setGroundReady(true);
+    if (typeof window.requestIdleCallback === "function") {
+      const id = window.requestIdleCallback(go, { timeout: 1200 });
+      return () => window.cancelIdleCallback?.(id);
+    }
+    const id = setTimeout(go, 200);
+    return () => clearTimeout(id);
+  }, []);
+
   // Which surface this is, for the one rule that has to tell them apart.
   //
   // globals.scss grows the root font size on screens past 1920 so the whole
@@ -221,7 +237,7 @@ function SiteShell({ Component, pageProps }) {
                 sady a která platí, rozhoduje orientace a to, jestli je to
                 dotykové zařízení. Rozepsané na tomhle místě by se daly změnit
                 jen pro obojí najednou. */}
-            <NeuralTunnel className="neural-tunnel--page" {...tunnel} />
+            {groundReady ? <NeuralTunnel className="neural-tunnel--page" {...tunnel} /> : null}
             {/* Sits over the shader and under everything that is read. Values
                 are the ones settled on in the generator: a 150px lattice at 10%
                 white and a half-pixel stroke, which is the same hairline weight
