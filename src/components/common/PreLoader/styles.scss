@@ -90,6 +90,9 @@ html[data-preload="1"] {
 
 .PGLoad__box {
     position: absolute;
+    // Poloha přichází jako transform (index.jsx, snapPx) — kotva je roh.
+    left: 0;
+    top: 0;
 }
 
 .PGLoad__box__skin {
@@ -232,6 +235,9 @@ html[data-preload="1"] {
 // ── the window frame ────────────────────────────────────────────────────
 .PGLoad__frame {
     position: fixed;
+    // Poloha přichází jako transform (index.jsx, snapPx) — kotva je roh.
+    left: 0;
+    top: 0;
     border: 1px solid rgba(255, 255, 255, 0.32);
     pointer-events: none;
 }

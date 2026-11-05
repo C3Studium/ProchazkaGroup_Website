@@ -55,6 +55,16 @@ const SHRINK_FAR = 0.9;
 const BAND_GIVE = 0.94;
 const lerp = (a, b, t) => a + (b - a) * t;
 
+// Boxy a rám se posouvají přes transform (framer x/y), ne přes left/top.
+// Chrome (od ~150) počítá každý posun left/top jako „layout shift" a opona
+// tak sama nasbírala CLS 0,23–0,33 na každé stránce (PageSpeed, desktop).
+// Transform se do CLS nepočítá. Zaokrouhlení na fyzický pixel drží 1px linky
+// stejně ostré, jako byly s left/top (layout je přichytával k pixelům sám).
+const snapPx = (v) => {
+    const dpr = typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1;
+    return Math.round(v * dpr) / dpr;
+};
+
 // The designed layout: three bands of squares (sizes in vh, so a square is a
 // square at any aspect), each band anchored at its own x (vw), boxes mostly
 // flush on shared hairlines with only a breath of air where noted. Boxes take
@@ -267,8 +277,9 @@ export function MaskReveal({ rect, onGo, onDone }) {
     const vw = typeof window !== "undefined" ? window.innerWidth : 1920;
     const vh = typeof window !== "undefined" ? window.innerHeight : 1080;
 
-    const fL = useTransform(m, (v) => lerp(rect.left, 0, v));
-    const fT = useTransform(m, (v) => lerp(rect.top, 0, v));
+    // Poloha rámu jde přes transform (x/y), ne left/top — viz snapPx níž.
+    const fL = useTransform(m, (v) => snapPx(lerp(rect.left, 0, v)));
+    const fT = useTransform(m, (v) => snapPx(lerp(rect.top, 0, v)));
     const fW = useTransform(m, (v) => lerp(rect.width, vw, v));
     const fH = useTransform(m, (v) => lerp(rect.height, vh, v));
     // The hairline frame is barely there at all: it starts at a quarter
@@ -334,7 +345,7 @@ export function MaskReveal({ rect, onGo, onDone }) {
     return (
         <motion.div
             className="PGLoad__frame"
-            style={{ left: fL, top: fT, width: fW, height: fH, opacity: fO }}
+            style={{ x: fL, y: fT, width: fW, height: fH, opacity: fO }}
         />
     );
 }
@@ -632,8 +643,8 @@ export default function Preloader() {
         }));
         rects.forEach((r, si) => {
             const m = rectMVs.current[si];
-            m.x.set(r.x);
-            m.y.set(r.y);
+            m.x.set(snapPx(r.x));
+            m.y.set(snapPx(r.y));
             m.w.set(r.w);
             m.h.set(r.h);
             // Slide the label only as far as the screen demands: centred
@@ -689,8 +700,8 @@ export default function Preloader() {
                         ref={(el) => (boxRefs.current[i] = el)}
                         className="PGLoad__box"
                         style={{
-                            left: rectMVs.current[i].x,
-                            top: rectMVs.current[i].y,
+                            x: rectMVs.current[i].x,
+                            y: rectMVs.current[i].y,
                             width: rectMVs.current[i].w,
                             height: rectMVs.current[i].h,
                         }}
