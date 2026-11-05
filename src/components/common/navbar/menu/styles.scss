@@ -256,6 +256,33 @@
                 inset: -16.5px -12px;
             }
         }
+
+        // ── telefon, otevřené menu ──
+        //
+        // Na telefonu je v liště jen logo a tohle tlačítko, a ZAVŘÍT je o dvě
+        // písmena širší než MENU: tlačítko narostlo doleva a křížek vjel do
+        // „GROUP". Otevřené menu proto ukazuje jen křížek — ten sám říká
+        // „zavřít" (stejně jako pod 380 px výš). Název tlačítka dál nese
+        // aria-label, a dotyková plocha je stejně velká jako u samotné značky.
+        @include below(xs) {
+            &[aria-expanded="true"] {
+                .navbar__text {
+                    position: absolute;
+                    width: 1px;
+                    height: 1px;
+                    margin: 0;
+                    overflow: hidden;
+                    white-space: nowrap;
+                    clip-path: inset(50%);
+                }
+
+                &::after {
+                    content: "";
+                    position: absolute;
+                    inset: -16.5px -12px;
+                }
+            }
+        }
     }
 }
 
