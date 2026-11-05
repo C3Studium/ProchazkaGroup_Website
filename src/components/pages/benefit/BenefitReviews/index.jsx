@@ -326,6 +326,11 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
     }, []);
 
     useEffect(() => {
+        // Pás běží jen když je na obrazovce (s rezervou 200 px, aby už jel,
+        // než do něj člověk dojede). Mimo obrazovku smyčka stojí — na telefonu
+        // jinak počítala každý snímek celou návštěvu, i pod úvodní oponou.
+        // Vzhled se nemění: kdo pás nevidí, nevidí, že stojí.
+        let visible = true;
         const step = (ts) => {
             if (last.current === null) last.current = ts;
             const dt = Math.min(0.05, Math.max(0, ts - last.current) / 1000);
@@ -373,10 +378,29 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                     trackRef.current.style.transform = `translate3d(${-offset.current}px, 0, 0)`;
                 }
             }
+            frame.current = visible ? requestAnimationFrame(step) : null;
+        };
+        const start = () => {
+            if (frame.current) return;
+            // Po pauze začít s čistým časem, ať první snímek neskočí.
+            last.current = null;
             frame.current = requestAnimationFrame(step);
         };
-        frame.current = requestAnimationFrame(step);
+        const wall = wallRef.current;
+        const watch =
+            wall && typeof IntersectionObserver !== "undefined"
+                ? new IntersectionObserver(
+                      ([entry]) => {
+                          visible = entry.isIntersecting;
+                          if (visible) start();
+                      },
+                      { rootMargin: "200px 0px" },
+                  )
+                : null;
+        if (watch && wall) watch.observe(wall);
+        start();
         return () => {
+            if (watch) watch.disconnect();
             if (frame.current) cancelAnimationFrame(frame.current);
             frame.current = null;
             last.current = null;

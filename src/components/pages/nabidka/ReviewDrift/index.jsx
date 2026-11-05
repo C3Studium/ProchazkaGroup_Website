@@ -231,6 +231,10 @@ export default function ReviewDrift({ reviews = [], copy = {} }) {
     }, [meta]);
 
     useEffect(() => {
+        // Stěna se hýbe, jen když je na obrazovce (s rezervou 200 px). Mimo ni
+        // smyčka stojí — na telefonu jinak běžela každý snímek celou návštěvu.
+        // Vzhled se nemění: kdo stěnu nevidí, nevidí, že stojí.
+        let visible = true;
         const step = (ts) => {
             if (last.current === null) last.current = ts;
             const dt = Math.min(0.05, Math.max(0, ts - last.current) / 1000);
@@ -276,11 +280,30 @@ export default function ReviewDrift({ reviews = [], copy = {} }) {
                 el.style.transform = `translate3d(0, ${-(offsets.current[c] ?? 0)}px, 0)`;
             }
 
-            frame.current = requestAnimationFrame(step);
+            frame.current = visible ? requestAnimationFrame(step) : null;
         };
 
-        frame.current = requestAnimationFrame(step);
+        const start = () => {
+            if (frame.current) return;
+            // Po pauze začít s čistým časem, ať první snímek neskočí.
+            last.current = null;
+            frame.current = requestAnimationFrame(step);
+        };
+        const node = wall.current;
+        const watch =
+            node && typeof IntersectionObserver !== "undefined"
+                ? new IntersectionObserver(
+                      ([entry]) => {
+                          visible = entry.isIntersecting;
+                          if (visible) start();
+                      },
+                      { rootMargin: "200px 0px" },
+                  )
+                : null;
+        if (watch && node) watch.observe(node);
+        start();
         return () => {
+            if (watch) watch.disconnect();
             if (frame.current) cancelAnimationFrame(frame.current);
             frame.current = null;
             last.current = null;

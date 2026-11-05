@@ -186,5 +186,17 @@ body[data-footer="hidden"] .SiteFooter {
   outline: none !important;
 }
 
+// Šipka „posuňte dolů" (SCROLL_NUDGE v ui/Arrow): stejný pohyb, jaký dřív
+// počítal framer — +5 → −5 px, 1,5 s, tam a zpět, křivka [0.45, 0, 0.55, 1].
+// Teď ho dělá kompozitor a mimo obrazovku ani ve skryté větvi nic nestojí.
+[data-scroll-nudge] {
+  animation: scroll-nudge 1.5s cubic-bezier(0.45, 0, 0.55, 1) infinite alternate;
+}
+
+@keyframes scroll-nudge {
+  from { transform: translateY(5px); }
+  to { transform: translateY(-5px); }
+}
+
 
 

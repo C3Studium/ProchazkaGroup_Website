@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 
 const alphabet = [
     { letter: "A", index: 0 },
@@ -46,6 +46,15 @@ const alphabet = [
     { letter: "", index: 41 },
     { letter: " ", index: 42 },
 ];
+// Sloupec písmen se vytvoří jednou pro celý web. Lišta má ~30 sloupců po 43
+// písmenech — skládat je znovu při každém renderu stálo na telefonu stovky ms.
+// Stejné prvky = React je při překreslení přeskočí.
+const LETTERS = alphabet.map((item) => (
+    <span key={`${item.letter}-${item.index}`} className="scrollToText__char__letter">
+        {item.letter}
+    </span>
+));
+
 const findAlphabetIndex = (char) => {
     const normalized = typeof char === "string" ? char.toUpperCase() : "";
     const found = alphabet.find((item) => item.letter === normalized);
@@ -64,7 +73,9 @@ const SPIN_EASE = [0.6, 0.05, 0, 0.9];
 // word closes to zero width on the same clock the others spin on, so the word
 // (and whatever button wears it) changes width as one continuous gesture
 // instead of snapping when the letter count changes.
-const AlphabetChar = ({ char, duration = 0.5 }) => {
+// memo: sloupec se překreslí jen když se změní jeho písmeno, ne s každým
+// renderem lišty.
+const AlphabetChar = memo(function AlphabetChar({ char, duration = 0.5 }) {
     const index = findAlphabetIndex(char);
     const size = { duration, ease: SPIN_EASE };
     const trackRef = useRef(null);
@@ -144,15 +155,11 @@ const AlphabetChar = ({ char, duration = 0.5 }) => {
                 animate={{ y: translateY }}
                 transition={{ duration, ease: SPIN_EASE }}
             >
-                {alphabet.map((item) => (
-                    <span key={`${item.letter}-${item.index}`} className="scrollToText__char__letter">
-                        {item.letter}
-                    </span>
-                ))}
+                {LETTERS}
             </motion.span>
         </motion.span>
     );
-};
+});
 
 export const ScrollToText = ({ text = "", duration = 0.6 }) => {
     const chars = useMemo(() => text.split(""), [text]);

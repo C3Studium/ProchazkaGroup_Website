@@ -202,28 +202,63 @@ const CardSwap = ({
             });
         };
 
-        swap();
-        intervalRef.current = window.setInterval(swap, delay);
+        // Karty se střídají, jen když je balíček na obrazovce (s rezervou
+        // 200 px) a nemá nad sebou myš. Mimo obrazovku časovač i rozběhnutá
+        // animace stojí — jinak GSAP přepisoval karty každý snímek celou
+        // návštěvu, i na telefonu daleko nad nimi. Kdo karty nevidí, nepozná to.
+        let running = false;
+        let hovered = false;
+        let visible = true;
+        const start = () => {
+            if (running) return;
+            running = true;
+            tlRef.current?.play();
+            intervalRef.current = window.setInterval(swap, delay);
+        };
+        const stop = () => {
+            if (!running) return;
+            running = false;
+            tlRef.current?.pause();
+            clearInterval(intervalRef.current);
+        };
+        const sync = () => (visible && !hovered ? start() : stop());
 
-        if (pauseOnHover) {
-            const node = container.current;
-            const pause = () => {
-                tlRef.current?.pause();
-                clearInterval(intervalRef.current);
-            };
-            const resume = () => {
-                tlRef.current?.play();
-                intervalRef.current = window.setInterval(swap, delay);
-            };
+        swap();
+        start();
+
+        const node = container.current;
+        const watch =
+            node && typeof IntersectionObserver !== "undefined"
+                ? new IntersectionObserver(
+                      ([entry]) => {
+                          visible = entry.isIntersecting;
+                          sync();
+                      },
+                      { rootMargin: "200px" },
+                  )
+                : null;
+        if (watch && node) watch.observe(node);
+
+        const pause = () => {
+            hovered = true;
+            sync();
+        };
+        const resume = () => {
+            hovered = false;
+            sync();
+        };
+        if (pauseOnHover && node) {
             node.addEventListener("mouseenter", pause);
             node.addEventListener("mouseleave", resume);
-            return () => {
+        }
+        return () => {
+            if (watch) watch.disconnect();
+            if (pauseOnHover && node) {
                 node.removeEventListener("mouseenter", pause);
                 node.removeEventListener("mouseleave", resume);
-                clearInterval(intervalRef.current);
-            };
-        }
-        return () => clearInterval(intervalRef.current);
+            }
+            clearInterval(intervalRef.current);
+        };
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [cardDistance, verticalDistance, delay, pauseOnHover, skewAmount, easing]);
 

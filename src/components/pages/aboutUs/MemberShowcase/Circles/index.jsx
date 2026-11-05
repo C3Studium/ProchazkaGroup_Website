@@ -234,9 +234,13 @@ export default function Circles({ progress, labels = [], markRefs, docId, geo })
 
         let frame = 0;
         let last = 0;
+        // Fyzika běží, jen když je vrstva na obrazovce (s rezervou 200 px).
+        // Mimo ni smyčka stojí — každý snímek měří rozložení, a to na telefonu
+        // stálo nejvíc ze všeho na stránce. Kdo kruhy nevidí, nepozná, že stály.
+        let visible = true;
 
         const step = (now) => {
-            frame = requestAnimationFrame(step);
+            frame = visible ? requestAnimationFrame(step) : 0;
 
             const dt = Math.min(MAX_STEP_MS, last ? now - last : 16) / 1000;
             last = now;
@@ -455,8 +459,25 @@ export default function Circles({ progress, labels = [], markRefs, docId, geo })
             list.forEach((body, i) => write(i, body.x, body.y, 0, 0, 1, 1, 1));
         };
 
+        const watch =
+            typeof IntersectionObserver !== "undefined"
+                ? new IntersectionObserver(
+                      ([entry]) => {
+                          visible = entry.isIntersecting;
+                          if (visible && !frame) {
+                              // Čerstvý čas, ať první krok po pauze neskočí.
+                              last = 0;
+                              frame = requestAnimationFrame(step);
+                          }
+                      },
+                      { rootMargin: "200px" },
+                  )
+                : null;
+        if (watch) watch.observe(layer);
+
         frame = requestAnimationFrame(step);
         return () => {
+            if (watch) watch.disconnect();
             cancelAnimationFrame(frame);
             window.removeEventListener("pointermove", onPointerMove);
             window.removeEventListener("pointerleave", onPointerLeave);

@@ -29,12 +29,9 @@ export default function Arrow({ direction = "right", className = "" }) {
 // is the middle of the movement and the cue reads as hovering rather than as
 // being tugged downwards. Eased at both ends — a linear shuttle reads as a
 // mechanism, and this is meant to read as breathing.
-export const SCROLL_NUDGE = {
-    animate: { y: [5, -5] },
-    transition: {
-        duration: 1.5,
-        repeat: Infinity,
-        repeatType: "reverse",
-        ease: [0.45, 0, 0.55, 1],
-    },
-};
+//
+// Běží jako CSS animace (globals.scss, [data-scroll-nudge]), ne přes framer:
+// stejný pohyb (+5 → −5 px, 1,5 s, tam a zpět, stejná křivka), ale počítá ho
+// kompozitor. Framer ho počítal v JS každý snímek, napořád, u všech šipek —
+// i u těch mimo obrazovku a ve skrytých větvích na telefonu.
+export const SCROLL_NUDGE = { "data-scroll-nudge": "" };
