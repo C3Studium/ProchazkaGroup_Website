@@ -51,3 +51,12 @@ next-env.d.ts
 
 # samostatna knihovna, ma vlastni repozitar
 VALECMS/
+
+# Na GitHub patří z dokumentace jen README.md. Interní poznámky, plány,
+# TODO a návody (i pro AI agenty) zůstávají jen lokálně.
+*.md
+!/README.md
+CLAUDE.md
+AGENTS.md
+.claude/
+.cursorrules
