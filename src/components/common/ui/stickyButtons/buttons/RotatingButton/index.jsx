@@ -5,14 +5,16 @@
 export default function RotatingButton({ text = "Nahlášení pojistného - Nahlášení pojistného - " }) {
     const letters = Array.from(text);
     const step = 360 / letters.length;
+    // Pro čtečku jednou a celé, ne dvakrát dokola po písmenech.
+    const label = text.split(" - ")[0].trim() || text.trim();
 
     return (
         <div className="RotatingButton">
-            <p className="RotatingButton__ring" aria-label={text}>
+            <span className="srOnly">{label}</span>
+            <p className="RotatingButton__ring" aria-hidden="true">
                 {letters.map((letter, index) => (
                     <span
                         key={index}
-                        aria-hidden="true"
                         style={{ transform: `rotate(${(index * step).toFixed(2)}deg)` }}
                     >
                         {letter}

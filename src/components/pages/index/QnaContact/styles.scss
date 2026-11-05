@@ -233,6 +233,21 @@
                 color: var(--hColor2);
             }
         }
+
+        // Otázka je tlačítko kvůli klávesnici; vypadat má jako text řádku.
+        .QnaContact__question {
+            margin: 0;
+            padding: 0;
+            border: 0;
+            background: none;
+            font: inherit;
+            letter-spacing: inherit;
+            word-spacing: inherit;
+            text-transform: inherit;
+            color: inherit;
+            text-align: inherit;
+            cursor: inherit;
+        }
     }
 
     .QnaContact__answer {

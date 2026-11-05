@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { CURTAIN, ENTERS, RISE, group } from "@/components/common/ui/entrance";
 import { editable } from "@/cms/edit";
 import { reviewCredit } from "@/constants/reviews";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 // The section's two lines of its own — everything else on the belt is a
 // client's words, moderated as a review document rather than edited as copy.
@@ -185,6 +186,11 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
     const [open, setOpen] = useState(null);
     const [mounted, setMounted] = useState(false);
     useEffect(() => setMounted(true), []);
+
+    // Fokus na křížek a po zavření zpátky na kartu v pásu.
+    const sheetRef = useRef(null);
+    const closeRef = useRef(null);
+    useDialogFocus(Boolean(open), { container: sheetRef, initialFocus: closeRef });
 
     useEffect(() => {
         if (!open) return undefined;
@@ -545,6 +551,7 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                                       onClick={hide}
                                   />
                                   <div
+                                      ref={sheetRef}
                                       className="BenReviews__sheetWrap"
                                       role="dialog"
                                       aria-modal="true"
@@ -566,6 +573,7 @@ export default function BenefitReviews({ reviews = [], copy = {} }) {
                                                   </span>
                                               ) : null}
                                               <button
+                                                  ref={closeRef}
                                                   type="button"
                                                   className="BenReviews__sheet__close"
                                                   onClick={hide}

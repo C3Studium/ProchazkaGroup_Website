@@ -19,6 +19,25 @@ const supabaseOrigin = (() => {
   }
 })();
 
+// Úvodní opona běží jen při první návštěvě za hodinu. Stránky jsou statické,
+// takže o tom nemůže rozhodnout server — rozhoduje tenhle skript, ještě před
+// prvním vykreslením: když je cookie `pg_intro`, sundá z <html> atribut
+// `data-preload` a opona se vůbec neukáže (LoadProvider i PageVeil čtou stejný
+// atribut). Cookie zapisuje opona, když doběhne (PreLoader, `finish`).
+//
+// Tvrdé obnovení (Ctrl/Cmd+Shift+R, Ctrl+F5) cookie smaže, takže se opona
+// ukáže znovu. Prohlížeč tvrdé obnovení stránce jinak neprozradí, proto se
+// chytá klávesová zkratka těsně předtím, než se stránka obnoví.
+const introScript = `(function(){try{
+var d=document.documentElement;
+if(/(?:^|; )pg_intro=1(?:;|$)/.test(document.cookie))d.removeAttribute("data-preload");
+addEventListener("keydown",function(e){
+var k=(e.key||"").toLowerCase();
+if(((e.ctrlKey||e.metaKey)&&e.shiftKey&&k==="r")||(e.ctrlKey&&k==="f5")){
+document.cookie="pg_intro=; Max-Age=0; Path=/; SameSite=Lax";}
+},true);
+}catch(e){}})();`;
+
 export default function Document() {
   return (
     <Html lang="cs" data-preload="1">
@@ -26,6 +45,7 @@ export default function Document() {
         <meta charSet="utf-8" />
         {/* viewport tu není schválně: v _document ho Next nedoporučuje a
             stránky ho přidávaly podruhé. Je jednou v _app (next/head). */}
+        <script dangerouslySetInnerHTML={{ __html: introScript }} />
         <link rel="icon" href="/favicon.ico" />
         {supabaseOrigin ? (
           <>

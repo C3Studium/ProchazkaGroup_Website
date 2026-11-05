@@ -100,7 +100,7 @@ export default function UploadZone({ onUploaded, compact, children }) {
           <span className={styles.dropTitle}>
             {dragging ? "Pusťte soubory sem" : "Přetáhněte obrázky nebo klikněte"}
           </span>
-          {!compact ? <span className={styles.dropHint}>JPG, PNG, WEBP · více souborů najednou</span> : null}
+          {!compact ? <span className={styles.dropHint}>JPG, PNG, WEBP · více souborů najednou · zmenší se a uloží jako WebP</span> : null}
         </button>
       )}
 

@@ -13,6 +13,8 @@
 // same signature as the Supabase adapter's, and both throw the same CmsError.
 
 import { CmsError, cmsErrorFromResponse } from './errors.js'
+// Čistě prohlížečový kód bez závislostí — výjimka z pravidla výš je bezpečná.
+import { prepareImageUpload } from '../studio/lib/compressImage.js'
 
 const DEFAULT_BASE = '/api/cms'
 
@@ -169,13 +171,19 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
             // metadata in the query string is simpler and has no parser to get
             // wrong. Filenames here are Czech, so they go through
             // URLSearchParams rather than a latin-1 header.
-            upload: (file, { alt = '' } = {}) =>
-                request('/media', {
+            //
+            // Velkou fotku nejdřív zmenší prohlížeč (studio/lib/compressImage.js),
+            // jinak by se kvůli limitu velikosti požadavku k serveru nedostala.
+            // Převod do WebP a kompresi pak dělá server (imageOptimize.js).
+            upload: async (file, { alt = '' } = {}) => {
+                const ready = await prepareImageUpload(file)
+                return request('/media', {
                     method: 'POST',
-                    raw: file,
-                    contentType: file?.type || 'application/octet-stream',
-                    query: { filename: file?.name || 'file', alt },
-                }),
+                    raw: ready,
+                    contentType: ready?.type || 'application/octet-stream',
+                    query: { filename: ready?.name || 'file', alt },
+                })
+            },
 
             list: ({ page, perPage, search, missingAlt, folder, usage, withUsage } = {}) =>
                 request('/media', {

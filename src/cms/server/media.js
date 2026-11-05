@@ -16,6 +16,7 @@ import path from 'node:path'
 
 import { cmsErrorFromPostgrest, conflict, invalid, notFound, serverError } from './errors.js'
 import { probeBytes } from './imageProbe.js'
+import { optimizeRaster, webpName } from './imageOptimize.js'
 import { sanitizeSvg } from './svgSanitize.js'
 import { MEDIA_COLUMNS, toAsset } from './query.js'
 import { buildUsageIndex } from './mediaUsage.js'
@@ -194,8 +195,22 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
                 bytes = Buffer.from(cleaned, 'utf8')
             }
 
+            // Fotky a grafika se ukládají zmenšené a jako WebP (./imageOptimize.js).
+            // PŘED otiskem ze stejného důvodu jako čištění SVG výš: otisk,
+            // klíč i řádek patří tomu, co se opravdu uloží.
+            let storedMime = mime
+            let storedName = filename
+            let optimizedSize = null
+            const optimized = await optimizeRaster(bytes, mime)
+            if (optimized) {
+                bytes = optimized.bytes
+                storedMime = optimized.mime
+                storedName = webpName(filename)
+                optimizedSize = { width: optimized.width, height: optimized.height }
+            }
+
             const hash = crypto.createHash('sha256').update(bytes).digest('hex')
-            const key = buildObjectKey({ hash, filename })
+            const key = buildObjectKey({ hash, filename: storedName })
 
             // Same bytes uploaded twice is the same asset. Returning the
             // existing row keeps the media library from filling with duplicates
@@ -207,11 +222,13 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
             const existing = await repo.findByPath(key)
             if (existing) return existing.archivedAt ? repo.restore(existing.id) : existing
 
-            await storage.put(key, bytes, { contentType: mime, upsert: true })
+            await storage.put(key, bytes, { contentType: storedMime, upsert: true })
 
-            const { width, height } = probed.width
-                ? { width: probed.width, height: probed.height }
-                : await probeDimensions(bytes, mime)
+            const { width, height } = optimizedSize
+                ? optimizedSize
+                : probed.width
+                  ? { width: probed.width, height: probed.height }
+                  : await probeDimensions(bytes, storedMime)
             const url = storage.publicUrl(key) || (await storage.signedUrl(key, { expiresIn: 60 * 60 * 24 * 365 }))
 
             const { data, error } = await table()
@@ -219,7 +236,7 @@ export const createMediaRepository = ({ client, storage, maxBytes, mediaArchive 
                     bucket: storage.bucket,
                     path: key,
                     url,
-                    mime,
+                    mime: storedMime,
                     size_bytes: bytes.length,
                     width,
                     height,

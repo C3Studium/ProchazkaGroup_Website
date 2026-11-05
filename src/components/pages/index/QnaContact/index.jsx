@@ -362,12 +362,22 @@ export default function QnaContact({ copy = {} }) {
                                         className={index === activeQuestion ? "isActive" : ""}
                                         onClick={() => setActiveQuestion(index)}
                                     >
-                                        {item.q}
+                                        {/* Tlačítko kvůli klávesnici a čtečce;
+                                            klik dál bere celý řádek (probublá
+                                            sem), takže se trefa nezmenšila. */}
+                                        <button
+                                            type="button"
+                                            className="QnaContact__question"
+                                            aria-expanded={index === activeQuestion}
+                                            aria-controls="QnaContact-answer"
+                                        >
+                                            {item.q}
+                                        </button>
                                     </motion.li>
                                 ))}
                             </ul>
 
-                            <div className="QnaContact__answer">
+                            <div className="QnaContact__answer" id="QnaContact-answer">
                                 <h3 {...editable(docId, "items.2.label", "text")}>{head.answerHeading}</h3>
                                 <AnimatePresence mode="wait">
                                     {/* The answer to whichever question is open,

@@ -25,8 +25,9 @@ const FALLBACK_HEADING = ["Naši", "kolegové"];
 // their row opens rather than as a target on this block.
 const FALLBACK_LINKS = {
     email: "mailto:asistentka.prochazka@ovbone.cz",
-    facebook: "https://www.facebook.com/prochazkagroup",
-    instagram: "https://www.instagram.com/prochazkagroup",
+    // Stejné profily jako v patičce a v menu.
+    facebook: "https://www.facebook.com/prochazka.group",
+    instagram: "https://www.instagram.com/prochazka.group/",
 };
 
 // the page's own glide — away quickly, then a long approach
@@ -201,14 +202,25 @@ const NameRow = memo(function NameRow({ person, index, active, phone, onSelect }
 // Then it holds. The stage stays pinned for another eighty viewport-heights
 // while the detail is drawn in — the rails, the rule under each name, the marks
 // framing the portrait. Built rather than switched on.
-export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsRoster, docId, dismissed = false }) {
+export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsRoster, docId, dismissed = false, assistant = null, socials = null }) {
     const heading = headingLines?.length ? headingLines : FALLBACK_HEADING;
+    // E-mail vede na asistentku ze Studia (Asistentka), stejně jako patička
+    // a kontaktní okno. Odkaz z bloku o-nas.links platí jen bez něj.
+    const assistantEmail = assistant?.email?.trim() || "";
+    // Facebook a Instagram firmy jsou jedny pro celý web: berou se z odkazů
+    // patičky (Studio → global.footer.links), aby se nemohly rozejít.
+    // Pole v o-nas.links platí jen tehdy, když patička odkaz nemá.
+    const footerFacebook = socials?.facebook?.href?.trim() || "";
+    const footerInstagram = socials?.instagram?.href?.trim() || "";
+    const footerLinksDocId = socials?.docId;
     // Each target falls back on its own, so a block that fills in only one of
     // them leaves the other two pointing where they pointed.
     const links = {
-        email: cmsLinks?.email?.trim() || FALLBACK_LINKS.email,
-        facebook: cmsLinks?.facebook?.trim() || FALLBACK_LINKS.facebook,
-        instagram: cmsLinks?.instagram?.trim() || FALLBACK_LINKS.instagram,
+        email: assistantEmail
+            ? `mailto:${assistantEmail}`
+            : cmsLinks?.email?.trim() || FALLBACK_LINKS.email,
+        facebook: footerFacebook || cmsLinks?.facebook?.trim() || FALLBACK_LINKS.facebook,
+        instagram: footerInstagram || cmsLinks?.instagram?.trim() || FALLBACK_LINKS.instagram,
     };
     const linksDocId = cmsLinks?.docId;
     // A list item has to exist in the block before it can be addressed — the
@@ -650,7 +662,9 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                             is edited in the popup the panel opens, not here. */}
                         <li>
                             <a
-                                {...editableLink(linksDocId, { href: "items.1.value" })}
+                                {...(assistantEmail
+                                    ? editableDoc(assistant?.id, "assistant")
+                                    : editableLink(linksDocId, { href: "items.1.value" }))}
                                 href={links.email}
                                 aria-label={`Napsat: ${person.name}`}
                                 data-cursor="frame"
@@ -660,7 +674,9 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                         </li>
                         <li>
                             <a
-                                {...editableLink(linksDocId, { href: "items.2.value" })}
+                                {...(footerFacebook
+                                    ? editableLink(footerLinksDocId, { href: "items.2.value" })
+                                    : editableLink(linksDocId, { href: "items.2.value" }))}
                                 href={links.facebook}
                                 aria-label="Facebook"
                                 data-cursor="frame"
@@ -670,7 +686,9 @@ export default function Colleagues({ headingLines, links: cmsLinks, roster: cmsR
                         </li>
                         <li>
                             <a
-                                {...editableLink(linksDocId, { href: "items.3.value" })}
+                                {...(footerInstagram
+                                    ? editableLink(footerLinksDocId, { href: "items.3.value" })
+                                    : editableLink(linksDocId, { href: "items.3.value" }))}
                                 href={links.instagram}
                                 aria-label="Instagram"
                                 data-cursor="frame"

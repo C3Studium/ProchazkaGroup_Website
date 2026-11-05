@@ -2,8 +2,9 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { AnimatePresence, cubicBezier, motion } from "framer-motion";
+import { AnimatePresence, cubicBezier, motion, useIsPresent } from "framer-motion";
 import AddReview from "@/components/pages/reviews/AddReview";
+import useDialogFocus from "@/hooks/useDialogFocus";
 import LikeButton from "@/components/common/ui/LikeButton";
 import { useReactions } from "@/components/common/ui/LikeButton/useReactions";
 import { ACTIONS_MODERATE, editable, editableDoc } from "@/cms/edit";
@@ -248,6 +249,21 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
                                 : { duration: 0.7, ease: GLIDE, delay: (index % BATCH) * 0.04 }}
                         >
                             <span className="RevWall__cell__edge" aria-hidden="true" />
+                            {/* Vstup z klávesnice. Karta sama tlačítkem být
+                                nemůže, uvnitř je „líbí se" a tlačítko v tlačítku
+                                neexistuje. Tohle leží přes celou kartu, myš jím
+                                prochází (pointer-events: none) a klik dál bere
+                                karta — vidět je jen jako rámeček při fokusu. */}
+                            <button
+                                type="button"
+                                className="RevWall__cell__hit"
+                                aria-label={`Rozkliknout recenzi – ${review.customerName}`}
+                                aria-haspopup="dialog"
+                                onClick={(event) => {
+                                    event.stopPropagation();
+                                    setOpen(review);
+                                }}
+                            />
                             <div className="RevWall__cell__in">
                                 <div className="RevWall__cell__head">
                                     <span className="RevWall__cell__tag">{reviewCredit(review)}</span>
@@ -344,6 +360,13 @@ export default function ReviewWall({ reviews, consultants = [], copy = {}, formC
 }
 
 function ReviewSheet({ review, onClose, likes, voteAsk }) {
+    // Přímé dítě AnimatePresence, takže „otevřeno" je tady „ještě není na
+    // odchodu" — fokus se vrací hned při zavření, ne až po doběhnutí exitu.
+    const present = useIsPresent();
+    const wrapRef = useRef(null);
+    const closeRef = useRef(null);
+    useDialogFocus(present, { container: wrapRef, initialFocus: closeRef });
+
     return (
         <>
             <motion.div
@@ -352,7 +375,7 @@ function ReviewSheet({ review, onClose, likes, voteAsk }) {
                 transition={{ duration: 0.35, ease: GLIDE }}
                 onClick={onClose} aria-hidden="true"
             />
-            <div className="RevSheet__wrap" role="dialog" aria-modal="true" aria-label={review.customerName}>
+            <div ref={wrapRef} className="RevSheet__wrap" role="dialog" aria-modal="true" aria-label={review.customerName}>
                 {/* `data-lenis-prevent` because the page's scroll is stopped
                     while this is open: without it lenis swallows the wheel and
                     the touch drag, and a review long enough to need the sheet's
@@ -360,7 +383,7 @@ function ReviewSheet({ review, onClose, likes, voteAsk }) {
                 <motion.article className="RevSheet" layoutId={`rev-${review.id}`} data-lenis-prevent>
                     <div className="RevSheet__head">
                         <span className="RevSheet__tag">{reviewCredit(review)}</span>
-                        <button type="button" className="RevSheet__close" onClick={onClose} data-cursor="frame" aria-label="Zavřít">
+                        <button ref={closeRef} type="button" className="RevSheet__close" onClick={onClose} data-cursor="frame" aria-label="Zavřít">
                             <span /><span />
                         </button>
                     </div>

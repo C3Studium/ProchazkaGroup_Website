@@ -7,6 +7,7 @@ import ContactModal from '@/components/common/ContactModal';
 import { onContactRequest } from '@/components/common/ContactModal/open';
 import { AnimatePresence } from 'framer-motion';
 import { surfaceRoot, useStudioSurface } from '@/cms/edit';
+import useDialogFocus from '@/hooks/useDialogFocus';
 
 export default function Navbar({ assistant, contactCopy, roster, navCopy }) {
     const [menu, setMenu] = useState(false);
@@ -54,10 +55,20 @@ export default function Navbar({ assistant, contactCopy, roster, navCopy }) {
     // open — the same two things ContactModal does, because from the reader's
     // side they are the same kind of thing over the page.
     //
-    // No focus trap, and that is the difference between the two: the sheet is
-    // a dialog and traps Tab because leaving it silently is a bug, while this
-    // is a menu on a bar. Tab leaving the last link and landing on the page
-    // behind is where a menu is supposed to go.
+    // Past na Tab je přes lištu I panel, ne jen přes panel: je to menu na
+    // liště, ne dialog, a tlačítko „Zavřít" musí zůstat v kruhu. Bez ní mířil
+    // Tab za posledním odkazem do stránky pod závojem, kterou není vidět.
+    // Fokus se při otevření nehýbe (zůstává na tlačítku, další Tab jde do
+    // panelu) a po zavření se na tlačítko vrátí, i když byl v panelu.
+    // Escape řeší efekt níž, hook ho nechává být.
+    useDialogFocus(menu, {
+        container: () => [
+            document.querySelector('.navbar__container'),
+            document.getElementById('navPanel'),
+        ],
+        initialFocus: false,
+    });
+
     useEffect(() => {
         if (!menu) return;
         window.lenis?.stop();

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, useIsPresent } from "framer-motion";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 import CornerButton from "@/components/common/ui/CornerButton";
 import Grid from "@/components/common/grid";
@@ -122,6 +123,15 @@ export default function CookiesModem({ setSettings, settings, open, copy = null,
     const closeRef = useRef(null);
     closeRef.current = () => setOpen && setOpen(false);
 
+    // Fokus na křížek, Tab zůstane uvnitř, po zavření zpátky na tlačítko,
+    // které list otevřelo. Modál je v DOM jen otevřený, takže „otevřeno" je
+    // tady „ještě není na odchodu". Ne ve Studiu: tam se kreslí sám a nikdo
+    // ho neotevřel.
+    const present = useIsPresent();
+    const dialogRef = useRef(null);
+    const closeButtonRef = useRef(null);
+    useDialogFocus(present, { container: dialogRef, initialFocus: closeButtonRef, enabled: !studioRoot });
+
     const handleToggle = (categoryId) => {
         if (COOKIE_CATEGORIES[categoryId].required) return;
 
@@ -160,6 +170,7 @@ export default function CookiesModem({ setSettings, settings, open, copy = null,
     return (
         <motion.section
             {...surfaceRoot(studioRoot)}
+            ref={dialogRef}
             className="CookiesModem"
             initial={{ x: "100%", opacity: 0 }}
             animate="open"
@@ -195,6 +206,7 @@ export default function CookiesModem({ setSettings, settings, open, copy = null,
                         <h3 {...editable(doc, "title")}>{t.title}</h3>
                     </div>
                     <button
+                        ref={closeButtonRef}
                         type="button"
                         className="CookiesModem__close"
                         onClick={() => closeRef.current()}

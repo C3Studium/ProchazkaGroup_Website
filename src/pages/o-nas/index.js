@@ -66,7 +66,7 @@ export async function getStaticProps(context) {
   }
 }
 
-export default function AboutPage({ content }) {
+export default function AboutPage({ content, assistant, footer }) {
   // Two switches, not one. `armed` is set the moment the prompt below comes into
   // view: the history is mounted then, but out of the flow and invisible, purely
   // so the browser can fetch its first photograph while nobody is waiting.
@@ -180,6 +180,8 @@ export default function AboutPage({ content }) {
           roster={colleagues.roster}
           docId={colleagues.docId}
           dismissed={historyOpen}
+          assistant={assistant}
+          socials={footer?.links || null}
         />
 
         {/* The history is not rendered on page load: four more viewports of

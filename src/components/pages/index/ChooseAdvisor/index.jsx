@@ -111,8 +111,11 @@ const Req = () => <span className="req" aria-hidden="true">*</span>;
 // Advisor picker + contact form. The form sits in the CENTER column (eyes go
 // to the middle), the selected advisor's profile on the right. Verticals at
 // 31vw and 65vw continue ReviewsPreview's endpoints above.
-export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} }) {
+export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {}, assistant = null }) {
     const sectionRef = useRef(null);
+    // Telefon do kanceláře je telefon asistentky ze Studia (Asistentka) — tentýž
+    // v patičce i v kontaktním okně. Text ze siteCopy platí jen bez něj.
+    const officePhone = assistant?.phone?.trim() || "";
 
     // Two documents, because the form is a dozen labels an editor reads as a
     // form and a positional list that long is one nobody can check.
@@ -122,10 +125,12 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
         whereHead: copy.whereHead || COPY.whereHead,
         address: copy.address || COPY.address,
         helpLine: copy.helpLine || COPY.helpLine,
-        phone: {
-            label: copy.phone?.label || COPY.phone.label,
-            href: copy.phone?.href || COPY.phone.href,
-        },
+        phone: officePhone
+            ? { label: officePhone, href: telHref(officePhone) }
+            : {
+                  label: copy.phone?.label || COPY.phone.label,
+                  href: copy.phone?.href || COPY.phone.href,
+              },
         claim: copy.claim || COPY.claim,
         callText: copy.callText || COPY.callText,
         city: copy.city || COPY.city,
@@ -170,6 +175,26 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
     // remembered slug can.
     const [selected, setSelected] = useState(0);
     const active = advisors[Math.min(selected, advisors.length - 1)] || FALLBACK_ADVISORS[0];
+
+    // Klávesnice nad seznamem poradců, jako u nativního radia: šipky vyberou
+    // souseda a fokus jde s výběrem, Home/End na kraje, Enter a mezerník
+    // vyberou ten, na kterém fokus stojí.
+    const listRef = useRef(null);
+    const onPickKey = (event, index) => {
+        const last = advisors.length - 1;
+        let next = null;
+        if (event.key === "ArrowDown" || event.key === "ArrowRight") next = index >= last ? 0 : index + 1;
+        else if (event.key === "ArrowUp" || event.key === "ArrowLeft") next = index <= 0 ? last : index - 1;
+        else if (event.key === "Home") next = 0;
+        else if (event.key === "End") next = last;
+        else if (event.key === "Enter" || event.key === " ") next = index;
+        if (next === null) return;
+        event.preventDefault();
+        setSelected(next);
+        if (next !== index) {
+            listRef.current?.querySelectorAll('[role="radio"]')[next]?.focus();
+        }
+    };
 
     // Controlled, because the check on submit has to read them. Nothing else
     // depends on them changing, so one object is enough.
@@ -252,7 +277,17 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                     stránku — dvanáct poradců by na nižší obrazovce končilo
                     useknutých bez možnosti dojet k posledním. Stejně jako
                     ContactModal__scroll a Dropdown. */}
-                <motion.ul className="ChooseAdvisor__list" variants={LEFT} data-lenis-prevent>
+                {/* Pro klávesnici a čtečku je to skupina přepínačů: jedna
+                    zastávka na Tab (ten vybraný), šipky mezi poradci, Enter
+                    a mezerník vybírá — tak se chová nativní radio. */}
+                <motion.ul
+                    className="ChooseAdvisor__list"
+                    variants={LEFT}
+                    data-lenis-prevent
+                    role="radiogroup"
+                    aria-label="Zvolit poradce"
+                    ref={listRef}
+                >
                     {/* A consultant is a document, not copy: the name on screen
                         is composed from three fields (see consultantFullName),
                         so there is no one field an in-place edit could write
@@ -265,10 +300,14 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                             variants={RISE}
                             className={index === selected ? "isActive" : ""}
                             onClick={() => setSelected(index)}
+                            onKeyDown={(event) => onPickKey(event, index)}
+                            role="radio"
+                            aria-checked={index === selected}
+                            tabIndex={index === selected ? 0 : -1}
                             data-cursor="frame"
                         >
                             <span className="name">{advisor.name}</span>
-                            <span className="radio" />
+                            <span className="radio" aria-hidden="true" />
                         </motion.li>
                     ))}
                 </motion.ul>
@@ -286,7 +325,9 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                         is dialled — and the element carries the marker that says
                         so rather than leaving it to be read off the href. */}
                     <a
-                        {...editableLink(docId, { text: "items.3.label", href: "items.3.value" })}
+                        {...(officePhone
+                            ? editable(assistant?.id, "phone", "text")
+                            : editableLink(docId, { text: "items.3.label", href: "items.3.value" }))}
                         href={text.phone.href}
                         className={`cornerButton ${EXTERNAL_CLASS} ChooseAdvisor__help__phone`}
                         data-cursor="frame"
@@ -498,9 +539,9 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                     `aria-label` is the only name it has, and it states the
                     number so a reader hears what it is about to call. */}
                 <motion.a
-                    href={telHref(active.phone || OFFICE_PHONE)}
+                    href={telHref(active.phone || officePhone || OFFICE_PHONE)}
                     className={`cornerButton ${EXTERNAL_CLASS} ChooseAdvisor__iconCall`}
-                    aria-label={`Zavolat na ${active.phone || OFFICE_PHONE}`}
+                    aria-label={`Zavolat na ${active.phone || officePhone || OFFICE_PHONE}`}
                     variants={RISE}
                 >
                     <span className="corner corner--tl" />
@@ -527,7 +568,7 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                     whichever popup the annotation asks for. */}
                 <motion.a
                     {...editableDoc(active.id, "consultant")}
-                    href={telHref(active.phone || OFFICE_PHONE)}
+                    href={telHref(active.phone || officePhone || OFFICE_PHONE)}
                     className={`cornerButton ${EXTERNAL_CLASS} ChooseAdvisor__phone`}
                     variants={RISE}
                     data-cursor="frame"
@@ -536,7 +577,7 @@ export default function ChooseAdvisor({ consultants, copy = {}, formCopy = {} })
                     <span className="corner corner--tr" />
                     <span className="corner corner--bl" />
                     <span className="corner corner--br" />
-                    {active.phone || OFFICE_PHONE}
+                    {active.phone || officePhone || OFFICE_PHONE}
                 </motion.a>
             </motion.div>
 

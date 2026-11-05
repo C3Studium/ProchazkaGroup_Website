@@ -12,6 +12,7 @@ import PixelReveal from '@/components/common/ui/PixelReveal'
 import { CURTAIN } from '@/components/common/ui/entrance'
 import { NavPages, NavAddLinks, NavIcons } from '@/constants/common'
 import { editableIn, interactive, surfaceRoot } from '@/cms/edit'
+import { FOCUSABLE, focusQuietly } from '@/hooks/useDialogFocus'
 
 // The menu.
 //
@@ -552,6 +553,18 @@ export default function NavbarBody({ setMenu, onSheet, roster, copy = null, stud
 
     const close = () => setMenu(false);
 
+    // Viz onExitComplete u výměny pohledů níž.
+    const frameRef = useRef(null);
+    const refocusView = () => requestAnimationFrame(() => {
+        // Dokument bez fokusu = náhled ve Studiu, kde pohled přepíná editor.
+        if (!document.hasFocus()) return;
+        const active = document.activeElement;
+        if (active && active !== document.body && active.isConnected) return;
+        const first = [...(frameRef.current?.querySelectorAll(FOCUSABLE) || [])]
+            .find((el) => el.getClientRects().length > 0);
+        focusQuietly(first);
+    });
+
     // Escape goes back one step before it goes out. The bar is listening for the
     // same key to close the whole menu, and this listener is registered first —
     // React runs a child's effects before its parent's — so stopping the event
@@ -639,6 +652,7 @@ export default function NavbarBody({ setMenu, onSheet, roster, copy = null, stud
                 />
 
                 <motion.div
+                    ref={frameRef}
                     className="navPanel__frame"
                     variants={boxIn}
                     initial="initial"
@@ -653,7 +667,11 @@ export default function NavbarBody({ setMenu, onSheet, roster, copy = null, stud
                     <span className="navPanel__rule navPanel__rule--b" style={{ '--sweep': '-4.2s' }} />
                     <span className="navPanel__rule navPanel__rule--l" style={{ '--sweep': '-2.4s' }} />
 
-                    <AnimatePresence mode="wait">
+                    {/* Výměna pohledu bere fokus s sebou: tlačítko, které ji
+                        spustilo (PORADCI, nebo krok zpět), zmizí a fokus by
+                        spadl na <body>. Po doběhnutí výměny jde na první
+                        zastávku nového pohledu — jen když opravdu spadl. */}
+                    <AnimatePresence mode="wait" onExitComplete={refocusView}>
                     {view === 'menu' ? (
                     <motion.nav
                         key="bento"

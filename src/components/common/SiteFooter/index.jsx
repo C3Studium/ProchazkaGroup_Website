@@ -109,7 +109,10 @@ const CONTACT = group(0.16);
 // names for those positions are FOOTER_LINES in @/lib/site/footer. They
 // are spelled as literals here because that module is server-only and this
 // component is on every public route; change one and change the other.
-export default function SiteFooter({ where, contactLead, address, legal, claim: cmsClaim, links: cmsLinks, docId }) {
+/** `+420 777 898 157` -> `tel:+420777898157`. */
+const telHref = (phone) => `tel:${String(phone).replace(/[^\d+]/g, "")}`;
+
+export default function SiteFooter({ where, contactLead, address, legal, claim: cmsClaim, links: cmsLinks, docId, assistant }) {
     const copy = {
         where: where?.trim() ? where : FALLBACK.where,
         contactLead: contactLead?.trim() ? contactLead : FALLBACK.contactLead,
@@ -124,9 +127,18 @@ export default function SiteFooter({ where, contactLead, address, legal, claim: 
     };
     const claimDocId = cmsClaim?.docId;
 
+    // Telefon a e-mail jsou kontakt na asistentku — jeden záznam ve Studiu
+    // (Asistentka), stejný jako v kontaktním okně. Odkazy z patičky ve Studiu
+    // platí jen tehdy, když asistentka telefon nebo e-mail vyplněný nemá.
+    const reachPhone = assistant?.phone?.trim() || "";
+    const reachEmail = assistant?.email?.trim() || "";
     const links = {
-        telephone: mergeLink(cmsLinks?.telephone, FALLBACK_LINKS.telephone),
-        email: mergeLink(cmsLinks?.email, FALLBACK_LINKS.email),
+        telephone: reachPhone
+            ? { text: reachPhone, href: telHref(reachPhone) }
+            : mergeLink(cmsLinks?.telephone, FALLBACK_LINKS.telephone),
+        email: reachEmail
+            ? { text: reachEmail, href: `mailto:${reachEmail}` }
+            : mergeLink(cmsLinks?.email, FALLBACK_LINKS.email),
         facebook: mergeLink(cmsLinks?.facebook, FALLBACK_LINKS.facebook),
         instagram: mergeLink(cmsLinks?.instagram, FALLBACK_LINKS.instagram),
     };
@@ -147,7 +159,9 @@ export default function SiteFooter({ where, contactLead, address, legal, claim: 
                             <motion.h2 variants={RISE}>
                                 {claim.lines.map((line, index) => (
                                     <span key={index}>
-                                        {index > 0 && <br />}
+                                        {/* Mezera před zalomením: kde CSS <br> schová, nesmí
+                                            se slova slepit („zlehčitfinanční"). */}
+                                        {index > 0 && <>{" "}<br /></>}
                                         <span {...editable(claimDocId, `items.${index}.label`, "text")}>{line}</span>
                                     </span>
                                 ))}
@@ -202,7 +216,9 @@ export default function SiteFooter({ where, contactLead, address, legal, claim: 
                                     from the href they actually render. */}
                                 <span className="details">
                                     <a
-                                        {...editableLink(linksDocId, { text: "items.0.label", href: "items.0.value" })}
+                                        {...(reachPhone
+                                            ? editable(assistant?.id, "phone", "text")
+                                            : editableLink(linksDocId, { text: "items.0.label", href: "items.0.value" }))}
                                         href={links.telephone.href}
                                         className={externalClass(links.telephone.href) || undefined}
                                         data-cursor="frame"
@@ -210,7 +226,9 @@ export default function SiteFooter({ where, contactLead, address, legal, claim: 
                                         {links.telephone.text}
                                     </a>
                                     <a
-                                        {...editableLink(linksDocId, { text: "items.1.label", href: "items.1.value" })}
+                                        {...(reachEmail
+                                            ? editable(assistant?.id, "email", "text")
+                                            : editableLink(linksDocId, { text: "items.1.label", href: "items.1.value" }))}
                                         href={links.email.href}
                                         className={externalClass(links.email.href) || undefined}
                                         data-cursor="frame"

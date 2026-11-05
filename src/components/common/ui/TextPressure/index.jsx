@@ -150,8 +150,10 @@ export default function TextPressure({
                 ref={titleRef}
                 className="textPressure__word"
                 style={{ fontSize: fontSize ? `${fontSize}px` : undefined }}
-                aria-label={text}
             >
+                {/* Pro čtečku celé slovo; `aria-label` na holém <span> se
+                    nečte. Mimo tok, takže měření šířky nemění. */}
+                <span className="srOnly">{text}</span>
                 {chars.map((char, i) => (
                     <span
                         key={i}

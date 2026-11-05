@@ -286,8 +286,10 @@ function CallLink({ phone, tel }) {
     );
 }
 
-export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorFormCopy = {}, copy = {} }) {
+export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorFormCopy = {}, copy = {}, assistant = null }) {
     const doc = copy.docId;
+    // Linka do kanceláře = telefon asistentky ze Studia (Asistentka).
+    const officePhone = assistant?.phone?.trim() || OFFICE_PHONE;
     const said = {
         ord: say(copy.ord, ENROLL.ord),
         eyebrow: say(copy.eyebrow, ENROLL.eyebrow),
@@ -738,9 +740,9 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                     number, so a reader hears what
                                                     is about to be rung. */}
                                                 <a
-                                                    href={telHref(chosen?.phone || OFFICE_PHONE)}
+                                                    href={telHref(chosen?.phone || officePhone)}
                                                     className="cornerButton BenBothWin__mini__iconCall"
-                                                    aria-label={`Zavolat na ${chosen?.phone || OFFICE_PHONE}`}
+                                                    aria-label={`Zavolat na ${chosen?.phone || officePhone}`}
                                                     data-cursor="frame"
                                                 >
                                                     <span className="corner corner--tl" />
@@ -784,7 +786,7 @@ export function BenefitEnroll({ consultants = [], advisorsCopy = {}, advisorForm
                                                 published this IS the answer, so it cannot be the
                                                 one place on a phone where the number goes back to
                                                 being a line of type. */}
-                                            <CallLink phone={phone} tel={OFFICE_PHONE} />
+                                            <CallLink phone={phone} tel={officePhone} />
                                             <p className="BenBothWin__reply__hours">Po–Pá, 8–16</p>
                                         </div>
                                     )}

@@ -814,7 +814,11 @@ function Written({ text, progress, from, to }) {
     let index = 0;
 
     return (
-        <span className="written" aria-label={text}>
+        <span className="written">
+            {/* Věta pro čtečku celá a s mezerami. `aria-label` na holém <span>
+                čtečky neberou, a slova pod ním jsou bez mezer (rozestup je
+                v CSS), takže by se četla jako jedno dlouhé slovo. */}
+            <span className="srOnly">{text}</span>
             {words.map((word, w) => {
                 const letters = [...word].map((letter) => {
                     const at = index;

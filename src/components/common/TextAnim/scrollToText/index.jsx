@@ -130,6 +130,9 @@ const AlphabetChar = ({ char, duration = 0.5 }) => {
     return (
         <motion.span
             className="scrollToText__char"
+            // Celá abeceda za každým písmenem — čtečka by ji přečetla. Slovo
+            // samo nese skrytý text v ScrollToText níž.
+            aria-hidden="true"
             initial={{ width: "0ch", marginLeft: "0rem", marginRight: "0rem", opacity: 0 }}
             animate={{ width: "1ch", marginLeft: "0.15rem", marginRight: "0.15rem", opacity: 1 }}
             exit={{ width: "0ch", marginLeft: "0rem", marginRight: "0rem", opacity: 0 }}
@@ -156,6 +159,8 @@ export const ScrollToText = ({ text = "", duration = 0.6 }) => {
 
     return (
         <p className="scrollToText">
+            {/* Slovo pro čtečku; sloupce s abecedou jsou aria-hidden. */}
+            <span className="srOnly">{text}</span>
             {/* Keyed by POSITION, not by letter: when the word changes, each
                 column that survives spins its track to the new letter instead
                 of being torn down, and only the head-count difference enters

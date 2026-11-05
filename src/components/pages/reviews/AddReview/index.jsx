@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, cubicBezier, motion, useReducedMotion } from "framer-motion";
 import Arrow from "@/components/common/ui/Arrow";
@@ -8,6 +8,7 @@ import Dropdown from "@/components/common/ui/Dropdown";
 import { editable, surfaceRoot, useStudioSurface } from "@/cms/edit";
 import { toast } from "sonner";
 import { notifyForm, rejectionReason } from "@/hooks/useFormSubmit";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
@@ -106,6 +107,12 @@ export default function AddReview({ consultants = [], copy = {}, notices = null,
             window.removeEventListener("keydown", onKey);
         };
     }, [shown]);
+
+    // Fokus do listu a zpátky na tlačítko. Jen na `open`, ne na `shown`:
+    // list, který si rozbalilo Studio, nikdo neotevřel a fokus nikam nepatří.
+    const sheetRef = useRef(null);
+    const closeRef = useRef(null);
+    useDialogFocus(open, { container: sheetRef, initialFocus: closeRef });
 
     const set = (key) => (e) => setForm((f) => ({ ...f, [key]: e.target.value }));
 
@@ -214,6 +221,7 @@ export default function AddReview({ consultants = [], copy = {}, notices = null,
                             reach the backdrop and close. */}
                         <motion.form
                             {...surfaceRoot(studioRoot)}
+                            ref={sheetRef}
                             className="AddRev__sheet"
                             onSubmit={submit}
                             initial={{ opacity: 0, y: calm ? 0 : "3vh" }}
@@ -237,6 +245,7 @@ export default function AddReview({ consultants = [], copy = {}, notices = null,
                                     {words.eyebrow}
                                 </span>
                                 <button
+                                    ref={closeRef}
                                     type="button"
                                     className="AddRev__close"
                                     onClick={() => setOpen(false)}

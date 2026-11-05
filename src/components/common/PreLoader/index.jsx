@@ -1,6 +1,7 @@
-// The first-load curtain. Plays on every FULL document load (reload and hard
-// reload included — <html> ships with data-preload="1" from _document) and
-// never on client-side route changes. TRANSPARENT: the shader ground shows
+// The first-load curtain. Plays on the first FULL document load in an hour
+// (<html> ships with data-preload="1" from _document; its inline script drops
+// the attribute while the `pg_intro` cookie lives, and a hard reload clears
+// the cookie) and never on client-side route changes. TRANSPARENT: the shader ground shows
 // through; heroes and the navbar hold their entrances behind it.
 //
 // Composition: EIGHT squares — one per navbar page, in NavPages order — set
@@ -645,6 +646,12 @@ export default function Preloader() {
         const html = document.documentElement;
         html.removeAttribute("data-preload");
         html.removeAttribute("data-preload-reveal");
+        // Odehráno — další hodinu se opona neukáže (čte to skript v _document;
+        // tvrdé obnovení cookie maže).
+        try {
+            const secure = window.location.protocol === "https:" ? "; Secure" : "";
+            document.cookie = `pg_intro=1; Max-Age=3600; Path=/; SameSite=Lax${secure}`;
+        } catch (e) {}
         setPhase("off");
         setTimeout(() => window.lenis && window.lenis.start(), 900);
     };

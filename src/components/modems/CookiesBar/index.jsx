@@ -33,6 +33,29 @@ export default function CookiesBar() {
     const studio = pathname.startsWith("/studio");
     const visible = showBanner && gate === "go" && !settings && !studio;
 
+    // Lišta se po dobu nastavení schová, takže tlačítko, které okno otevřelo,
+    // při zavření neexistuje a fokus by spadl na <body>. Když se lišta vrátí
+    // (návštěvník nic neuložil), fokus jde zpátky na „Nastavení" — jen pokud
+    // okno otevřela klávesnice.
+    const settingsRef = useRef(null);
+    const backToSettings = useRef(false);
+    useEffect(() => {
+        if (settings || !visible || !backToSettings.current) return undefined;
+        backToSettings.current = false;
+        const frame = requestAnimationFrame(() => {
+            // Na <body>, nebo ještě v odjíždějícím okně (exit trvá 0,6 s).
+            const active = document.activeElement;
+            if (!active || active === document.body || active.closest(".CookiesModem")) {
+                settingsRef.current?.focus({ preventScroll: true, focusVisible: true });
+            }
+        });
+        return () => cancelAnimationFrame(frame);
+    }, [settings, visible]);
+    const openSettings = (event) => {
+        backToSettings.current = event.currentTarget.matches(":focus-visible");
+        setSettings(true);
+    };
+
     // Co dalšího stojí u spodního okraje (widget novinek), musí lištu obejít:
     // obě jsou `position: fixed` na stejné vrstvě a bublina novinek jinak
     // ležela přes „Nastavení" a brala mu kliknutí. Lišta proto hlásí, že je
@@ -92,9 +115,10 @@ export default function CookiesBar() {
                                 Odmítnout
                             </CornerButton>
                             <button
+                                ref={settingsRef}
                                 type="button"
                                 className="CookiesBar__settings"
-                                onClick={() => setSettings(true)}
+                                onClick={openSettings}
                                 data-cursor="frame"
                             >
                                 Nastavení

@@ -121,6 +121,18 @@ const subscribeToScreen = (notify) => {
 const readScreenDpr = () =>
     typeof window === "undefined" ? 1 : window.devicePixelRatio || 1;
 
+// Omezený pohyb v systému (prefers-reduced-motion): podklad zůstane stát na
+// jednom snímku. Nevykresluje se dál ve smyčce, jen když se změní velikost.
+const STILL_QUERY = "(prefers-reduced-motion: reduce)";
+const subscribeToMotion = (notify) => {
+    if (typeof window === "undefined") return () => {};
+    const media = window.matchMedia(STILL_QUERY);
+    media.addEventListener("change", notify);
+    return () => media.removeEventListener("change", notify);
+};
+const readStill = () =>
+    typeof window !== "undefined" && window.matchMedia(STILL_QUERY).matches;
+
 const isClear = (paint) =>
     paint === "transparent" || paint === "none" || paint === "";
 
@@ -320,6 +332,7 @@ export const NeuralTunnel = ({
         () => 1,
     );
     const ceiling = Math.min(screenDpr, Math.max(dpr, 0.5));
+    const still = useSyncExternalStore(subscribeToMotion, readStill, () => false);
 
     const readPointer = useCallback(() => pointer.current, []);
 
@@ -378,7 +391,7 @@ export const NeuralTunnel = ({
                 <Canvas
                     orthographic
                     dpr={ceiling}
-                    frameloop={awake && !covered ? "always" : "demand"}
+                    frameloop={awake && !covered && !still ? "always" : "demand"}
                     gl={{
                         antialias: false,
                         alpha: true,
@@ -407,7 +420,7 @@ export const NeuralTunnel = ({
                         opacity={opacity}
                         cursorInteraction={cursorInteraction}
                         cursorShift={cursorShift}
-                        paused={paused}
+                        paused={paused || still}
                         adaptiveQuality={adaptiveQuality}
                         targetFps={targetFps}
                         readPointer={readPointer}

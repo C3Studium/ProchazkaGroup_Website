@@ -121,7 +121,12 @@ export default function GridDistortion({
         // ordinary optimised <Image> in the fallback layer is the picture.
         // Some call sites (WhoWeAre) already skip this component on touch at
         // their end; this guard makes the same true for the ones that don't.
-        if (window.matchMedia("(hover: none)").matches) return;
+        // Omezený pohyb v systému: stejně jako na dotyku zůstane obyčejná
+        // fotka, bez shaderu.
+        if (
+            window.matchMedia("(hover: none)").matches ||
+            window.matchMedia("(prefers-reduced-motion: reduce)").matches
+        ) return;
 
         // Everything below used to run from mount to unmount, which meant one
         // WebGL context per picture held for the life of the page — on top of

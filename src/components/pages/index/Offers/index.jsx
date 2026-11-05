@@ -144,7 +144,7 @@ function TitleChar({ ch, index, count, journey }) {
     const opacity = useTransform(journey, [start, start + 0.04], [0, 1]);
     const y = useTransform(journey, [start, start + 0.055], ["0.42em", "0em"], { ease: SETTLE });
     return (
-        <motion.span style={{ opacity, y }}>
+        <motion.span style={{ opacity, y }} aria-hidden="true">
             {ch === " " ? "\u00A0" : ch}
         </motion.span>
     );
@@ -514,7 +514,11 @@ export default function Offers({ partnerLogos: cmsLogos, copyLines: cmsCopyLines
                         it: each character holds its own transform through the
                         reveal, and this is the box whose wrapping is the truth.
                         Same arrangement as WhoWeAre's paragraph. */}
-                    <h2 {...editable(docId, "title", "text")} className="Offers__hero__title">
+                    {/* Jméno nadpisu je `aria-label`, písmena jsou aria-hidden —
+                        jinak je čtečka přečte po jednom (každé je blok). Ne
+                        skrytý <span> uvnitř: nadpis se edituje na místě a ten
+                        by se přečetl jako součást textu. */}
+                    <h2 {...editable(docId, "title", "text")} className="Offers__hero__title" aria-label={title}>
                         {title.split("").map((ch, i) => (
                             <TitleChar key={i} ch={ch} index={i} count={title.length} journey={journey} />
                         ))}

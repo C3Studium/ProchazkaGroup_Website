@@ -43,11 +43,15 @@
 
 @import url("../../public/Fonts/synonym/css/synonym.css");
 @import url("../../public/Fonts/switzer/css/switzer.css");
-@import url("https://fonts.googleapis.com/css2?family=Poppins:wght@200;300&display=swap");
+// Poppins a Roboto Flex jsou hostované u nás (public/Fonts), ne z Google Fonts:
+// žádný blokující řetěz CSS importů na cizí doménu a žádný požadavek na Google
+// před souhlasem s cookies. Stejné soubory, jaké Google posílal (latin
+// a latin-ext kvůli češtině).
+@import url("../../public/Fonts/poppins/css/poppins.css");
 // Loaded for one element: the footer's wordmark, which is set with a variable
 // weight and width per letter (see ui/TextPressure). Nothing else on the site
-// uses it, and only the two axes it actually reads are requested.
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:wght@100..1000&display=swap");
+// uses it, and only the weight axis it actually reads is shipped.
+@import url("../../public/Fonts/roboto-flex/css/roboto-flex.css");
 
 // Legacy tokens from the pre-remodel design. Components that are still live
 // (navbar, hero, transition, preloader) reference these; delete each once the
@@ -144,6 +148,42 @@ body[data-footer="hidden"] .SiteFooter {
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
   pointer-events: none;
+}
+
+// Text jen pro čtečku: je v DOM, ale nezabere místo a není vidět.
+// Pro nápisy rozsekané po písmenech, kde se písmena schovají přes aria-hidden.
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+// Fokus z klávesnice: tenký prstenec v tyrkysové. Jen :focus-visible, takže
+// klik myší nic nového nekreslí. :where() drží specifičnost nízko, aby
+// vlastní :focus-visible komponent (menu, modály, Dropdown) dál vyhrály.
+// Pole formulářů ne: ta mají :focus-visible i po kliknutí myší a svůj stav
+// zaostření si kreslí sama. Ne ve Studiu — to má vlastní styly.
+:where(:root:not([data-studio])) :focus-visible:where(:not(input, textarea, select)) {
+  outline: 1px solid var(--focusRing);
+  outline-offset: 3px;
+}
+
+:where(:root:not([data-studio])) :focus:where(:not(:focus-visible)) {
+  outline: none;
+}
+
+// Fokus, který dialog posunul po kliknutí myší (hooks/useDialogFocus). Chrome
+// ho jinak počítá za :focus-visible a kreslil by prstenec i myši. `!important`,
+// protože to má přebít i vlastní :focus-visible komponent — jen na tu chvíli.
+[data-focus-quiet]:focus-visible {
+  outline: none !important;
 }
 
 

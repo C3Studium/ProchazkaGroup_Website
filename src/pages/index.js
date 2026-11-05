@@ -62,7 +62,12 @@ export async function getStaticProps() {
   };
 }
 
-export default function Home({ content }) {
+export default function Home({ content, assistant }) {
+  // Kontakt ve strukturovaných datech je kontakt na asistentku ze Studia —
+  // stejný telefon a e-mail jako v patičce a v kontaktním okně.
+  const reachPhone = assistant?.phone?.trim() || "+420 777 898 157";
+  const reachEmail = assistant?.email?.trim() || "asistentka.prochazka@ovbone.cz";
+
   // Non-sticky wrapper around hero + WhoWeAre: gives the pinned hero its
   // scroll travel and serves as the progress target for its parallax.
   const heroStackRef = useRef(null);
@@ -99,8 +104,8 @@ export default function Home({ content }) {
           "url": "https://www.prochazkagroup.cz",
           "logo": "https://www.prochazkagroup.cz/favicon.ico",
           "image": "https://www.prochazkagroup.cz/assets/seo/og/prochazka-group.jpg",
-          "telephone": "+420 705 500 200",
-          "email": "asistentka.prochazka@ovbone.cz",
+          "telephone": reachPhone,
+          "email": reachEmail,
           "foundingDate": "2013",
           "parentOrganization": {
             "@type": "Organization",
@@ -122,8 +127,8 @@ export default function Home({ content }) {
           },
           "contactPoint": {
             "@type": "ContactPoint",
-            "telephone": "+420 705 500 200",
-            "email": "asistentka.prochazka@ovbone.cz",
+            "telephone": reachPhone,
+            "email": reachEmail,
             "contactType": "customer service",
             "availableLanguage": ["Czech"],
             "areaServed": "CZ"
@@ -134,9 +139,8 @@ export default function Home({ content }) {
             "jobTitle": "Vedoucí kanceláře"
           },
           "sameAs": [
-            "https://www.facebook.com/prochazkagroup",
-            "https://www.instagram.com/prochazkagroup",
-            "https://www.linkedin.com/company/prochazkagroup"
+            "https://www.facebook.com/prochazka.group",
+            "https://www.instagram.com/prochazka.group/"
           ],
           "openingHoursSpecification": [
             {
@@ -188,6 +192,7 @@ export default function Home({ content }) {
           consultants={consultants}
           copy={advisorsCopy}
           formCopy={advisorFormCopy}
+          assistant={assistant}
         />
         <QnaContact copy={qna} />
         {/* <IntroStatbar data={StatbarData} /> */}

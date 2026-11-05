@@ -277,7 +277,7 @@ function SiteShell({ Component, pageProps }) {
                 generation; a page with no getStaticProps hands down nothing and
                 the footer renders the copy it ships with. See
                 @/lib/site/footer. */}
-            <SiteFooter {...(pageProps.footer || {})} />
+            <SiteFooter {...(pageProps.footer || {})} assistant={pageProps.assistant || null} />
             <Analytics />
             {/* Last, so a fixed badge in a corner is painted over the page
                 rather than under it, and outside <Component> so switching pages

@@ -8,6 +8,7 @@ import { RiMailLine, RiPhoneLine } from "@remixicon/react";
 import { dial } from "@/constants/roster";
 import { EXTERNAL_CLASS } from "@/components/common/ui/externalLink";
 import { surfaceRoot } from "@/cms/edit";
+import useDialogFocus from "@/hooks/useDialogFocus";
 
 const GLIDE = cubicBezier(0.22, 1, 0.36, 1);
 
@@ -51,9 +52,6 @@ const ruleIn = (calm) => ({
     shown: { scaleX: 1, opacity: 1, transition: { duration: calm ? 0.4 : 0.9, ease: GLIDE } },
 });
 
-const FOCUSABLE =
-    'a[href],button:not([disabled]),input:not([disabled]),textarea:not([disabled]),select:not([disabled]),[tabindex]:not([tabindex="-1"])';
-
 /**
  * @param {object|null} person   záznam z rosteru (constants/roster.js): name, moto,
  *                               story, src, srcAlt, tel, email; `null` = zavřeno
@@ -72,49 +70,9 @@ export default function AdvisorModal({ person, order = null, onClose, studioRoot
     // klientský render je prázdný stejně jako serverový.
     useEffect(() => setMounted(true), []);
 
-    // Fokus na zavírací křížek, po zavření zpátky na kartu.
-    useEffect(() => {
-        if (!open) return undefined;
-        const opener = document.activeElement;
-        const frame = requestAnimationFrame(() => closeRef.current?.focus({ preventScroll: true }));
-        return () => {
-            cancelAnimationFrame(frame);
-            opener?.focus?.({ preventScroll: true });
-        };
-    }, [open]);
-
-    // Escape a Tab. Capture + stopImmediatePropagation — viz komentář nahoře.
-    useEffect(() => {
-        if (!open) return undefined;
-        const onKey = (e) => {
-            if (e.key === "Escape") {
-                e.preventDefault();
-                e.stopImmediatePropagation();
-                onClose();
-                return;
-            }
-            if (e.key !== "Tab") return;
-            const wrap = wrapRef.current;
-            if (!wrap) return;
-            const stops = [...wrap.querySelectorAll(FOCUSABLE)].filter((el) => el.getClientRects().length > 0);
-            if (!stops.length) return;
-            const first = stops[0];
-            const last = stops[stops.length - 1];
-            const active = document.activeElement;
-            if (!wrap.contains(active)) {
-                e.preventDefault();
-                (e.shiftKey ? last : first).focus({ preventScroll: true });
-            } else if (e.shiftKey && active === first) {
-                e.preventDefault();
-                last.focus({ preventScroll: true });
-            } else if (!e.shiftKey && active === last) {
-                e.preventDefault();
-                first.focus({ preventScroll: true });
-            }
-        };
-        window.addEventListener("keydown", onKey, true);
-        return () => window.removeEventListener("keydown", onKey, true);
-    }, [open, onClose]);
+    // Fokus na zavírací křížek, po zavření zpátky na kartu; Escape a past na
+    // Tab. Capture + stopImmediatePropagation — viz komentář nahoře.
+    useDialogFocus(open, { container: wrapRef, initialFocus: closeRef, onClose, capture: true });
 
     if (!mounted) return null;
 

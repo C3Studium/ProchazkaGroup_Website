@@ -83,6 +83,11 @@
                 cursor: pointer;
                 isolation: isolate;
 
+                // Seznam se posouvá (overflow), prstenec venku by ořízl.
+                &:focus-visible {
+                    outline-offset: -2px;
+                }
+
                 // The ground comes in from the left, the way every rule and
                 // every review on this page does. It is a wash rather than a
                 // fill — the rows are separated by hairlines and a solid block

@@ -85,8 +85,8 @@ export default function BenefitProgramPage({
     consultants = [],
     advisorsCopy = {},
     advisorFormCopy = {},
+    assistant = null,
 }) {
-    // WIP: Use differnt paths for phone viewports
 
     return (
         <>
@@ -151,6 +151,7 @@ export default function BenefitProgramPage({
                     advisorsCopy={advisorsCopy}
                     advisorFormCopy={advisorFormCopy}
                     copy={content?.enroll}
+                    assistant={assistant}
                 />
 
                 {/* Both fall back to their own shipped copy when given nothing,
