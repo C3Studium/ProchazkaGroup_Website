@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import Script from "next/script";
+import { Analytics as VercelAnalytics } from "@vercel/analytics/react";
 
 import { useCookies } from "@/context/CookiesProvider";
 import { clearAnalyticsCookies } from "@/helpers/consent";
@@ -46,6 +47,11 @@ export default function ConsentScripts() {
 
     return (
         <>
+            {/* Vercel Analytics neukládá cookies, ale posílá návštěvu na servery
+                Vercelu — i to je měření, a měření jde až po kliknutí v liště.
+                Dřív stálo v _app.js a běželo každému od prvního snímku. */}
+            <VercelAnalytics />
+
             <Script id="google-tag-manager" strategy="afterInteractive">
                 {`
                 (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':

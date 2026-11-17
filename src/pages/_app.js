@@ -27,9 +27,9 @@ import { useEditArming } from "@/cms/edit/arm";
 import ManageBadge from "@/cms/manage";
 // import Transition from "@/components/common/Transition";
 import CookiesBar from "@/components/modems/CookiesBar";
-// GTM, GA a Clarity — vykreslí se až po souhlasu s analytickými cookies.
+// GTM, GA, Clarity i Vercel Analytics — vykreslí se až po souhlasu
+// s analytickými cookies.
 import ConsentScripts from "@/components/common/ConsentScripts";
-import { Analytics } from "@vercel/analytics/react";
 // The shader ground for every page. Loaded client-side only: react-three-fiber
 // builds a WebGL context on mount and has nothing to render on the server.
 const NeuralTunnel = dynamic(
@@ -294,7 +294,7 @@ function SiteShell({ Component, pageProps }) {
                 the footer renders the copy it ships with. See
                 @/lib/site/footer. */}
             <SiteFooter {...(pageProps.footer || {})} assistant={pageProps.assistant || null} />
-            <Analytics />
+            {/* Vercel Analytics je v ConsentScripts — až po souhlasu, jako ostatní měření. */}
             {/* Last, so a fixed badge in a corner is painted over the page
                 rather than under it, and outside <Component> so switching pages
                 does not remount it. */}
