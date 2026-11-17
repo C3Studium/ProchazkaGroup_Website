@@ -24,25 +24,14 @@
 import { clientKey, consume } from '@/cms/server/rateLimit.js'
 import { adminRecipients, prepare } from '@/lib/mail/forms.js'
 import { effectiveMailSender } from '@/cms/server/settings.js'
+import { mailTexts } from '@/cms/server/mails.js'
 
-// Šablony se importují staticky a všechny: `import()` s proměnnou v cestě
-// webpack nedokáže rozbalit a trasa by za běhu hlásila nenalezený modul.
-// Deset souborů v serverovém balíku nic nestojí — do prohlížeče nejde ani jeden.
-import * as kontaktAdmin from '@/modules/resend/emails/kontakt-admin.jsx'
-import * as kontaktUser from '@/modules/resend/emails/kontakt-user.jsx'
-import * as recenzeAdmin from '@/modules/resend/emails/recenze-admin.jsx'
-import * as recenzeUser from '@/modules/resend/emails/recenze-user.jsx'
-import * as zajemAdmin from '@/modules/resend/emails/zajem-admin.jsx'
-import * as zajemUser from '@/modules/resend/emails/zajem-user.jsx'
-
-const TEMPLATES = {
-    'kontakt-admin': kontaktAdmin,
-    'kontakt-user': kontaktUser,
-    'zajem-admin': zajemAdmin,
-    'zajem-user': zajemUser,
-    'recenze-admin': recenzeAdmin,
-    'recenze-user': recenzeUser,
-}
+// Šablony se importují staticky a všechny (katalog je má pohromadě):
+// `import()` s proměnnou v cestě webpack nedokáže rozbalit a trasa by za běhu
+// hlásila nenalezený modul. Šest souborů v serverovém balíku nic nestojí —
+// do prohlížeče nejde ani jeden. Tentýž katalog dává Studiu obrazovku
+// E-maily, odkud majitel znění přepisuje (`mailTexts` níž ho čte).
+import { TEMPLATES, mails } from '@/lib/mail/catalog.js'
 
 /**
  * Kolik odeslání za hodinu z jedné adresy.
@@ -68,13 +57,17 @@ const send = async ({ resend, render, from, name, to, data }) => {
     const template = TEMPLATES[name]
     if (!template) throw new Error(`neznámá šablona ${name}`)
 
+    // Texty ze Studia (E-maily): přepis nad výchozím zněním. Bez databáze
+    // přijde výchozí — nikdy to neshodí odeslání.
+    const { texts } = await mailTexts(mails, name)
+
     const Component = template.default
-    const html = await render(Component(data))
+    const html = await render(Component({ ...data, texts }))
 
     const { error } = await resend.emails.send({
         from,
         to,
-        subject: template.subject(data),
+        subject: template.subject(data, texts),
         html,
     })
 

@@ -1,5 +1,6 @@
 import EmailShell, { BrandButton, BrandText, DataRow, DataTable } from "./_shell.jsx"
 import { BRAND } from "./_brand.js"
+import { fill, paragraphs, textsFor } from "./_texts.js"
 
 /**
  * Nová recenze ke schválení — pro kancelář.
@@ -7,18 +8,25 @@ import { BRAND } from "./_brand.js"
  * Vzhled je obálka `_shell.jsx` — barvy a typografie změřené na živém webu,
  * v hlavičce snímek jeho shaderu. Interní e-mail: žádné vítání ani sliby
  * o lhůtách, jen kdo psal, co, a čím se dá odpovědět.
+ *
+ * Texty jdou přepsat ve Studiu (E-maily): `texts` jsou přepisy nad výchozím
+ * zněním z ./_texts.js; bez nich (náhled) platí výchozí.
  */
-function RecenzeAdminEmailComponent({ customerName, email, message, consultantName, hashtag, created_at }) {
+function RecenzeAdminEmailComponent({ customerName, email, message, consultantName, hashtag, created_at, texts }) {
+    const t = textsFor("recenze-admin", texts)
+    const vars = { jméno: customerName?.trim() || "" }
     const when = new Date(created_at || Date.now()).toLocaleString("cs-CZ", { dateStyle: "long", timeStyle: "short" })
 
     return (
         <EmailShell
             preview={`Nová recenze od ${customerName || "zákazníka"}`}
-            eyebrow="Recenze"
-            title="Nová recenze ke schválení"
-            footNote="Odesláno automaticky z webu."
+            eyebrow={fill(t.eyebrow, vars)}
+            title={fill(t.title, vars)}
+            footNote={paragraphs(fill(t.footNote, vars)).join(" ")}
         >
-            <BrandText style={{ margin: 0 }}>Přišla nová recenze. Na webu se objeví, až ji někdo schválí ve Studiu.</BrandText>
+            {paragraphs(fill(t.lead, vars)).map((line, i) => (
+                <BrandText key={i} style={i ? undefined : { margin: 0 }}>{line}</BrandText>
+            ))}
 
             <div style={{ paddingTop: "18px" }}>
                 <DataTable>
@@ -32,16 +40,18 @@ function RecenzeAdminEmailComponent({ customerName, email, message, consultantNa
 
             {message ? (
                 <div style={{ paddingTop: "18px" }}>
-                    <BrandText muted style={{ margin: "0 0 8px" }}>Text recenze</BrandText>
+                    <BrandText muted style={{ margin: "0 0 8px" }}>{fill(t.messageTitle, vars)}</BrandText>
                     <div style={{ padding: "16px", backgroundColor: BRAND.raised, border: `1px solid ${BRAND.line}`, fontSize: "15px", lineHeight: "24px", color: BRAND.ink, whiteSpace: "pre-wrap" }}>
                         {message}
                     </div>
                 </div>
             ) : null}
 
-            <div style={{ padding: "24px 0 4px" }}>
-                <BrandButton href={`mailto:${email}?subject=${encodeURIComponent("Děkujeme za recenzi — Procházka Group")}`}>Odpovědět</BrandButton>
-            </div>
+            {email && t.button.trim() ? (
+                <div style={{ padding: "24px 0 4px" }}>
+                    <BrandButton href={`mailto:${email}?subject=${encodeURIComponent("Děkujeme za recenzi — Procházka Group")}`}>{fill(t.button, vars)}</BrandButton>
+                </div>
+            ) : null}
         </EmailShell>
     )
 }
@@ -53,7 +63,8 @@ export default RecenzeAdminEmailComponent
 // výchozí. Sjednotit je by znamenalo sáhnout na obojí; tohle je jeden řádek.
 export const recenzeAdminEmail = RecenzeAdminEmailComponent
 
-export const subject = ({ customerName }) => `Nová recenze — ${customerName || "web"}`
+/** Předmět — výchozí, nebo přepis ze Studia (`texts.subject`); {jméno} = zákazník. */
+export const subject = (data = {}, texts) => fill(textsFor("recenze-admin", texts).subject, { jméno: data.customerName || "web" })
 
 RecenzeAdminEmailComponent.PreviewProps = {
     customerName: "Karel Šrámek",

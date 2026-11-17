@@ -1,0 +1,280 @@
+@use "../styles/tokens.module" as t;
+
+/* Tři sloupce na jedné obrazovce: seznam, formulář, náhled. Stejná gramatika
+   řádků jako seznam dokumentů — vlasová linka, žádné karty. Náhled je jediná
+   světlá plocha, protože e-mail je cizí dokument a má tak vypadat. */
+
+.body {
+  display: flex;
+  flex-direction: column;
+  padding-bottom: 0;
+}
+
+.columns {
+  display: grid;
+  flex: 1;
+  grid-template-columns: 250px minmax(0, 1fr) minmax(360px, 42%);
+  min-height: 0;
+
+  @media (max-width: 1180px) {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+}
+
+/* ---------------------------------------------------------------- seznam -- */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-right: 1px solid var(--st-line-soft);
+}
+
+.search {
+  padding: var(--st-s3) var(--st-s4);
+  border-bottom: 1px solid var(--st-line-soft);
+}
+
+.rows {
+  flex: 1;
+  padding: 0 0 var(--st-s6);
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.groupLabel {
+  @include t.eyebrow;
+
+  padding: var(--st-s5) var(--st-s4) var(--st-s1);
+  color: var(--st-ink-4);
+}
+
+.row {
+  display: flex;
+  gap: var(--st-s2);
+  align-items: flex-start;
+  justify-content: space-between;
+  width: 100%;
+  padding: 9px var(--st-s4);
+  font-family: var(--st-font);
+  font-size: var(--st-text-small);
+  line-height: 1.4;
+  color: var(--st-ink-2);
+  text-align: left;
+  cursor: pointer;
+  background: none;
+  border: 0;
+  border-left: 2px solid transparent;
+  transition:
+    background var(--st-fast) var(--st-ease),
+    color var(--st-fast) var(--st-ease);
+
+  &:hover {
+    color: var(--st-ink);
+    background: rgba(255, 252, 247, 0.03);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(-1px);
+  }
+}
+
+.rowActive {
+  color: var(--st-ink);
+  background: var(--st-raised);
+  border-left-color: var(--st-accent);
+}
+
+.rowTitle {
+  flex: 1;
+}
+
+.none {
+  padding: var(--st-s4);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-4);
+}
+
+/* ------------------------------------------------------------- formulář -- */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s5);
+  min-height: 0;
+  padding: var(--st-s5) var(--st-gutter) var(--st-s8);
+  overflow-y: auto;
+}
+
+.formHead {
+  display: flex;
+  gap: var(--st-s4);
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: var(--st-s3);
+  border-bottom: 1px solid var(--st-line);
+}
+
+.formTitle {
+  margin: 0;
+  font-size: var(--st-text-section);
+  font-weight: var(--st-w-medium);
+  letter-spacing: var(--st-track-section);
+  color: var(--st-ink);
+}
+
+.note {
+  margin: 0;
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--st-s1);
+}
+
+.fieldHead {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.fieldLabel {
+  font-size: var(--st-text-small);
+  font-weight: var(--st-w-medium);
+  color: var(--st-ink-2);
+}
+
+.fieldState {
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-4);
+}
+
+.fieldAction,
+.fieldEdit {
+  padding: 0;
+  font-family: var(--st-font);
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-3);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+  background: none;
+  border: 0;
+
+  &:hover {
+    color: var(--st-accent);
+  }
+
+  &:focus-visible {
+    @include t.focus-outline(1px);
+  }
+}
+
+.fieldEdit {
+  align-self: flex-start;
+}
+
+.fieldHint {
+  margin: 0;
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-4);
+}
+
+/* Stejná plocha jako každý vstup v editoru (tokens: control). Placeholder je
+   výchozí znění, proto o chlup čitelnější než obvyklý placeholder. */
+.control {
+  @include t.control;
+
+  resize: vertical;
+
+  &::placeholder {
+    color: var(--st-ink-4);
+    opacity: 1;
+  }
+}
+
+/* --------------------------------------------------------------- náhled -- */
+
+.preview {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 1px solid var(--st-line-soft);
+
+  @media (max-width: 1180px) {
+    display: none;
+  }
+}
+
+.previewHead {
+  display: flex;
+  gap: var(--st-s3);
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: var(--st-s2) var(--st-s4);
+  border-bottom: 1px solid var(--st-line-soft);
+}
+
+.previewMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.previewKicker {
+  @include t.eyebrow;
+
+  color: var(--st-ink-4);
+}
+
+.previewSubject {
+  overflow: hidden;
+  font-size: var(--st-text-small);
+  color: var(--st-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewState {
+  flex: none;
+  font-size: var(--st-text-tiny);
+  color: var(--st-ink-4);
+}
+
+.previewNone {
+  padding: var(--st-s6) var(--st-s4);
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}
+
+.frame {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  background: #fff;
+  border: 0;
+}
+
+/* ------------------------------------------------------------ uložení -- */
+
+.saveBar {
+  display: flex;
+  flex: none;
+  gap: var(--st-s3);
+  align-items: center;
+  padding: var(--st-s3) var(--st-gutter);
+  background: var(--st-bg);
+  border-top: 1px solid var(--st-line);
+}
+
+.saveNote {
+  font-size: var(--st-text-small);
+  color: var(--st-ink-3);
+}

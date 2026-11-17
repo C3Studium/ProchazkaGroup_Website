@@ -1,27 +1,32 @@
 import EmailShell, { BrandButton, BrandText, DataRow, DataTable } from "./_shell.jsx"
 import { BRAND } from "./_brand.js"
+import { fill, paragraphs, textsFor } from "./_texts.js"
 
 /**
  * Nová zpráva z kontaktního formuláře — pro kancelář.
  *
  * Vzhled je obálka `_shell.jsx`: barvy a typografie změřené na živém webu,
- * v hlavičce snímek jeho shaderu. Dřív měl tenhle e-mail fialovo-azurový
- * přechod a modré pozadí, které web nikde nemá.
+ * v hlavičce snímek jeho shaderu. Interní e-mail, takže žádné vítání a žádné
+ * sliby o lhůtách — jen kdo psal, co, a jedno tlačítko, kterým se dá odpovědět.
  *
- * Interní e-mail, takže žádné vítání a žádné sliby o lhůtách — jen kdo psal,
- * co, a jedno tlačítko, kterým se dá odpovědět.
+ * Texty jdou přepsat ve Studiu (E-maily): `texts` jsou přepisy nad výchozím
+ * zněním z ./_texts.js; bez nich (náhled) platí výchozí.
  */
-function KontaktAdminEmailComponent({ name, email, message, phone_number, consultant_name }) {
+function KontaktAdminEmailComponent({ name, email, message, phone_number, consultant_name, texts }) {
+    const t = textsFor("kontakt-admin", texts)
+    const vars = { jméno: name?.trim() || "" }
     const when = new Date().toLocaleString("cs-CZ", { dateStyle: "long", timeStyle: "short" })
 
     return (
         <EmailShell
             preview={`Nová zpráva od ${name || "návštěvníka"}`}
-            eyebrow="Kontaktní formulář"
-            title="Nová zpráva z webu"
-            footNote="Odesláno automaticky z kontaktního formuláře na webu."
+            eyebrow={fill(t.eyebrow, vars)}
+            title={fill(t.title, vars)}
+            footNote={paragraphs(fill(t.footNote, vars)).join(" ")}
         >
-            <BrandText style={{ margin: 0 }}>Přišla zpráva z kontaktního formuláře.</BrandText>
+            {paragraphs(fill(t.lead, vars)).map((line, i) => (
+                <BrandText key={i} style={i ? undefined : { margin: 0 }}>{line}</BrandText>
+            ))}
 
             <div style={{ paddingTop: "18px" }}>
                 <DataTable>
@@ -36,7 +41,7 @@ function KontaktAdminEmailComponent({ name, email, message, phone_number, consul
             {message ? (
                 <div style={{ paddingTop: "18px" }}>
                     <BrandText muted style={{ margin: "0 0 8px" }}>
-                        Zpráva
+                        {fill(t.messageTitle, vars)}
                     </BrandText>
                     <div
                         style={{
@@ -54,11 +59,13 @@ function KontaktAdminEmailComponent({ name, email, message, phone_number, consul
                 </div>
             ) : null}
 
-            <div style={{ padding: "24px 0 4px" }}>
-                <BrandButton href={`mailto:${email}?subject=${encodeURIComponent(`Re: vaše zpráva — Procházka Group`)}`}>
-                    Odpovědět
-                </BrandButton>
-            </div>
+            {email && t.button.trim() ? (
+                <div style={{ padding: "24px 0 4px" }}>
+                    <BrandButton href={`mailto:${email}?subject=${encodeURIComponent(`Re: vaše zpráva — Procházka Group`)}`}>
+                        {fill(t.button, vars)}
+                    </BrandButton>
+                </div>
+            ) : null}
         </EmailShell>
     )
 }
@@ -70,7 +77,8 @@ export default KontaktAdminEmailComponent
 // výchozí. Sjednotit je by znamenalo sáhnout na obojí; tohle je jeden řádek.
 export const kontaktAdminEmail = KontaktAdminEmailComponent
 
-export const subject = ({ name }) => `Nová kontaktní zpráva — ${name || "web"}`
+/** Předmět — výchozí, nebo přepis ze Studia (`texts.subject`); {jméno} = odesílatel. */
+export const subject = (data = {}, texts) => fill(textsFor("kontakt-admin", texts).subject, { jméno: data.name || "web" })
 
 // Ukázková data pro `pnpm run dev:email`. Bez nich se náhled kreslí prázdný a
 // nejde na něm posoudit, co e-mail dělá s dlouhou zprávou nebo chybějícím

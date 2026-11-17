@@ -22,9 +22,16 @@ import { handleReactions } from './reactions.js'
 import { handleWidget } from './widget.js'
 import { handleHeartbeat } from './heartbeat.js'
 import { handleDialPrefixes } from './dialPrefixes.js'
+import { handleMails } from './mails.js'
 import { sendError } from './http.js'
 
-export const handleCmsRequest = async (req, res) => {
+/**
+ * @param {object} [options]
+ * @param {ReadonlyArray<object>} [options.mails] Katalog e-mailů webu
+ *   (`defineMails` ze server/mails.js). Zapíná obrazovku E-maily ve Studiu;
+ *   bez něj větev /mails vrací prázdný seznam.
+ */
+export const handleCmsRequest = async (req, res, options = {}) => {
     const route = req.query.route
     const segments = (Array.isArray(route) ? route : [route]).filter(Boolean)
     const [head, ...rest] = segments
@@ -75,6 +82,10 @@ export const handleCmsRequest = async (req, res) => {
             // Viz server/heartbeat.js.
             case 'heartbeat':
                 return await handleHeartbeat(req, res)
+            // Texty e-mailů webu (obrazovka E-maily). Katalog dodává web
+            // v `options.mails`; se session, protože znění je obsah.
+            case 'mails':
+                return await handleMails(req, res, rest, options.mails)
             default:
                 throw new CmsError('not_found', 'Neznámý endpoint')
         }
@@ -85,5 +96,5 @@ export const handleCmsRequest = async (req, res) => {
 
 export {
     handleReviews, handleDocuments, handleMedia, handleArchive,
-    handleAuth, handleSettings, handleWidget, handleContent,
+    handleAuth, handleSettings, handleWidget, handleContent, handleMails,
 }

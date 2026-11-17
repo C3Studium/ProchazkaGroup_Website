@@ -324,6 +324,18 @@ export const createHttpDataPort = ({ baseUrl = DEFAULT_BASE, fetchImpl } = {}) =
          * There is no method here that returns the value of a secret, and there
          * is no endpoint behind one — see src/cms/server/settings.js.
          */
+        /**
+         * Texty e-mailů webu — obrazovka E-maily. Katalog (výchozí znění
+         * z kódu + přepisy) čte každý přihlášený; prázdný seznam znamená, že
+         * web žádný katalog nedeklaroval a obrazovka se neukazuje.
+         */
+        mails: {
+            list: () => request('/mails'),
+            save: (key, values) => request(`/mails/${encodeURIComponent(key)}`, { method: 'PUT', body: { values } }),
+            preview: (key, values) =>
+                request(`/mails/${encodeURIComponent(key)}/preview`, { method: 'POST', body: { values } }),
+        },
+
         // Statistiky. Klíče k Clarity i PageSpeed zůstávají na serveru, takže
         // klient dostane hotová čísla a nic, čím by šel limit vyčerpat.
         stats: {

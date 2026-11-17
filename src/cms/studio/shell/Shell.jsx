@@ -6,6 +6,7 @@ import DocumentListView from "../views/DocumentListView.jsx"
 import DocumentEditorView from "../views/DocumentEditorView.jsx"
 import EditView from "../views/EditView.jsx"
 import MediaView from "../views/MediaView.jsx"
+import MailsView from "../views/MailsView.jsx"
 import ArchiveView from "../views/ArchiveView.jsx"
 import ModerationView from "../views/ModerationView.jsx"
 import OverviewView from "../views/OverviewView.jsx"
@@ -63,6 +64,8 @@ function Workspace({ route, core, isOwner }) {
   if (route.view === "edit") return <EditView />
   if (route.view === "media") return <MediaView />
   if (route.view === "stats") return <StatsView />
+  // Texty e-mailů. Bez katalogu z webu vykreslí vysvětlení, ne prázdno.
+  if (route.view === "mails") return <MailsView />
 
   // Both owner-only screens. An editor who types either URL gets an explanation
   // rather than a blank screen or a stack of 403 toasts. The server refuses the

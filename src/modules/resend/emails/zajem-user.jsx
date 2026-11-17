@@ -1,35 +1,31 @@
 import EmailShell, { BrandButton, BrandText, DataRow, DataTable } from "./_shell.jsx"
 import { BRAND, SITE } from "./_brand.js"
+import { fill, paragraphs, textsFor } from "./_texts.js"
 
 /**
  * Potvrzení poptávky — pro zákazníka.
  *
  * Vzhled je obálka `_shell.jsx` — barvy a typografie změřené na živém webu,
- * v hlavičce snímek jeho shaderu. Dřív měly tyhle e-maily fialovo-azurový
- * přechod a modré pozadí, které web nikde nemá.
- *
- * Bez emotikonů a bez „VIP" a „BEZPLATNÁ konzultace čeká!" — web mluví
+ * v hlavičce snímek jeho shaderu. Bez emotikonů a bez „VIP" — web mluví
  * střídmě a e-mail, který mluví jinak, vypadá, že přišel odjinud.
+ *
+ * Texty jdou přepsat ve Studiu (E-maily): `texts` jsou přepisy nad výchozím
+ * zněním z ./_texts.js; bez nich (náhled) platí výchozí.
  */
-function ZajemUserEmailComponent({ name, email, phone_number, consultant_name, message, inquiryDate, personalizedGreeting }) {
-    const greeting = personalizedGreeting?.trim()
-        ? personalizedGreeting.trim()
-        : name?.trim()
-          ? `Dobrý den, ${name.trim()},`
-          : "Dobrý den,"
+function ZajemUserEmailComponent({ name, email, phone_number, consultant_name, message, personalizedGreeting, texts }) {
+    const t = textsFor("zajem-user", texts)
+    const vars = { jméno: name?.trim() || "" }
+    const greeting = personalizedGreeting?.trim() ? personalizedGreeting.trim() : fill(t.greeting, vars)
 
     return (
-        <EmailShell
-            preview="Vaši poptávku máme. Ozveme se."
-            eyebrow="Poptávka"
-            title="Vaši poptávku máme"
-            footNote="Tenhle e-mail je potvrzení. Pokud jste nám nepsali, dejte nám prosím vědět."
-        >
+        <EmailShell preview="Vaši poptávku máme. Ozveme se." eyebrow={fill(t.eyebrow, vars)} title={fill(t.title, vars)} footNote={paragraphs(fill(t.footNote, vars)).join(" ")}>
             <BrandText style={{ margin: 0 }}>{greeting}</BrandText>
-            <BrandText>děkujeme za váš zájem. Poptávku jsme přijali a ozveme se vám do dvou pracovních dnů.</BrandText>
+            {paragraphs(fill(t.lead, vars)).map((line, i) => (
+                <BrandText key={i}>{line}</BrandText>
+            ))}
 
             <div style={{ paddingTop: "18px" }}>
-                <BrandText muted style={{ margin: "0 0 8px" }}>Co jsme od vás dostali</BrandText>
+                <BrandText muted style={{ margin: "0 0 8px" }}>{fill(t.summary, vars)}</BrandText>
                 <DataTable>
                     <DataRow label="Jméno" value={name} />
                     <DataRow label="E-mail" value={email} />
@@ -46,9 +42,11 @@ function ZajemUserEmailComponent({ name, email, phone_number, consultant_name, m
                 </div>
             ) : null}
 
-            <div style={{ padding: "22px 0 4px" }}>
-                <BrandButton href={`${SITE}/nabidka`}>Naše nabídka</BrandButton>
-            </div>
+            {t.button.trim() ? (
+                <div style={{ padding: "22px 0 4px" }}>
+                    <BrandButton href={`${SITE}/nabidka`}>{fill(t.button, vars)}</BrandButton>
+                </div>
+            ) : null}
         </EmailShell>
     )
 }
@@ -59,7 +57,8 @@ export default ZajemUserEmailComponent
 // src/pages/api/resend.js bere pojmenovaný export, resend-enhanced.js výchozí.
 export const zajemUserEmail = ZajemUserEmailComponent
 
-export const subject = () => `Vaši poptávku jsme přijali — Procházka Group`
+/** Předmět — výchozí, nebo přepis ze Studia (`texts.subject`). */
+export const subject = (data = {}, texts) => fill(textsFor("zajem-user", texts).subject, { jméno: data.name })
 
 ZajemUserEmailComponent.PreviewProps = {
     name: "Karel Šrámek",

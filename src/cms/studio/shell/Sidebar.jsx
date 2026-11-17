@@ -53,6 +53,12 @@ export default function Sidebar() {
 
   const pendingCount = pending?.total || 0
 
+  // Položka E-maily jen tehdy, když web katalog e-mailů deklaroval
+  // (`handleCmsRequest(req, res, { mails })`). Jednou za přihlášení — katalog
+  // je z kódu a mění se s nasazením, ne s obsahem.
+  const { data: mailbox } = useAsync(() => port.mails.list().catch(() => null), [port])
+  const showMails = Boolean(mailbox?.mails?.length)
+
   // Opening the preview from an editor should come back to that editor, so the
   // route the shell is already parsing is the source of "which document" — the
   // views stay unaware that a preview exists.
@@ -151,6 +157,10 @@ export default function Sidebar() {
           </li>
           <NavItem href={hrefs.media()} icon="image" label="Knihovna médií" path={router.path} />
           <NavItem href={hrefs.stats()} icon="chart" label="Statistiky" path={router.path} />
+          {/* Znění e-mailů, které web posílá. Pro každého přihlášeného — je to
+              text jako kterýkoli jiný na webu; odkud a kam se posílá zůstává
+              v Nastavení (vlastník). */}
+          {showMails ? <NavItem href={hrefs.mails()} icon="mail" label="E-maily" path={router.path} /> : null}
           {/* In Nástroje, first of the owner-only three, and the position is the
               argument moderation already won: the archive is a job somebody
               opens the tool to do, not a content type — so it does not belong in

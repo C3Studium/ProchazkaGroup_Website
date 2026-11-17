@@ -1,32 +1,28 @@
-import EmailShell, { BrandButton, BrandText, DataRow, DataTable } from "./_shell.jsx"
+import EmailShell, { BrandButton, BrandText } from "./_shell.jsx"
 import { BRAND, SITE } from "./_brand.js"
+import { fill, paragraphs, textsFor } from "./_texts.js"
 
 /**
  * Poděkování za recenzi — pro zákazníka.
  *
  * Vzhled je obálka `_shell.jsx` — barvy a typografie změřené na živém webu,
- * v hlavičce snímek jeho shaderu. Dřív měly tyhle e-maily fialovo-azurový
- * přechod a modré pozadí, které web nikde nemá.
- *
- * Bez emotikonů a bez „VIP" a „BEZPLATNÁ konzultace čeká!" — web mluví
+ * v hlavičce snímek jeho shaderu. Bez emotikonů a bez „VIP" — web mluví
  * střídmě a e-mail, který mluví jinak, vypadá, že přišel odjinud.
+ *
+ * Texty jdou přepsat ve Studiu (E-maily): `texts` jsou přepisy nad výchozím
+ * zněním z ./_texts.js; bez nich (náhled) platí výchozí.
  */
-function RecenzeUserEmailComponent({ customerName: name, email, message, consultantName, hashtag, created_at, personalizedGreeting }) {
-    const greeting = personalizedGreeting?.trim()
-        ? personalizedGreeting.trim()
-        : name?.trim()
-          ? `Dobrý den, ${name.trim()},`
-          : "Dobrý den,"
+function RecenzeUserEmailComponent({ customerName: name, message, personalizedGreeting, texts }) {
+    const t = textsFor("recenze-user", texts)
+    const vars = { jméno: name?.trim() || "" }
+    const greeting = personalizedGreeting?.trim() ? personalizedGreeting.trim() : fill(t.greeting, vars)
 
     return (
-        <EmailShell
-            preview="Děkujeme za recenzi."
-            eyebrow="Recenze"
-            title="Děkujeme za recenzi"
-            footNote="Tenhle e-mail je potvrzení. Pokud jste nám nepsali, dejte nám prosím vědět."
-        >
+        <EmailShell preview="Děkujeme za recenzi." eyebrow={fill(t.eyebrow, vars)} title={fill(t.title, vars)} footNote={paragraphs(fill(t.footNote, vars)).join(" ")}>
             <BrandText style={{ margin: 0 }}>{greeting}</BrandText>
-            <BrandText>děkujeme, že jste si našli čas. Recenzi jsme přijali; na webu se objeví, jakmile ji projdeme.</BrandText>
+            {paragraphs(fill(t.lead, vars)).map((line, i) => (
+                <BrandText key={i}>{line}</BrandText>
+            ))}
 
             {message ? (
                 <div style={{ paddingTop: "16px" }}>
@@ -36,9 +32,11 @@ function RecenzeUserEmailComponent({ customerName: name, email, message, consult
                 </div>
             ) : null}
 
-            <div style={{ padding: "22px 0 4px" }}>
-                <BrandButton href={`${SITE}/recenze`}>Zobrazit recenze</BrandButton>
-            </div>
+            {t.button.trim() ? (
+                <div style={{ padding: "22px 0 4px" }}>
+                    <BrandButton href={`${SITE}/recenze`}>{fill(t.button, vars)}</BrandButton>
+                </div>
+            ) : null}
         </EmailShell>
     )
 }
@@ -49,7 +47,8 @@ export default RecenzeUserEmailComponent
 // src/pages/api/resend.js bere pojmenovaný export, resend-enhanced.js výchozí.
 export const recenzeUserEmail = RecenzeUserEmailComponent
 
-export const subject = ({ customerName }) => `Děkujeme za vaši recenzi${customerName ? `, ${customerName}` : ""}`
+/** Předmět — výchozí, nebo přepis ze Studia (`texts.subject`). */
+export const subject = (data = {}, texts) => fill(textsFor("recenze-user", texts).subject, { jméno: data.customerName })
 
 RecenzeUserEmailComponent.PreviewProps = {
     customerName: "Karel Šrámek",

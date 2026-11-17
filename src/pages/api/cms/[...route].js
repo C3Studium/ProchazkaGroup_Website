@@ -50,6 +50,8 @@
 // above module-body statements, so it cannot be a `clearTypes()` call here.
 import '@/cms/server/registerSchemas'
 import { handleCmsRequest } from '@/cms/server/handlers'
+// Katalog e-mailů webu → obrazovka E-maily ve Studiu (src/lib/mail/catalog).
+import { mails } from '@/lib/mail/catalog.js'
 
 export const config = {
     api: {
@@ -61,5 +63,5 @@ export const config = {
 }
 
 export default function handler(req, res) {
-    return handleCmsRequest(req, res)
+    return handleCmsRequest(req, res, { mails })
 }

@@ -33,7 +33,7 @@ export const BASE = "/studio"
 // is reserved for the stronger reason: a type named that would be shadowed by a
 // page file, not by a branch in parseRoute, and would fail with no warning at
 // all.
-export const RESERVED = ["moderation", "edit", "media", "archive", "stats", "users", "settings", "preview"]
+export const RESERVED = ["moderation", "edit", "media", "archive", "stats", "mails", "users", "settings", "preview"]
 
 export function parseRoute(path) {
   const segments = (Array.isArray(path) ? path : path ? [path] : []).filter(Boolean)
@@ -105,6 +105,8 @@ export const hrefs = {
     return search ? `${base}?${search}` : base
   },
   stats: () => `${BASE}/stats`,
+  /** Texty e-mailů webu. Jen když web katalog deklaroval (Sidebar se ptá). */
+  mails: () => `${BASE}/mails`,
   users: () => `${BASE}/users`,
   settings: () => `${BASE}/settings`,
   list: (type) => `${BASE}/${type}`,
